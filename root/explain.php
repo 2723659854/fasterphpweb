@@ -167,7 +167,7 @@ class HttpServer
                     $post_param[$dou[0]] = isset($dou[1]) ? $dou[1] : null;
                 }
             }
-            foreach ($now as $a => $b) {
+            /*foreach ($now as $a => $b) {
                 if (stripos($b, 'form-data; name="')) {
                     $str1 = substr($b, stripos($b, 'form-data; name="'));
                     $arr = explode('"', $str1);
@@ -182,6 +182,46 @@ class HttpServer
                         $post_param['file'] = ['filename' => $_filename, 'content' => $_filecontent];
                         $post_param[$key] = ['filename' => $_filename, 'content' => $_filecontent];
                     }
+                }
+            }*/
+
+            foreach ($now as $a => $b) {
+                if (stripos($b, 'form-data; name="')) {
+                    //获取分隔符
+                    $fengexian=$now[$a-1];//找到两个分割线，分割线之间的除了空格就是值
+                    //获取所有的分割线下标
+                    $fenge_array=array_keys($now,$fengexian,true);
+                    $value_key_stop=0;
+                    foreach ($fenge_array as $m=>$n){
+                        if ($m>$a){
+                            $value_key_stop=$n;
+                            //找到紧靠的下一个就是本字段的分隔符
+                            break;
+                        }
+                    }
+                    //$now_length=count($now);
+                    //取出这个变量的值
+                    $value='';
+                    for($ii=$a+2;$ii<=$value_key_stop;$ii++){
+                        if (isset($now[$ii])&&$now[$ii]){
+                            $value=$value.$now[$ii];
+                        }
+                    }
+                    $str1 = substr($b, stripos($b, 'form-data; name="'));
+                    $arr = explode('"', $str1);
+                    $key = $arr[1];
+                    //$value = isset($now[$a + 2]) ? $now[$a + 2] : null;
+                    //$value=$now[$a+2];
+
+                    $post_param[$key] = $value;
+//                    if (stripos($b, '; filename="')) {
+//                        $str1 = substr($b, stripos($b, '; filename="'));
+//                        $arr = explode('"', $str1);
+//                        $_filename = $arr[1];
+//                        $_filecontent = isset($now[$a + 3]) ? $now[$a + 3] : null;
+//                        $post_param['file'] = ['filename' => $_filename, 'content' => $_filecontent];
+//                        $post_param[$key] = ['filename' => $_filename, 'content' => $_filecontent];
+//                    }
                 }
             }
         }
