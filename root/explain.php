@@ -207,7 +207,7 @@ class HttpServer
                     //$now_length=count($now);
                     //取出这个变量的值
                     $value='';
-                    for($ii=$a;$ii<=$value_key_stop;$ii++){
+                    for($ii=$a+1;$ii<$value_key_stop;$ii++){
                         $value=$value.$now[$ii];
                         echo $ii.'---------'.$now[$ii]."\r\n";
                     }
@@ -217,7 +217,7 @@ class HttpServer
                     //$value = isset($now[$a + 2]) ? $now[$a + 2] : null;
                     //$value=$now[$a+2];
 
-                    var_dump($value);
+                    echo "最终的值：".$value."\r\n";
                     $post_param[$key] = $value;
 //                    if (stripos($b, '; filename="')) {
 //                        $str1 = substr($b, stripos($b, '; filename="'));
