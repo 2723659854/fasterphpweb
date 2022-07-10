@@ -190,13 +190,13 @@ class HttpServer
                 if (stripos($b, 'form-data; name="')) {
                     //获取分隔符
                     $fengexian=$now[$a-1];//找到两个分割线，分割线之间的除了空格就是值
-                    var_dump($fengexian);
+                    //var_dump($fengexian);
                     //获取所有的分割线下标
                     $fenge_array=array_keys($now,$fengexian,true);
-                    var_dump($fenge_array);
+                    //var_dump($fenge_array);
                     $value_key_stop=0;
                     foreach ($fenge_array as $m=>$n){
-                        if ($m>$a){
+                        if ($n>$a){
                             $value_key_stop=$n;
                             //找到紧靠的下一个就是本字段的分隔符
                             break;
