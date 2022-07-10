@@ -207,11 +207,9 @@ class HttpServer
                     //$now_length=count($now);
                     //取出这个变量的值
                     $value='';
-                    for($ii=$a+1;$ii<=$value_key_stop;$ii++){
-                        echo "------start------\r\n";
+                    for($ii=$a;$ii<=$value_key_stop;$ii++){
                         $value=$value.$now[$ii];
-                        echo $now[$ii];
-                        echo "-------end-----\r\n";
+                        echo $ii.'---------'.$now[$ii]."\r\n";
                     }
                     $str1 = substr($b, stripos($b, 'form-data; name="'));
                     $arr = explode('"', $str1);
