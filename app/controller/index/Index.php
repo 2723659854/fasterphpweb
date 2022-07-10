@@ -70,7 +70,10 @@ class Index
             $file=$request->file('file');
             $name=$file['filename'];
             $content=$file['content'];
-            file_put_contents(app_path().'/public/'.$name,$content);
+            $fp=fopen(app_path().'/public/'.$name,'wb');
+            fwrite($fp,$content);
+            fclose($fp);
+            //file_put_contents(app_path().'/public/'.$name,$content);
         }
 
         $file = $request->param('file');
