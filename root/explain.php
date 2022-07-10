@@ -31,12 +31,23 @@ class HttpServer
         @\socket_bind($this->_socket, $this->ip, $this->port);
         @\socket_listen($this->_socket, 5);
         while (true) {
-            $socketAccept = socket_accept($this->_socket);
-            $request = socket_read($socketAccept, 1024 * 1000);
+            $socketAccept = @\socket_accept($this->_socket);
+
+            $request='';
+            $flag=true;
+            while($flag){
+                $_content = socket_read($socketAccept, 1024);
+                if (strlen($_content)<1024){
+                    $flag=false;
+                }
+                $request=$request.$_content;
+            }
+            var_dump($request);
             $_param = [];
             socket_write($socketAccept, 'HTTP/1.1 200 OK' . PHP_EOL, 1024);
             socket_write($socketAccept, 'Date:' . date('Y-m-d H:i:s') . PHP_EOL, 1024);
             $_mark = $this->getUri($request);
+
             $fileName = $_mark['file'];
             $_request = $_mark['request'];
             foreach ($_mark['post_param'] as $k => $v) {

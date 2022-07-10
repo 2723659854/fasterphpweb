@@ -14,12 +14,11 @@
     <br/>解析之后的base64数据：<br/>
     <p id="data"></p>
 </div>
-<!--enctype="multipart/form-data"-->
+<!--enctype="multipart/form-data" http://127.0.0.1:10008-->
 <form action="/index/index/store" method="post" enctype="multipart/form-data">
-    <input type="text" name="file" value="" id="teacher" />学生
-    <input type="text" name="modify" value="" placeholder="表单">
-
-    <input type="file" name="upload" value="">
+    <input type="text" name="student" value="" id="teacher" />学生<br>
+    <input type="text" name="teacher" value="" >老师<br>
+    <input type="file" name="file" value=""><br>
     <input type="submit">上传
 </form>
 
