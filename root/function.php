@@ -315,7 +315,7 @@ function daemon()
 }
 
 
-function base64_file($picture){
+function base64_file_upload($picture){
     $image = explode(',', $picture);
     $type=$image[0];
     switch ($type){
