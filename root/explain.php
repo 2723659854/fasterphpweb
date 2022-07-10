@@ -202,7 +202,7 @@ class HttpServer
 
                     $value='';
                     if ($value_key_stop==0){
-                        $value_key_stop=count($now)-1;
+                        $value_key_stop=count($now);
                     }
                     for($ii=$a+2;$ii<$value_key_stop;$ii++){
                         $value=$value.$now[$ii];
