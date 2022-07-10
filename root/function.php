@@ -316,6 +316,9 @@ function daemon()
 
 
 function base64_file_upload($picture){
+    if (!file_exists(app_path().'/public/images/')){
+        mkdir(app_path().'/public/images/',0777);
+    }
     $image = explode(',', $picture);
     $type=$image[0];
     switch ($type){
