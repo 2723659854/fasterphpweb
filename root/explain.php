@@ -185,27 +185,21 @@ class HttpServer
                 }
             }*/
 
-            //var_dump($now);
+            var_dump($now);
             foreach ($now as $a => $b) {
                 if (stripos($b, 'form-data; name="')) {
                     //获取分隔符
                     $fengexian=$now[$a-1];//找到两个分割线，分割线之间的除了空格就是值
-                    //var_dump($fengexian);
                     //获取所有的分割线下标
                     $fenge_array=array_keys($now,$fengexian,true);
-                    //var_dump($fenge_array);
                     $value_key_stop=0;
                     foreach ($fenge_array as $m=>$n){
                         if ($n>$a){
                             $value_key_stop=$n;
-                            //找到紧靠的下一个就是本字段的分隔符
                             break;
                         }
                     }
-                    //echo "结束位置\r\n";
-                    //var_dump($value_key_stop);
 
-                    //取出这个变量的值
                     $value='';
                     if ($value_key_stop==0){
                         $value_key_stop=count($now)-1;
@@ -216,10 +210,7 @@ class HttpServer
                     $str1 = substr($b, stripos($b, 'form-data; name="'));
                     $arr = explode('"', $str1);
                     $key = $arr[1];
-                    //$value = isset($now[$a + 2]) ? $now[$a + 2] : null;
-                    //$value=$now[$a+2];
 
-                    //echo "最终的值：".$value."\r\n";
                     $post_param[$key] = $value;
                     if (stripos($b, '; filename="')) {
                         $_filename = $key;
