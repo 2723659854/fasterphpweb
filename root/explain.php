@@ -207,6 +207,9 @@ class HttpServer
 
                     //取出这个变量的值
                     $value='';
+                    if ($value_key_stop==0){
+                        $value_key_stop=count($now)-1;
+                    }
                     for($ii=$a+1;$ii<$value_key_stop;$ii++){
                         if ($now[$ii]){
                             $value=$value.$now[$ii];
