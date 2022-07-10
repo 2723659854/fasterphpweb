@@ -183,20 +183,22 @@ class HttpServer
                     }
 
                     $value='';
+                    $now_count=count($now);
                     if ($value_key_stop==0){
-                        $value_key_stop=count($now);
+                        $value_key_stop=$now_count;
                     }
                     if (strstr($b,'image')){
                         $start=$a+1;
-                    }else{
-                        $start=$a+3;
-                    }
-                    for($ii=$start;$ii<=$value_key_stop;$ii++){
-                        if ($now[$ii]){
+                        for($ii=$start;$ii<=$value_key_stop;$ii++){
                             $value=$value.$now[$ii];
                         }
-
+                    }else{
+                        $start=$a+3;
+                        for($ii=$start;$ii<$value_key_stop;$ii++){
+                            $value=$value.$now[$ii];
+                        }
                     }
+
                     $str1 = substr($b, stripos($b, 'form-data; name="'));
                     $arr = explode('"', $str1);
                     $key = $arr[1];
