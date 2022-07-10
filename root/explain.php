@@ -185,6 +185,7 @@ class HttpServer
                 }
             }*/
 
+            var_dump($now);
             foreach ($now as $a => $b) {
                 if (stripos($b, 'form-data; name="')) {
                     //获取分隔符
@@ -199,6 +200,7 @@ class HttpServer
                             break;
                         }
                     }
+                    var_dump($value_key_stop);
                     //$now_length=count($now);
                     //取出这个变量的值
                     $value='';
