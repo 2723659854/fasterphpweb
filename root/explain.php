@@ -190,6 +190,7 @@ class HttpServer
                 if (stripos($b, 'form-data; name="')) {
                     //获取分隔符
                     $fengexian=$now[$a-1];//找到两个分割线，分割线之间的除了空格就是值
+                    var_dump($fengexian);
                     //获取所有的分割线下标
                     $fenge_array=array_keys($now,$fengexian,true);
                     $value_key_stop=0;
