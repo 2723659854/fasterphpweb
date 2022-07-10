@@ -317,10 +317,38 @@ function daemon()
 
 function base64_file($picture){
     $image = explode(',', $picture);
+    $type=$image[0];
+    switch ($type){
+        case 'data:application/pdf;base64':
+            $type='pdf';
+            break;
+        case 'data:image/png;base64':
+            $type='png';
+            break;
+        case 'data:text/plain;base64':
+            $type='txt';
+            break;
+        case 'data:application/msword;base64':
+            $type='doc';
+            break;
+        case 'data:application/x-zip-compressed;base64':
+            $type='zip';
+            break;
+            case 'data:application/octet-stream;base64';
+            $type='txt';
+            break;
+        case 'data:application/vnd.openxmlformats-officedocument.presentationml.presentation;base64':
+            $type='doc';
+            break;
+        default:
+            $type='';
+
+    }
     $image = $image[1];
-    $filename=app_path().'/public/images/'.time().'_'.uniqid().'.png';
-    $ifp = fopen( app_path().'/public/images/'.time().'_'.uniqid().'.png', "wb" );
+    $filename=app_path().'/public/images/'.time().'_'.uniqid().'.'.$type;
+    $ifp = fopen( $filename, "wb" );
     fwrite( $ifp, base64_decode( $image) );
     fclose( $ifp );
+    return $filename;
 }
 

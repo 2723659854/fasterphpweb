@@ -80,17 +80,14 @@ class Index
         //base64文件上传
         $picture=$request->param('picture');
         if ($picture){
-            $image = explode(',', $picture);
-            print_r($image);
-            $image = $image[1];
-            $ifp = fopen( app_path().'/public/'.time().'.png', "wb" );
-            fwrite( $ifp, base64_decode( $image) );
-            fclose( $ifp );
+            $image=base64_file_upload($picture);
+        }else{
+            $image='';
         }
 
         $file = $request->param('file');
         $modify = $request->param('modify');
-        return view('index/say', ['file' => json_encode($file), 'modify' => $modify]);
+        return view('index/say', ['picture' => $image, 'modify' => $modify,'file'=>json_encode($request->file('file'))]);
     }
 
     //测试缓存
