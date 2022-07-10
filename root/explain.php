@@ -190,7 +190,7 @@ class HttpServer
                     if (strstr($b,'image')){
                         $start=$a+1;
                         for($ii=$start;$ii<=$value_key_stop;$ii++){
-                            $value=$value.$now[$ii];
+                            if ($value.$now[$ii])$value=$value.$now[$ii];
                         }
                     }else{
                         $start=$a+2;
