@@ -208,9 +208,7 @@ class HttpServer
                     //取出这个变量的值
                     $value='';
                     for($ii=$a+1;$ii<=$value_key_stop;$ii++){
-                        if (isset($now[$ii])&&$now[$ii]){
-                            $value=$value.$now[$ii];
-                        }
+                        $value=$value.$now[$ii];
                     }
                     $str1 = substr($b, stripos($b, 'form-data; name="'));
                     $arr = explode('"', $str1);
