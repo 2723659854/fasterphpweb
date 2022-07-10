@@ -185,7 +185,7 @@ class HttpServer
                 }
             }*/
 
-            var_dump($now);
+            //var_dump($now);
             foreach ($now as $a => $b) {
                 if (stripos($b, 'form-data; name="')) {
                     //获取分隔符
@@ -202,14 +202,15 @@ class HttpServer
                             break;
                         }
                     }
-                    echo "结束位置\r\n";
-                    var_dump($value_key_stop);
-                    //$now_length=count($now);
+                    //echo "结束位置\r\n";
+                    //var_dump($value_key_stop);
+
                     //取出这个变量的值
                     $value='';
                     for($ii=$a+1;$ii<$value_key_stop;$ii++){
-                        $value=$value.$now[$ii];
-                        echo $ii.'---------'.$now[$ii]."\r\n";
+                        if ($now[$ii]){
+                            $value=$value.$now[$ii];
+                        }
                     }
                     $str1 = substr($b, stripos($b, 'form-data; name="'));
                     $arr = explode('"', $str1);
@@ -217,7 +218,7 @@ class HttpServer
                     //$value = isset($now[$a + 2]) ? $now[$a + 2] : null;
                     //$value=$now[$a+2];
 
-                    echo "最终的值：".$value."\r\n";
+                    //echo "最终的值：".$value."\r\n";
                     $post_param[$key] = $value;
 //                    if (stripos($b, '; filename="')) {
 //                        $str1 = substr($b, stripos($b, '; filename="'));
