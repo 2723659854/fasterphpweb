@@ -66,14 +66,23 @@ class Index
     {
         var_dump($request);
 
+        //普通上传文件
         if ($request->file('file')){
             $file=$request->file('file');
-            $name=$file['filename'];
+            $name=$file['filename']?$file['filename']:'test.png';
             $content=$file['content'];
-            $fp=fopen(app_path().'/public/test.png','wb');
+            $fp=fopen(app_path().'/public/'.$name,'wb');
             fwrite($fp,$content);
             fclose($fp);
             //file_put_contents(app_path().'/public/'.$name,$content);
+        }
+
+        //base64文件上传
+        $picture=$request->param('picture');
+        if ($picture){
+            $ifp = fopen( app_path().'/public/'.time().'.png', "wb" );
+            fwrite( $ifp, base64_decode( $picture) );
+            fclose( $ifp );
         }
 
         $file = $request->param('file');
