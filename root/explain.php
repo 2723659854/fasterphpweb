@@ -47,6 +47,7 @@ class HttpServer
             socket_write($socketAccept, 'HTTP/1.1 200 OK' . PHP_EOL, 1024);
             socket_write($socketAccept, 'Date:' . date('Y-m-d H:i:s') . PHP_EOL, 1024);
             $_mark = $this->getUri($request);
+            //var_dump($_mark);
 
             $fileName = $_mark['file'];
             $_request = $_mark['request'];
@@ -124,6 +125,7 @@ class HttpServer
     {
 
         $arrayRequest = explode(PHP_EOL, $request);
+        var_dump($arrayRequest);
         $line = $arrayRequest[0];
         $str = $line . ' ';
         $length = strlen($str);
