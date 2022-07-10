@@ -42,7 +42,7 @@ class HttpServer
                 }
                 $request=$request.$_content;
             }
-            var_dump($request);
+            //var_dump($request);
             $_param = [];
             socket_write($socketAccept, 'HTTP/1.1 200 OK' . PHP_EOL, 1024);
             socket_write($socketAccept, 'Date:' . date('Y-m-d H:i:s') . PHP_EOL, 1024);
@@ -187,7 +187,7 @@ class HttpServer
                         $value_key_stop=count($now);
                     }
                     if (strstr($b,'image')){
-                        $start=$a+2;
+                        $start=$a+1;
                     }else{
                         $start=$a+3;
                     }
