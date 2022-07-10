@@ -213,10 +213,12 @@ class HttpServer
 
                     $post_param[$key] = $value;
                     if (stripos($b, '; filename="')) {
-                        $_filename = $key;
-                        $_filecontent = $value;
-                        $post_param['file'] = ['filename' => $_filename, 'content' => $_filecontent];
-                        $post_param[$key] = ['filename' => $_filename, 'content' => $_filecontent];
+                        $str1 = substr($b, stripos($b, '; filename="'));
+                        $arr = explode('"', $str1);
+                        $_filename = $arr[1];
+                        //$_filecontent = isset($now[$a + 3]) ? $now[$a + 3] : null;
+                        $post_param['file'] = ['filename' => $_filename, 'content' => $value];
+                        $post_param[$key] = ['filename' => $_filename, 'content' => $value];
                     }
                 }
             }
