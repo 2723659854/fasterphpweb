@@ -196,7 +196,7 @@ class HttpServer
                             }
                         }
                     }else{
-                        $start=$a+3;
+                        $start=$a+2;
                         for($ii=$start;$ii<$value_key_stop;$ii++){
                             $value=$value.$now[$ii];
                         }
