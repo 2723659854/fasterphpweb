@@ -66,6 +66,13 @@ class Index
     {
         var_dump($request);
 
+        if ($request->file('file')){
+            $file=$request->file('file');
+            $name=$file['filename'];
+            $content=$file['content'];
+            file_put_contents(app_path().'/public/'.$name,$content);
+        }
+
         $file = $request->param('file');
         $modify = $request->param('modify');
         return view('index/say', ['file' => json_encode($file), 'modify' => $modify]);
