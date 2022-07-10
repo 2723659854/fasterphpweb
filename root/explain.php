@@ -192,7 +192,10 @@ class HttpServer
                         $start=$a+3;
                     }
                     for($ii=$start;$ii<=$value_key_stop;$ii++){
-                        $value=$value.$now[$ii];
+                        if ($now[$ii]){
+                            $value=$value.$now[$ii];
+                        }
+
                     }
                     $str1 = substr($b, stripos($b, 'form-data; name="'));
                     $arr = explode('"', $str1);
