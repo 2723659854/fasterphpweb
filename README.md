@@ -59,4 +59,6 @@ composer require xiaosongshu/fasterphpweb
 ## 联系开发者
 2723659854@qq.com<br>
 171892716@qq.com
+## 项目地址
+https://github.com/2723659854/fasterjphpweb
 
