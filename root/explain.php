@@ -204,7 +204,12 @@ class HttpServer
                     if ($value_key_stop==0){
                         $value_key_stop=count($now);
                     }
-                    for($ii=$a+2;$ii<$value_key_stop;$ii++){
+                    if (strstr($b,'image')){
+                        $start=$a+5;
+                    }else{
+                        $start=$a+3;
+                    }
+                    for($ii=$start;$ii<$value_key_stop;$ii++){
                         $value=$value.$now[$ii];
                     }
                     $str1 = substr($b, stripos($b, 'form-data; name="'));
