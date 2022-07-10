@@ -1,6 +1,6 @@
 {
     "name": "xiaosongshu/fasterphpweb",
-    "description": "\"一个常驻内存轻量级php框架\"",
+    "description": "一个常驻内存轻量级php框架",
     "type": "project",
     "license": "MIT",
     "version":"1.0.0",
