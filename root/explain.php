@@ -42,7 +42,7 @@ class HttpServer
                 }
                 $request=$request.$_content;
             }
-            //var_dump($request);
+            var_dump($request);
             $_param = [];
             socket_write($socketAccept, 'HTTP/1.1 200 OK' . PHP_EOL, 1024);
             socket_write($socketAccept, 'Date:' . date('Y-m-d H:i:s') . PHP_EOL, 1024);
@@ -167,25 +167,7 @@ class HttpServer
                     $post_param[$dou[0]] = isset($dou[1]) ? $dou[1] : null;
                 }
             }
-            /*foreach ($now as $a => $b) {
-                if (stripos($b, 'form-data; name="')) {
-                    $str1 = substr($b, stripos($b, 'form-data; name="'));
-                    $arr = explode('"', $str1);
-                    $key = $arr[1];
-                    $value = isset($now[$a + 2]) ? $now[$a + 2] : null;
-                    $post_param[$key] = $value;
-                    if (stripos($b, '; filename="')) {
-                        $str1 = substr($b, stripos($b, '; filename="'));
-                        $arr = explode('"', $str1);
-                        $_filename = $arr[1];
-                        $_filecontent = isset($now[$a + 3]) ? $now[$a + 3] : null;
-                        $post_param['file'] = ['filename' => $_filename, 'content' => $_filecontent];
-                        $post_param[$key] = ['filename' => $_filename, 'content' => $_filecontent];
-                    }
-                }
-            }*/
-
-            var_dump($now);
+            //var_dump($now);
             foreach ($now as $a => $b) {
                 if (stripos($b, 'form-data; name="')) {
                     //获取分隔符
