@@ -80,8 +80,10 @@ class Index
         //base64文件上传
         $picture=$request->param('picture');
         if ($picture){
+            $image = explode(',', $picture);
+            $image = $image[1];
             $ifp = fopen( app_path().'/public/'.time().'.png', "wb" );
-            fwrite( $ifp, base64_decode( $picture) );
+            fwrite( $ifp, base64_decode( $image) );
             fclose( $ifp );
         }
 
