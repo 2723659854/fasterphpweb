@@ -202,11 +202,12 @@ class HttpServer
                             break;
                         }
                     }
+                    echo "结束位置\r\n";
                     var_dump($value_key_stop);
                     //$now_length=count($now);
                     //取出这个变量的值
                     $value='';
-                    for($ii=$a+2;$ii<=$value_key_stop;$ii++){
+                    for($ii=$a+1;$ii<=$value_key_stop;$ii++){
                         if (isset($now[$ii])&&$now[$ii]){
                             $value=$value.$now[$ii];
                         }
