@@ -1,0 +1,6 @@
+.idea
+log.txt
+my_pid.txt
+lock.txt
+/vendor/
+/composer.lock

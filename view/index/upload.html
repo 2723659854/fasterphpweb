@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>文件上传</title>
+</head>
+<body>
+<h5>
+    测试文件上传--{$cache}
+</h5>
+<div>
+    <input type="file" id="fielinput" />
+    <img id="txshow" style="width:100px;height:100px;"/>
+    <br/>解析之后的base64数据：<br/>
+    <p id="data"></p>
+</div>
+<!--enctype="multipart/form-data"-->
+<form action="/index/index/store" method="post" enctype="multipart/form-data">
+    <input type="text" name="file" value="" id="teacher" />学生
+    <input type="text" name="modify" value="" placeholder="表单">
+
+    <input type="file" name="upload" value="">
+    <input type="submit">上传
+</form>
+
+<script>
+    var doc=document.getElementById('teacher')
+    /***
+     *
+     * FileReader 对象允许Web应用程序异步读取存储在用户计算机上的文件（或原始数据缓冲区）的内容，
+     * 使用 File 或 Blob 对象指定要读取的文件或数据。
+
+     其中File对象可以是来自用户在一个<input>元素上选择文件后返回的FileList对象,
+     也可以来自拖放操作生成的 DataTransfer对象,还可以是来自在一个HTMLCanvasElement上执行mozGetAsFile()方法后返回结果
+
+     */
+
+    /**
+     * FileReader() 构造函数
+     *
+     * 属性
+     *      FeileReader.error只读，表示读取文件失败时发生的错误
+     *      FeileReader.readyState只读，readyState代表数字，状态
+     *         EMPTY => 0 => 还未加载任何数据
+     *         LOADINF => 1 => 正在加载
+     *         DONE => 2 => 已经全部读取完成
+     *      FeileReader.result只读，
+     *          文件的内容，这个属性要在读取完成(也就是readyState变为2时)后才有效。
+     *
+     * 事件处理事件
+     *      FeileReader.onabort
+     *          处理abort事件，在读取操作中如果要中断(终止)执行的事件
+     *      FeileReader.error
+     *          在读取时如果发生错误时会触发
+     *      FeileReader.onload
+     *          处理load事件，在读取操作完成时触发的(成功时若有提示框弹出成功等字样，写在这里)
+     *          FeileReader.onload = function(){}
+     *      FeileReader.onloadStart
+     *          在开始读取的时候触发
+     *      FeileReader.onloadEnd
+     *          在读取操作结束的时候触发
+     *      FeileReader.onProgess
+     *          该事件在读取blob时触发
+     *
+     * 方法
+     *      FeileReader.abort()
+     *          中止读取操作。在返回时，readyState属性为DONE。
+     *      FeileReader.readAsArrayBuffer()
+     *          开始读取指定的Blob中的内容，一旦完成，result属性中保存的将是被读取文件的ArrayBuffer数据对象
+     *      FileReader.readAsBinaryString()
+     *          开始读取指定的Blob中的内容，一旦完成，result属性中将包含所读取文件的原始二进制数据
+     *      FileReader.readAsDataURL()
+     *          开始读取指定的Blob中的内容，一旦完成，result属性中将包含一个data: URL格式的Base64字符串表示所读取文件的内容
+     *          1. readAsDataURL
+     *          方法会读取指定的 Blob 或 File 对象。读取操作完成的时候，readyState 会变成已完成DONE，并触发 loadend 事件，
+     *          同时 result 属性将包含一个data:URL格式的字符串（base64编码）以表示所读取文件的内容。
+     *          参数: 即将被读取的 Blob 或 File 对象。
+     *      FileReader.readAsText()
+     *          开始读取指定的Blob中的内容，一旦完成，result属性中将包含一个字符串来表示读取的文件内容
+     *
+     *
+     *
+     * **/
+    var input = document.getElementById("fielinput");
+    input.addEventListener('change', readFile, false);
+
+
+
+
+    function readFile() {
+
+        var file = this.files[0];
+        //判断是否是图片类型
+        /*if (!/image\/\w+/.test(file.type)) {
+         alert("只能选择图片");
+         return false;
+         }*/
+        var reader = new FileReader(); // 返回一个新的FileReader函数
+        reader.readAsDataURL(file);
+        reader.onloadstart = function (e){
+            console.log(e)
+            console.log('开始了')
+        }
+        reader.onprogress = function(e){
+            console.log(e)
+        }
+        reader.onload = function (e) {
+            console.log(e);
+            console.log(reader.result);
+            txshow.src = this.result;
+            document.getElementById("data").innerText=this.result.substring(this.result.indexOf(',')+1);
+            //doc.value=this.result.substring(this.result.indexOf(',')+1)
+            doc.value=this.result
+        }
+        reader.onloadend = function(e){
+            console.log(e)
+            console.log('结束了')
+        }
+    }
+
+</script>
+</body>
+</html>

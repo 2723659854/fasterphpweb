@@ -1,0 +1,25 @@
+{
+    "name": "xiaosongshu/fasterphpweb",
+    "description": "\"一个常驻内存轻量级php框架\"",
+    "type": "project",
+    "license": "MIT",
+    "version":"1.0.0",
+    "keywords" : [ "phpSocket","socketWeb","socket","faster php","php web","php framework" ],
+    "autoload": {
+        "psr-4": {
+            "Xiaosongshu\\Socketweb\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "yanglong",
+            "email": "2723659854@qq.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "ext-pcntl": "*",
+      "ext-redis": "*",
+        "ext-posix": "*"
+    }
+}
