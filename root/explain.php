@@ -193,6 +193,7 @@ class HttpServer
                     var_dump($fengexian);
                     //获取所有的分割线下标
                     $fenge_array=array_keys($now,$fengexian,true);
+                    var_dump($fenge_array);
                     $value_key_stop=0;
                     foreach ($fenge_array as $m=>$n){
                         if ($m>$a){
