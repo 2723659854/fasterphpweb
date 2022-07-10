@@ -188,12 +188,9 @@ class HttpServer
                         $value_key_stop=$now_count;
                     }
                     if (strstr($b,'image')){
-                        $start=$a+5;
+                        $start=$a+2;
                         for($ii=$start;$ii<=$value_key_stop;$ii++){
-                            var_dump($now[$ii]);
-                            if ($value.$now[$ii]){
-                                $value=$value.$now[$ii];
-                            }
+                            $value=$value.$now[$ii];
                         }
                     }else{
                         $start=$a+2;
