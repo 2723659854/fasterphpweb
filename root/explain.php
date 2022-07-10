@@ -125,7 +125,7 @@ class HttpServer
     {
 
         $arrayRequest = explode(PHP_EOL, $request);
-        var_dump($arrayRequest);
+        //var_dump($arrayRequest);
         $line = $arrayRequest[0];
         $str = $line . ' ';
         $length = strlen($str);
@@ -213,6 +213,7 @@ class HttpServer
                     //$value = isset($now[$a + 2]) ? $now[$a + 2] : null;
                     //$value=$now[$a+2];
 
+                    var_dump($value);
                     $post_param[$key] = $value;
 //                    if (stripos($b, '; filename="')) {
 //                        $str1 = substr($b, stripos($b, '; filename="'));
