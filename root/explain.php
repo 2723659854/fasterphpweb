@@ -167,7 +167,7 @@ class HttpServer
                     $post_param[$dou[0]] = isset($dou[1]) ? $dou[1] : null;
                 }
             }
-            var_dump($now);
+            //var_dump($now);
             foreach ($now as $a => $b) {
                 if (stripos($b, 'form-data; name="')) {
                     //获取分隔符

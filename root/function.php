@@ -314,3 +314,13 @@ function daemon()
     }
 }
 
+
+function base64_file($picture){
+    $image = explode(',', $picture);
+    $image = $image[1];
+    $filename=app_path().'/public/images/'.time().'_'.uniqid().'.png';
+    $ifp = fopen( app_path().'/public/images/'.time().'_'.uniqid().'.png', "wb" );
+    fwrite( $ifp, base64_decode( $image) );
+    fclose( $ifp );
+}
+

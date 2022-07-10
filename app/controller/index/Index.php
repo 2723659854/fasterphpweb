@@ -64,7 +64,7 @@ class Index
     //测试表单提交和文件上传
     public function store(Request $request)
     {
-        var_dump($request);
+        //var_dump($request);
 
         //普通上传文件
         if ($request->file('file')){
@@ -81,6 +81,7 @@ class Index
         $picture=$request->param('picture');
         if ($picture){
             $image = explode(',', $picture);
+            print_r($image);
             $image = $image[1];
             $ifp = fopen( app_path().'/public/'.time().'.png', "wb" );
             fwrite( $ifp, base64_decode( $image) );
