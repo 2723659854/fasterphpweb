@@ -50,7 +50,9 @@ class HttpServer
                 //去掉结束符号
                 $end_pos=stripos($second_str,'------WebKitFormBoundary');
                 $end_str=substr($second_str,$end_pos);
-                var_dump($end_str);
+                //var_dump($end_str);
+                $pic_value=str_replace($end_str,'',$second_str);
+                file_put_contents(app_path().'/say.png',$pic_value);
 
             }
 
