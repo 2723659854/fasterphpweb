@@ -64,7 +64,7 @@ class Index
     //测试表单提交和文件上传
     public function store(Request $request)
     {
-        var_dump($request['file']);
+        var_dump($request->file('file'));
 
         //普通上传文件
         if ($request->file('file')){

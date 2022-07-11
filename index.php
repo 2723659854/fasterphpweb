@@ -9,7 +9,7 @@ function save_file($filename,$data,$pattern="w")
     fwrite($fp, $data);
     fclose($fp);
 }
-$s = file_get_contents(__DIR__."/http2.png");
+$s = file_get_contents(__DIR__."/word.png");
 $ks="";
 for($i=0;$i< strlen($s);$i++)
 {
