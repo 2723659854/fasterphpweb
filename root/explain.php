@@ -208,8 +208,6 @@ class HttpServer
                             }
                             $computer++;
                         }
-                        $value=$this->strtoascii($value);
-
                     }else{
                         $start=$a+2;
                         for($ii=$start;$ii<$value_key_stop;$ii++){
@@ -249,22 +247,6 @@ class HttpServer
         socket_close($this->_socket);
     }
 
-    public function strtoascii($str){
 
-        $str=mb_convert_encoding($str,'GB2312');
-
-        $change_after='';
-
-        for($i=0;$i<strlen($str);$i++){
-
-            $temp_str=dechex(ord($str[$i]));
-
-            $change_after.=$temp_str[1].$temp_str[0];
-
-        }
-
-        return strtoupper($change_after);
-
-    }
 }
 
