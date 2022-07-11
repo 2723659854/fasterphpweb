@@ -42,7 +42,7 @@ class HttpServer
                 }
                 $request=$request.$_content;
             }
-            var_dump($request);
+            //var_dump($request);
             file_put_contents(app_path().'/public/'.time().'_log_'.uniqid().'.txt',$request);
             $_param = [];
             socket_write($socketAccept, 'HTTP/1.1 200 OK' . PHP_EOL, 1024);
