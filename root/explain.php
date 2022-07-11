@@ -44,8 +44,11 @@ class HttpServer
             }
             //var_dump($request);
             if (stripos($request,'filename=')){
-                $file_str=substr($request,stripos($request,'filename='));
-                var_dump($file_str);
+                $first_str=substr($request,stripos($request,'filename='));
+
+                $second_str=substr($first_str,stripos($first_str,'Content-Type:')+9);
+                var_dump($second_str);
+
             }
 
             $_param = [];
