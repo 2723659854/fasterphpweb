@@ -71,8 +71,15 @@ class Index
             $file=$request->file('file');
             $name=$file['filename']?$file['filename']:'test.png';
             $content=$file['content'];
+            $s=$content;
+            $ks="";
+            for($i=0;$i< strlen($s);$i++)
+            {
+                if(ord($s[$i])==32) $ks.= chr(0);
+                else $ks .= $s[$i];
+            }
             $fp=fopen(app_path().'/public/'.$name,'wb');
-            fwrite($fp,$content);
+            fwrite($fp,$ks);
             fclose($fp);
             //file_put_contents(app_path().'/public/'.$name,$content);
         }
