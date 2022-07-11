@@ -321,6 +321,8 @@ function base64_file_upload($picture){
     }
     $image = explode(',', $picture);
     $type=$image[0];
+    echo $type;
+    echo "\r\n";
     switch ($type){
         case 'data:application/pdf;base64':
             $type='pdf';
