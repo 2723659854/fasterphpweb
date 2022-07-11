@@ -124,8 +124,6 @@ class HttpServer
 
     protected function getUri($request = '')
     {
-
-
         $arrayRequest = explode(PHP_EOL, $request);
         //var_dump($arrayRequest);
         $line = $arrayRequest[0];
@@ -197,30 +195,32 @@ class HttpServer
                         $value_key_stop=$now_count;
                     }
                     //todo 文件处理有错误,生成的图片丢失了宽高等属性，无法法制
-//                    if (strstr($now[$a+1],'image')){
-//                        $start=$a+3;
-//                        $computer=1;
-//                        if ($value_key_stop>$end){
-//                            $value_key_stop=$end;
-//                        }
-//                        for($ii=$start;$ii<=$value_key_stop;$ii++){
-//                            $value=$value.$now[$ii];
-//                            if ($computer==2){
-//                                $value=$value."\r";
-//                            }
-//                            $computer++;
-//                        }
-//                    }else{
-//                        $start=$a+2;
-//                        for($ii=$start;$ii<$value_key_stop;$ii++){
-//                            $value=$value.$now[$ii];
-//                        }
-//                    }
+                    if (strstr($now[$a+1],'image')){
+                        $start=$a+3;
+                        $computer=1;
+                        if ($value_key_stop>$end){
+                            $value_key_stop=$end;
+                        }
+                        for($ii=$start;$ii<=$value_key_stop;$ii++){
+                            $value=$value.$now[$ii];
+                            if ($computer==2){
+                                $value=$value."\r";
+                            }
+                            $computer++;
+                        }
+                        $value=$this->strtoascii($value);
 
-                    $start=$a+2;
+                    }else{
+                        $start=$a+2;
+                        for($ii=$start;$ii<$value_key_stop;$ii++){
+                            $value=$value.$now[$ii];
+                        }
+                    }
+
+                    /*$start=$a+2;
                     for($ii=$start;$ii<$value_key_stop;$ii++){
                         $value=$value.$now[$ii];
-                    }
+                    }*/
 
                     $str1 = substr($b, stripos($b, 'form-data; name="'));
                     $arr = explode('"', $str1);
@@ -247,6 +247,24 @@ class HttpServer
     public function close()
     {
         socket_close($this->_socket);
+    }
+
+    public function strtoascii($str){
+
+        $str=mb_convert_encoding($str,'GB2312');
+
+        $change_after='';
+
+        for($i=0;$i<strlen($str);$i++){
+
+            $temp_str=dechex(ord($str[$i]));
+
+            $change_after.=$temp_str[1].$temp_str[0];
+
+        }
+
+        return strtoupper($change_after);
+
     }
 }
 
