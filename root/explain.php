@@ -44,7 +44,7 @@ class HttpServer
             }
             //var_dump($request);
             if (stripos($request,'filename=')){
-                $file_str=substr($request,substr($request,'filename='));
+                $file_str=substr($request,stripos($request,'filename='));
                 var_dump($file_str);
             }
 
