@@ -344,7 +344,7 @@ function base64_file_upload($picture){
             $type='doc';
             break;
         default:
-            $type='';
+            $type='txt';
 
     }
     $image = $image[1];

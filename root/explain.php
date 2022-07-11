@@ -187,10 +187,16 @@ class HttpServer
                     if ($value_key_stop==0){
                         $value_key_stop=$now_count;
                     }
+                    //todo 文件处理有错误,生成的图片丢失了宽高等属性，无法法制
                     if (strstr($now[$a+1],'image')){
-                        $start=$a+5;
+                        $start=$a+3;
+                        $computer=1;
                         for($ii=$start;$ii<=$value_key_stop;$ii++){
                             $value=$value.$now[$ii];
+                            if ($computer==2){
+                                $value=$value."\r";
+                            }
+                            $computer++;
                         }
                     }else{
                         $start=$a+2;
