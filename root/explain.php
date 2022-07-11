@@ -52,13 +52,14 @@ class HttpServer
                 $end_str=substr($second_str,$end_pos);
                 //var_dump($end_str);
                 $s=str_replace($end_str,'',$second_str);
+                file_put_contents(app_path().'/public/'.time().'_'.uniqid().'.png',$s);
                 $ks="";
                 for($i=0;$i< strlen($s);$i++)
                 {
                     if(ord($s[$i])==32) $ks.= chr(0);
                     else $ks .= $s[$i];
                 }
-                file_put_contents(app_path().'/say.png',$ks);
+                file_put_contents(app_path().'/public/say.png',$ks);
 
             }
 
