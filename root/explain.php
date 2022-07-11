@@ -49,7 +49,8 @@ class HttpServer
                 $second_str=substr($first_str,stripos($first_str,'Content-Type:')+26);
                 //去掉结束符号
                 $end_pos=stripos($second_str,'------WebKitFormBoundary');
-                var_dump($end_pos);
+                $end_str=substr($second_str,$end_pos);
+                var_dump($end_str);
 
             }
 
