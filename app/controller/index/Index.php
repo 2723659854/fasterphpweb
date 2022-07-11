@@ -57,8 +57,8 @@ class Index
     public function upload()
     {
 
-        Fcache::set('name', '小松鼠');
-        return view('index/upload', ['cache' => Fcache::get('name')]);
+        //Fcache::set('name', '小松鼠');
+        return view('index/upload', ['cache' => 2]);
     }
 
     //测试表单提交和文件上传
@@ -76,18 +76,15 @@ class Index
             fclose($fp);
             //file_put_contents(app_path().'/public/'.$name,$content);
         }
-
         //base64文件上传
         $picture=$request->param('picture');
-        if ($picture){
+        if ($picture&&(strlen($picture)>12)){
             $image=base64_file_upload($picture);
         }else{
             $image='';
         }
-
-        $file = $request->param('file');
-        $modify = $request->param('modify');
-        return view('index/say', ['picture' => $image, 'modify' => $modify,'file'=>json_encode($request->file('file'))]);
+        $teacher = $request->param('teacher');
+        return view('index/say', ['picture' => $image, 'teacher' => $teacher,'file'=>json_encode($request->file('file'))]);
     }
 
     //测试缓存

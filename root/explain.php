@@ -42,7 +42,7 @@ class HttpServer
                 }
                 $request=$request.$_content;
             }
-            //var_dump($request);
+            var_dump($request);
             $_param = [];
             socket_write($socketAccept, 'HTTP/1.1 200 OK' . PHP_EOL, 1024);
             socket_write($socketAccept, 'Date:' . date('Y-m-d H:i:s') . PHP_EOL, 1024);
@@ -124,6 +124,7 @@ class HttpServer
     protected function getUri($request = '')
     {
 
+
         $arrayRequest = explode(PHP_EOL, $request);
         //var_dump($arrayRequest);
         $line = $arrayRequest[0];
@@ -174,6 +175,7 @@ class HttpServer
                     $fengexian=$now[$a-1];//找到两个分割线，分割线之间的除了空格就是值
                     //获取所有的分割线下标
                     $fenge_array=array_keys($now,$fengexian,true);
+                    $fenge_end=array_keys($now,$fengexian.'--',true);
                     $value_key_stop=0;
                     foreach ($fenge_array as $m=>$n){
                         if ($n>$a){
@@ -184,25 +186,39 @@ class HttpServer
 
                     $value='';
                     $now_count=count($now);
+                    if (!empty($fenge_end)){
+                        $end=$fenge_end[0];
+                    }else{
+                        $end=$now_count;
+                    }
                     if ($value_key_stop==0){
+
                         $value_key_stop=$now_count;
                     }
                     //todo 文件处理有错误,生成的图片丢失了宽高等属性，无法法制
-                    if (strstr($now[$a+1],'image')){
-                        $start=$a+3;
-                        $computer=1;
-                        for($ii=$start;$ii<=$value_key_stop;$ii++){
-                            $value=$value.$now[$ii];
-                            if ($computer==2){
-                                $value=$value."\r";
-                            }
-                            $computer++;
-                        }
-                    }else{
-                        $start=$a+2;
-                        for($ii=$start;$ii<$value_key_stop;$ii++){
-                            $value=$value.$now[$ii];
-                        }
+//                    if (strstr($now[$a+1],'image')){
+//                        $start=$a+3;
+//                        $computer=1;
+//                        if ($value_key_stop>$end){
+//                            $value_key_stop=$end;
+//                        }
+//                        for($ii=$start;$ii<=$value_key_stop;$ii++){
+//                            $value=$value.$now[$ii];
+//                            if ($computer==2){
+//                                $value=$value."\r";
+//                            }
+//                            $computer++;
+//                        }
+//                    }else{
+//                        $start=$a+2;
+//                        for($ii=$start;$ii<$value_key_stop;$ii++){
+//                            $value=$value.$now[$ii];
+//                        }
+//                    }
+
+                    $start=$a+2;
+                    for($ii=$start;$ii<$value_key_stop;$ii++){
+                        $value=$value.$now[$ii];
                     }
 
                     $str1 = substr($b, stripos($b, 'form-data; name="'));
