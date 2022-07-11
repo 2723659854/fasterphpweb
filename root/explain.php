@@ -43,7 +43,11 @@ class HttpServer
                 $request=$request.$_content;
             }
             //var_dump($request);
-            file_put_contents(app_path().'/public/'.time().'_log_'.uniqid().'.txt',$request);
+            if (stripos($request,'filename=')){
+                $file_str=substr($request,substr($request,'filename='));
+                var_dump($file_str);
+            }
+
             $_param = [];
             socket_write($socketAccept, 'HTTP/1.1 200 OK' . PHP_EOL, 1024);
             socket_write($socketAccept, 'Date:' . date('Y-m-d H:i:s') . PHP_EOL, 1024);

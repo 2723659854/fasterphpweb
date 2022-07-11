@@ -7,6 +7,7 @@ function save_file($filename,$data,$pattern="w")
     fclose($fp);
 }
 $s = file_get_contents("./http1.png");
+print_r($s);
 $ks="";
 for($i=0;$i< strlen($s);$i++)
 {
