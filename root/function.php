@@ -345,6 +345,12 @@ function base64_file_upload($picture){
         case 'data:application/vnd.openxmlformats-officedocument.presentationml.presentation;base64':
             $type='doc';
             break;
+        case 'data:application/vnd.ms-powerpoint;base64':
+            $type='ppt';
+            break;
+        case 'data:application/vnd.ms-excel;base64':
+            $type='xls';
+            break;
         default:
             $type='txt';
 
