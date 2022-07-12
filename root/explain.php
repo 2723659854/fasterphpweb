@@ -52,6 +52,7 @@ class HttpServer
                 $_param[$k] = $v;
             }
             $url     = $fileName;
+            var_dump($fileName);
             $fileExt = preg_replace('/^.*\.(\w+)$/', '$1', $fileName);
             var_dump($fileExt);
             switch ($fileExt) {
