@@ -166,7 +166,7 @@ class HttpServer
                     $post_param[$dou[0]] = isset($dou[1]) ? $dou[1] : null;
                 }
             }
-            var_dump($now);
+            //var_dump($now);
             $length=0;
             foreach ($now as $a => $b) {
                 if (stripos($b,'ength:')){
@@ -208,7 +208,7 @@ class HttpServer
                         //$pos2=stripos($request,$now[$value_key_stop]);
                         //$value=substr($request,$pos1,($pos2-$pos1)+$length);
 
-                        var_dump($value);
+                        //var_dump($value);
                     }else{
                         $start=$a+2;
                         for($ii=$start;$ii<$value_key_stop;$ii++){
@@ -226,7 +226,7 @@ class HttpServer
                         $arr = explode('"', $str1);
                         $_filename = $arr[1];
                         //$_filecontent = isset($now[$a + 3]) ? $now[$a + 3] : null;
-                        $post_param['file'][] = ['filename' => $_filename, 'content' => $value];
+                        $post_param['file'][$key] = ['filename' => $_filename, 'content' => $value];
                         $post_param[$key] = ['filename' => $_filename, 'content' => $value];
                     }
                 }
