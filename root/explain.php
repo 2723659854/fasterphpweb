@@ -42,13 +42,10 @@ class HttpServer
                 }
                 $request=$request.$_content;
             }
-            //var_dump($request);
             $_param = [];
             socket_write($socketAccept, 'HTTP/1.1 200 OK' . PHP_EOL, 1024);
             socket_write($socketAccept, 'Date:' . date('Y-m-d H:i:s') . PHP_EOL, 1024);
             $_mark = $this->getUri($request);
-            //var_dump($_mark);
-
             $fileName = $_mark['file'];
             $_request = $_mark['request'];
             foreach ($_mark['post_param'] as $k => $v) {
@@ -124,7 +121,6 @@ class HttpServer
     protected function getUri($request = '')
     {
         $arrayRequest = explode(PHP_EOL, $request);
-        //var_dump($arrayRequest);
         $line = $arrayRequest[0];
         $str = $line . ' ';
         $length = strlen($str);
@@ -166,7 +162,6 @@ class HttpServer
                     $post_param[$dou[0]] = isset($dou[1]) ? $dou[1] : null;
                 }
             }
-            //var_dump($now);
             $length=0;
             foreach ($now as $a => $b) {
                 if (stripos($b,'ength:')){
@@ -174,9 +169,7 @@ class HttpServer
                     $length=(int)$_vaka[1];
                 }
                 if (stripos($b, 'form-data; name="')) {
-                    //获取分隔符
-                    $fengexian=$now[$a-1];//找到两个分割线，分割线之间的除了空格就是值
-                    //获取所有的分割线下标
+                    $fengexian=$now[$a-1];
                     $fenge_array=array_keys($now,$fengexian,true);
                     $value_key_stop=0;
                     foreach ($fenge_array as $m=>$n){
@@ -185,17 +178,13 @@ class HttpServer
                             break;
                         }
                     }
-
-
                     $value='';
                     $now_count=count($now);
                     if ($value_key_stop==0){
                         $value_key_stop=$now_count;
                     }
-                    //todo 文件处理有错误,生成的图片丢失了宽高等属性，无法法制
                     if (strstr($now[$a+1],'Type:')){
                         $small_str=substr($request,stripos($request,$b));
-                        //换一种写法
                         $pos1=stripos($small_str,$now[$a+3]);
                         $pos2=stripos($small_str,$now[$value_key_stop]);
                         if ($value_key_stop==$now_count){
@@ -203,12 +192,6 @@ class HttpServer
                         }else{
                             $value=substr($small_str,$pos1,($pos2-$pos1));
                         }
-                        //截取这两个位置之间的字符串作为文件的内容
-                        //$pos1=stripos($request,$now[$a+3]);
-                        //$pos2=stripos($request,$now[$value_key_stop]);
-                        //$value=substr($request,$pos1,($pos2-$pos1)+$length);
-
-                        //var_dump($value);
                     }else{
                         $start=$a+2;
                         for($ii=$start;$ii<$value_key_stop;$ii++){
@@ -225,7 +208,6 @@ class HttpServer
                         $str1 = substr($b, stripos($b, '; filename="'));
                         $arr = explode('"', $str1);
                         $_filename = $arr[1];
-                        //$_filecontent = isset($now[$a + 3]) ? $now[$a + 3] : null;
                         $post_param['file'][$key] = ['filename' => $_filename, 'content' => $value];
                         $post_param[$key] = ['filename' => $_filename, 'content' => $value];
                     }

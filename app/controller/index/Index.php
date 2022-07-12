@@ -56,7 +56,6 @@ class Index
     //测试文件上传，以及缓存用法
     public function upload()
     {
-
         //Fcache::set('name', '小松鼠');
         return view('index/upload', ['cache' => 2]);
     }
@@ -64,8 +63,7 @@ class Index
     //测试表单提交和文件上传
     public function store(Request $request)
     {
-        var_dump($request->file());
-
+        //var_dump($request->file());
         //普通上传文件
         if ($request->file('one')){
             $file=$request->file('one');
