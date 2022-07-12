@@ -145,10 +145,10 @@ class HttpServer
         $line         = $arrayRequest[0];
         var_dump($line);
         $str          = $line . ' ';
-        $length       = strlen($str);
+        $url_length       = strlen($str);
         static $fuck = '';
         $array = [];
-        for ($i = 0; $i < $length; $i++) {
+        for ($i = 0; $i < $url_length; $i++) {
             if (trim($str[$i])) {
                 $fuck = $fuck . $str[$i];
             } else {
@@ -156,6 +156,8 @@ class HttpServer
                 $fuck    = '';
             }
         }
+        var_dump($array);
+        var_dump($url_length);
         $fuck = '';
         if (isset($array[1])) {
             $url = $array[1];
