@@ -42,7 +42,7 @@ class HttpServer
                 }
                 $request=$request.$_content;
             }
-            var_dump($request);
+            //var_dump($request);
 //            if (stripos($request,'filename=')){
 //                $first_str=substr($request,stripos($request,'filename='));
 //
