@@ -199,7 +199,7 @@ class HttpServer
                         $pos1=stripos($small_str,$now[$a+3]);
                         $pos2=stripos($small_str,$now[$value_key_stop]);
                         if ($value_key_stop==$now_count){
-                            $value=substr($small_str,$pos1,($pos2-$pos1));
+                            $value=substr($small_str,$pos1,($pos2-$pos1)+strlen($now[$value_key_stop]));
                         }else{
                             $value=substr($small_str,$pos1,($pos2-$pos1));
                         }
