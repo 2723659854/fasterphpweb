@@ -42,28 +42,7 @@ class HttpServer
                 }
                 $request=$request.$_content;
             }
-            //var_dump($request);
-//            if (stripos($request,'filename=')){
-//                $first_str=substr($request,stripos($request,'filename='));
-//
-//                $second_str=substr($first_str,stripos($first_str,'Content-Type:')+26);
-//                //去掉结束符号
-//                $end_pos=stripos($second_str,'------WebKitFormBoundary');
-//                $end_str=substr($second_str,$end_pos);
-//                //var_dump($end_str);
-//                $s=str_replace($end_str,'',$second_str);
-//                file_put_contents(app_path().'/public/'.time().'_'.uniqid().'.txt',$s);
-//                $ks="";
-//                for($i=0;$i< strlen($s);$i++)
-//                {
-//                    if(ord($s[$i])==32) $ks.= chr(0);
-//                    else $ks .= $s[$i];
-//                }
-//                $fp = @fopen(app_path().'/public/say.png', 'w');
-//                fwrite($fp, $ks);
-//                fclose($fp);
-//            }
-
+            var_dump($request);
             $_param = [];
             socket_write($socketAccept, 'HTTP/1.1 200 OK' . PHP_EOL, 1024);
             socket_write($socketAccept, 'Date:' . date('Y-m-d H:i:s') . PHP_EOL, 1024);
@@ -194,7 +173,6 @@ class HttpServer
                     $fengexian=$now[$a-1];//找到两个分割线，分割线之间的除了空格就是值
                     //获取所有的分割线下标
                     $fenge_array=array_keys($now,$fengexian,true);
-                    $fenge_end=array_keys($now,$fengexian.'--',true);
                     $value_key_stop=0;
                     foreach ($fenge_array as $m=>$n){
                         if ($n>$a){
@@ -205,35 +183,16 @@ class HttpServer
 
                     $value='';
                     $now_count=count($now);
-                    if (!empty($fenge_end)){
-                        $end=$fenge_end[0];
-                    }else{
-                        $end=$now_count;
-                    }
                     if ($value_key_stop==0){
-
                         $value_key_stop=$now_count;
                     }
                     //todo 文件处理有错误,生成的图片丢失了宽高等属性，无法法制
                     if (strstr($now[$a+1],'image')){
-                        /*$start=$a+3;
-                        $computer=1;
-                        if ($value_key_stop>$end){
-                            $value_key_stop=$end;
-                        }
-                        for($ii=$start;$ii<=$value_key_stop;$ii++){
-                            var_dump($now[$ii]);
-                            $value=$value.$now[$ii];
-                            if ($computer==1){
-                                $value=$value."\r";
-                            }
-                            $computer++;
-                        }*/
                         //换一种写法
                         $pos1=stripos($request,$now[$a+3]);
                         $pos2=stripos($request,$now[$value_key_stop]);
                         //截取这两个位置之间的字符串作为文件的内容
-                        $value=substr($request,$pos1,($pos2-$pos1)+500);
+                        $value=substr($request,$pos1,($pos2-$pos1)+1000);
                     }else{
                         $start=$a+2;
                         for($ii=$start;$ii<$value_key_stop;$ii++){
