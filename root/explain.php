@@ -43,28 +43,26 @@ class HttpServer
                 $request=$request.$_content;
             }
             var_dump($request);
-            if (stripos($request,'filename=')){
-                $first_str=substr($request,stripos($request,'filename='));
-
-                $second_str=substr($first_str,stripos($first_str,'Content-Type:')+26);
-                //去掉结束符号
-                $end_pos=stripos($second_str,'------WebKitFormBoundary');
-                $end_str=substr($second_str,$end_pos);
-                //var_dump($end_str);
-                $s=str_replace($end_str,'',$second_str);
-                file_put_contents(app_path().'/public/'.time().'_'.uniqid().'.txt',$s);
-                $ks="";
-                for($i=0;$i< strlen($s);$i++)
-                {
-                    if(ord($s[$i])==32) $ks.= chr(0);
-                    else $ks .= $s[$i];
-                }
-                $fp = @fopen(app_path().'/public/say.png', 'w');
-                fwrite($fp, $ks);
-                fclose($fp);
-                //file_put_contents(app_path().'/public/say.png',$ks);
-
-            }
+//            if (stripos($request,'filename=')){
+//                $first_str=substr($request,stripos($request,'filename='));
+//
+//                $second_str=substr($first_str,stripos($first_str,'Content-Type:')+26);
+//                //去掉结束符号
+//                $end_pos=stripos($second_str,'------WebKitFormBoundary');
+//                $end_str=substr($second_str,$end_pos);
+//                //var_dump($end_str);
+//                $s=str_replace($end_str,'',$second_str);
+//                file_put_contents(app_path().'/public/'.time().'_'.uniqid().'.txt',$s);
+//                $ks="";
+//                for($i=0;$i< strlen($s);$i++)
+//                {
+//                    if(ord($s[$i])==32) $ks.= chr(0);
+//                    else $ks .= $s[$i];
+//                }
+//                $fp = @fopen(app_path().'/public/say.png', 'w');
+//                fwrite($fp, $ks);
+//                fclose($fp);
+//            }
 
             $_param = [];
             socket_write($socketAccept, 'HTTP/1.1 200 OK' . PHP_EOL, 1024);
