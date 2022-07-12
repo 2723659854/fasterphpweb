@@ -196,6 +196,8 @@ class HttpServer
                     if (strstr($now[$a+1],'Type:')){
                         echo $value_key_stop;
                         echo "\r\n";
+                        echo $now[$value_key_stop];
+                        echo "\r\n";
                         //换一种写法
                         $pos1=stripos($request,$now[$a+3]);
                         $pos2=stripos($request,$now[$value_key_stop]);
