@@ -198,13 +198,16 @@ class HttpServer
                         //换一种写法
                         $pos1=stripos($small_str,$now[$a+3]);
                         $pos2=stripos($small_str,$now[$value_key_stop]);
-                        //截取这两个位置之间的字符串作为文件的内容
-                        //$value=substr($request,$pos1,($pos2-$pos1)+$length);
                         if ($value_key_stop==$now_count){
-                            $value=substr($small_str,$pos1);
+                            $value=substr($small_str,$pos1,($pos2-$pos1));
                         }else{
                             $value=substr($small_str,$pos1,($pos2-$pos1));
                         }
+                        //截取这两个位置之间的字符串作为文件的内容
+                        //$pos1=stripos($request,$now[$a+3]);
+                        //$pos2=stripos($request,$now[$value_key_stop]);
+                        //$value=substr($request,$pos1,($pos2-$pos1)+$length);
+
                         var_dump($value);
                     }else{
                         $start=$a+2;
