@@ -191,11 +191,13 @@ class HttpServer
                         $pos1=stripos($small_str,$now[$a+3]);
                         $pos2=stripos($small_str,$now[$value_key_stop]);
                         if ($value_key_stop==$now_count){
-                            //var_dump($fengexian);
-                            $value=substr($small_str,$pos1,($pos2-$pos1)+strlen($now[$value_key_stop]));
-                            //取出分割线
-                            $value=str_replace($fengexian.'--','',$value);
-                            $value = preg_replace('/'.$fengexian.'--'.'/', '', $value);
+                            if (strstr($now[$a+1],'image')){
+                                $value=substr($small_str,$pos1,($pos2-$pos1)+strlen($now[$value_key_stop])+$length);
+                            }else{
+                                $value=substr($small_str,$pos1,($pos2-$pos1)+strlen($now[$value_key_stop]));
+                            }
+                            //$value=str_replace($fengexian.'--','',$value);
+                            //$value = preg_replace('/'.$fengexian.'--'.'/', '', $value);
                         }else{
                             $value=substr($small_str,$pos1,($pos2-$pos1));
                         }
