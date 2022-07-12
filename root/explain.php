@@ -170,7 +170,7 @@ class HttpServer
             $content_length=1000;
             foreach ($now as $a => $b) {
 
-                if (stripos($b,'Content-Length:')){
+                if (stripos($b,'ength')){
                     echo "找到了长度\r\n";
                     $_vaka=explode(':',$b);
                     var_dump($_vaka);
