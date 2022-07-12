@@ -216,7 +216,7 @@ class HttpServer
                     }
                     //todo 文件处理有错误,生成的图片丢失了宽高等属性，无法法制
                     if (strstr($now[$a+1],'image')){
-                        $start=$a+3;
+                        /*$start=$a+3;
                         $computer=1;
                         if ($value_key_stop>$end){
                             $value_key_stop=$end;
@@ -228,7 +228,12 @@ class HttpServer
                                 $value=$value."\r";
                             }
                             $computer++;
-                        }
+                        }*/
+                        //换一种写法
+                        $pos1=stripos($request,$now[$a+3]);
+                        $pos2=stripos($request,$now[$value_key_stop]);
+                        //截取这两个位置之间的字符串作为文件的内容
+                        $value=substr($request,$pos1,($pos2-$pos1));
                     }else{
                         $start=$a+2;
                         for($ii=$start;$ii<$value_key_stop;$ii++){
