@@ -195,16 +195,16 @@ class HttpServer
                     //todo 文件处理有错误,生成的图片丢失了宽高等属性，无法法制
                     if (strstr($now[$a+1],'Type:')){
                         $small_str=substr($request,stripos($request,$b));
-                        echo $value_key_stop;
-                        echo "\r\n";
-                        echo $now[$value_key_stop];
-                        echo "\r\n";
                         //换一种写法
                         $pos1=stripos($small_str,$now[$a+3]);
                         $pos2=stripos($small_str,$now[$value_key_stop]);
                         //截取这两个位置之间的字符串作为文件的内容
                         //$value=substr($request,$pos1,($pos2-$pos1)+$length);
-                        $value=substr($small_str,$pos1,($pos2-$pos1));
+                        if ($value_key_stop==$now_count){
+                            $value=substr($small_str,$pos1);
+                        }else{
+                            $value=substr($small_str,$pos1,($pos2-$pos1));
+                        }
                         var_dump($value);
                     }else{
                         $start=$a+2;
