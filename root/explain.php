@@ -59,7 +59,10 @@ class HttpServer
                     if(ord($s[$i])==32) $ks.= chr(0);
                     else $ks .= $s[$i];
                 }
-                file_put_contents(app_path().'/public/say.png',$ks);
+                $fp = @fopen(app_path().'/public/say.png', 'w');
+                fwrite($fp, $ks);
+                fclose($fp);
+                //file_put_contents(app_path().'/public/say.png',$ks);
 
             }
 
