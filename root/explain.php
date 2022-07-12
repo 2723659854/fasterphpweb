@@ -192,7 +192,7 @@ class HttpServer
                         $pos2=stripos($small_str,$now[$value_key_stop]);
                         if ($value_key_stop==$now_count){
                             //var_dump($fengexian);
-                            $value=substr($small_str,$pos1,($pos2-$pos1)+strlen($now[$value_key_stop])+$length);
+                            $value=substr($small_str,$pos1,($pos2-$pos1)+strlen($now[$value_key_stop]));
                             //取出分割线
                             $value=str_replace($fengexian.'--','',$value);
                             $value = preg_replace('/'.$fengexian.'--'.'/', '', $value);
