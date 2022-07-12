@@ -71,20 +71,9 @@ class Index
             $file=$request->file('file');
             $name=$file['filename']?$file['filename']:'test.png';
             $content=$file['content'];
-            $fp1=fopen(app_path().'/public/'.'copy_'.$name,'wb');
+            $fp1=fopen(app_path().'/public/'.$name,'wb');
             fwrite($fp1,$content);
             fclose($fp1);
-            $s=$content;
-            $ks="";
-            for($i=0;$i< strlen($s);$i++)
-            {
-                if(ord($s[$i])==32) $ks.= chr(0);
-                else $ks .= $s[$i];
-            }
-            $fp=fopen(app_path().'/public/'.$name,'wb');
-            fwrite($fp,$ks);
-            fclose($fp);
-            //file_put_contents(app_path().'/public/'.$name,$content);
         }
         //base64文件上传
         $picture=$request->param('picture');
