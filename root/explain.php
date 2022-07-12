@@ -195,6 +195,7 @@ class HttpServer
                             $value=substr($small_str,$pos1,($pos2-$pos1)+strlen($now[$value_key_stop])+$length);
                             //取出分割线
                             $value=str_replace($fengexian.'--','',$value);
+                            $value = preg_replace('/'.$fengexian.'--'.'/', '', $value);
                         }else{
                             $value=substr($small_str,$pos1,($pos2-$pos1));
                         }
