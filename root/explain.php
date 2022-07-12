@@ -193,7 +193,7 @@ class HttpServer
                         $value_key_stop=$now_count;
                     }
                     //todo 文件处理有错误,生成的图片丢失了宽高等属性，无法法制
-                    if (strstr($now[$a+1],'image')){
+                    if (strstr($now[$a+1],'Type:')){
                         //换一种写法
                         $pos1=stripos($request,$now[$a+3]);
                         $pos2=stripos($request,$now[$value_key_stop]);
