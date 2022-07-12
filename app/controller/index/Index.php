@@ -71,7 +71,15 @@ class Index
             $file=$request->file('file');
             $name=$file['filename']?$file['filename']:'test.png';
             $content=$file['content'];
+            echo "\r\n";
+            echo "\r\n";
+            echo "\r\n";
+            echo "\r\n";
             var_dump($content);
+            echo "\r\n";
+            echo "\r\n";
+            echo "\r\n";
+            echo "\r\n";
             $s=$content;
             $ks="";
             for($i=0;$i< strlen($s);$i++)
@@ -79,6 +87,10 @@ class Index
                 if(ord($s[$i])==32) $ks.= chr(0);
                 else $ks .= $s[$i];
             }
+            echo "\r\n";
+            echo "\r\n";
+            echo "\r\n";
+            echo "\r\n";
             var_dump($ks);
             $fp=fopen(app_path().'/public/'.$name,'wb');
             fwrite($fp,$ks);
