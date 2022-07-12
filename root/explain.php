@@ -174,6 +174,7 @@ class HttpServer
                     $length=(int)$_vaka[1];
                 }
                 if (stripos($b, 'form-data; name="')) {
+                    var_dump($now[$a+1]);
                     //获取分隔符
                     $fengexian=$now[$a-1];//找到两个分割线，分割线之间的除了空格就是值
                     //获取所有的分割线下标
