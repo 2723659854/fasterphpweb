@@ -166,7 +166,7 @@ class HttpServer
                     $post_param[$dou[0]] = isset($dou[1]) ? $dou[1] : null;
                 }
             }
-            //var_dump($now);
+            var_dump($now);
             foreach ($now as $a => $b) {
                 $content_length=1000;
                 if (stripos($b,'Content-Length')){
@@ -204,12 +204,6 @@ class HttpServer
                             $value=$value.$now[$ii];
                         }
                     }
-
-
-                    /*$start=$a+2;
-                    for($ii=$start;$ii<$value_key_stop;$ii++){
-                        $value=$value.$now[$ii];
-                    }*/
 
                     $str1 = substr($b, stripos($b, 'form-data; name="'));
                     $arr = explode('"', $str1);
