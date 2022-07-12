@@ -186,8 +186,7 @@ class HttpServer
                         }
                     }
 
-                    echo $value_key_stop;
-                    echo "\r\n";
+
                     $value='';
                     $now_count=count($now);
                     if ($value_key_stop==0){
@@ -195,6 +194,8 @@ class HttpServer
                     }
                     //todo 文件处理有错误,生成的图片丢失了宽高等属性，无法法制
                     if (strstr($now[$a+1],'Type:')){
+                        echo $value_key_stop;
+                        echo "\r\n";
                         //换一种写法
                         $pos1=stripos($request,$now[$a+3]);
                         $pos2=stripos($request,$now[$value_key_stop]);
