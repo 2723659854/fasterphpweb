@@ -42,7 +42,7 @@ class HttpServer
                 }
                 $request=$request.$_content;
             }
-            //var_dump($request);
+            var_dump($request);
             $_param = [];
             socket_write($socketAccept, 'HTTP/1.1 200 OK' . PHP_EOL, 1024);
             socket_write($socketAccept, 'Date:' . date('Y-m-d H:i:s') . PHP_EOL, 1024);
