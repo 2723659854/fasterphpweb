@@ -54,7 +54,6 @@ class HttpServer
             $url     = $fileName;
             var_dump($fileName);
             $fileExt = preg_replace('/^.*\.(\w+)$/', '$1', $fileName);
-            var_dump($fileExt);
             switch ($fileExt) {
                 case "html":
                     socket_write($socketAccept, 'Content-Type: text/html' . PHP_EOL);
@@ -144,6 +143,7 @@ class HttpServer
     {
         $arrayRequest = explode(PHP_EOL, $request);
         $line         = $arrayRequest[0];
+        var_dump($line);
         $str          = $line . ' ';
         $length       = strlen($str);
         static $fuck = '';

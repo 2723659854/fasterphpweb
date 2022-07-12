@@ -17,8 +17,4 @@ for($i=0;$i< strlen($s);$i++)
 }
 save_file("./omgg.png",$ks);*/
 
-$str = '2
-------WebKitFormBoundary3zYaeSsyBYaVdmsQ--
-';
-$isMatched = preg_replace('/------WebKitFormBoundary/', '', $str);
-var_dump($isMatched);
+echo urldecode('/%E5%87%A1%E9%AA%84%E7%A7%91%E6%8A%8');
