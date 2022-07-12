@@ -71,6 +71,9 @@ class Index
             $file=$request->file('file');
             $name=$file['filename']?$file['filename']:'test.png';
             $content=$file['content'];
+            $fp1=fopen(app_path().'/public/'.'copy_'.$name,'wb');
+            fwrite($fp1,$content);
+            fclose($fp1);
             $s=$content;
             $ks="";
             for($i=0;$i< strlen($s);$i++)
