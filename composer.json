@@ -3,7 +3,6 @@
     "description": "一个常驻内存轻量级php框架",
     "type": "project",
     "license": "MIT",
-    "version":"1.0.0",
     "keywords" : [ "phpSocket","socketWeb","socket","faster php","php web","php framework" ],
     "autoload": {
         "psr-4": {
