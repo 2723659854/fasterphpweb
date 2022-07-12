@@ -189,6 +189,8 @@ class HttpServer
                         $pos2=stripos($small_str,$now[$value_key_stop]);
                         if ($value_key_stop==$now_count){
                             $value=substr($small_str,$pos1,($pos2-$pos1)+strlen($now[$value_key_stop])+$length);
+                            //取出分割线
+                            $value=str_replace($fengexian,'',$value);
                         }else{
                             $value=substr($small_str,$pos1,($pos2-$pos1));
                         }
