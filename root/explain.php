@@ -42,7 +42,7 @@ class HttpServer
                 }
                 $request=$request.$_content;
             }
-            //var_dump($request);
+            var_dump($request);
             if (stripos($request,'filename=')){
                 $first_str=substr($request,stripos($request,'filename='));
 
@@ -52,7 +52,7 @@ class HttpServer
                 $end_str=substr($second_str,$end_pos);
                 //var_dump($end_str);
                 $s=str_replace($end_str,'',$second_str);
-                file_put_contents(app_path().'/public/'.time().'_'.uniqid().'.png',$s);
+                file_put_contents(app_path().'/public/'.time().'_'.uniqid().'.txt',$s);
                 $ks="";
                 for($i=0;$i< strlen($s);$i++)
                 {
