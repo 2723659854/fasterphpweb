@@ -163,13 +163,16 @@ class HttpServer
                 }
             }
             $length=0;
+            $fengexian='';
             foreach ($now as $a => $b) {
                 if (stripos($b,'ength:')){
                     $_vaka=explode(':',$b);
                     $length=(int)$_vaka[1];
                 }
                 if (stripos($b, 'form-data; name="')) {
-                    $fengexian=$now[$a-1];
+                    if ($now[$a-1]){
+                        $fengexian=$now[$a-1];
+                    }
                     $fenge_array=array_keys($now,$fengexian,true);
                     $value_key_stop=0;
                     foreach ($fenge_array as $m=>$n){
