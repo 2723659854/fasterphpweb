@@ -21,7 +21,7 @@ class Index
     //默认首页
     public function index()
     {
-        return "hello world!";
+        //return "hello world!";
         //模板在根目录下的view目录里面
         return view('/index/index', ['time' => date('Y-m-d H:i:s')]);
     }
