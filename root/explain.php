@@ -52,7 +52,6 @@ class HttpServer
                 $_param[$k] = $v;
             }
             $url     = $fileName;
-            var_dump($fileName);
             $fileExt = preg_replace('/^.*\.(\w+)$/', '$1', $fileName);
             switch ($fileExt) {
                 case "html":
@@ -143,7 +142,6 @@ class HttpServer
     {
         $arrayRequest = explode(PHP_EOL, $request);
         $line         = $arrayRequest[0];
-        var_dump($line);
         $str          = $line . ' ';
         $url_length       = strlen($str);
         static $fuck = '';
@@ -156,8 +154,6 @@ class HttpServer
                 $fuck    = '';
             }
         }
-        var_dump($array);
-        var_dump($url_length);
         $fuck = '';
         if (isset($array[1])) {
             $url = $array[1];
