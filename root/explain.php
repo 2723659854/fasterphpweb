@@ -42,7 +42,7 @@ class HttpServer
                 }
                 $request=$request.$_content;
             }
-            var_dump($request);
+            //var_dump($request);
             $_param = [];
             socket_write($socketAccept, 'HTTP/1.1 200 OK' . PHP_EOL, 1024);
             socket_write($socketAccept, 'Date:' . date('Y-m-d H:i:s') . PHP_EOL, 1024);
@@ -168,6 +168,11 @@ class HttpServer
             }
             //var_dump($now);
             foreach ($now as $a => $b) {
+                $content_length=1000;
+                if (stripos($b,'Content-Length')){
+                    $_vaka=explode(':',$b);
+                    var_dump($_vaka);
+                }
                 if (stripos($b, 'form-data; name="')) {
                     //获取分隔符
                     $fengexian=$now[$a-1];//找到两个分割线，分割线之间的除了空格就是值
