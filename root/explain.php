@@ -10,8 +10,8 @@ if (file_exists(dirname(__DIR__) . '/vendor/autoload.php')) {
 
 class HttpServer
 {
-    private $ip = '0.0.0.0';
-    private $port = 8020;
+    private $ip      = '0.0.0.0';
+    private $port    = 8020;
     private $_socket = null;
 
     public function __construct()
@@ -33,25 +33,25 @@ class HttpServer
         while (true) {
             $socketAccept = @\socket_accept($this->_socket);
 
-            $request='';
-            $flag=true;
-            while($flag){
+            $request = '';
+            $flag    = true;
+            while ($flag) {
                 $_content = socket_read($socketAccept, 1024);
-                if (strlen($_content)<1024){
-                    $flag=false;
+                if (strlen($_content) < 1024) {
+                    $flag = false;
                 }
-                $request=$request.$_content;
+                $request = $request . $_content;
             }
             $_param = [];
             socket_write($socketAccept, 'HTTP/1.1 200 OK' . PHP_EOL, 1024);
             socket_write($socketAccept, 'Date:' . date('Y-m-d H:i:s') . PHP_EOL, 1024);
-            $_mark = $this->getUri($request);
+            $_mark    = $this->getUri($request);
             $fileName = $_mark['file'];
             $_request = $_mark['request'];
             foreach ($_mark['post_param'] as $k => $v) {
                 $_param[$k] = $v;
             }
-            $url = $fileName;
+            $url     = $fileName;
             $fileExt = preg_replace('/^.*\.(\w+)$/', '$1', $fileName);
             switch ($fileExt) {
                 case "html":
@@ -84,13 +84,32 @@ class HttpServer
 
                     socket_write($socketAccept, $fileContent, strlen($fileContent));
                     break;
+                case "doc":
+                case "docx":
+                case "ppt":
+                case "pptx":
+                case "xls":
+                case "xlsx":
+                case "zip":
+                case "rar":
+                    socket_write($socketAccept, 'Content-Type: application/octet-stream' . PHP_EOL);
+                    socket_write($socketAccept, '' . PHP_EOL);
+                    $fileName = dirname(__DIR__) . '/public/' . $fileName;
+                    if (file_exists($fileName)) {
+                        $fileContent = file_get_contents($fileName);
+                    } else {
+                        $fileContent = 'sorry,the file is missing!';
+                    }
+
+                    socket_write($socketAccept, $fileContent, strlen($fileContent));
+                    break;
                 default:
                     if (($url) && strpos($url, '?')) {
                         $request_url = explode('?', $url);
-                        $route = $request_url[0];
-                        $params = explode('&', $request_url[1]);
+                        $route       = $request_url[0];
+                        $params      = explode('&', $request_url[1]);
                         foreach ($params as $k => $v) {
-                            $_v = explode('=', $v);
+                            $_v             = explode('=', $v);
                             $_param[$_v[0]] = $_v['1'];
                         }
                         $content = handle(route($route), $_param, $_request);
@@ -100,14 +119,14 @@ class HttpServer
                     socket_write($socketAccept, 'Content-Type: text/html' . PHP_EOL, 1024);
                     socket_write($socketAccept, '' . PHP_EOL, 1024);
                     if ($content) {
-                        $content = is_string($content) ? $content : json_encode($content);
+                        $content      = is_string($content) ? $content : json_encode($content);
                         $write_length = strlen($content);
                         if ($write_length < 1024) {
                             $write_length = 1024;
                         }
                     } else {
                         $write_length = 1024;
-                        $content = '';
+                        $content      = '';
                     }
                     socket_write($socketAccept, $content, $write_length);
             }
@@ -121,9 +140,9 @@ class HttpServer
     protected function getUri($request = '')
     {
         $arrayRequest = explode(PHP_EOL, $request);
-        $line = $arrayRequest[0];
-        $str = $line . ' ';
-        $length = strlen($str);
+        $line         = $arrayRequest[0];
+        $str          = $line . ' ';
+        $length       = strlen($str);
         static $fuck = '';
         $array = [];
         for ($i = 0; $i < $length; $i++) {
@@ -131,7 +150,7 @@ class HttpServer
                 $fuck = $fuck . $str[$i];
             } else {
                 $array[] = $fuck;
-                $fuck = '';
+                $fuck    = '';
             }
         }
         $fuck = '';
@@ -153,72 +172,69 @@ class HttpServer
         }
         $post_param = [];
         if ($method == 'POST' || $method == 'post') {
-            $now = $arrayRequest;
+            $now   = $arrayRequest;
             $param = array_pop($now);
             if (strpos($param, '&')) {
                 $many = explode('&', $param);
                 foreach ($many as $a => $b) {
-                    $dou = explode('=', $b);
+                    $dou                 = explode('=', $b);
                     $post_param[$dou[0]] = isset($dou[1]) ? $dou[1] : null;
                 }
             }
-            $length=0;
-            $fengexian='';
+            $length    = 0;
+            $fengexian = '';
             foreach ($now as $a => $b) {
-                if (stripos($b,'ength:')){
-                    $_vaka=explode(':',$b);
-                    $length=(int)$_vaka[1];
+                if (stripos($b, 'ength:')) {
+                    $_vaka  = explode(':', $b);
+                    $length = (int)$_vaka[1];
                 }
                 if (stripos($b, 'form-data; name="')) {
-                    if ($now[$a-1]){
-                        $fengexian=$now[$a-1];
+                    if ($now[$a - 1]) {
+                        $fengexian = $now[$a - 1];
                     }
-                    $fenge_array=array_keys($now,$fengexian,true);
-                    $value_key_stop=0;
-                    foreach ($fenge_array as $m=>$n){
-                        if ($n>$a){
-                            $value_key_stop=$n;
+                    $fenge_array    = array_keys($now, $fengexian, true);
+                    $value_key_stop = 0;
+                    foreach ($fenge_array as $m => $n) {
+                        if ($n > $a) {
+                            $value_key_stop = $n;
                             break;
                         }
                     }
-                    $value='';
-                    $now_count=count($now);
-                    if ($value_key_stop==0){
-                        $value_key_stop=$now_count;
+                    $value     = '';
+                    $now_count = count($now);
+                    if ($value_key_stop == 0) {
+                        $value_key_stop = $now_count;
                     }
-                    if (strstr($now[$a+1],'Type:')){
-                        $small_str=substr($request,stripos($request,$b));
-                        $pos1=stripos($small_str,$now[$a+3]);
-                        $pos2=stripos($small_str,$now[$value_key_stop]);
-                        if ($value_key_stop==$now_count){
-                            if (strstr($now[$a+1],'image')){
-                                $value=substr($small_str,$pos1,($pos2-$pos1)+strlen($now[$value_key_stop])+$length);
-                            }else{
-                                $value=substr($small_str,$pos1,($pos2-$pos1)+strlen($now[$value_key_stop]));
+                    if (strstr($now[$a + 1], 'Type:')) {
+                        $small_str = substr($request, stripos($request, $b));
+                        $pos1      = stripos($small_str, $now[$a + 3]);
+                        $pos2      = stripos($small_str, $now[$value_key_stop]);
+                        if ($value_key_stop == $now_count) {
+                            if (strstr($now[$a + 1], 'image')) {
+                                $value = substr($small_str, $pos1, ($pos2 - $pos1) + strlen($now[$value_key_stop]) + $length);
+                            } else {
+                                $value = substr($small_str, $pos1, ($pos2 - $pos1) + strlen($now[$value_key_stop]));
                             }
-                            //$value=str_replace($fengexian.'--','',$value);
-                            //$value = preg_replace('/'.$fengexian.'--'.'/', '', $value);
-                        }else{
-                            $value=substr($small_str,$pos1,($pos2-$pos1));
+                        } else {
+                            $value = substr($small_str, $pos1, ($pos2 - $pos1));
                         }
-                    }else{
-                        $start=$a+2;
-                        for($ii=$start;$ii<$value_key_stop;$ii++){
-                            $value=$value.$now[$ii];
+                    } else {
+                        $start = $a + 2;
+                        for ($ii = $start; $ii < $value_key_stop; $ii++) {
+                            $value = $value . $now[$ii];
                         }
                     }
-
                     $str1 = substr($b, stripos($b, 'form-data; name="'));
-                    $arr = explode('"', $str1);
-                    $key = $arr[1];
+                    $arr  = explode('"', $str1);
+                    $key  = $arr[1];
 
                     $post_param[$key] = $value;
                     if (stripos($b, '; filename="')) {
-                        $str1 = substr($b, stripos($b, '; filename="'));
-                        $arr = explode('"', $str1);
-                        $_filename = $arr[1];
+                        $str1                     = substr($b, stripos($b, '; filename="'));
+                        $arr                      = explode('"', $str1);
+                        $_filename                = $arr[1];
                         $post_param['file'][$key] = ['filename' => $_filename, 'content' => $value];
-                        $post_param[$key] = ['filename' => $_filename, 'content' => $value];
+                        $post_param[$key]         = ['filename' => $_filename, 'content' => $value];
                     }
                 }
             }
