@@ -53,6 +53,7 @@ class HttpServer
             }
             $url     = $fileName;
             $fileExt = preg_replace('/^.*\.(\w+)$/', '$1', $fileName);
+            var_dump($fileExt);
             switch ($fileExt) {
                 case "html":
                     socket_write($socketAccept, 'Content-Type: text/html' . PHP_EOL);
@@ -92,6 +93,7 @@ class HttpServer
                 case "xlsx":
                 case "zip":
                 case "rar":
+                case "txt":
                     socket_write($socketAccept, 'Content-Type: application/octet-stream' . PHP_EOL);
                     socket_write($socketAccept, '' . PHP_EOL);
                     $fileName = dirname(__DIR__) . '/public/' . $fileName;
