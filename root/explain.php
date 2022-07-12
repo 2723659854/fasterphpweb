@@ -216,12 +216,13 @@ class HttpServer
                     }
                     //todo 文件处理有错误,生成的图片丢失了宽高等属性，无法法制
                     if (strstr($now[$a+1],'image')){
-                        $start=$a+3;
+                        $start=$a+2;
                         $computer=1;
                         if ($value_key_stop>$end){
                             $value_key_stop=$end;
                         }
                         for($ii=$start;$ii<=$value_key_stop;$ii++){
+                            var_dump($now[$ii]);
                             $value=$value.$now[$ii];
                             if ($computer==2){
                                 $value=$value."\r";
@@ -234,6 +235,7 @@ class HttpServer
                             $value=$value.$now[$ii];
                         }
                     }
+
 
                     /*$start=$a+2;
                     for($ii=$start;$ii<$value_key_stop;$ii++){
