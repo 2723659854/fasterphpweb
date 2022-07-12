@@ -166,10 +166,12 @@ class HttpServer
                     $post_param[$dou[0]] = isset($dou[1]) ? $dou[1] : null;
                 }
             }
-            var_dump($now);
+            //var_dump($now);
+            $content_length=1000;
             foreach ($now as $a => $b) {
-                $content_length=1000;
-                if (stripos($b,'Content-Length')){
+
+                if (stripos($b,'Content-Length:')){
+                    echo "找到了长度\r\n";
                     $_vaka=explode(':',$b);
                     var_dump($_vaka);
                 }
