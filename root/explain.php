@@ -167,13 +167,11 @@ class HttpServer
                 }
             }
             //var_dump($now);
-            $content_length=1000;
+            $length=1000;
             foreach ($now as $a => $b) {
-
                 if (stripos($b,'ength:')){
-                    echo "找到了长度\r\n";
                     $_vaka=explode(':',$b);
-                    var_dump($_vaka);
+                    $length=(int)$_vaka[1];
                 }
                 if (stripos($b, 'form-data; name="')) {
                     //获取分隔符
@@ -199,7 +197,7 @@ class HttpServer
                         $pos1=stripos($request,$now[$a+3]);
                         $pos2=stripos($request,$now[$value_key_stop]);
                         //截取这两个位置之间的字符串作为文件的内容
-                        $value=substr($request,$pos1,($pos2-$pos1)+1000);
+                        $value=substr($request,$pos1,($pos2-$pos1)+$length);
                     }else{
                         $start=$a+2;
                         for($ii=$start;$ii<$value_key_stop;$ii++){
