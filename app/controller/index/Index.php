@@ -67,8 +67,8 @@ class Index
         //var_dump($request->file('file'));
 
         //普通上传文件
-        if ($request->file('file')){
-            $file=$request->file('file');
+        if ($request->file('one')){
+            $file=$request->file('one');
             $name=$file['filename']?$file['filename']:'test.png';
             $content=$file['content'];
             $fp1=fopen(app_path().'/public/'.$name,'wb');

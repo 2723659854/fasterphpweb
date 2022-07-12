@@ -215,7 +215,7 @@ class HttpServer
                         $arr = explode('"', $str1);
                         $_filename = $arr[1];
                         //$_filecontent = isset($now[$a + 3]) ? $now[$a + 3] : null;
-                        $post_param['file'] = ['filename' => $_filename, 'content' => $value];
+                        //$post_param['file'] = ['filename' => $_filename, 'content' => $value];
                         $post_param[$key] = ['filename' => $_filename, 'content' => $value];
                     }
                 }
