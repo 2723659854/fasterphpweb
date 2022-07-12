@@ -48,13 +48,17 @@ class Request
     }
 
     /**
+     * 文件作为二维数组被存储，获取的时候
      * 获取文件
      * @param string $name
      * @return mixed|null
      */
-    public function file($name='file'){
-
-        return isset($this->value[$name])?$this->value[$name]:(isset($this->value['file'])?$this->value['file']:null);
+    public function file($name=''){
+        if ($name){
+            return isset($this->value['file'][$name])?$this->value['file'][$name]:null;
+        }else{
+            return isset($this->value['file'])?$this->value['file']:null;
+        }
     }
 
 }

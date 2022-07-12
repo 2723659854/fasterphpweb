@@ -42,7 +42,7 @@ class HttpServer
                 }
                 $request=$request.$_content;
             }
-            var_dump($request);
+            //var_dump($request);
             $_param = [];
             socket_write($socketAccept, 'HTTP/1.1 200 OK' . PHP_EOL, 1024);
             socket_write($socketAccept, 'Date:' . date('Y-m-d H:i:s') . PHP_EOL, 1024);
@@ -167,7 +167,7 @@ class HttpServer
                 }
             }
             //var_dump($now);
-            $length=1000;
+            $length=0;
             foreach ($now as $a => $b) {
                 if (stripos($b,'ength:')){
                     $_vaka=explode(':',$b);
@@ -197,7 +197,9 @@ class HttpServer
                         $pos1=stripos($request,$now[$a+3]);
                         $pos2=stripos($request,$now[$value_key_stop]);
                         //截取这两个位置之间的字符串作为文件的内容
-                        $value=substr($request,$pos1,($pos2-$pos1)+$length);
+                        //$value=substr($request,$pos1,($pos2-$pos1)+$length);
+                        $value=substr($request,$pos1,($pos2-$pos1));
+                        var_dump($value);
                     }else{
                         $start=$a+2;
                         for($ii=$start;$ii<$value_key_stop;$ii++){
@@ -215,7 +217,7 @@ class HttpServer
                         $arr = explode('"', $str1);
                         $_filename = $arr[1];
                         //$_filecontent = isset($now[$a + 3]) ? $now[$a + 3] : null;
-                        //$post_param['file'] = ['filename' => $_filename, 'content' => $value];
+                        $post_param['file'][] = ['filename' => $_filename, 'content' => $value];
                         $post_param[$key] = ['filename' => $_filename, 'content' => $value];
                     }
                 }
