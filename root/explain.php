@@ -36,8 +36,8 @@ class HttpServer
             $request = '';
             $flag    = true;
             while ($flag) {
-                $_content = socket_read($socketAccept, 1024);
-                if (strlen($_content) < 1024) {
+                $_content = socket_read($socketAccept, 2048);
+                if (strlen($_content) < 2048) {
                     $flag = false;
                 }
                 $request = $request . $_content;
