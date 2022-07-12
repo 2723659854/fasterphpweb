@@ -149,7 +149,7 @@ class HttpServer
         static $fuck = '';
         $array = [];
         for ($i = 0; $i < $url_length; $i++) {
-            if (trim($str[$i])) {
+            if (trim($str[$i])!=null) {
                 $fuck = $fuck . $str[$i];
             } else {
                 $array[] = $fuck;
