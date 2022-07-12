@@ -64,7 +64,7 @@ class Index
     //测试表单提交和文件上传
     public function store(Request $request)
     {
-        var_dump($request->file('file'));
+        var_dump($request->file());
 
         //普通上传文件
         if ($request->file('one')){
@@ -75,8 +75,8 @@ class Index
             fwrite($fp1,$content);
             fclose($fp1);
         }
-        if ($request->file('one')){
-            $file=$request->file('one');
+        if ($request->file('two')){
+            $file=$request->file('two');
             $name=$file['filename']?$file['filename']:'test.png';
             $content=$file['content'];
             $fp1=fopen(app_path().'/public/'.$name,'wb');
