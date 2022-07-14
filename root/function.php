@@ -339,7 +339,7 @@ function base64_file_upload($picture){
         case 'data:application/x-zip-compressed;base64':
             $type='zip';
             break;
-            case 'data:application/octet-stream;base64';
+        case 'data:application/octet-stream;base64':
             $type='txt';
             break;
         case 'data:application/vnd.openxmlformats-officedocument.presentationml.presentation;base64':

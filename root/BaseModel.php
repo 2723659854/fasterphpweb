@@ -309,5 +309,41 @@ class BaseModel
         }
 
     }
+
+
+    /**
+     * 批量写入数据库
+     * @param array $array
+     * @return bool|\mysqli_result
+     */
+    public function insertAll($array=[]){
+        if (empty($array)){
+            return false;
+        }
+        $value=[];
+        $key=array_keys($array[0]);
+        foreach ($array as $k=>$v){
+            $str='';
+            foreach ($v as $a=>$b){
+                if (!is_numeric($b)){
+                   $b='"'.$b.'"';
+                }
+                if ($str){
+                    $str=$str.','.$b;
+                }else{
+                    $str=$b;
+                }
+            }
+            $value[]='('.$str.')';
+        }
+        if (!$this->table){
+            $this->table=$this->table_name();
+        }
+        $field='('.implode(',',$key).')';
+        $values=implode(',',$value);
+        $sql='insert into '.$this->table.'  '.$field.'  values '.$values;
+        return $this->mysql->query($sql);
+    }
+
 }
 

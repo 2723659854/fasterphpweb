@@ -8,6 +8,7 @@ use Root\Request;
 use Root\Cache;
 use App\Queue\Test;
 use APP\Facade\Cache as Fcache;
+use APP\Facade\Book as Fbook;
 
 class Index
 {
@@ -129,6 +130,7 @@ class Index
         return 'push message success!';
     }
 
+    //测试原生sql操作
     public function query()
     {
         $user = new User();
@@ -138,6 +140,24 @@ class Index
         $res = $user->query('insert into user (`username`,`sex`)  values("牛魔王",2)');
         //var_dump($res);
         return 123;
+    }
+
+    //测试批量写入
+    public function buy_book(){
+        $name=[
+            '语文','数学','英语','物理','化学','政治','美术','体育','生物','历史','地理',
+        ];
+        $publisher=['人民教育出版社','青海教育出版社','新华教育出版社','重庆教育出版社','四川教育出版社','贵州教育出版社',];
+        $name_count=count($name);
+        $publisher_count=count($publisher);
+        $array=[];
+        for ($i=0;$i<=100000;$i++){
+            $subject=$name[rand(0,$name_count-1)];
+            $publish=$publisher[rand(0,$publisher_count-1)];
+            $array[]=['name'=>$subject,'publisher'=>$publish,'create_time'=>date('Y-m-d'),'update_time'=>date('Y-m-d')];
+        }
+        Fbook::insertAll($array);
+        return '执行完成';
     }
 
 }
