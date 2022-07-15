@@ -174,16 +174,19 @@ class Index
     }
 
     public function compare_php_and_go(){
-        echo "开始计时\r\n";
-        $data=Fbook::get();
+        var_dump(time());
         $time1=time();
+        echo "开始\r\n";
+        $data=Fbook::get();
+        var_dump(time());
+
         $array=[];
         foreach ($data as $k=>$v){
             $key=$v['name'].'-'.$v['publisher'].'-'.$v['content'];
             $array[$key][]=$v['id'];
         }
         $time2=time();
-        echo "及时结束\r\n";
+        echo "结束\r\n";
         $time3=$time2-$time1;
         echo $time3."\r\n";
         echo count($array);
