@@ -166,7 +166,10 @@ class Index
             $array[]=['name'=>$subject,'publisher'=>$publish,'content'=>$word,'create_time'=>date('Y-m-d'),'update_time'=>date('Y-m-d')];
         }
 
-        Fbook::insertAll($array);
+        foreach (array_chunk($array,500) as $v){
+            Fbook::insertAll($v);
+        }
+
         return 'INSERT SUCCESS!';
     }
 
