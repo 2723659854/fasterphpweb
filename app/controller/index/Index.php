@@ -31,10 +31,10 @@ class Index
     public function database(Request $request)
     {
         //print_r($request);
-        $var = $request->param('var');
-        $str = $request->param('str');
-        $user = new User();
-        $data = $user->where('username', '=', 'test')->first();
+        $var      = $request->param('var');
+        $str      = $request->param('str');
+        $user     = new User();
+        $data     = $user->where('username', '=', 'test')->first();
         $app_name = config('app')['app_name'];
         //模板渲染 参数传递
         return view('index/database', ['var' => $var, 'str' => date('Y-m-d H:i:s'), 'user' => json_encode($data), 'app_name' => $app_name]);
@@ -47,8 +47,8 @@ class Index
         //var_dump($request);
         $book = new Book();
         $book->insert([
-            'name' => '哈利波特',
-            'price' => 15.23,
+            'name'        => '哈利波特',
+            'price'       => 15.23,
             'create_time' => time(),
             'update_time' => time(),
         ]);
@@ -67,31 +67,31 @@ class Index
     {
         //var_dump($request->file());
         //普通上传文件
-        if ($request->file('one')){
-            $file=$request->file('one');
-            $name=$file['filename']?$file['filename']:'test.png';
-            $content=$file['content'];
-            $fp1=fopen(app_path().'/public/'.$name,'wb');
-            fwrite($fp1,$content);
+        if ($request->file('one')) {
+            $file    = $request->file('one');
+            $name    = $file['filename'] ? $file['filename'] : 'test.png';
+            $content = $file['content'];
+            $fp1     = fopen(app_path() . '/public/' . $name, 'wb');
+            fwrite($fp1, $content);
             fclose($fp1);
         }
-        if ($request->file('two')){
-            $file=$request->file('two');
-            $name=$file['filename']?$file['filename']:'test.png';
-            $content=$file['content'];
-            $fp1=fopen(app_path().'/public/'.$name,'wb');
-            fwrite($fp1,$content);
+        if ($request->file('two')) {
+            $file    = $request->file('two');
+            $name    = $file['filename'] ? $file['filename'] : 'test.png';
+            $content = $file['content'];
+            $fp1     = fopen(app_path() . '/public/' . $name, 'wb');
+            fwrite($fp1, $content);
             fclose($fp1);
         }
         //base64文件上传
-        $picture=$request->param('picture');
-        if ($picture&&(strlen($picture)>12)){
-            $image=base64_file_upload($picture);
-        }else{
-            $image='';
+        $picture = $request->param('picture');
+        if ($picture && (strlen($picture) > 12)) {
+            $image = base64_file_upload($picture);
+        } else {
+            $image = '';
         }
         $teacher = $request->param('teacher');
-        return view('index/say', ['picture' => $image, 'teacher' => $teacher,'file'=>json_encode($request->file('file'))]);
+        return view('index/say', ['picture' => $image, 'teacher' => $teacher, 'file' => json_encode($request->file('file'))]);
     }
 
     //测试缓存
@@ -143,54 +143,54 @@ class Index
     }
 
     //测试批量写入
-    public function buy_book(){
-        $name=[
-            '语文','数学','英语','物理','化学','政治','美术','体育','生物','历史','地理',
+    public function buy_book()
+    {
+        $name            = [
+            '语文', '数学', '英语', '物理', '化学', '政治', '美术', '体育', '生物', '历史', '地理',
         ];
-        $publisher=['人民教育出版社','青海教育出版社','新华教育出版社','重庆教育出版社','四川教育出版社','贵州教育出版社',];
-        $str='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890';
-        $str_len=strlen($str);
-
-
-        $name_count=count($name);
-        $publisher_count=count($publisher);
-        $array=[];
-        for ($i=0;$i<=100000;$i++){
-            $subject=$name[rand(0,$name_count-1)];
-            $publish=$publisher[rand(0,$publisher_count-1)];
-            $word_num=rand(0,$str_len-1);
-            $word='';
-            for ($j=0;$j<$word_num;$j++){
-                $word=$word.$str[rand(0,$str_len-1)];
+        $publisher       = ['人民教育出版社', '青海教育出版社', '新华教育出版社', '重庆教育出版社', '四川教育出版社', '贵州教育出版社',];
+        $str             = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890';
+        $str_len         = strlen($str);
+        $name_count      = count($name);
+        $publisher_count = count($publisher);
+        $array           = [];
+        for ($i = 0; $i <= 100000; $i++) {
+            $subject  = $name[rand(0, $name_count - 1)];
+            $publish  = $publisher[rand(0, $publisher_count - 1)];
+            $word_num = rand(0, $str_len - 1);
+            $word     = '';
+            for ($j = 0; $j < $word_num; $j++) {
+                $word = $word . $str[rand(0, $str_len - 1)];
             }
-            $array[]=['name'=>$subject,'publisher'=>$publish,'content'=>$word,'create_time'=>date('Y-m-d'),'update_time'=>date('Y-m-d')];
+            $array[] = ['name' => $subject, 'publisher' => $publish, 'content' => $word, 'create_time' => date('Y-m-d'), 'update_time' => date('Y-m-d')];
         }
 
-        foreach (array_chunk($array,500) as $v){
+        foreach (array_chunk($array, 500) as $v) {
             Fbook::insertAll($v);
         }
 
         return 'INSERT SUCCESS!';
     }
 
-    public function compare_php_and_go(){
-        var_dump(time());
-        $time1=time();
-        echo "开始\r\n";
-        $data=Fbook::get();
-        var_dump(time());
-
-        $array=[];
-        foreach ($data as $k=>$v){
-            $key=$v['name'].'-'.$v['publisher'].'-'.$v['content'];
-            $array[$key][]=$v['id'];
-        }
-        $time2=time();
-        echo "结束\r\n";
-        $time3=$time2-$time1;
-        echo $time3."\r\n";
-        echo count($array);
-        echo "\r\n";
+    public function compare()
+    {
+//        var_dump(time());
+//        $time1=time();
+//        echo "开始\r\n";
+//        $data=Fbook::limit(100000)->get();
+//        var_dump(time());
+//
+//        $array=[];
+//        foreach ($data as $k=>$v){
+//            $key=$v['name'].'-'.$v['publisher'].'-'.$v['content'];
+//            $array[$key][]=$v['id'];
+//        }
+//        $time2=time();
+//        echo "结束\r\n";
+//        $time3=$time2-$time1;
+//        echo $time3."\r\n";
+//        echo count($array);
+//        echo "\r\n";
         return 'compare success!';
     }
 
