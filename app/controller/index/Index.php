@@ -148,16 +148,44 @@ class Index
             '语文','数学','英语','物理','化学','政治','美术','体育','生物','历史','地理',
         ];
         $publisher=['人民教育出版社','青海教育出版社','新华教育出版社','重庆教育出版社','四川教育出版社','贵州教育出版社',];
+        $str='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890';
+        $str_len=strlen($str);
+
+
         $name_count=count($name);
         $publisher_count=count($publisher);
         $array=[];
         for ($i=0;$i<=100000;$i++){
             $subject=$name[rand(0,$name_count-1)];
             $publish=$publisher[rand(0,$publisher_count-1)];
-            $array[]=['name'=>$subject,'publisher'=>$publish,'create_time'=>date('Y-m-d'),'update_time'=>date('Y-m-d')];
+            $word_num=rand(0,$str_len-1);
+            $word='';
+            for ($j=0;$j<$word_num;$j++){
+                $word=$word.$str[rand(0,$str_len-1)];
+            }
+            $array[]=['name'=>$subject,'publisher'=>$publish,'content'=>$word,'create_time'=>date('Y-m-d'),'update_time'=>date('Y-m-d')];
         }
+
         Fbook::insertAll($array);
-        return '执行完成';
+        return 'INSERT SUCCESS!';
+    }
+
+    public function compare_php_and_go(){
+        echo "开始计时\r\n";
+        $data=Fbook::get();
+        $time1=time();
+        $array=[];
+        foreach ($data as $k=>$v){
+            $key=$v['name'].'-'.$v['publisher'].'-'.$v['content'];
+            $array[$key][]=$v['id'];
+        }
+        $time2=time();
+        echo "及时结束\r\n";
+        $time3=$time2-$time1;
+        echo $time3."\r\n";
+        echo count($array);
+        echo "\r\n";
+        return 'compare success!';
     }
 
 }

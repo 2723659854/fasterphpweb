@@ -15,7 +15,7 @@ class BaseModel
     private $type = 'mysql';
 
     private $mysql;
-    private $sql;
+    private $sql='';
     public $table = '';
     private $field='*';
     private $order='id asc';
@@ -62,7 +62,12 @@ class BaseModel
         if (!$this->table){
             $this->table=$this->table_name();
         }
-        $sql='select '.$this->field.' from '.$this->table.' where '.$this->sql.' order by '.$this->order.$limit;
+        if ($this->sql){
+            $sql='select '.$this->field.' from '.$this->table.' where '.$this->sql.' order by '.$this->order.$limit;
+        }else{
+            $sql='select '.$this->field.' from '.$this->table.' order by '.$this->order.$limit;
+        }
+
 
         try{
             return $this->mysql->query($sql)->fetch_assoc();
@@ -87,7 +92,11 @@ class BaseModel
         if (!$this->table){
             $this->table=$this->table_name();
         }
-        $sql='select '.$this->field.' from '.$this->table.' where '.$this->sql.' order by '.$this->order.$limit;
+        if ($this->sql){
+            $sql='select '.$this->field.' from '.$this->table.' where '.$this->sql.' order by '.$this->order.$limit;
+        }else{
+            $sql='select '.$this->field.' from '.$this->table.' order by '.$this->order.$limit;
+        }
         try{
             $list = $this->mysql->query($sql);
             $data = [];
