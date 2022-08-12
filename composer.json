@@ -17,8 +17,6 @@
     ],
     "minimum-stability": "dev",
     "require": {
-        "ext-pcntl": "*",
-      "ext-redis": "*",
-        "ext-posix": "*"
+        "symfony/console": "5.4.x-dev"
     }
 }

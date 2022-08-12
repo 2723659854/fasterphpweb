@@ -194,4 +194,10 @@ class Index
         return 'compare success!';
     }
 
+    public function checkBook(Request $request){
+        $book=Fbook::where('id','>',0)->limit(10)->get();
+        var_dump($book);
+        return json_encode($book);
+    }
+
 }
