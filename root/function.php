@@ -126,6 +126,7 @@ function start_server($param)
         exit(0);
     }
 
+    /** 此处需要判断是否是是Linux系统，如果是则检查是否有epoll 有则调用epoll，否则调用select */
 
     if ($daemonize) {
         daemon();
@@ -133,7 +134,8 @@ function start_server($param)
         echo $_listen . "\r\n";
         echo "进程启动完成,你可以按ctrl+c停止运行\r\n";
 
-        epoll();
+        //epoll();
+        //select();
     }
 
 }
