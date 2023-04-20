@@ -37,7 +37,7 @@ function start_server($param)
     check_env();
     $daemonize = false;
     $flag      = true;
-    global $pid_file, $_port, $_listen, $_server_num, $_system, $lock_file;
+    global $pid_file, $_port, $_listen, $_server_num, $_system, $lock_file,$events;
     $pid_file  = __DIR__ . '/my_pid.txt';
     $lock_file = __DIR__ . '/lock.txt';
     require_once __DIR__ . '/Timer.php';
@@ -184,7 +184,7 @@ function deal_job($job = [])
         }
     }
 }
-
+/** 执行定时器 */
 function xiaosongshu_timer()
 {
     require_once __DIR__ . '/Timer.php';
@@ -209,12 +209,14 @@ function xiaosongshu_timer()
 
 }
 
+/** 执行队列 */
 function xiaosongshu_queue()
 {
 
     _queue_xiaosongshu();
 }
 
+/** 关闭进程 */
 function close()
 {
     echo "关闭进程中...\r\n";
@@ -232,6 +234,7 @@ function close()
     }
 }
 
+/** 环境监测 */
 function check_env()
 {
     if (!extension_loaded('sockets')) {
@@ -250,9 +253,9 @@ function nginx()
 /** 异步IO之select轮询模式 */
 function select()
 {
-    //echo "启动select轮询模式\r\n";
+    echo "启动select轮询模式\r\n";
     require_once __DIR__ . '/Worker.php';
-    $httpServer = new \Root\Worker('tcp://0.0.0.0:8080');
+    $httpServer = new \Root\Worker('tcp://0.0.0.0:8000');
     /** 消息接收  */
     $httpServer->onMessage = function ($socketAccept, $message) use ($httpServer) {
         if (strpos($message, 'HTTP/1.1')) {
@@ -280,6 +283,9 @@ function select()
                     }
                     fwrite($socketAccept, "Content-Length: " . strlen($fileContent) . "\r\n\r\n");
                     fwrite($socketAccept, $fileContent, strlen($fileContent));
+                    fclose($socketAccept);
+                    unset($httpServer->allSocket[(int)$socketAccept]);
+                    unset($socketAccept);
                     break;
                 case "ico":
                 case "jpg":
@@ -301,6 +307,9 @@ function select()
                     }
                     fwrite($socketAccept, "Content-Length: " . strlen($fileContent) . "\r\n\r\n");
                     fwrite($socketAccept, $fileContent, strlen($fileContent));
+                fclose($socketAccept);
+                unset($httpServer->allSocket[(int)$socketAccept]);
+                unset($socketAccept);
                     break;
                 case "doc":
                 case "docx":
@@ -323,6 +332,9 @@ function select()
                     }
 
                     fwrite($socketAccept, $fileContent, strlen($fileContent));
+                fclose($socketAccept);
+                unset($httpServer->allSocket[(int)$socketAccept]);
+                unset($socketAccept);
                     break;
                 default:
 
@@ -353,6 +365,7 @@ function select()
                     /** 这里必须关闭才能够给cli模式正常的返回数据，但是这个会影响需要长连接的浏览器或者其他服务，还不知道怎么处理 */
                     fclose($socketAccept);
                     unset($httpServer->allSocket[(int)$socketAccept]);
+                    unset($socketAccept);
             }
         } else {
             //事件回调当中写业务逻辑
@@ -370,13 +383,13 @@ function select()
     $httpServer->start();
 }
 
-/** 使用epoll模型  */
+
+/** 使用epoll异步io模型 */
 function epoll(){
-    //echo "启动select轮询模式\r\n";
+    echo "走的这个epoll\r\n";
     require_once __DIR__ . '/Fucker.php';
-    $httpServer = new \Root\Fucker('tcp://0.0.0.0:8000');
-    /** 消息接收  */
-    $httpServer->onMessage = function ($socketAccept, $message) use ($httpServer) {
+    $httpServer = new Fucker('tcp://0.0.0.0:8000');
+    $httpServer->onMessage=function ($socketAccept, $message) use ($httpServer) {
         if (strpos($message, 'HTTP/1.1')) {
             $_param   = [];
             $_mark    = getUri($message);
@@ -402,6 +415,9 @@ function epoll(){
                     }
                     fwrite($socketAccept, "Content-Length: " . strlen($fileContent) . "\r\n\r\n");
                     fwrite($socketAccept, $fileContent, strlen($fileContent));
+                    fclose($socketAccept);
+                    unset($httpServer->events[(int)$socketAccept]);
+                    unset($socketAccept);
                     break;
                 case "ico":
                 case "jpg":
@@ -423,6 +439,9 @@ function epoll(){
                     }
                     fwrite($socketAccept, "Content-Length: " . strlen($fileContent) . "\r\n\r\n");
                     fwrite($socketAccept, $fileContent, strlen($fileContent));
+                fclose($socketAccept);
+                unset($httpServer->events[(int)$socketAccept]);
+                unset($socketAccept);
                     break;
                 case "doc":
                 case "docx":
@@ -445,6 +464,9 @@ function epoll(){
                     }
 
                     fwrite($socketAccept, $fileContent, strlen($fileContent));
+                fclose($socketAccept);
+                unset($httpServer->events[(int)$socketAccept]);
+                unset($socketAccept);
                     break;
                 default:
 
@@ -470,9 +492,11 @@ function epoll(){
                     fwrite($socketAccept, 'Content-Type: text/html' . PHP_EOL);
                     fwrite($socketAccept, "Content-Length: " . strlen($content) . "\r\n\r\n");
                     fwrite($socketAccept, $content, strlen($content));
+
+
                     /** 这里必须关闭才能够给cli模式正常的返回数据，但是这个会影响需要长连接的浏览器或者其他服务，还不知道怎么处理 */
                     fclose($socketAccept);
-                    unset($httpServer->events[(int)$socketAccept]);//
+                    unset($httpServer->events[(int)$socketAccept]);
                     unset($socketAccept);
             }
         } else {
@@ -488,10 +512,10 @@ function epoll(){
         }
 
     };
-    $httpServer->start();
+    $httpServer->run();
 }
 
-
+/** 守护进程模式 */
 function daemon()
 {
     ini_set('display_errors', 'off');
@@ -551,7 +575,7 @@ function daemon()
         }
     } else {
         cli_set_process_title("xiaosongshu_http");
-        nginx2();
+        select();
     }
     $pid = \pcntl_fork();
     if (-1 === $pid) {

@@ -1,5 +1,5 @@
 <?php
-namespace Root;
+
 
 set_time_limit(0);
 require_once __DIR__ . '/function.php';
@@ -11,6 +11,7 @@ require_once __DIR__ . '/app.php';
 if (file_exists(dirname(__DIR__) . '/vendor/autoload.php')) {
     require_once dirname(__DIR__) . '/vendor/autoload.php';
 }
+
 
 class Fucker
 {
@@ -51,8 +52,8 @@ class Fucker
         $this->event_base = new EventBase();
 
         /** 打印是否是使用epoll模型 */
-        //echo $this->event_base->getMethod();//epoll
-        //echo "\r\n";
+        echo $this->event_base->getMethod();//epoll
+        echo "\r\n";
         /** 建立事件监听服务器socket可读事件， 获取event实例，这个是获取php的event扩展的基类 */
         /** 在react中，SyntheticEvent在调用事件回调之后该对象将被重用，并且其所有属性都将无效。如果要以异步方 式访问事件属性，则应调用event.persist()事件，这将从池中删除事件，并允许用户代码保留对该事件的引用。 */
         $event = new Event($this->event_base, $this->serv, Event::READ | Event::PERSIST, function ($serv) {
@@ -74,7 +75,6 @@ class Fucker
                         }
                         $buffer = $buffer. $_content;
                     }
-
                     /** 如果用户输入为空或者输入不是资源 */
                     if ($buffer == false || !is_resource($cli)) {
                         /** 释放事件 */
@@ -87,23 +87,6 @@ class Fucker
                         /** 传入连接，接收的值到回调函数 */
                         call_user_func($this->onMessage, $cli, $buffer);
                     }
-                    /** 构建需要回复的内容，使用http协议 */
-//                    $time    = date('Y-m-d H:i:s');
-//                    $content = "<html><title>epoll模型</title><body>这里是epoll模型，当前时间:$time</body></html>";
-//
-//                    /** 拼装头信息 */
-//                    $header = '';
-//                    $header .= "HTTP/1.1 200 OK\r\n";
-//                    $header .= "Date: " . gmdate('D, d M Y H:i:s T') . "\r\n";
-//                    $header .= "Content-Type: text/html;charset=utf-8\r\n";
-//                    $header .= "Content-Length: " . strlen($content) . "\r\n\r\n";//必须2个\r\n表示头部信息结束
-//                    $header .= $content;
-//                    /** 向客户端发送数据 */
-//                    fwrite($cli, $header);//回写数据
-//                    fclose($cli);
-//                    unset($this->events[(int)$cli]);//
-//                    unset($cli);
-
                 }, $cli);
                 /** 将构建的客户端事件添加到epoll当中 */
                 $client_event->add();
@@ -117,7 +100,6 @@ class Fucker
 
     public function run()
     {
-
         /** 添加事件 */
         $this->event->add();//
         /** 执行事件循环 */
