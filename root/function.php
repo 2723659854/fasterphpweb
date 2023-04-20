@@ -326,10 +326,12 @@ function nginx()
                     } else {
                         $content = handle(route($url), $_param, $_request);
                     }
-                    fwrite($socketAccept, 'Content-Type: text/html' . PHP_EOL);
-                    fwrite($socketAccept, "Content-Type: text/html;charset=utf-8\r\n");
+                    if (!is_string($content)){
+                        $content = json_encode($content);
+                    }
                     fwrite($socketAccept, "Content-Length: ".strlen($content)."\r\n\r\n");
-                    fwrite($socketAccept, $content,strlen($content));
+                    fwrite($socketAccept,$content,strlen($content));
+                    /** 关闭连接 */
 //                    fclose($socketAccept);
 //                    unset($httpServer->allSocket[(int)$socketAccept]);
             }
