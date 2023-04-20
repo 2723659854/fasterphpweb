@@ -133,7 +133,7 @@ function start_server($param)
         echo $_listen . "\r\n";
         echo "进程启动完成,你可以按ctrl+c停止运行\r\n";
 
-        nginx2();
+        epoll();
     }
 
 }
@@ -248,7 +248,7 @@ function nginx()
 }
 
 /** 异步IO之select轮询模式 */
-function nginx2()
+function select()
 {
     //echo "启动select轮询模式\r\n";
     require_once __DIR__ . '/Worker.php';
@@ -353,6 +353,127 @@ function nginx2()
                     /** 这里必须关闭才能够给cli模式正常的返回数据，但是这个会影响需要长连接的浏览器或者其他服务，还不知道怎么处理 */
                     fclose($socketAccept);
                     unset($httpServer->allSocket[(int)$socketAccept]);
+            }
+        } else {
+            //事件回调当中写业务逻辑
+            $content      = $message;
+            $http_resonse = "HTTP/1.1 200 OK\r\n";
+            $http_resonse .= "Content-Type: application/json;charset=UTF-8\r\n";
+            $http_resonse .= "Connection: keep-alive\r\n"; //连接保持
+            $http_resonse .= "Server: php socket server\r\n";
+            $http_resonse .= "Content-length: " . strlen($content) . "\r\n\r\n";
+            $http_resonse .= $content;
+            fwrite($socketAccept, $http_resonse);
+        }
+
+    };
+    $httpServer->start();
+}
+
+/** 使用epoll模型  */
+function epoll(){
+    //echo "启动select轮询模式\r\n";
+    require_once __DIR__ . '/Fucker.php';
+    $httpServer = new \Root\Fucker('tcp://0.0.0.0:8000');
+    /** 消息接收  */
+    $httpServer->onMessage = function ($socketAccept, $message) use ($httpServer) {
+        if (strpos($message, 'HTTP/1.1')) {
+            $_param   = [];
+            $_mark    = getUri($message);
+
+            $fileName = $_mark['file'];
+            $_request = $_mark['request'];
+            foreach ($_mark['post_param'] as $k => $v) {
+                $_param[$k] = $v;
+            }
+            $url     = $fileName;
+            $fileExt = preg_replace('/^.*\.(\w+)$/', '$1', $fileName);
+            switch ($fileExt) {
+                case "html":
+                    fwrite($socketAccept, 'HTTP/1.1 200 OK' . PHP_EOL);
+                    fwrite($socketAccept, 'Date:' . date('Y-m-d H:i:s') . PHP_EOL);
+                    fwrite($socketAccept, 'Content-Type: text/html' . PHP_EOL);
+                    fwrite($socketAccept, '' . PHP_EOL);
+                    $fileName = dirname(__DIR__) . '/view/' . $fileName;
+                    if (file_exists($fileName)) {
+                        $fileContent = file_get_contents($fileName);
+                    } else {
+                        $fileContent = 'sorry,the file is missing!';
+                    }
+                    fwrite($socketAccept, "Content-Length: " . strlen($fileContent) . "\r\n\r\n");
+                    fwrite($socketAccept, $fileContent, strlen($fileContent));
+                    break;
+                case "ico":
+                case "jpg":
+                case "js":
+                case "css":
+                case "gif":
+                case "png":
+                case "icon":
+                case "jpeg":
+
+                    fwrite($socketAccept, 'HTTP/1.1 200 OK' . PHP_EOL);
+                    fwrite($socketAccept, 'Date:' . date('Y-m-d H:i:s') . PHP_EOL);
+                    fwrite($socketAccept, 'Content-Type: image/jpeg' . PHP_EOL);
+                    $fileName = dirname(__DIR__) . '/public/' . $fileName;
+                    if (file_exists($fileName)) {
+                        $fileContent = file_get_contents($fileName);
+                    } else {
+                        $fileContent = 'sorry,the file is missing!';
+                    }
+                    fwrite($socketAccept, "Content-Length: " . strlen($fileContent) . "\r\n\r\n");
+                    fwrite($socketAccept, $fileContent, strlen($fileContent));
+                    break;
+                case "doc":
+                case "docx":
+                case "ppt":
+                case "pptx":
+                case "xls":
+                case "xlsx":
+                case "zip":
+                case "rar":
+                case "txt":
+                    fwrite($socketAccept, 'HTTP/1.1 200 OK' . PHP_EOL);
+                    fwrite($socketAccept, 'Date:' . date('Y-m-d H:i:s') . PHP_EOL);
+                    fwrite($socketAccept, 'Content-Type: application/octet-stream' . PHP_EOL);
+                    fwrite($socketAccept, '' . PHP_EOL);
+                    $fileName = dirname(__DIR__) . '/public/' . $fileName;
+                    if (file_exists($fileName)) {
+                        $fileContent = file_get_contents($fileName);
+                    } else {
+                        $fileContent = 'sorry,the file is missing!';
+                    }
+
+                    fwrite($socketAccept, $fileContent, strlen($fileContent));
+                    break;
+                default:
+
+                    fwrite($socketAccept, 'HTTP/1.1 200 OK' . PHP_EOL);
+                    fwrite($socketAccept, 'Date:' . date('Y-m-d H:i:s') . PHP_EOL);
+                    if (($url) && strpos($url, '?')) {
+                        $request_url = explode('?', $url);
+                        $route       = $request_url[0];
+                        $params      = explode('&', $request_url[1]);
+                        foreach ($params as $k => $v) {
+                            $_v             = explode('=', $v);
+                            $_param[$_v[0]] = $_v['1'];
+                        }
+                        $content = handle(route($route), $_param, $_request);
+                    } else {
+                        $content = handle(route($url), $_param, $_request);
+                    }
+
+                    if (!is_string($content)) {
+                        $content = json_encode($content);
+                    }
+
+                    fwrite($socketAccept, 'Content-Type: text/html' . PHP_EOL);
+                    fwrite($socketAccept, "Content-Length: " . strlen($content) . "\r\n\r\n");
+                    fwrite($socketAccept, $content, strlen($content));
+                    /** 这里必须关闭才能够给cli模式正常的返回数据，但是这个会影响需要长连接的浏览器或者其他服务，还不知道怎么处理 */
+                    fclose($socketAccept);
+                    unset($httpServer->events[(int)$socketAccept]);//
+                    unset($socketAccept);
             }
         } else {
             //事件回调当中写业务逻辑
