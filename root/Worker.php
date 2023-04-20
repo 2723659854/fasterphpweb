@@ -21,12 +21,10 @@ class Worker
     public $onConnect = NULL;
     /** 设置接收消息回调 */
     public $onMessage = NULL;
-    /** 设置子进程个数 */
-    public $workerNum = 4;
     /** 存放所有socket */
     public $allSocket;
 
-    /**  */
+    /** 初始化 */
     public function __construct($socket_address)
     {
         /** 设置服务端：监听地址+端口 */

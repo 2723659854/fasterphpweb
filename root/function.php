@@ -133,7 +133,7 @@ function start_server($param)
         echo $_listen . "\r\n";
         echo "进程启动完成,你可以按ctrl+c停止运行\r\n";
 
-        nginx();
+        nginx2();
     }
 
 }
@@ -239,15 +239,26 @@ function check_env()
     }
 }
 
+/** 普通的阻塞模式 */
 function nginx()
 {
+    require_once __DIR__ . '/explain.php';
+    $worker = new root\HttpServer();
+    $worker->run();
+}
+
+/** 异步IO之select轮询模式 */
+function nginx2()
+{
+    //echo "启动select轮询模式\r\n";
     require_once __DIR__ . '/Worker.php';
     $httpServer = new \Root\Worker('tcp://0.0.0.0:8080');
     /** 消息接收  */
-    $httpServer->onMessage = function ($socketAccept, $message)use($httpServer) {
+    $httpServer->onMessage = function ($socketAccept, $message) use ($httpServer) {
         if (strpos($message, 'HTTP/1.1')) {
-            $_param = [];
+            $_param   = [];
             $_mark    = getUri($message);
+
             $fileName = $_mark['file'];
             $_request = $_mark['request'];
             foreach ($_mark['post_param'] as $k => $v) {
@@ -267,8 +278,10 @@ function nginx()
                     } else {
                         $fileContent = 'sorry,the file is missing!';
                     }
+                    fwrite($socketAccept, "Content-Length: " . strlen($fileContent) . "\r\n\r\n");
                     fwrite($socketAccept, $fileContent, strlen($fileContent));
                     break;
+                case "ico":
                 case "jpg":
                 case "js":
                 case "css":
@@ -276,17 +289,17 @@ function nginx()
                 case "png":
                 case "icon":
                 case "jpeg":
-                case "ico":
-                fwrite($socketAccept, 'HTTP/1.1 200 OK' . PHP_EOL);
-                fwrite($socketAccept, 'Date:' . date('Y-m-d H:i:s') . PHP_EOL);
+
+                    fwrite($socketAccept, 'HTTP/1.1 200 OK' . PHP_EOL);
+                    fwrite($socketAccept, 'Date:' . date('Y-m-d H:i:s') . PHP_EOL);
                     fwrite($socketAccept, 'Content-Type: image/jpeg' . PHP_EOL);
-                    fwrite($socketAccept, '' . PHP_EOL);
                     $fileName = dirname(__DIR__) . '/public/' . $fileName;
                     if (file_exists($fileName)) {
                         $fileContent = file_get_contents($fileName);
                     } else {
                         $fileContent = 'sorry,the file is missing!';
                     }
+                    fwrite($socketAccept, "Content-Length: " . strlen($fileContent) . "\r\n\r\n");
                     fwrite($socketAccept, $fileContent, strlen($fileContent));
                     break;
                 case "doc":
@@ -298,8 +311,8 @@ function nginx()
                 case "zip":
                 case "rar":
                 case "txt":
-                fwrite($socketAccept, 'HTTP/1.1 200 OK' . PHP_EOL);
-                fwrite($socketAccept, 'Date:' . date('Y-m-d H:i:s') . PHP_EOL);
+                    fwrite($socketAccept, 'HTTP/1.1 200 OK' . PHP_EOL);
+                    fwrite($socketAccept, 'Date:' . date('Y-m-d H:i:s') . PHP_EOL);
                     fwrite($socketAccept, 'Content-Type: application/octet-stream' . PHP_EOL);
                     fwrite($socketAccept, '' . PHP_EOL);
                     $fileName = dirname(__DIR__) . '/public/' . $fileName;
@@ -312,6 +325,7 @@ function nginx()
                     fwrite($socketAccept, $fileContent, strlen($fileContent));
                     break;
                 default:
+
                     fwrite($socketAccept, 'HTTP/1.1 200 OK' . PHP_EOL);
                     fwrite($socketAccept, 'Date:' . date('Y-m-d H:i:s') . PHP_EOL);
                     if (($url) && strpos($url, '?')) {
@@ -326,16 +340,20 @@ function nginx()
                     } else {
                         $content = handle(route($url), $_param, $_request);
                     }
-                    if (!is_string($content)){
+
+                    if (!is_string($content)) {
                         $content = json_encode($content);
                     }
-                    fwrite($socketAccept, "Content-Length: ".strlen($content)."\r\n\r\n");
-                    fwrite($socketAccept,$content,strlen($content));
-                    /** 关闭连接 */
-//                    fclose($socketAccept);
-//                    unset($httpServer->allSocket[(int)$socketAccept]);
-            }
 
+                    fwrite($socketAccept, 'Content-Type: text/html' . PHP_EOL);
+                    fwrite($socketAccept, "Content-Length: " . strlen($content) . "\r\n\r\n");
+                    fwrite($socketAccept, $content, strlen($content));
+
+
+                    /** 这里必须关闭才能够给cli模式正常的返回数据，但是这个会影响需要长连接的浏览器或者其他服务，还不知道怎么处理 */
+                    fclose($socketAccept);
+                    unset($httpServer->allSocket[(int)$socketAccept]);
+            }
         } else {
             //事件回调当中写业务逻辑
             $content      = $message;
@@ -347,7 +365,7 @@ function nginx()
             $http_resonse .= $content;
             fwrite($socketAccept, $http_resonse);
         }
-        //fclose($socketAccept);
+
     };
     $httpServer->start();
 }
@@ -412,7 +430,7 @@ function daemon()
         }
     } else {
         cli_set_process_title("xiaosongshu_http");
-        nginx();
+        nginx2();
     }
     $pid = \pcntl_fork();
     if (-1 === $pid) {
@@ -582,6 +600,19 @@ function getUri($request = '')
 
     $arrayRequest[] = "method: " . $method;
     $arrayRequest[] = "path: /" . $url;
-    return ['file' => $url, 'request' => $arrayRequest, 'post_param' => $post_param];
+    $header = [];
+    foreach ($arrayRequest as $k=>$v){
+        $v = trim($v);
+        if ($v) {
+            $_pos = strripos($v, ": ");
+            $key = trim(substr($v, 0, $_pos));
+            $value = trim(substr($v, $_pos + 1, strlen($v)));
+            if ($key){
+                $header[$key]=$value;
+            }
+        }
+    }
+
+    return ['file' => $url, 'request' => $arrayRequest, 'post_param' => $post_param,'header'=>$header];
 }
 
