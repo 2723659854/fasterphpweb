@@ -63,7 +63,6 @@ class Fucker
         stream_set_blocking($this->serv, 0);
         /** 获取eventBase实例 */
         $this->event_base = new EventBase();
-
         /** 建立事件监听服务器socket可读事件， 获取event实例，这个是获取php的event扩展的基类 */
         /** 在react中，SyntheticEvent在调用事件回调之后该对象将被重用，并且其所有属性都将无效。如果要以异步方 式访问事件属性，则应调用event.persist()事件，这将从池中删除事件，并允许用户代码保留对该事件的引用。 */
         $event = new Event($this->event_base, $this->serv, Event::READ | Event::PERSIST, function ($serv) {
@@ -104,15 +103,34 @@ class Fucker
                 $this->events[(int)$cli] = $client_event;
             }
         }, $this->serv);
-
         $this->event=$event;
     }
 
+    /** 启动http服务 */
     public function run()
     {
-        /** 添加事件 */
-        $this->event->add();//
-        /** 执行事件循环 */
-        $this->event_base->loop();//
+        global $_server_num,$_pid_file;
+        if ($_server_num < 2) {
+            $_server_num = 2;
+        }
+        for ($i=1;$i<=$_server_num;$i++){
+            /** @var int $pid 创建子进程 ,必须在loop之前创建子进程，否则loop会阻塞其他子进程 */
+            $pid = \pcntl_fork();
+            if (-1 === $pid) {
+                /** 创建子进程失败 */
+                throw new Exception('Fork fail');
+            } elseif ($pid > 0) {
+                cli_set_process_title("xiaosongshu_http".$pid);
+
+                $fp = fopen($_pid_file, 'a+');
+                fwrite($fp, getmypid() . '-');
+                fclose($fp);
+                /** 添加事件 */
+                $this->event->add();//
+                /** 执行事件循环 */
+                $this->event_base->loop();//
+            }
+        }
+
     }
 }

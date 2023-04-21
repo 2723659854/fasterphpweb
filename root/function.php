@@ -275,6 +275,8 @@ function select()
     $httpServer->onMessage = function ($socketAccept, $message) use ($httpServer) {
         onMessage($socketAccept, $message, $httpServer);
     };
+
+
     $httpServer->start();
 }
 
@@ -425,8 +427,57 @@ function daemon()
     if (-1 === \posix_setsid()) {
         throw new Exception("Setsid fail");
     }
+
+    create_process();
+    /** @var int $_this_pid  获取当前进程id */
+    $_this_pid = getmypid();
+    /** 如果是主进程 */
+    if ($_this_pid == $master_pid) {
+        /** 在主进程里再创建一个子进程 */
+        \pcntl_fork();
+        if (getmypid() == $master_pid) {
+            /** 如果是主进程，则设置进程名称为master */
+            cli_set_process_title("xiaosongshu_master");
+            /** 在主进程里启动定时器 */
+            xiaosongshu_timer();
+        } else {
+            /** 在子进程里启动队列，并设置进程名称 */
+            cli_set_process_title("xiaosongshu_queue");
+            $fp = fopen($_pid_file, 'a+');
+            fwrite($fp, getmypid() . '-');
+            fclose($fp);
+            xiaosongshu_queue();
+        }
+    } else {
+        file_put_contents(__DIR__.'/note.txt',"我来过".date('Y-m-d H:i:s'));
+        /** 如果不是主进程，则开启http服务，并设置进程名称 */
+        cli_set_process_title("xiaosongshu_http");
+        global $_has_epoll;
+        /** 如果linux支持epoll模型则使用epoll */
+        if ($_has_epoll) {
+            /** 使用epoll ，只有一个，其他进程被阻塞了*/
+            //epoll();
+            /** 普通的阻塞的，可以开启多个http服务 */
+            //nginx();
+            select();
+        } else {
+            /** 否则使用select，只有一个，其他进程被阻塞了 */
+            select();
+        }
+    }
+    /** @var int $pid 再创建一个子进程，脱离主进程会话 */
+    $pid = \pcntl_fork();
+    if (-1 === $pid) {
+        throw new Exception("Fork fail");
+    } elseif (0 !== $pid) {
+        /** 脱离会话控制 */
+        exit(0);
+    }
+}
+
+function create_process(){
     /** 初始化工作进程数 */
-    global $_server_num;
+    global $_server_num,$_pid_file;
     if ($_server_num < 2) {
         $_server_num = 2;
     }
@@ -452,51 +503,12 @@ function daemon()
             break;
         } else {
             /** 否则创建子进程 */
-            pcntl_fork();
+            \pcntl_fork();
             /** 将创建好的进程id存入文件 */
             $fp = fopen($_pid_file, 'a+');
             fwrite($fp, getmypid() . '-');
             fclose($fp);
         }
-    }
-    /** @var int $_this_pid  获取当前进程id */
-    $_this_pid = getmypid();
-    /** 如果是主进程 */
-    if ($_this_pid == $master_pid) {
-        /** 在主进程里再创建一个子进程 */
-        pcntl_fork();
-        if (getmypid() == $master_pid) {
-            /** 如果是主进程，则设置进程名称为master */
-            cli_set_process_title("xiaosongshu_master");
-            /** 在主进程里启动定时器 */
-            xiaosongshu_timer();
-        } else {
-            /** 在子进程里启动队列，并设置进程名称 */
-            cli_set_process_title("xiaosongshu_queue");
-            $fp = fopen($_pid_file, 'a+');
-            fwrite($fp, getmypid() . '-');
-            fclose($fp);
-            xiaosongshu_queue();
-        }
-    } else {
-        /** 如果不是主进程，则开启http服务，并设置进程名称 */
-        cli_set_process_title("xiaosongshu_http");
-        global $_has_epoll;
-        /** 如果linux支持epoll模型则使用epoll */
-        if ($_has_epoll) {
-            epoll();
-        } else {
-            /** 否则使用select */
-            select();
-        }
-    }
-    /** @var int $pid 再创建一个子进程，脱离主进程会话 */
-    $pid = \pcntl_fork();
-    if (-1 === $pid) {
-        throw new Exception("Fork fail");
-    } elseif (0 !== $pid) {
-        /** 脱离会话控制 */
-        exit(0);
     }
 }
 
@@ -575,7 +587,7 @@ function getUri($request = '')
     if (isset($array[1])) {
         $url = $array[1];
     } else {
-        $url = '/';
+        $url = '/index/query';
     }
     if (isset($array[0])) {
         $method = $array[0];

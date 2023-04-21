@@ -63,13 +63,10 @@ class HttpServer
                     } else {
                         $fileContent = 'sorry,the file is missing!';
                     }
+                    socket_write($socketAccept, "Content-Length: " . strlen($fileContent) . "\r\n\r\n");
                     socket_write($socketAccept, $fileContent, strlen($fileContent));
                     break;
-                case "jpg":
-                case "js":
-                case "css":
-                case "gif":
-                case "png":
+                case "jpg": case "js": case "css": case "gif": case "png":
                 case "icon":
                 case "jpeg":
                 case "ico":
@@ -81,11 +78,10 @@ class HttpServer
                     } else {
                         $fileContent = 'sorry,the file is missing!';
                     }
-
+                socket_write($socketAccept, "Content-Length: " . strlen($fileContent) . "\r\n\r\n");
                     socket_write($socketAccept, $fileContent, strlen($fileContent));
                     break;
-                case "doc":
-                case "docx":
+                case "doc": case "docx":
                 case "ppt":
                 case "pptx":
                 case "xls":
@@ -101,7 +97,7 @@ class HttpServer
                     } else {
                         $fileContent = 'sorry,the file is missing!';
                     }
-
+                socket_write($socketAccept, "Content-Length: " . strlen($fileContent) . "\r\n\r\n");
                     socket_write($socketAccept, $fileContent, strlen($fileContent));
                     break;
                 default:
@@ -129,7 +125,8 @@ class HttpServer
                         $write_length = 1024;
                         $content      = '';
                     }
-                    socket_write($socketAccept, $content, $write_length);
+                    socket_write($socketAccept, "Content-Length: " . strlen($content) . "\r\n\r\n");
+                    socket_write($socketAccept, $content, strlen($content));
             }
             socket_close($socketAccept);
 

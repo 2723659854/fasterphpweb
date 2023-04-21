@@ -1,6 +1,6 @@
 <?php
 
-use mysqli;
+
 use mysqli_sql_exception as MysqlException;
 
 class BaseModel

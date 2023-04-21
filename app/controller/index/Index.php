@@ -22,6 +22,8 @@ class Index
     //默认首页
     public function index()
     {
+
+        echo "我的pid".getmypid()."\r\n";
         //return "hello world!";
         //模板在根目录下的view目录里面
         return view('/index/index', ['time' => date('Y-m-d H:i:s')]);
