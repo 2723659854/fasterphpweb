@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'host'     => '127.0.0.1',
+    'host'     => '192.168.4.105',
     'password' => '',
     'port'     => '6379',
     'database' => 0,

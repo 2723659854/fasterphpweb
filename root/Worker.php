@@ -2,7 +2,7 @@
 
 namespace Root;
 
-set_time_limit(0);
+//set_time_limit(0);
 require_once __DIR__ . '/function.php';
 require_once __DIR__ . '/view.php';
 require_once __DIR__ . '/Request.php';
@@ -17,18 +17,34 @@ class Worker
 {
     /** 服务端 */
     protected $socket = NULL;
+
     /** 设置连接回调事件 */
     public $onConnect = NULL;
+
     /** 设置接收消息回调 */
     public $onMessage = NULL;
+
     /** 存放所有socket */
     public $allSocket;
 
+    /** @var string $host 监听的ip和协议 */
+    public $host='0.0.0.0';
+
+    /** @var string $port 监听的端口 */
+    public $port='8000';
+
+    /** @var string $protocol 通信协议 */
+    public $protocol='tcp';
+
     /** 初始化 */
-    public function __construct($socket_address)
+    public function __construct()
     {
+        global $_port;
+        $this->port=$_port?:'8000';
+        /** @var string $listeningAddress 拼接监听地址 */
+        $listeningAddress=$this->protocol.'://'.$this->host.':'.$this->port;
         /** 设置服务端：监听地址+端口 */
-        $this->socket = stream_socket_server($socket_address);
+        $this->socket = stream_socket_server($listeningAddress);
         /** 设置非阻塞，语法是关闭阻塞 */
         stream_set_blocking($this->socket, 0);
         /** 将服务端保存 */

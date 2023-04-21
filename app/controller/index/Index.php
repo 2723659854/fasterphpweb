@@ -134,12 +134,8 @@ class Index
     public function query()
     {
         $user = new User();
-        //$res=$user->query('select * from user  ');
-        //$res=$user->query('update user set age =55 where username ="test"');
-        //$res=$user->query('delete from user where username ="test123"');
-        $res = $user->query('insert into user (`username`,`sex`)  values("牛魔王",2)');
-        //var_dump($res);
-        return 123;
+        $res = $user->where('username','=',"牛魔王")->first();
+        return $res;
     }
 
     //测试批量写入

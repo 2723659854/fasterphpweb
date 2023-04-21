@@ -1,7 +1,7 @@
 <?php
 
 
-set_time_limit(0);
+//set_time_limit(0);
 require_once __DIR__ . '/function.php';
 require_once __DIR__ . '/view.php';
 require_once __DIR__ . '/Request.php';
@@ -27,8 +27,17 @@ class Fucker
     /** @var false|resource tcp 服务 */
     public $serv;
 
+    /** @var callable $onMessage 消息处理事件 */
     public $onMessage;
 
+    /** @var string $host 监听的ip和协议 */
+    public $host='0.0.0.0';
+
+    /** @var string $port 监听的端口 */
+    public $port='8000';
+
+    /** @var string $protocol 通信协议 */
+    public $protocol='tcp';
     /**
      * 定义消息处理方法
      * @param $str
@@ -40,10 +49,14 @@ class Fucker
         echo $str . "\r\n";
     }
 
-    public function __construct($host)
+    public function __construct()
     {
+        global $_port;
+        $this->port=$_port?:'8000';
+        /** @var string $listeningAddress 拼接监听地址 */
+        $listeningAddress=$this->protocol.'://'.$this->host.':'.$this->port;
         /** 创建tcp服务器套接字 */
-        $this->serv = stream_socket_server($host, $errno, $error); //
+        $this->serv = stream_socket_server($listeningAddress, $errno, $error); //
         /** 如果有错误则直接退出 */
         $errno && exit($error);
         /** 设置为异步，不然fread,stream_socket_acceptd等会堵塞 */
@@ -51,9 +64,6 @@ class Fucker
         /** 获取eventBase实例 */
         $this->event_base = new EventBase();
 
-        /** 打印是否是使用epoll模型 */
-        echo $this->event_base->getMethod();//epoll
-        echo "\r\n";
         /** 建立事件监听服务器socket可读事件， 获取event实例，这个是获取php的event扩展的基类 */
         /** 在react中，SyntheticEvent在调用事件回调之后该对象将被重用，并且其所有属性都将无效。如果要以异步方 式访问事件属性，则应调用event.persist()事件，这将从池中删除事件，并允许用户代码保留对该事件的引用。 */
         $event = new Event($this->event_base, $this->serv, Event::READ | Event::PERSIST, function ($serv) {
