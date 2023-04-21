@@ -1,5 +1,4 @@
 <?php
-namespace Root;
 
 use mysqli;
 use mysqli_sql_exception as MysqlException;
@@ -42,6 +41,7 @@ class BaseModel
         $mysqli->set_charset('utf8');
         $this->mysql = $mysqli;
         $this->sql = '';
+        var_dump("初始化数据库完成");
     }
 
     private static function table_name(){
@@ -69,7 +69,7 @@ class BaseModel
         }
 
 
-        //var_dump($sql);
+        var_dump($sql);
         //todo 某一个中文搜索不出来 username = 牛魔王 ，linux 没有mysql 原生的函数
         try{
             return $this->mysql->query($sql)->fetch_assoc();
@@ -357,4 +357,3 @@ class BaseModel
     }
 
 }
-

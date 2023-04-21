@@ -101,7 +101,7 @@ class Index
         Cache::getInstance()->set('fuck', 'fuck you');
         //获取缓存
         Cache::getInstance()->get('fuck');
-        return ['code' => 200, 'msg' => 'ok'];
+        return ['code' => 200, 'msg' => 'ok','cache'=>Cache::getInstance()->get('fuck')];
     }
 
     //测试接收数据并直接返回数据
@@ -134,7 +134,8 @@ class Index
     public function query()
     {
         $user = new User();
-        $res = $user->where('username','=',"牛魔王")->first();
+        $res = $user->where('id','=',3)->first();
+        $res = $user->where('username','=','牛魔王')->first();
         return $res;
     }
 

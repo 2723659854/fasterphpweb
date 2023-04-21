@@ -2,7 +2,7 @@
 
 namespace App\Model;
 
-use Root\BaseModel;
+use BaseModel;
 
 //必须继承Root\BaseModel
 class Book extends BaseModel

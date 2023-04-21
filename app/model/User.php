@@ -2,7 +2,7 @@
 
 namespace App\Model;
 
-use Root\BaseModel;
+use BaseModel;
 
 class User extends BaseModel
 {
