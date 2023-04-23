@@ -68,7 +68,7 @@ class Worker
     /** 接收客户端消息 */
     public function accept()
     {
-        /** 创建多个子进程阻塞接收服务端socket */
+        /** 创建多个子进程阻塞接收服务端socket 这个while死循环 会导致for循环被阻塞，不往下执行，创建了子进程也没有用，直接在第一个子进程哪里阻塞了 */
         while (true) {
             /** 初始化需要监测的可写入的客户端，需要排除的客户端都为空 */
             $write = $except = [];

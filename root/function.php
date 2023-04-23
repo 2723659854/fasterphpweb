@@ -309,14 +309,7 @@ function onMessage($socketAccept, $message, &$httpServer)
                 fwrite($socketAccept, "Content-Length: " . strlen($fileContent) . "\r\n\r\n");
                 fwrite($socketAccept, $fileContent, strlen($fileContent));
                 break;
-            case "ico":
-            case "jpg":
-            case "js":
-            case "css":
-            case "gif":
-            case "png":
-            case "icon":
-            case "jpeg":
+            case "ico": case "jpg": case "js": case "css": case "gif": case "png": case "icon": case "jpeg":
                 fwrite($socketAccept, 'Content-Type: image/jpeg' . PHP_EOL);
                 $fileName = dirname(__DIR__) . '/public/' . $fileName;
                 if (file_exists($fileName)) {
@@ -327,15 +320,7 @@ function onMessage($socketAccept, $message, &$httpServer)
                 fwrite($socketAccept, "Content-Length: " . strlen($fileContent) . "\r\n\r\n");
                 fwrite($socketAccept, $fileContent, strlen($fileContent));
                 break;
-            case "doc":
-            case "docx":
-            case "ppt":
-            case "pptx":
-            case "xls":
-            case "xlsx":
-            case "zip":
-            case "rar":
-            case "txt":
+            case "doc": case "docx": case "ppt": case "pptx": case "xls": case "xlsx": case "zip": case "rar": case "txt":
                 fwrite($socketAccept, 'Content-Type: application/octet-stream' . PHP_EOL);
                 fwrite($socketAccept, '' . PHP_EOL);
                 $fileName = dirname(__DIR__) . '/public/' . $fileName;
@@ -427,7 +412,7 @@ function daemon()
     if (-1 === \posix_setsid()) {
         throw new Exception("Setsid fail");
     }
-
+    /** 创建子进程 */
     create_process();
     /** @var int $_this_pid  获取当前进程id */
     $_this_pid = getmypid();
@@ -456,13 +441,10 @@ function daemon()
         /** 如果linux支持epoll模型则使用epoll */
         if ($_has_epoll) {
             /** 使用epoll ，只有一个，其他进程被阻塞了*/
-            //epoll();
-            /** 普通的阻塞的，可以开启多个http服务 */
-            //nginx();
-            select();
+            epoll();
         } else {
             /** 否则使用select，只有一个，其他进程被阻塞了 */
-            select();
+            nginx();
         }
     }
     /** @var int $pid 再创建一个子进程，脱离主进程会话 */

@@ -26,6 +26,7 @@ class HttpServer
         $this->port = $_port;
     }
 
+    /** 普通的阻塞同步io */
     public function run()
     {
         @\socket_bind($this->_socket, $this->ip, $this->port);
@@ -66,10 +67,7 @@ class HttpServer
                     socket_write($socketAccept, "Content-Length: " . strlen($fileContent) . "\r\n\r\n");
                     socket_write($socketAccept, $fileContent, strlen($fileContent));
                     break;
-                case "jpg": case "js": case "css": case "gif": case "png":
-                case "icon":
-                case "jpeg":
-                case "ico":
+                case "jpg": case "js": case "css": case "gif": case "png": case "icon": case "jpeg": case "ico":
                     socket_write($socketAccept, 'Content-Type: image/jpeg' . PHP_EOL);
                     socket_write($socketAccept, '' . PHP_EOL);
                     $fileName = dirname(__DIR__) . '/public/' . $fileName;
@@ -81,14 +79,7 @@ class HttpServer
                 socket_write($socketAccept, "Content-Length: " . strlen($fileContent) . "\r\n\r\n");
                     socket_write($socketAccept, $fileContent, strlen($fileContent));
                     break;
-                case "doc": case "docx":
-                case "ppt":
-                case "pptx":
-                case "xls":
-                case "xlsx":
-                case "zip":
-                case "rar":
-                case "txt":
+                case "doc": case "docx": case "ppt": case "pptx": case "xls": case "xlsx": case "zip": case "rar": case "txt":
                     socket_write($socketAccept, 'Content-Type: application/octet-stream' . PHP_EOL);
                     socket_write($socketAccept, '' . PHP_EOL);
                     $fileName = dirname(__DIR__) . '/public/' . $fileName;
@@ -117,12 +108,7 @@ class HttpServer
                     socket_write($socketAccept, '' . PHP_EOL, 1024);
                     if ($content) {
                         $content      = is_string($content) ? $content : json_encode($content);
-                        $write_length = strlen($content);
-                        if ($write_length < 1024) {
-                            $write_length = 1024;
-                        }
                     } else {
-                        $write_length = 1024;
                         $content      = '';
                     }
                     socket_write($socketAccept, "Content-Length: " . strlen($content) . "\r\n\r\n");
@@ -135,6 +121,11 @@ class HttpServer
     }
 
 
+    /**
+     * 解析路由和参数
+     * @param $request
+     * @return array
+     */
     protected function getUri($request = '')
     {
         $arrayRequest = explode(PHP_EOL, $request);
@@ -243,6 +234,7 @@ class HttpServer
         return ['file' => $url, 'request' => $arrayRequest, 'post_param' => $post_param];
     }
 
+    /** 关闭服务端 */
     public function close()
     {
         socket_close($this->_socket);
