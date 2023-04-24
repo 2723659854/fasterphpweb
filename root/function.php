@@ -1,20 +1,43 @@
 <?php
+
+
+/**
+ * App目录
+ * @return string
+ */
 function app_path()
 {
     return dirname(__DIR__);
 }
 
+/**
+ * 获取配置文件
+ * @param $path_name
+ * @return mixed
+ */
 function config($path_name)
 {
     return include app_path() . '/config/' . $path_name . '.php';
 }
 
+/**
+ * public目录
+ * @return string
+ */
 function public_path()
 {
     return app_path() . '/public';
 }
 
+function command_path(){
+    return dirname(__DIR__).'/app/command';
+}
 
+/**
+ * 遍历目录
+ * @param $path
+ * @return mixed
+ */
 function traverse($path = '.')
 {
     global $filePath;
@@ -32,12 +55,39 @@ function traverse($path = '.')
     return $filePath;
 }
 
+/**
+ * 获取文件中定义的类名
+ * @param $php_code
+ * @return array
+ */
+function get_php_classes($php_code) {
+    $classes = array();
+    $tokens = token_get_all($php_code);
+    $count = count($tokens);
+    for ($i = 2; $i < $count; $i++) {
+        if (   $tokens[$i - 2][0] == T_CLASS
+            && $tokens[$i - 1][0] == T_WHITESPACE
+            && $tokens[$i][0] == T_STRING) {
+
+            $class_name = $tokens[$i][1];
+            $classes[] = $class_name;
+        }
+    }
+    return $classes;
+}
+/**
+ * 启动服务
+ * @param $param
+ * @return void
+ * @throws Exception
+ */
 function start_server($param)
 {
+
     check_env();
     $daemonize = false;
     $flag      = true;
-    global $_pid_file, $_port, $_listen, $_server_num, $_system, $_lock_file, $_has_epoll;
+    global $_pid_file, $_port, $_listen, $_server_num, $_system, $_lock_file, $_has_epoll,$_system_command;
     $_pid_file  = __DIR__ . '/my_pid.txt';
     $_lock_file = __DIR__ . '/lock.txt';
     require_once __DIR__ . '/Timer.php';
@@ -48,6 +98,8 @@ function start_server($param)
     require_once __DIR__ . '/queue/Queue.php';
     require_once __DIR__ . '/Facade.php';
     require_once __DIR__ . '/Worker.php';
+    require_once __DIR__ . '/Worker.php';
+    require_once __DIR__ . '/BaseCommand.php';
 
     /** @var bool $_has_epoll 默认不支持epoll模型 */
     $_has_epoll = false;
@@ -72,11 +124,15 @@ function start_server($param)
     }
     $_listen    = "http://127.0.0.1:" . $_port;
     $httpServer = null;
+    /** 装载用户的自定义命令 */
+    deal_command();
+    /** 装载App目录下的所有文件 */
     foreach (traverse(app_path() . '/app') as $key => $val) {
         if (file_exists($val)) {
             require_once $val;
         }
     }
+    /** 分析用户输入的命令，执行业务逻辑 */
     if (count($param) > 1) {
         switch ($param[1]) {
             case "start":
@@ -113,8 +169,16 @@ function start_server($param)
                 xiaosongshu_queue();
                 break;
             default:
-                echo "未识别的命令\r\n";
-                $flag = false;
+                /** 如果是自定义命令，则执行用户的逻辑 */
+                if (isset($_system_command[$param[1]])){
+                    (new $_system_command[$param[1]]())->handle();
+                    exit;
+                }else{
+                    /** 查看是否是用户自定义的命令 */
+                    echo "未识别的命令\r\n";
+                    $flag = false;
+                }
+
         }
     } else {
         echo "缺少必要参数，你可以输入start,start -d,stop,restart,queue\r\n";
@@ -184,7 +248,11 @@ function _queue_xiaosongshu()
     }
 }
 
-
+/**
+ * 队列逻辑处理
+ * @param $job
+ * @return void
+ */
 function deal_job($job = [])
 {
     if (!empty($job)) {
@@ -280,7 +348,13 @@ function select()
     $httpServer->start();
 }
 
-
+/**
+ * select和epoll消息处理事件
+ * @param $socketAccept
+ * @param $message
+ * @param $httpServer
+ * @return void
+ */
 function onMessage($socketAccept, $message, &$httpServer)
 {
     if (strpos($message, 'HTTP/1.1')) {
@@ -669,4 +743,35 @@ function getUri($request = '')
 
     return ['file' => $url, 'request' => $arrayRequest, 'post_param' => $post_param, 'header' => $header];
 }
+
+/**
+ * 处理自定义的命令
+ * @return void
+ */
+function deal_command(){
+    global $_system_command;
+    /** 加载所有自定义的命令 */
+    foreach (traverse(command_path()) as $key => $file) {
+        if (file_exists($file)) {
+            require_once $file;
+            $php_code = file_get_contents($file);
+            $classes = get_php_classes($php_code);
+            foreach ($classes as $class){
+                /** @var string $_class_name 拼接完整的路径 */
+                $_class_name='App\Command\\'.$class;
+                /** @var object $object 通过反射获取这个类 */
+                $object=new ReflectionClass(new $_class_name());
+                /** 如果这个类有command属性，并且有handle方法，则将这个方法和类名注册到全局命令行中 */
+                if ($object->hasMethod('handle')&&$object->hasProperty('command')){
+                    foreach ($object->getDefaultProperties() as $property => $command){
+                        if ($property=='command'){
+                            $_system_command[$command]=$_class_name;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
 
