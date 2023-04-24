@@ -48,3 +48,20 @@ services:
     ports:
       # 本项目内部使用可以用6379端口，如果外部项目需要使用这个redis请使用6389，可以自己设置
       - "6389:6379"
+  # rabbitmq服务
+  rabbitmq:
+    # 是否自动重启
+    restart: always
+    # 镜像名称
+    container_name: faster-rabbitmq
+    # 镜像源
+    image: rabbitmq:3.8-management-alpine
+    # 端口映射
+    ports:
+      - "5671:5671"
+      - "5672:5672"
+      - "15671:15671"
+      - "15672:15672"
+    # 挂载目录
+    volumes:
+      - /d/rabbitmq/:/var/log/rabbitmq/

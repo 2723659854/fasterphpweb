@@ -295,8 +295,10 @@ function xiaosongshu_timer()
 /** 执行队列 */
 function xiaosongshu_queue()
 {
-
-    _queue_xiaosongshu();
+    $enable=config('redis')['enable'];
+    if ($enable){
+        _queue_xiaosongshu();
+    }
 }
 
 /** 关闭进程 */
@@ -803,19 +805,22 @@ function deal_command(){
  * @return void
  */
 function rabbitmqConsume(){
-    $config=config('rabbitmqProcess');
-    foreach ($config as $name=>$value){
-        if (isset($value['handler'])){
-            /** 创建一个子进程，在子进程里面执行消费 */
-            $rabbitmq_pid=\pcntl_fork();
-            if ($rabbitmq_pid>0) {
-                /** 记录进程号 */
-                writePid();
-                cli_set_process_title($name);
-                if (class_exists($value['handler'])) {
-                    $className=$value['handler'];
-                    $queue = new $className();
-                    $queue->consume();
+    $enable=config('rabbitmq')['enable'];
+    if ($enable){
+        $config=config('rabbitmqProcess');
+        foreach ($config as $name=>$value){
+            if (isset($value['handler'])){
+                /** 创建一个子进程，在子进程里面执行消费 */
+                $rabbitmq_pid=\pcntl_fork();
+                if ($rabbitmq_pid>0) {
+                    /** 记录进程号 */
+                    writePid();
+                    cli_set_process_title($name);
+                    if (class_exists($value['handler'])) {
+                        $className=$value['handler'];
+                        $queue = new $className();
+                        $queue->consume();
+                    }
                 }
             }
         }
