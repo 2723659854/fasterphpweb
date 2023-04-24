@@ -15,5 +15,8 @@
             "email": "2723659854@qq.com"
         }
     ],
-    "minimum-stability": "dev"
+    "minimum-stability": "dev",
+    "require": {
+        "php-amqplib/php-amqplib": "3.2.*"
+    }
 }

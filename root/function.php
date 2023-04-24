@@ -100,6 +100,7 @@ function start_server($param)
     require_once __DIR__ . '/Worker.php';
     require_once __DIR__ . '/Worker.php';
     require_once __DIR__ . '/BaseCommand.php';
+    require_once __DIR__ . '/queue/RabbitMQBase.php';
 
     /** @var bool $_has_epoll 默认不支持epoll模型 */
     $_has_epoll = false;
@@ -442,7 +443,7 @@ function onMessage($socketAccept, $message, &$httpServer)
 /** 使用epoll异步io模型 */
 function epoll()
 {
-    echo "启动epoll异步IO模型\r\n";
+    //echo "启动epoll异步IO模型\r\n";
     /** 加载epoll模型类 */
     require_once __DIR__ . '/Fucker.php';
     /** @var object $httpServer 将对象加载到内存 */
@@ -493,31 +494,46 @@ function daemon()
     /** 如果是主进程 */
     if ($_this_pid == $master_pid) {
         /** 在主进程里再创建一个子进程 */
-        \pcntl_fork();
+       \pcntl_fork();
         if (getmypid() == $master_pid) {
-            /** 如果是主进程，则设置进程名称为master */
-            cli_set_process_title("xiaosongshu_master");
-            /** 在主进程里启动定时器 */
-            xiaosongshu_timer();
+
+            /** 在主进程里面创建一个子进程负责处理rabbitmq的队列 */
+            $_small_son_id=\pcntl_fork();
+            if ($_small_son_id>0){
+                /** 记录进程号 */
+                writePid();
+                /** 子进程 */
+                rabbitmqConsume();
+            }elseif($_small_son_id==0){
+                /** 主进程 */
+                /** 如果是主进程，则设置进程名称为master */
+                cli_set_process_title("xiaosongshu_timer_and_master");
+                writePid();
+                /** 在主进程里启动定时器 */
+                xiaosongshu_timer();
+            }else{
+                echo "在创建rabbitmq的管理进程的时候失败了\r\t";
+                exit;
+            }
+
         } else {
             /** 在子进程里启动队列，并设置进程名称 */
             cli_set_process_title("xiaosongshu_queue");
-            $fp = fopen($_pid_file, 'a+');
-            fwrite($fp, getmypid() . '-');
-            fclose($fp);
+            writePid();
             xiaosongshu_queue();
         }
     } else {
+        /** 这个只是测试用的，可以屏蔽 */
         file_put_contents(__DIR__.'/note.txt',"我来过".date('Y-m-d H:i:s'));
         /** 如果不是主进程，则开启http服务，并设置进程名称 */
         cli_set_process_title("xiaosongshu_http");
         global $_has_epoll;
         /** 如果linux支持epoll模型则使用epoll */
         if ($_has_epoll) {
-            /** 使用epoll ，只有一个，其他进程被阻塞了*/
+            /** 使用epoll */
             epoll();
         } else {
-            /** 否则使用select，只有一个，其他进程被阻塞了 */
+            /** 使用普通的同步io */
             nginx();
         }
     }
@@ -531,6 +547,16 @@ function daemon()
     }
 }
 
+/** 记录pid到文件 */
+function writePid(){
+    global $_pid_file;
+    /** 记录进程号 */
+    $fp = fopen($_pid_file, 'a+');
+    fwrite($fp, getmypid() . '-');
+    fclose($fp);
+}
+
+/** 创建子进程 */
 function create_process(){
     /** 初始化工作进程数 */
     global $_server_num,$_pid_file;
@@ -561,9 +587,7 @@ function create_process(){
             /** 否则创建子进程 */
             \pcntl_fork();
             /** 将创建好的进程id存入文件 */
-            $fp = fopen($_pid_file, 'a+');
-            fwrite($fp, getmypid() . '-');
-            fclose($fp);
+            writePid();
         }
     }
 }
@@ -768,6 +792,30 @@ function deal_command(){
                             $_system_command[$command]=$_class_name;
                         }
                     }
+                }
+            }
+        }
+    }
+}
+
+/**
+ * 处理rabbitmq的消费
+ * @return void
+ */
+function rabbitmqConsume(){
+    $config=config('rabbitmqProcess');
+    foreach ($config as $name=>$value){
+        if (isset($value['handler'])){
+            /** 创建一个子进程，在子进程里面执行消费 */
+            $rabbitmq_pid=\pcntl_fork();
+            if ($rabbitmq_pid>0) {
+                /** 记录进程号 */
+                writePid();
+                cli_set_process_title($name);
+                if (class_exists($value['handler'])) {
+                    $className=$value['handler'];
+                    $queue = new $className();
+                    $queue->consume();
                 }
             }
         }

@@ -9,6 +9,7 @@ use Root\Cache;
 use App\Queue\Test;
 use APP\Facade\Cache as Fcache;
 use APP\Facade\Book as Fbook;
+use App\Rabbitmq\Demo;
 
 class Index
 {
@@ -197,6 +198,16 @@ class Index
         $book=Fbook::where('id','>',0)->limit(10)->get();
         var_dump($book);
         return json_encode($book);
+    }
+
+    /**
+     * 测试rabbitmq消息队列
+     * @return array
+     */
+    public function rabbitmq(){
+        $queue=new Demo();
+        $queue->send(['name'=>'张三','age'=>23]);
+        return ['msg'=>'发送成功','status'=>200];
     }
 
 }

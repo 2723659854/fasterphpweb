@@ -109,7 +109,7 @@ class Fucker
     /** 启动http服务 */
     public function run()
     {
-        global $_server_num,$_pid_file;
+        global $_server_num;
         if ($_server_num < 2) {
             $_server_num = 2;
         }
@@ -121,10 +121,7 @@ class Fucker
                 throw new Exception('Fork fail');
             } elseif ($pid > 0) {
                 cli_set_process_title("xiaosongshu_http".$pid);
-
-                $fp = fopen($_pid_file, 'a+');
-                fwrite($fp, getmypid() . '-');
-                fclose($fp);
+                writePid();
                 /** 添加事件 */
                 $this->event->add();//
                 /** 执行事件循环 */
