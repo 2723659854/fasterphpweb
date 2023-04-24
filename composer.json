@@ -15,8 +15,5 @@
             "email": "2723659854@qq.com"
         }
     ],
-    "minimum-stability": "dev",
-    "require": {
-        "symfony/console": "5.4.x-dev"
-    }
+    "minimum-stability": "dev"
 }
