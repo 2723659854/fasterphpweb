@@ -1,12 +1,9 @@
 <?php
 
+
 use mysqli_sql_exception as MysqlException;
 
-/**
- * @purpose 数据库基类
- * @note 子类继承这一个基类，子类模型必须使用单例模式，一直使用mysql连接，否则每一次查询都会创建连接
- */
- class BaseModel
+class BaseModel
 {
 
     private $host = null;
@@ -17,37 +14,15 @@ use mysqli_sql_exception as MysqlException;
     private $type = 'mysql';
 
     private $mysql;
-    protected $sql='';
+    private $sql='';
     public $table = '';
     private $field='*';
     private $order='id asc';
     private $limit=0;
     private $offset=0;
-    /** 初始化 */
+
     public function __construct()
     {
-        $this->connect();
-        /** 创建连接成功后，单开一个进程负责mysql心跳 */
-    }
-
-     /**
-      * 维持心跳的函数，防止mysql连接断开
-      * @return void
-      */
-    public function wakeup(){
-
-        while (true){
-            $this->mysql->query("select 1 ;")->fetch_assoc();
-            sleep(5);
-        }
-
-    }
-
-     /**
-      * 连接数据库
-      * @return void
-      */
-    public function connect(){
         mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
         $config = config('database');
         $this->type = $config['default'];
@@ -66,13 +41,11 @@ use mysqli_sql_exception as MysqlException;
         $mysqli->set_charset('utf8');
         $this->mysql = $mysqli;
         $this->sql = '';
-        var_dump("连接数据库完成");
+        var_dump("初始化数据库完成");
     }
 
-
-    /** 获取表名称 */
-    public function table_name(){
-        return $this->table;
+    private static function table_name(){
+       return array_reverse(explode('\\',strtolower(get_called_class())))[0];
     }
 
     /**
@@ -94,33 +67,16 @@ use mysqli_sql_exception as MysqlException;
         }else{
             $sql='select '.$this->field.' from '.$this->table.' order by '.$this->order.$limit;
         }
-        $sql=$sql.';';
-
-        $sqlCopy=$this->sql;
+        var_dump($sql);
         //todo 某一个中文搜索不出来 username = 牛魔王 ，linux 没有mysql 原生的函数
         try{
-            $data = $this->mysql->query($sql)->fetch_assoc();
-            echo "\r\n".$sql."====我的Pid=".getmypid()."\r\n";
-
-            /** 执行完之后需要清除sql语句，否则会保留上一次的sql语句 */
-            $this->sql='';
-            return $data;
+            return $this->mysql->query($sql)->fetch_assoc();
         }catch (MysqlException $e){
-            /** 如果是连接超时，则重连，并重新执行sql语句 */
-            if ($e->getCode()==2006){
-                /** 重连 */
-                $this->connect();
-                /** 还原sql语句 */
-                $this->sql=$sqlCopy;
-                /** 重新执行 */
-                return $this->first();
-            }
             global $fuck;
             $fuck->_error=no_declear('index',['msg'=>"错误码：".$e->getCode()."<br>文件：".$e->getFile()."<br>行数：".$e->getLine().PHP_EOL."<br>错误详情：".$e->getMessage()]);
             return [];
         }
     }
-
 
     /**
      * 多条数据查询
@@ -141,7 +97,6 @@ use mysqli_sql_exception as MysqlException;
         }else{
             $sql='select '.$this->field.' from '.$this->table.' order by '.$this->order.$limit;
         }
-        $sqlCopy = $this->sql;
         try{
             $list = $this->mysql->query($sql);
             $data = [];
@@ -154,21 +109,11 @@ use mysqli_sql_exception as MysqlException;
                 }
                 $data[]=$array;
             }
-            $this->sql='';
             return $data;
         }catch (MysqlException $e){
-            /** 如果是连接超时，则重连，并重新执行sql语句 */
-            if ($e->getCode()==2006){
-                /** 重连 */
-                $this->connect();
-                /** 还原sql语句 */
-                $this->sql=$sqlCopy;
-                /** 重新执行 */
-                return $this->get();
-            }
-            global $fuck;
-            $fuck->_error=no_declear('index',['msg'=>"错误码：".$e->getCode()."<br>文件：".$e->getFile()."<br>行数：".$e->getLine().PHP_EOL."<br>错误详情：".$e->getMessage()]);
-            return [];
+
+            echo $e->getMessage();
+            die("数据库操作失败！");
         }
 
     }
@@ -250,16 +195,8 @@ use mysqli_sql_exception as MysqlException;
         try{
             return $this->mysql->query($sql);
         }catch (MysqlException $e){
-            /** 如果是连接超时，则重连，并重新执行sql语句 */
-            if ($e->getCode()==2006){
-                /** 重连 */
-                $this->connect();
-                /** 重新执行 */
-                return $this->insert($param);
-            }
-            global $fuck;
-            $fuck->_error=no_declear('index',['msg'=>"错误码：".$e->getCode()."<br>文件：".$e->getFile()."<br>行数：".$e->getLine().PHP_EOL."<br>错误详情：".$e->getMessage()]);
-            return false;
+            echo $e->getMessage();
+            die('数据库操作失败');
         }
 
     }
@@ -279,23 +216,12 @@ use mysqli_sql_exception as MysqlException;
             $_param[]=$k.' = '.$v;
         }
         $sql='update '.$this->table.' SET '.implode(',',$_param).$this->sql;
-        $sqlCopy=$this->sql;
         try{
-            $this->sql='';
             return $this->mysql->query($sql);
         }catch (MysqlException $e){
-            /** 如果是连接超时，则重连，并重新执行sql语句 */
-            if ($e->getCode()==2006){
-                /** 重连 */
-                $this->connect();
-                /** 恢复sql语句 */
-                $this->sql=$sqlCopy;
-                /** 重新执行 */
-                return $this->update($param);
-            }
-            global $fuck;
-            $fuck->_error=no_declear('index',['msg'=>"错误码：".$e->getCode()."<br>文件：".$e->getFile()."<br>行数：".$e->getLine().PHP_EOL."<br>错误详情：".$e->getMessage()]);
-            return false;
+
+            echo $e->getMessage();
+            die('数据库操作失败');
         }
     }
 
@@ -306,22 +232,12 @@ use mysqli_sql_exception as MysqlException;
      */
     public function delete(){
         $sql='delete from '.$this->table.' '.$this->sql;
-        $sqlCopy=$this->sql;
         try{
-            $this->sql='';
             return $this->mysql->query($sql);
         }catch (MysqlException $e){
-            /** 如果是连接超时，则重连，并重新执行sql语句 */
-            if ($e->getCode()==2006){
-                /** 重连 */
-                $this->connect();
-                $this->sql=$sqlCopy;
-                /** 重新执行 */
-                return $this->delete();
-            }
-            global $fuck;
-            $fuck->_error=no_declear('index',['msg'=>"错误码：".$e->getCode()."<br>文件：".$e->getFile()."<br>行数：".$e->getLine().PHP_EOL."<br>错误详情：".$e->getMessage()]);
-            return false;
+
+            echo $e->getMessage();
+            die('数据库操作失败');
         }
     }
 
@@ -394,26 +310,12 @@ use mysqli_sql_exception as MysqlException;
      * @return bool|\mysqli_result
      */
     public function query($sql=''){
-        try {
-            $res=$this->mysql->query($sql);
-            if (is_object($res)){
-                return $res->fetch_all();
-            }else{
-                return $res;
-            }
-        }catch (MysqlException $e){
-            /** 如果是连接超时，则重连，并重新执行sql语句 */
-            if ($e->getCode()==2006){
-                /** 重连 */
-                $this->connect();
-                /** 重新执行 */
-                return $this->query($sql);
-            }
-            global $fuck;
-            $fuck->_error=no_declear('index',['msg'=>"错误码：".$e->getCode()."<br>文件：".$e->getFile()."<br>行数：".$e->getLine().PHP_EOL."<br>错误详情：".$e->getMessage()]);
-            return false;
+        $res=$this->mysql->query($sql);
+        if (is_object($res)){
+            return $res->fetch_all();
+        }else{
+            return $res;
         }
-
 
     }
 
@@ -424,47 +326,32 @@ use mysqli_sql_exception as MysqlException;
      * @return bool|\mysqli_result
      */
     public function insertAll($array=[]){
-
-        try {
-            if (empty($array)){
-                return false;
-            }
-            $value=[];
-            $key=array_keys($array[0]);
-            foreach ($array as $k=>$v){
-                $str='';
-                foreach ($v as $a=>$b){
-                    if (!is_numeric($b)){
-                        $b='"'.$b.'"';
-                    }
-                    if ($str){
-                        $str=$str.','.$b;
-                    }else{
-                        $str=$b;
-                    }
-                }
-                $value[]='('.$str.')';
-            }
-            if (!$this->table){
-                $this->table=$this->table_name();
-            }
-            $field='('.implode(',',$key).')';
-            $values=implode(',',$value);
-            $sql='insert into '.$this->table.'  '.$field.'  values '.$values;
-            return $this->mysql->query($sql);
-        }catch (MysqlException $e){
-            /** 如果是连接超时，则重连，并重新执行sql语句 */
-            if ($e->getCode()==2006){
-                /** 重连 */
-                $this->connect();
-                /** 重新执行 */
-                return $this->insertAll($array);
-            }
-            global $fuck;
-            $fuck->_error=no_declear('index',['msg'=>"错误码：".$e->getCode()."<br>文件：".$e->getFile()."<br>行数：".$e->getLine().PHP_EOL."<br>错误详情：".$e->getMessage()]);
+        if (empty($array)){
             return false;
         }
-
+        $value=[];
+        $key=array_keys($array[0]);
+        foreach ($array as $k=>$v){
+            $str='';
+            foreach ($v as $a=>$b){
+                if (!is_numeric($b)){
+                   $b='"'.$b.'"';
+                }
+                if ($str){
+                    $str=$str.','.$b;
+                }else{
+                    $str=$b;
+                }
+            }
+            $value[]='('.$str.')';
+        }
+        if (!$this->table){
+            $this->table=$this->table_name();
+        }
+        $field='('.implode(',',$key).')';
+        $values=implode(',',$value);
+        $sql='insert into '.$this->table.'  '.$field.'  values '.$values;
+        return $this->mysql->query($sql);
     }
 
 }

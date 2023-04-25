@@ -25,7 +25,10 @@ class Index
     {
 
         echo "我的pid".getmypid()."\r\n";
-        //return "hello world!";
+        //$user = new User();
+        $user = User::getInstance();
+        $res = $user->where('id','=',3)->first();
+
         //模板在根目录下的view目录里面
         return view('/index/index', ['time' => date('Y-m-d H:i:s')]);
     }
@@ -136,7 +139,7 @@ class Index
     //测试原生sql操作
     public function query()
     {
-        $user = new User();
+        $user = User::getInstance();
         $res = $user->where('id','=',3)->first();
         $res = $user->where('username','=','牛魔王')->first();
         return $res;
