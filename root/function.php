@@ -525,8 +525,6 @@ function daemon()
             xiaosongshu_queue();
         }
     } else {
-        /** 这个只是测试用的，可以屏蔽 */
-        file_put_contents(__DIR__.'/note.txt',"我来过".date('Y-m-d H:i:s'));
         /** 如果不是主进程，则开启http服务，并设置进程名称 */
         cli_set_process_title("xiaosongshu_http");
         global $_has_epoll;

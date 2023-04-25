@@ -18,7 +18,7 @@ class Cache
 
     /**
      * 连接redis服务器
-     * @return void
+     * @return mixed
      */
     public function connect(){
         try{
@@ -26,8 +26,8 @@ class Cache
             $client=new Redis();
             $client->connect($config['host'],$config['port']);
             self::$client=$client;
-        }catch (\Exception $exception){
-            die('致命错误：redis连接失败！详情：'.$exception->getMessage());
+        }catch (\Exception $e){
+            throw new \RuntimeException($e->getMessage());
         }
     }
 
@@ -39,7 +39,18 @@ class Cache
      */
     public function __call($name, $arguments)
     {
-        return self::$client->$name(...$arguments);
+        try {
+            return self::$client->$name(...$arguments);
+        }catch (\RedisException $exception){
+            if ($exception->getMessage()=='Connection lost'){
+                /** redis默认没有语法错误 */
+                $this->connect();
+                return self::$client->$name(...$arguments);
+            }else{
+                throw new \RuntimeException($exception->getMessage());
+            }
+        }
+
     }
 
     /**
@@ -49,6 +60,16 @@ class Cache
      * @return mixed
      */
     public static function __callStatic($name,$arguments){
-        return self::$client->$name(...$arguments);
+        try {
+            return self::$client->$name(...$arguments);
+        }catch (\Exception $exception){
+          if ($exception->getMessage()=='Connection lost'){
+              /** redis默认没有语法错误 */
+              self::connect();
+              return self::$client->$name(...$arguments);
+          }else{
+              throw new \RuntimeException($exception->getMessage());
+          }
+        }
     }
 }

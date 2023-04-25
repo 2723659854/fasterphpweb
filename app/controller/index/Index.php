@@ -23,8 +23,6 @@ class Index
     //默认首页
     public function index()
     {
-
-        echo "我的pid" . getmypid() . "\r\n";
         //模板在根目录下的view目录里面
         return view('/index/index', ['time' => date('Y-m-d H:i:s')]);
     }
@@ -46,7 +44,6 @@ class Index
     public function say(Request $request)
     {
 
-        //var_dump($request);
         $book = new Book();
         $book->insert([
             'name' => '哈利波特',
@@ -60,14 +57,12 @@ class Index
     //测试文件上传，以及缓存用法
     public function upload()
     {
-        //Fcache::set('name', '小松鼠');
         return view('index/upload', ['cache' => 2]);
     }
 
     //测试表单提交和文件上传
     public function store(Request $request)
     {
-        //var_dump($request->file());
         //普通上传文件
         if ($request->file('one')) {
             $file    = $request->file('one');
@@ -171,30 +166,13 @@ class Index
 
     public function compare()
     {
-//        var_dump(time());
-//        $time1=time();
-//        echo "开始\r\n";
-//        $data=Fbook::limit(100000)->get();
-//        var_dump(time());
-//
-//        $array=[];
-//        foreach ($data as $k=>$v){
-//            $key=$v['name'].'-'.$v['publisher'].'-'.$v['content'];
-//            $array[$key][]=$v['id'];
-//        }
-//        $time2=time();
-//        echo "结束\r\n";
-//        $time3=$time2-$time1;
-//        echo $time3."\r\n";
-//        echo count($array);
-//        echo "\r\n";
+
         return 'compare success!';
     }
 
     public function checkBook(Request $request)
     {
         $book = Fbook::where('id', '>', 0)->limit(10)->get();
-        var_dump($book);
         return json_encode($book);
     }
 

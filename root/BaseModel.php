@@ -35,7 +35,7 @@ use mysqli_sql_exception as MysqlException;
 
      /**
       * 连接数据库
-      * @return void
+      * @return mixed
       */
     public function connect(){
         mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
@@ -50,8 +50,7 @@ use mysqli_sql_exception as MysqlException;
         try{
             $mysqli = new mysqli($this->host, $this->username, $this->password, $this->dbname, $this->port);
         }catch (MysqlException $e){
-            echo $e->getMessage();
-            die("致命错误：数据库连接失败！".$e->getMessage());
+            throw new RuntimeException($e->getMessage(),$e->getCode());
         }
         $mysqli->set_charset('utf8');
         /** @var  mysql */

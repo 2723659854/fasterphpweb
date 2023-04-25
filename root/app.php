@@ -34,8 +34,14 @@ function handle($url, $param, $_request)
     foreach ($param as $k => $v) {
         $fuck->set($k, $v);
     }
-    $response = $class->$method($fuck);
+    /** 这里必须捕获异常 */
+    try {
+        $response = $class->$method($fuck);
+    }catch (Exception|RuntimeException $e){
+        $fuck->_error=no_declear('index',['msg'=>"错误码：".$e->getCode()."<br>文件：".$e->getFile()."<br>行数：".$e->getLine().PHP_EOL."<br>错误详情：".$e->getMessage()]);
+    }
     if ($fuck->_error) {
+
         return $fuck->_error;
     } else {
         return $response;
