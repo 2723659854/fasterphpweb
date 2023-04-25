@@ -24,11 +24,7 @@ class Index
     public function index()
     {
 
-        echo "我的pid".getmypid()."\r\n";
-        //$user = new User();
-        $user = User::getInstance();
-        $res = $user->where('id','=',3)->first();
-
+        echo "我的pid" . getmypid() . "\r\n";
         //模板在根目录下的view目录里面
         return view('/index/index', ['time' => date('Y-m-d H:i:s')]);
     }
@@ -53,8 +49,8 @@ class Index
         //var_dump($request);
         $book = new Book();
         $book->insert([
-            'name'        => '哈利波特',
-            'price'       => 15.23,
+            'name' => '哈利波特',
+            'price' => 15.23,
             'create_time' => time(),
             'update_time' => time(),
         ]);
@@ -107,7 +103,7 @@ class Index
         Cache::getInstance()->set('fuck', 'fuck you');
         //获取缓存
         Cache::getInstance()->get('fuck');
-        return ['code' => 200, 'msg' => 'ok','cache'=>Cache::getInstance()->get('fuck')];
+        return ['code' => 200, 'msg' => 'ok', 'cache' => Cache::getInstance()->get('fuck')];
     }
 
     //测试接收数据并直接返回数据
@@ -139,10 +135,9 @@ class Index
     //测试原生sql操作
     public function query()
     {
-
-        (new User())->where('id','=',4)->first();
-        (new Book())->where('id','=',4)->first();
-        return 123123;
+        $book=(new Book())->where('id','=',3)->first();
+        $messages = Fbook::where('id', '=', 3)->first();
+        return ['status' => 1, 'data' => $messages, 'msg' => 'success','book'=>$book];
     }
 
     //测试批量写入
@@ -197,8 +192,9 @@ class Index
         return 'compare success!';
     }
 
-    public function checkBook(Request $request){
-        $book=Fbook::where('id','>',0)->limit(10)->get();
+    public function checkBook(Request $request)
+    {
+        $book = Fbook::where('id', '>', 0)->limit(10)->get();
         var_dump($book);
         return json_encode($book);
     }
@@ -207,10 +203,11 @@ class Index
      * 测试rabbitmq消息队列
      * @return array
      */
-    public function rabbitmq(){
-        $queue=new Demo();
-        $queue->send(['name'=>'张三','age'=>23]);
-        return ['msg'=>'发送成功','status'=>200];
+    public function rabbitmq()
+    {
+        $queue = new Demo();
+        $queue->send(['name' => '张三', 'age' => 23]);
+        return ['msg' => '发送成功', 'status' => 200];
     }
 
 }

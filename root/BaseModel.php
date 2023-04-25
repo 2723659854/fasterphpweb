@@ -57,7 +57,7 @@ use mysqli_sql_exception as MysqlException;
         /** @var  mysql */
         self::$mysql=$mysqli;
         $this->sql = '';
-        var_dump("连接数据库完成");
+        var_dump("连接成功");
     }
 
 
@@ -86,13 +86,9 @@ use mysqli_sql_exception as MysqlException;
             $sql='select '.$this->field.' from '.$this->table.' order by '.$this->order.$limit;
         }
         $sql=$sql.';';
-
         $sqlCopy=$this->sql;
-        //todo 某一个中文搜索不出来 username = 牛魔王 ，linux 没有mysql 原生的函数
         try{
             $data = self::$mysql->query($sql)->fetch_assoc();
-            echo "\r\n".$sql."====我的Pid=".getmypid()."\r\n";
-
             /** 执行完之后需要清除sql语句，否则会保留上一次的sql语句 */
             $this->sql='';
             return $data;
@@ -134,6 +130,7 @@ use mysqli_sql_exception as MysqlException;
         }
         $sqlCopy = $this->sql;
         try{
+            $sql=$sql.';';
             $list = self::$mysql->query($sql);
             $data = [];
             //返回键值对对象
@@ -239,6 +236,7 @@ use mysqli_sql_exception as MysqlException;
         }
         $sql="insert into "."$this->table  (".implode(',',$key).") values(".implode(',',$val).")";
         try{
+            $sql=$sql.';';
             return self::$mysql->query($sql);
         }catch (MysqlException $e){
             /** 如果是连接超时，则重连，并重新执行sql语句 */
@@ -269,10 +267,14 @@ use mysqli_sql_exception as MysqlException;
             }
             $_param[]=$k.' = '.$v;
         }
-        $sql='update '.$this->table.' SET '.implode(',',$_param).$this->sql;
+        $sql='update '.$this->table.' SET '.implode(',',$_param);
+        if ($this->sql){
+            $sql=$sql.' where '.$this->sql;
+        }
         $sqlCopy=$this->sql;
         try{
             $this->sql='';
+            $sql=$sql.';';
             return self::$mysql->query($sql);
         }catch (MysqlException $e){
             /** 如果是连接超时，则重连，并重新执行sql语句 */
@@ -296,10 +298,14 @@ use mysqli_sql_exception as MysqlException;
      * @return bool|\mysqli_result
      */
     public function delete(){
-        $sql='delete from '.$this->table.' '.$this->sql;
+        $sql='delete from '.$this->table;
+        if ($this->sql){
+            $sql=$sql.' where '.$this->sql;
+        }
         $sqlCopy=$this->sql;
         try{
             $this->sql='';
+            $sql=$sql.';';
             return self::$mysql->query($sql);
         }catch (MysqlException $e){
             /** 如果是连接超时，则重连，并重新执行sql语句 */
@@ -386,6 +392,7 @@ use mysqli_sql_exception as MysqlException;
      */
     public function query($sql=''){
         try {
+            $sql=$sql.';';
             $res=self::$mysql->query($sql);
             if (is_object($res)){
                 return $res->fetch_all();
@@ -442,6 +449,7 @@ use mysqli_sql_exception as MysqlException;
             $field='('.implode(',',$key).')';
             $values=implode(',',$value);
             $sql='insert into '.$this->table.'  '.$field.'  values '.$values;
+            $sql=$sql.';';
             return self::$mysql->query($sql);
         }catch (MysqlException $e){
             /** 如果是连接超时，则重连，并重新执行sql语句 */
