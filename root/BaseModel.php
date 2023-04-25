@@ -57,7 +57,6 @@ use mysqli_sql_exception as MysqlException;
         /** @var  mysql */
         self::$mysql=$mysqli;
         $this->sql = '';
-        var_dump("连接成功");
     }
 
 
@@ -465,5 +464,4 @@ use mysqli_sql_exception as MysqlException;
         }
 
     }
-
-}
+ }

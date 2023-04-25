@@ -99,11 +99,10 @@ class Index
     //测试缓存
     public function book()
     {
-        //设置缓存
-        Cache::getInstance()->set('fuck', 'fuck you');
-        //获取缓存
-        Cache::getInstance()->get('fuck');
-        return ['code' => 200, 'msg' => 'ok', 'cache' => Cache::getInstance()->get('fuck')];
+        (new Cache())->set('fuck','you');
+        Cache::set('happy','new year');
+
+        return ['code' => 200, 'msg' => 'ok','普通的调用'=>(new Cache())->get('fuck'),'静态调用'=>Cache::get('happy')];
     }
 
     //测试接收数据并直接返回数据
