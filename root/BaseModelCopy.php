@@ -1,6 +1,6 @@
 <?php
 
-
+namespace Root;
 use mysqli_sql_exception as MysqlException;
 
 class BaseModel

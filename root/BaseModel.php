@@ -16,7 +16,9 @@ use mysqli_sql_exception as MysqlException;
     private $port = null;
     private $type = 'mysql';
 
-    private $mysql;
+    /** mysql连接公用的关键就是把mysql静态化存储，防止每一次类被实例化的时候重复的创建连接，减少tcp握手开销 */
+    private static $mysql;
+
     protected $sql='';
     public $table = '';
     private $field='*';
@@ -26,21 +28,9 @@ use mysqli_sql_exception as MysqlException;
     /** 初始化 */
     public function __construct()
     {
-        $this->connect();
-        /** 创建连接成功后，单开一个进程负责mysql心跳 */
-    }
-
-     /**
-      * 维持心跳的函数，防止mysql连接断开
-      * @return void
-      */
-    public function wakeup(){
-
-        while (true){
-            $this->mysql->query("select 1 ;")->fetch_assoc();
-            sleep(5);
+        if (!self::$mysql){
+            $this->connect();
         }
-
     }
 
      /**
@@ -64,7 +54,8 @@ use mysqli_sql_exception as MysqlException;
             die("致命错误：数据库连接失败！".$e->getMessage());
         }
         $mysqli->set_charset('utf8');
-        $this->mysql = $mysqli;
+        /** @var  mysql */
+        self::$mysql=$mysqli;
         $this->sql = '';
         var_dump("连接数据库完成");
     }
@@ -99,7 +90,7 @@ use mysqli_sql_exception as MysqlException;
         $sqlCopy=$this->sql;
         //todo 某一个中文搜索不出来 username = 牛魔王 ，linux 没有mysql 原生的函数
         try{
-            $data = $this->mysql->query($sql)->fetch_assoc();
+            $data = self::$mysql->query($sql)->fetch_assoc();
             echo "\r\n".$sql."====我的Pid=".getmypid()."\r\n";
 
             /** 执行完之后需要清除sql语句，否则会保留上一次的sql语句 */
@@ -143,7 +134,7 @@ use mysqli_sql_exception as MysqlException;
         }
         $sqlCopy = $this->sql;
         try{
-            $list = $this->mysql->query($sql);
+            $list = self::$mysql->query($sql);
             $data = [];
             //返回键值对对象
             while($row=$list->fetch_object())
@@ -248,7 +239,7 @@ use mysqli_sql_exception as MysqlException;
         }
         $sql="insert into "."$this->table  (".implode(',',$key).") values(".implode(',',$val).")";
         try{
-            return $this->mysql->query($sql);
+            return self::$mysql->query($sql);
         }catch (MysqlException $e){
             /** 如果是连接超时，则重连，并重新执行sql语句 */
             if ($e->getCode()==2006){
@@ -282,7 +273,7 @@ use mysqli_sql_exception as MysqlException;
         $sqlCopy=$this->sql;
         try{
             $this->sql='';
-            return $this->mysql->query($sql);
+            return self::$mysql->query($sql);
         }catch (MysqlException $e){
             /** 如果是连接超时，则重连，并重新执行sql语句 */
             if ($e->getCode()==2006){
@@ -309,7 +300,7 @@ use mysqli_sql_exception as MysqlException;
         $sqlCopy=$this->sql;
         try{
             $this->sql='';
-            return $this->mysql->query($sql);
+            return self::$mysql->query($sql);
         }catch (MysqlException $e){
             /** 如果是连接超时，则重连，并重新执行sql语句 */
             if ($e->getCode()==2006){
@@ -395,7 +386,7 @@ use mysqli_sql_exception as MysqlException;
      */
     public function query($sql=''){
         try {
-            $res=$this->mysql->query($sql);
+            $res=self::$mysql->query($sql);
             if (is_object($res)){
                 return $res->fetch_all();
             }else{
@@ -451,7 +442,7 @@ use mysqli_sql_exception as MysqlException;
             $field='('.implode(',',$key).')';
             $values=implode(',',$value);
             $sql='insert into '.$this->table.'  '.$field.'  values '.$values;
-            return $this->mysql->query($sql);
+            return self::$mysql->query($sql);
         }catch (MysqlException $e){
             /** 如果是连接超时，则重连，并重新执行sql语句 */
             if ($e->getCode()==2006){

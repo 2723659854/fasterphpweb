@@ -139,10 +139,10 @@ class Index
     //测试原生sql操作
     public function query()
     {
-        $user = User::getInstance();
-        $res = $user->where('id','=',3)->first();
-        $res = $user->where('username','=','牛魔王')->first();
-        return $res;
+
+        (new User())->where('id','=',4)->first();
+        (new Book())->where('id','=',4)->first();
+        return 123123;
     }
 
     //测试批量写入
