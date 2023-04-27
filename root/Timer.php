@@ -85,23 +85,31 @@ class Timer
         self::$time = $interval;
         $time = time() + $interval;
         self::$task[$time][] = array('func' => $func, 'argv' => $argv, 'interval' => $interval, 'persist' => $persist);
-        /**
-         * 存在两个问题
-         * 1，直接添加的话，因为存在进程隔离，导致定时任务不能添加到另外一个进程中
-         * 2，如果在添加的时候创建一个子进程处理，那么http的进程就被阻塞了
-         * 3，解决办法，添加了子进程后，怎么脱离子进程控制
-         */
-//        $id=pcntl_fork();
-//        if ($id>0){
-//            \cli_set_process_title("xiaosongshu_timer_".rand(1,100));
-//            writePid();
-//            Timer::run();
-//            while (true) {
-//                pcntl_signal_dispatch();
-//                sleep(1);
-//            }
-//        }
-
+        /** 创建子进程，在子进程中执行定时任务，否则主进程被阻塞 */
+        $id=pcntl_fork();
+        writePid();
+        if ($id){
+            $son=pcntl_fork();
+            writePid();
+            /** 在二级子进程中执行定时器 */
+            if ($son){
+                \cli_set_process_title("xiaosongshu_timer_".rand(1,1000000));
+                writePid();
+                self::run();
+                while (true) {
+                    pcntl_signal_dispatch();
+                    sleep(1);
+                    /** 定时器里面的任务为空，则退出进程 */
+                    if (empty(self::$task)){
+                        exit;
+                    }
+                }
+            }else{
+                /** 脱离一级子进程控制 */
+                exit;
+            }
+        }
+        /** 主进程不阻塞，继续执行后面的逻辑 */
     }
 
     /**

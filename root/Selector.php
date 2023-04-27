@@ -40,8 +40,16 @@ class Selector
         $this->port=$_port?:'8000';
         /** @var string $listeningAddress 拼接监听地址 */
         $listeningAddress=$this->protocol.'://'.$this->host.':'.$this->port;
+
+        /** 配置socket流参数 */
+        $context = stream_context_create();
+        /** 设置端口复用 */
+        stream_context_set_option($context, 'socket', 'so_reuseport', 1);
+        stream_context_set_option($context, 'socket', 'so_reuseaddr', 1);
+
         /** 设置服务端：监听地址+端口 */
-        $this->socket = stream_socket_server($listeningAddress);
+        $this->socket = stream_socket_server($listeningAddress,$errno, $errstr, STREAM_SERVER_BIND | STREAM_SERVER_LISTEN, $context);
+
         /** 设置非阻塞，语法是关闭阻塞 */
         stream_set_blocking($this->socket, 0);
         /** 将服务端保存 */
@@ -51,9 +59,6 @@ class Selector
     /** 启动服务 */
     public function start()
     {
-        /** 使用匿名函数提前连接数据库和缓存 */
-        prepareMysqlAndRedis();
-        /** 获取配置文件,创建子进程，这里省了 */
         $this->accept();
     }
     /** 接收客户端消息 */

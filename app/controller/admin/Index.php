@@ -37,10 +37,12 @@ class Index
     }
 
     public function timer(){
-        /** 因为是不同的进程，所以没有执行 */
-        $res=\root\Timer::add(5, function () {
-            var_dump("喔喔");
-        }, [], true);
+        /** 添加定时任务，周期，回调函数，参数，是否循环执行 */
+        \root\Timer::add(5, function ($a,$b) {
+            var_dump("我只执行一次额");
+            var_dump($a);
+            var_dump($b);
+        }, [3,5], false);
     return 45;
     }
 

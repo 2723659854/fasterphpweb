@@ -7,8 +7,8 @@ return [
 //        'handle'=>\App\Time\Test::class,
 //        'time'=>4,
 //    ],
-    'other'=>[
-        'handle'=>\App\Time\OtherTimer::class,
-        'time'=>7,
-    ],
+//    'other'=>[
+//        'handle'=>\App\Time\OtherTimer::class,
+//        'time'=>7,
+//    ],
 ];

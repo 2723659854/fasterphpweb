@@ -292,6 +292,18 @@ class OtherTimer
 }
 ```
 
+#### 临时添加定时任务
+```php 
+/** 添加定时任务，周期，回调函数，参数，是否循环执行 */
+        \root\Timer::add(5, function ($a,$b) {
+            var_dump("我只执行一次额");
+            var_dump($a);
+            var_dump($b);
+        }, [3,5], false);
+
+```
+
+
 #### rabbitmq消息队列
 
 #### rabbitmq连接配置

@@ -7,6 +7,11 @@ if (file_exists(dirname(__DIR__) . '/vendor/autoload.php')) {
     require_once dirname(__DIR__) . '/vendor/autoload.php';
 }
 
+
+/**
+ * @purpose 这个是同步阻塞io，可以自己测试使用
+ */
+
 class Nginx
 {
     private $ip      = '0.0.0.0';

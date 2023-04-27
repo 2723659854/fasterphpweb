@@ -126,7 +126,7 @@ class Epoll
                 /** 添加事件 */
                 $this->event->add();//
                 /** 执行事件循环 */
-                $this->event_base->loop();//
+                @$this->event_base->loop();//
             }
         }
 

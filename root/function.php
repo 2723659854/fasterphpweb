@@ -285,12 +285,6 @@ function xiaosongshu_timer()
             }
         }
     }
-    root\Timer::run();
-    while (true) {
-        pcntl_signal_dispatch();
-        sleep(1);
-    }
-
 }
 
 /** 执行队列 */
@@ -328,7 +322,7 @@ function check_env()
     }
 }
 
-/** 普通的阻塞模式 */
+/** 普通的阻塞模式,可以自己尝试使用 */
 function nginx()
 {
     require_once __DIR__ . '/Nginx.php';
@@ -532,7 +526,7 @@ function daemon()
             epoll();
         } else {
             /** 使用普通的同步io */
-            nginx();
+            select();
         }
     }
     /** @var int $pid 再创建一个子进程，脱离主进程会话 */
