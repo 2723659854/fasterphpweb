@@ -331,7 +331,6 @@ function check_env()
 /** 普通的阻塞模式 */
 function nginx()
 {
-    echo "启用普通同步阻塞IO模式\r\n";
     require_once __DIR__ . '/Nginx.php';
     $worker = new Nginx();
     $worker->run();
@@ -340,7 +339,7 @@ function nginx()
 /** 异步IO之select轮询模式 */
 function select()
 {
-    echo "启动select异步IO模型\r\n";
+    //echo "启动select异步IO模型\r\n";
     require_once __DIR__ . '/Selector.php';
     $httpServer = new Selector();
     /** 消息接收  */

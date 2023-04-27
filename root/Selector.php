@@ -55,7 +55,7 @@ class Selector
         (function(){
             try {
                 new BaseModel();
-                \Root\Cache::set('_START_TIME',time());
+                //\Root\Cache::set('_START_TIME',time());
             }catch (RuntimeException $exception){
                 echo "\r\n";
                 echo $exception->getMessage();

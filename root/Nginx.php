@@ -26,7 +26,7 @@ class Nginx
         (function(){
             try {
                 new \BaseModel();
-                \Root\Cache::set('_START_TIME',time());
+                //\Root\Cache::set('_START_TIME',time());
             }catch (\RuntimeException $exception){
                 echo "\r\n";
                 echo $exception->getMessage();
@@ -53,8 +53,8 @@ class Nginx
                 $request = $request . $_content;
             }
             $_param = [];
-            socket_write($socketAccept, 'HTTP/1.1 200 OK' . PHP_EOL, 1024);
-            socket_write($socketAccept, 'Date:' . date('Y-m-d H:i:s') . PHP_EOL, 1024);
+            socket_write($socketAccept, 'HTTP/1.1 200 OK' . PHP_EOL);
+            socket_write($socketAccept, 'Date:' . date('Y-m-d H:i:s') . PHP_EOL);
             $_mark    = $this->getUri($request);
             $fileName = $_mark['file'];
             $_request = $_mark['request'];
@@ -66,7 +66,6 @@ class Nginx
             switch ($fileExt) {
                 case "html":
                     socket_write($socketAccept, 'Content-Type: text/html' . PHP_EOL);
-                    socket_write($socketAccept, '' . PHP_EOL);
                     $fileName = dirname(__DIR__) . '/view/' . $fileName;
                     if (file_exists($fileName)) {
                         $fileContent = file_get_contents($fileName);
@@ -78,26 +77,24 @@ class Nginx
                     break;
                 case "jpg": case "js": case "css": case "gif": case "png": case "icon": case "jpeg": case "ico":
                     socket_write($socketAccept, 'Content-Type: image/jpeg' . PHP_EOL);
-                    socket_write($socketAccept, '' . PHP_EOL);
                     $fileName = dirname(__DIR__) . '/public/' . $fileName;
                     if (file_exists($fileName)) {
                         $fileContent = file_get_contents($fileName);
                     } else {
                         $fileContent = 'sorry,the file is missing!';
                     }
-                socket_write($socketAccept, "Content-Length: " . strlen($fileContent) . "\r\n\r\n");
+                    socket_write($socketAccept, "Content-Length: " . strlen($fileContent) . "\r\n\r\n");
                     socket_write($socketAccept, $fileContent, strlen($fileContent));
                     break;
                 case "doc": case "docx": case "ppt": case "pptx": case "xls": case "xlsx": case "zip": case "rar": case "txt":
                     socket_write($socketAccept, 'Content-Type: application/octet-stream' . PHP_EOL);
-                    socket_write($socketAccept, '' . PHP_EOL);
                     $fileName = dirname(__DIR__) . '/public/' . $fileName;
                     if (file_exists($fileName)) {
                         $fileContent = file_get_contents($fileName);
                     } else {
                         $fileContent = 'sorry,the file is missing!';
                     }
-                socket_write($socketAccept, "Content-Length: " . strlen($fileContent) . "\r\n\r\n");
+                    socket_write($socketAccept, "Content-Length: " . strlen($fileContent) . "\r\n\r\n");
                     socket_write($socketAccept, $fileContent, strlen($fileContent));
                     break;
                 default:
@@ -113,8 +110,6 @@ class Nginx
                     } else {
                         $content = handle(route($url), $_param, $_request);
                     }
-                    socket_write($socketAccept, 'Content-Type: text/html' . PHP_EOL, 1024);
-                    socket_write($socketAccept, '' . PHP_EOL, 1024);
                     if ($content) {
                         $content      = is_string($content) ? $content : json_encode($content);
                     } else {
@@ -128,8 +123,6 @@ class Nginx
         }
 
     }
-
-
     /**
      * 解析路由和参数
      * @param $request

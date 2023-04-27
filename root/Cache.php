@@ -11,7 +11,7 @@ class Cache
      */
     public function __construct()
     {
-        echo "初始化缓存\r\n";
+
         if (!self::$client){
             $this->connect();
         }
