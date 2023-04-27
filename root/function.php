@@ -360,7 +360,7 @@ function select()
  */
 function onMessage($socketAccept, $message, &$httpServer)
 {
-    if (strpos($message, 'HTTP/1.1')) {
+    if (strpos($message, 'HTTP/1.')) {
         $_param = [];
         $_mark  = getUri($message);
 

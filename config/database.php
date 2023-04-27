@@ -4,7 +4,7 @@ return [
     'default'=>'mysql',
     //支持mysql驱动
     'mysql'=>[
-        'host'=>'192.168.4.91',
+        'host'=>'192.168.4.105',
         'username'=>'root',
         'passwd'=>'root',
         'dbname'=>'go_gin_chat',

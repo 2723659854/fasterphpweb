@@ -187,4 +187,18 @@ class Index
         return ['msg' => '发送成功', 'status' => 200];
     }
 
+    /**
+     * 加法
+     * @param Request $request
+     * @return int
+     * @note 服务提供者
+     * @note 将服务注册到nacos，然后其他地方可以调用这个服务
+     */
+    public function add(Request $request){
+
+        $a=$request->param('a',0);
+        $b=$request->param('b',0);
+        return (int)bcadd($a,$b);
+    }
+
 }
