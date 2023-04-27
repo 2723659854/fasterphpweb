@@ -1,8 +1,5 @@
 <?php
-
-
 namespace App\Time;
-
 
 class OtherTimer
 {

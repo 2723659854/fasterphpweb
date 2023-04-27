@@ -122,17 +122,7 @@ class Epoll
             } elseif ($pid > 0) {
                 cli_set_process_title("xiaosongshu_http".$pid);
                 writePid();
-                /** 使用匿名函数提前连接数据库 */
-                (function(){
-                    try {
-                        new BaseModel();
-                        \Root\Cache::set('_START_TIME',time());
-                    }catch (RuntimeException $exception){
-                        echo "\r\n";
-                        echo $exception->getMessage();
-                        echo "\r\n";
-                    }
-                })();
+                prepareMysqlAndRedis();
                 /** 添加事件 */
                 $this->event->add();//
                 /** 执行事件循环 */

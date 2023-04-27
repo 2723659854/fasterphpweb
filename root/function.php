@@ -288,7 +288,7 @@ function xiaosongshu_timer()
     root\Timer::run();
     while (true) {
         pcntl_signal_dispatch();
-        sleep(10);
+        sleep(1);
     }
 
 }
@@ -346,8 +346,6 @@ function select()
     $httpServer->onMessage = function ($socketAccept, $message) use ($httpServer) {
         onMessage($socketAccept, $message, $httpServer);
     };
-
-
     $httpServer->start();
 }
 
@@ -823,6 +821,21 @@ function rabbitmqConsume(){
             }
         }
     }
+}
+
+
+function prepareMysqlAndRedis(){
+    /** 使用匿名函数提前连接数据库 */
+    (function(){
+        try {
+            new BaseModel();
+            new \Root\Cache();
+        }catch (RuntimeException $exception){
+            echo "\r\n";
+            echo $exception->getMessage();
+            echo "\r\n";
+        }
+    })();
 }
 
 

@@ -30,9 +30,10 @@ class Index
     /** 测试缓存 */
     public function cache()
     {
+        /** 第一种方法，先实例化，在调用 */
         (new Cache())->set('fuck','you');
+        /** 第二种方法，直接静态方法调用 */
         Cache::set('happy','new year');
-
         return ['code' => 200, 'msg' => 'ok','普通的调用'=>(new Cache())->get('fuck'),'静态调用'=>Cache::get('happy')];
     }
 
@@ -44,21 +45,28 @@ class Index
     /** 测试数据库 */
     public function query()
     {
+        /** 第一种方法，实例化模型，然后查询数据库 */
         $book=(new Book())->where('id','=',3)->first();
+        /** 第二种方法：使用门面类调用模型，需要自己创建门面类 */
         $messages = Fbook::where('id', '=', 3)->first();
         return ['status' => 1, 'data' => $messages, 'msg' => 'success','book'=>$book];
     }
 
-    //数据查询
+    /**
+     * request以及模板渲染演示
+     * @param Request $request
+     * @return array|false|string|string[]
+     */
     public function database(Request $request)
     {
-        //print_r($request);
+        /** 获取var参数 */
         $var      = $request->param('var');
-        $str      = $request->param('str');
+        /** 调用数据库 */
         $user     = new User();
         $data     = $user->where('username', '=', 'test')->first();
+        /** 读取配置 */
         $app_name = config('app')['app_name'];
-        //模板渲染 参数传递
+        /** 模板渲染 参数传递 */
         return view('index/database', ['var' => $var, 'str' => date('Y-m-d H:i:s'), 'user' => json_encode($data), 'app_name' => $app_name]);
     }
 

@@ -1,8 +1,9 @@
 <?php
 return [
 
+    /** 默认连接方式 */
     'default'=>'mysql',
-    //支持mysql驱动
+    /** mysql配置 */
     'mysql'=>[
         'host'=>'192.168.4.105',
         'username'=>'root',

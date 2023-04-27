@@ -52,27 +52,10 @@ class Selector
     public function start()
     {
         /** 使用匿名函数提前连接数据库和缓存 */
-        (function(){
-            try {
-                new BaseModel();
-                //\Root\Cache::set('_START_TIME',time());
-            }catch (RuntimeException $exception){
-                echo "\r\n";
-                echo $exception->getMessage();
-                echo "\r\n";
-            }
-        })();
+        prepareMysqlAndRedis();
         /** 获取配置文件,创建子进程，这里省了 */
-        $this->fork();
-    }
-
-    /** 子进程 */
-    public function fork()
-    {
-        /** 子进程负责接收客户端请求 */
         $this->accept();
     }
-
     /** 接收客户端消息 */
     public function accept()
     {

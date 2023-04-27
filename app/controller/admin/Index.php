@@ -8,6 +8,8 @@ namespace App\Controller\Admin;
 
 use APP\Facade\Cache;
 use APP\Facade\User;
+use App\Time\OtherTimer;
+use Root\Timer;
 
 class Index
 {
@@ -33,4 +35,13 @@ class Index
         //print_r(Cache::get('hot'));
         return 'use facade/cache,and the cache data is :' . Cache::get('hot');
     }
+
+    public function timer(){
+        /** 因为是不同的进程，所以没有执行 */
+        $res=\root\Timer::add(5, function () {
+            var_dump("喔喔");
+        }, [], true);
+    return 45;
+    }
+
 }

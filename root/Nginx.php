@@ -23,16 +23,7 @@ class Nginx
         }
         global $_port;
         $this->port = $_port;
-        (function(){
-            try {
-                new \BaseModel();
-                //\Root\Cache::set('_START_TIME',time());
-            }catch (\RuntimeException $exception){
-                echo "\r\n";
-                echo $exception->getMessage();
-                echo "\r\n";
-            }
-        })();
+        prepareMysqlAndRedis();
     }
 
     /** 普通的阻塞同步io */
@@ -46,8 +37,8 @@ class Nginx
             $request = '';
             $flag    = true;
             while ($flag) {
-                $_content = socket_read($socketAccept, 2048);
-                if (strlen($_content) < 2048) {
+                $_content = socket_read($socketAccept, 1024);
+                if (strlen($_content) < 1024) {
                     $flag = false;
                 }
                 $request = $request . $_content;
@@ -115,6 +106,7 @@ class Nginx
                     } else {
                         $content      = '';
                     }
+                    socket_write($socketAccept, 'Content-Type: text/html' . PHP_EOL);
                     socket_write($socketAccept, "Content-Length: " . strlen($content) . "\r\n\r\n");
                     socket_write($socketAccept, $content, strlen($content));
             }
