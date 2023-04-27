@@ -97,8 +97,9 @@ function start_server($param)
     require_once __DIR__ . '/Cache.php';
     require_once __DIR__ . '/queue/Queue.php';
     require_once __DIR__ . '/Facade.php';
-    require_once __DIR__ . '/Worker.php';
-    require_once __DIR__ . '/Worker.php';
+    require_once __DIR__ . '/Selector.php';
+    require_once __DIR__ . '/Epoll.php';
+    require_once __DIR__ . '/Nginx.php';
     require_once __DIR__ . '/BaseCommand.php';
     require_once __DIR__ . '/queue/RabbitMQBase.php';
 
@@ -331,8 +332,8 @@ function check_env()
 function nginx()
 {
     echo "启用普通同步阻塞IO模式\r\n";
-    require_once __DIR__ . '/explain.php';
-    $worker = new root\HttpServer();
+    require_once __DIR__ . '/Nginx.php';
+    $worker = new Nginx();
     $worker->run();
 }
 
@@ -340,8 +341,8 @@ function nginx()
 function select()
 {
     echo "启动select异步IO模型\r\n";
-    require_once __DIR__ . '/Worker.php';
-    $httpServer = new \Root\Worker();
+    require_once __DIR__ . '/Selector.php';
+    $httpServer = new Selector();
     /** 消息接收  */
     $httpServer->onMessage = function ($socketAccept, $message) use ($httpServer) {
         onMessage($socketAccept, $message, $httpServer);
@@ -360,7 +361,7 @@ function select()
  */
 function onMessage($socketAccept, $message, &$httpServer)
 {
-    if (strpos($message, 'HTTP/1.')) {
+    if (strpos($message, 'HTTP/')) {
         $_param = [];
         $_mark  = getUri($message);
 
@@ -447,9 +448,9 @@ function epoll()
 {
     //echo "启动epoll异步IO模型\r\n";
     /** 加载epoll模型类 */
-    require_once __DIR__ . '/Fucker.php';
+    require_once __DIR__ . '/Epoll.php';
     /** @var object $httpServer 将对象加载到内存 */
-    $httpServer            = new Fucker();
+    $httpServer            = new Epoll();
     /** @var callable onMessage 设置消息处理函数 */
     $httpServer->onMessage = function ($socketAccept, $message) use ($httpServer) {
         onMessage($socketAccept, $message, $httpServer);

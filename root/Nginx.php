@@ -1,6 +1,5 @@
 <?php
 
-namespace root;
 set_time_limit(0);
 require_once __DIR__ . '/route.php';
 require_once __DIR__ . '/app.php';
@@ -8,7 +7,7 @@ if (file_exists(dirname(__DIR__) . '/vendor/autoload.php')) {
     require_once dirname(__DIR__) . '/vendor/autoload.php';
 }
 
-class HttpServer
+class Nginx
 {
     private $ip      = '0.0.0.0';
     private $port    = 8020;
@@ -24,6 +23,16 @@ class HttpServer
         }
         global $_port;
         $this->port = $_port;
+        (function(){
+            try {
+                new \BaseModel();
+                \Root\Cache::set('_START_TIME',time());
+            }catch (\RuntimeException $exception){
+                echo "\r\n";
+                echo $exception->getMessage();
+                echo "\r\n";
+            }
+        })();
     }
 
     /** 普通的阻塞同步io */

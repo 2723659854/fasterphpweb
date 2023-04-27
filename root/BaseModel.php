@@ -48,6 +48,7 @@ use mysqli_sql_exception as MysqlException;
         $this->dbname = $database_config['dbname'];
         $this->port = $database_config['port'];
         try{
+            var_dump("开始连接数据库");
             $mysqli = new mysqli($this->host, $this->username, $this->password, $this->dbname, $this->port);
         }catch (MysqlException $e){
             throw new RuntimeException($e->getMessage(),$e->getCode());

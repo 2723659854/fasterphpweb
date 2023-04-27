@@ -20,11 +20,33 @@ class Index
 
     }
 
-    //默认首页
+    /** 默认首页,测试html */
     public function index()
     {
         //模板在根目录下的view目录里面
         return view('/index/index', ['time' => date('Y-m-d H:i:s')]);
+    }
+
+    /** 测试缓存 */
+    public function cache()
+    {
+        (new Cache())->set('fuck','you');
+        Cache::set('happy','new year');
+
+        return ['code' => 200, 'msg' => 'ok','普通的调用'=>(new Cache())->get('fuck'),'静态调用'=>Cache::get('happy')];
+    }
+
+    /** 纯数据 */
+    public function json(){
+        return json_encode(['status'=>1,'msg'=>'success']);
+    }
+
+    /** 测试数据库 */
+    public function query()
+    {
+        $book=(new Book())->where('id','=',3)->first();
+        $messages = Fbook::where('id', '=', 3)->first();
+        return ['status' => 1, 'data' => $messages, 'msg' => 'success','book'=>$book];
     }
 
     //数据查询
@@ -91,14 +113,7 @@ class Index
         return view('index/say', ['picture' => $image, 'teacher' => $teacher, 'file' => json_encode($request->file('file'))]);
     }
 
-    //测试缓存
-    public function book()
-    {
-        (new Cache())->set('fuck','you');
-        Cache::set('happy','new year');
 
-        return ['code' => 200, 'msg' => 'ok','普通的调用'=>(new Cache())->get('fuck'),'静态调用'=>Cache::get('happy')];
-    }
 
     //测试接收数据并直接返回数据
     public function back_url(Request $request)
@@ -126,13 +141,7 @@ class Index
         return 'push message success!';
     }
 
-    //测试原生sql操作
-    public function query()
-    {
-        $book=(new Book())->where('id','=',3)->first();
-        $messages = Fbook::where('id', '=', 3)->first();
-        return ['status' => 1, 'data' => $messages, 'msg' => 'success','book'=>$book];
-    }
+
 
     //测试批量写入
     public function buy_book()

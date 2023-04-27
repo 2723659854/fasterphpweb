@@ -1,7 +1,4 @@
 <?php
-
-namespace Root;
-
 //set_time_limit(0);
 require_once __DIR__ . '/function.php';
 require_once __DIR__ . '/view.php';
@@ -13,7 +10,7 @@ if (file_exists(dirname(__DIR__) . '/vendor/autoload.php')) {
     require_once dirname(__DIR__) . '/vendor/autoload.php';
 }
 
-class Worker
+class Selector
 {
     /** 服务端 */
     protected $socket = NULL;
@@ -54,6 +51,17 @@ class Worker
     /** 启动服务 */
     public function start()
     {
+        /** 使用匿名函数提前连接数据库和缓存 */
+        (function(){
+            try {
+                new BaseModel();
+                \Root\Cache::set('_START_TIME',time());
+            }catch (RuntimeException $exception){
+                echo "\r\n";
+                echo $exception->getMessage();
+                echo "\r\n";
+            }
+        })();
         /** 获取配置文件,创建子进程，这里省了 */
         $this->fork();
     }
