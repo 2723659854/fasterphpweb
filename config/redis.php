@@ -2,7 +2,7 @@
 
 return [
     /** 是否提前启动缓存连接 */
-    'preStart'=>true,
+    'preStart'=>false,
     /** redis队列开关 */
     'enable'=>false,
     /** redis连接基本配置 */

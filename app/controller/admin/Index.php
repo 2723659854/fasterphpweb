@@ -8,7 +8,8 @@ namespace App\Controller\Admin;
 
 use APP\Facade\Cache;
 use APP\Facade\User;
-use App\Time\OtherTimer;
+
+use root\ESClient;
 use Root\Timer;
 
 class Index
@@ -36,14 +37,24 @@ class Index
         return 'use facade/cache,and the cache data is :' . Cache::get('hot');
     }
 
-    public function timer(){
+    public function timer()
+    {
         /** 添加定时任务，周期，回调函数，参数，是否循环执行 */
-        \root\Timer::add(5, function ($a,$b) {
+        \root\Timer::add(5, function ($a, $b) {
             var_dump("我只执行一次额");
             var_dump($a);
             var_dump($b);
-        }, [3,5], false);
-    return 45;
+        }, [3, 5], false);
+        return 45;
+    }
+
+    /** 测试elasticsearch用法 */
+    public function search()
+    {
+        /** 实例化es客户端 */
+        $client = new ESClient();
+        /** 查询所有的数据 */
+        return $client->all('v2_es_user3','_doc');
     }
 
 }

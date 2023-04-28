@@ -127,6 +127,7 @@ function start_server($param)
     require_once __DIR__ . '/Nginx.php';
     require_once __DIR__ . '/BaseCommand.php';
     require_once __DIR__ . '/queue/RabbitMQBase.php';
+    require_once __DIR__ . '/ESClient.php';
 
     /** @var bool $_has_epoll 默认不支持epoll模型 */
     $_has_epoll = false;
@@ -803,7 +804,7 @@ function getUri($request = '')
 function deal_command(){
     global $_system_command;
     /** 加载所有自定义的命令 */
-    foreach (traverse(command_path()) as $key => $file) {
+    foreach (scan_dir(command_path()) as $key => $file) {
         if (file_exists($file)) {
             require_once $file;
             $php_code = file_get_contents($file);

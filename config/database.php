@@ -6,7 +6,7 @@ return [
     /** mysql配置 */
     'mysql'=>[
         /** 是否提前连接MySQL */
-        'preStart'=>true,
+        'preStart'=>false,
         /** mysql基本配置 */
         'host'=>'192.168.4.80',
         'username'=>'root',
