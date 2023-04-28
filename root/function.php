@@ -902,7 +902,13 @@ function prepareMysqlAndRedis()
     })();
 }
 
-function download_file($path)
+/**
+ * 下载文件到浏览器
+ * @param string $path 文件路径
+ * @param string $name 文件名称
+ * @return array
+ */
+function download_file(string $path,string $name=null)
 {
     if (!is_file($path)) {
         throw new RuntimeException("[" . $path . "] 不是可用的文件 ！");
@@ -913,12 +919,12 @@ function download_file($path)
     if (!is_readable($path)) {
         throw new RuntimeException("[" . $path . "] 不可读 ！");
     }
-    var_dump(basename($path));
     $file    = $path;
     $fd      = fopen($file, 'r');
     $content = fread($fd, filesize($file));
     fclose($fd);
-    return ['content' => $content, 'type' => md5('_byte_for_down_load_file_'), 'name' => time() . '.png'];
+    if (!trim($name))$name=basename($path);
+    return ['content' => $content, 'type' => md5('_byte_for_down_load_file_'), 'name' => $name];
 }
 
 

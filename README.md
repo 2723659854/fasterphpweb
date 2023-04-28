@@ -341,7 +341,7 @@ public function search()
     /** 查询节点的所有数据 */
     return $client->all('v2_es_user3','_doc');
 }
-# 其他用发参照 root\ESClient::class的源码，
+# 其他用法参照 root\ESClient::class的源码，
 ```
 
 #### 下载文件到浏览器
