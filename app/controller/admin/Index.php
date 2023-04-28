@@ -8,9 +8,7 @@ namespace App\Controller\Admin;
 
 use APP\Facade\Cache;
 use APP\Facade\User;
-
 use root\ESClient;
-use Root\Timer;
 
 class Index
 {
@@ -53,7 +51,7 @@ class Index
     {
         /** 实例化es客户端 */
         $client = new ESClient();
-        /** 查询所有的数据 */
+        /** 查询节点的所有数据 */
         return $client->all('v2_es_user3','_doc');
     }
 

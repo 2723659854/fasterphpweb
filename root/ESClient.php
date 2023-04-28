@@ -15,8 +15,11 @@ use Elasticsearch\ClientBuilder;
 class ESClient
 {
 
-    /**  php的elasticsearch客户端 */
-    public static  $client = null ;
+    /**
+     * 客户端
+     * @var Client|null
+     */
+    public static  ?Client $client = null ;
     /** @var array|string[] $nodes es服务器节点  */
     protected array $nodes=['192.168.4.80:9200'];
     
@@ -30,7 +33,6 @@ class ESClient
 
     /** 连接服务器 */
     private function connect(){
-        var_dump("去连接服务器了");
         $nodes = config('elastic');
         if (empty($nodes)) $nodes = $this->nodes;
         self::$client = ClientBuilder::create()->setHosts($nodes)->build();

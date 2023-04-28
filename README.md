@@ -330,5 +330,19 @@ return [
 ];
 ```
 
+```php 
+use root\ESClient;
+
+    /** 测试elasticsearch用法 */
+public function search()
+{
+    /** 实例化es客户端 */
+    $client = new ESClient();
+    /** 查询节点的所有数据 */
+    return $client->all('v2_es_user3','_doc');
+}
+# 其他用发参照 root\ESClient::class的源码，
+```
+
 
 
