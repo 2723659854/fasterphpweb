@@ -264,35 +264,8 @@ return [
         }
 ```
 #### 定时器
-
-```php 
-# 在config/timer.php 中配置需要添加的定时器
-    'other'=>[
-        /** 业务类 */
-        'handle'=>\App\Time\OtherTimer::class,
-        /** 周期 */
-        'time'=>7,
-    ],
-```
-
-#### 定时器业务类
-
-```php
-<?php
-namespace App\Time;
-
-class OtherTimer
-{
-    //定时器的业务逻辑必须写在handle方法里面，然后需要在config/timer里面配置
-    public function handle(){
-        //测试写入文件
-        file_put_contents(app_path().'/public/'.time().'note.txt','搜索');
-        var_dump("我是定时器".date('Y-m-d H:i:s'));
-    }
-}
-```
-
-#### 临时添加定时任务
+只能在linux系统中使用定时器，或者使用docker环境。
+#### 添加定时任务
 ```php 
 /** 添加定时任务，周期，回调函数，参数，是否循环执行 */
         \root\Timer::add(5, function ($a,$b) {
@@ -302,7 +275,6 @@ class OtherTimer
         }, [3,5], false);
 
 ```
-
 
 #### rabbitmq消息队列
 

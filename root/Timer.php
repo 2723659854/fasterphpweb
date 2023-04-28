@@ -101,7 +101,10 @@ class Timer
                     sleep(1);
                     /** 定时器里面的任务为空，则退出进程 */
                     if (empty(self::$task)){
-                        exit("没有任务了");
+                        /** 记录进程号,主进程负责管理杀死这些 */
+                        writeTimerPid();
+                        var_dump("任务清理完了");
+                        break;
                     }
                 }
             }else{

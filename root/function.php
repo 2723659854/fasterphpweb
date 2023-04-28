@@ -33,6 +33,10 @@ function command_path(){
     return dirname(__DIR__).'/app/command';
 }
 
+function timerLogPath(){
+    return dirname(__DIR__).'/root/timerLog';
+}
+
 /**
  * 遍历目录
  * @param $path
@@ -48,6 +52,27 @@ function traverse($path = '.')
             continue;
         } else if (is_dir($sub_dir)) {
             traverse($sub_dir);
+        } else {
+            $filePath[$path . '/' . $file] = $path . '/' . $file;
+        }
+    }
+    return $filePath;
+}
+
+/**
+ * 扫描目录的文件
+ * @param $path
+ * @return array
+ */
+function scan_dir($path = '.'){
+    $filePath=[];
+    $current_dir = opendir($path);
+    while (($file = readdir($current_dir)) !== false) {
+        $sub_dir = $path . DIRECTORY_SEPARATOR . $file;
+        if ($file == '.' || $file == '..') {
+            continue;
+        } else if (is_dir($sub_dir)) {
+            scan_dir($sub_dir);
         } else {
             $filePath[$path . '/' . $file] = $path . '/' . $file;
         }
@@ -271,19 +296,20 @@ function deal_job($job = [])
 /** 执行定时器 */
 function xiaosongshu_timer()
 {
-    require_once __DIR__ . '/Timer.php';
-    $timer_config = include dirname(__DIR__) . '/config/timer.php';
-    if (!empty($timer_config)) {
-        foreach ($timer_config as $k => $v) {
-            $className = $v['handle'];
-            $time      = $v['time'];
-            if (class_exists($className)) {
-                root\Timer::add(intval($time), function () use ($className) {
-                    $class = new $className;
-                    $class->handle();
-                }, [], true);
+    while(true){
+        /** 管理定时器 */
+        foreach ( scan_dir(timerLogPath()) as $key=>$val){
+            $pid = file_get_contents($val);
+            if ($pid > 0) {
+                \posix_kill($pid, SIGKILL);
             }
+            @unlink($val);
+            /** 杀死进程必须等待1秒 */
+            sleep(1);
         }
+
+        /** 每次执行完成后等待1秒，防止进程占用大量内存 */
+        sleep(1);
     }
 }
 
@@ -499,8 +525,8 @@ function daemon()
                 rabbitmqConsume();
             }elseif($_small_son_id==0){
                 /** 主进程 */
-                /** 如果是主进程，则设置进程名称为master */
-                cli_set_process_title("xiaosongshu_timer_and_master");
+                /** 如果是主进程，则设置进程名称为master，管理定时器 */
+                cli_set_process_title("xiaosongshu_master");
                 writePid();
                 /** 在主进程里启动定时器 */
                 xiaosongshu_timer();
@@ -546,6 +572,17 @@ function writePid(){
     $fp = fopen($_pid_file, 'a+');
     fwrite($fp, getmypid() . '-');
     fclose($fp);
+}
+
+/**
+ * 记录定时器的pid
+ * @param $pid
+ * @return void
+ */
+function writeTimerPid(){
+    /** 记录进程号 */
+    $myPid=getmypid();
+    file_put_contents(__DIR__.'/timerLog/'.$myPid.'.txt',$myPid);
 }
 
 /** 创建子进程 */
