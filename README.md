@@ -14,15 +14,16 @@ composer require xiaosongshu/fasterphpweb
         |-- ...                 <其他业务模块>
     |-- facade                  <门面模块>
     |-- queue                  <队列任务模块>
-    |-- timer                  <定时任务模块>
+    |-- rabbitmq                  <rabbitmq队列>
     |-- model               <模型层>
+    |-- command               <自定义命令行>
 |-- config                  <配置项>
     |--app.php              <项目配置>
     |--database.php              <数据库配置>
     |--redis.php              <缓存配置>
     |--server.php              <http服务配置>
     |--timer.php              <定时任务配置>
-|-- mysql                 <mysql文件>
+|-- mysql                 <mysql文件，非必须>
     ...
 |-- public                  <公共文件>
 |-- root                <系统目录，建议不要轻易改动>
@@ -263,6 +264,18 @@ return [
             fclose($fp1);
         }
 ```
+#### 下载文件到浏览器
+
+```php 
+ /** 下载文件到浏览器 */
+    public function down()
+    {
+        /** 语法：download_file(文件路径) */
+        return download_file(public_path().'/head.png');
+    }
+
+```
+
 #### 定时器
 只能在linux系统中使用定时器，或者使用docker环境。
 #### 添加定时任务
@@ -344,15 +357,24 @@ public function search()
 # 其他用法参照 root\ESClient::class的源码，
 ```
 
-#### 下载文件到浏览器
 
+#### 自定义命令
 ```php 
- /** 下载文件到浏览器 */
-    public function down()
+<?php
+namespace App\Command;
+/** 引入命令行基类 */
+use Root\BaseCommand;
+/** 创建自定义命令类 继承基类*/
+class DemoCommand  extends BaseCommand
+{
+
+    /** @var string $command 命令触发字段，必填 */
+    public $command = 'check:wrong';
+
+    /** 业务逻辑 必填 */
+    public function handle()
     {
-        /** 语法：download_file(文件路径) */
-        return download_file(public_path().'/head.png');
+        echo "请在这里写你的业务逻辑\r\n";
     }
-
+}
 ```
-
