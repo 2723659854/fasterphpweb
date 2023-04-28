@@ -327,7 +327,7 @@ function nginx()
 {
     require_once __DIR__ . '/Nginx.php';
     $worker = new Nginx();
-    $worker->run();
+    $worker->start();
 }
 
 /** 异步IO之select轮询模式 */
@@ -447,7 +447,7 @@ function epoll()
         onMessage($socketAccept, $message, $httpServer);
     };
     /** 启动服务 */
-    $httpServer->run();
+    $httpServer->start();
 }
 
 
@@ -490,7 +490,6 @@ function daemon()
         /** 在主进程里再创建一个子进程 */
        \pcntl_fork();
         if (getmypid() == $master_pid) {
-
             /** 在主进程里面创建一个子进程负责处理rabbitmq的队列 */
             $_small_son_id=\pcntl_fork();
             if ($_small_son_id>0){
@@ -517,8 +516,9 @@ function daemon()
             xiaosongshu_queue();
         }
     } else {
-        /** 如果不是主进程，则开启http服务，并设置进程名称 */
+        /** 在子进程里启动队列，并设置进程名称 */
         cli_set_process_title("xiaosongshu_http");
+        writePid();
         global $_has_epoll;
         /** 如果linux支持epoll模型则使用epoll */
         if ($_has_epoll) {
@@ -551,10 +551,9 @@ function writePid(){
 /** 创建子进程 */
 function create_process(){
     /** 初始化工作进程数 */
-    global $_server_num,$_pid_file;
-    if ($_server_num < 2) {
-        $_server_num = 2;
-    }
+    global $_server_num, $_pid_file;
+    /** 至少要开启一个子进程才能开启http服务 */
+    if ($_server_num<2) $_server_num = 2;
     /** 创建子进程，因为是多进程，所以会有以下的操作 */
     for ($i = 0; $i <= $_server_num; $i++) {
         /** @var string $read_log_content 读取已经开启的进程 */
@@ -822,8 +821,14 @@ function prepareMysqlAndRedis(){
     /** 使用匿名函数提前连接数据库 */
     (function(){
         try {
-            new BaseModel();
-            new \Root\Cache();
+            $startMysql=config('database')['mysql']['preStart']??false;
+            if ($startMysql){
+                new BaseModel();
+            }
+            $startRedis=config('redis')['preStart']??false;
+            if ($startRedis){
+                new \Root\Cache();
+            }
         }catch (RuntimeException $exception){
             echo "\r\n";
             echo $exception->getMessage();

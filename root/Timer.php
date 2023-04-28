@@ -101,7 +101,7 @@ class Timer
                     sleep(1);
                     /** 定时器里面的任务为空，则退出进程 */
                     if (empty(self::$task)){
-                        exit;
+                        exit("没有任务了");
                     }
                 }
             }else{

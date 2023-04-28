@@ -32,7 +32,7 @@ class Nginx
     }
 
     /** 普通的阻塞同步io */
-    public function run()
+    public function start()
     {
         @\socket_bind($this->_socket, $this->ip, $this->port);
         @\socket_listen($this->_socket, 5);

@@ -5,7 +5,10 @@ return [
     'default'=>'mysql',
     /** mysql配置 */
     'mysql'=>[
-        'host'=>'192.168.4.105',
+        /** 是否提前连接MySQL */
+        'preStart'=>true,
+        /** mysql基本配置 */
+        'host'=>'192.168.4.80',
         'username'=>'root',
         'passwd'=>'root',
         'dbname'=>'go_gin_chat',

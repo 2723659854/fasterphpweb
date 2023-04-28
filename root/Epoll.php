@@ -109,26 +109,27 @@ class Epoll
     /** 启动http服务 */
     public function run()
     {
+        /** 添加事件 */
+        $this->event->add();//
+        /** 执行事件循环 */
+        $this->event_base->loop();//
+    }
+
+    public function start(){
+        $this->fork();
+    }
+
+    public function fork(){
         global $_server_num;
-        if ($_server_num < 2) {
-            $_server_num = 2;
-        }
         for ($i=1;$i<=$_server_num;$i++){
             /** @var int $pid 创建子进程 ,必须在loop之前创建子进程，否则loop会阻塞其他子进程 */
             $pid = \pcntl_fork();
-            if (-1 === $pid) {
-                /** 创建子进程失败 */
-                throw new Exception('Fork fail');
-            } elseif ($pid > 0) {
-                cli_set_process_title("xiaosongshu_http".$pid);
+            if ($pid){
+                cli_set_process_title("xiaosongshu_http");
                 writePid();
                 prepareMysqlAndRedis();
-                /** 添加事件 */
-                $this->event->add();//
-                /** 执行事件循环 */
-                @$this->event_base->loop();//
+                $this->run();
             }
         }
-
     }
 }
