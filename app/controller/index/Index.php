@@ -31,25 +31,26 @@ class Index
     public function cache()
     {
         /** 第一种方法，先实例化，在调用 */
-        (new Cache())->set('fuck','you');
+        (new Cache())->set('fuck', 'you');
         /** 第二种方法，直接静态方法调用 */
-        Cache::set('happy','new year');
-        return ['code' => 200, 'msg' => 'ok','普通的调用'=>(new Cache())->get('fuck'),'静态调用'=>Cache::get('happy')];
+        Cache::set('happy', 'new year');
+        return ['code' => 200, 'msg' => 'ok', '普通的调用' => (new Cache())->get('fuck'), '静态调用' => Cache::get('happy')];
     }
 
     /** 纯数据 */
-    public function json(){
-        return json_encode(['status'=>1,'msg'=>'success']);
+    public function json()
+    {
+        return json_encode(['status' => 1, 'msg' => 'success']);
     }
 
     /** 测试数据库 */
     public function query()
     {
         /** 第一种方法，实例化模型，然后查询数据库 */
-        $book=(new Book())->where('id','=',3)->first();
+        $book = (new Book())->where('id', '=', 3)->first();
         /** 第二种方法：使用门面类调用模型，需要自己创建门面类 */
         $messages = Fbook::where('id', '=', 3)->first();
-        return ['status' => 1, 'data' => $messages, 'msg' => 'success','book'=>$book];
+        return ['status' => 1, 'data' => $messages, 'msg' => 'success', 'book' => $book];
     }
 
     /**
@@ -60,10 +61,10 @@ class Index
     public function database(Request $request)
     {
         /** 获取var参数 */
-        $var      = $request->param('var');
+        $var = $request->param('var');
         /** 调用数据库 */
-        $user     = new User();
-        $data     = $user->where('username', '=', 'test')->first();
+        $user = new User();
+        $data = $user->where('username', '=', 'test')->first();
         /** 读取配置 */
         $app_name = config('app')['app_name'];
         /** 模板渲染 参数传递 */
@@ -122,7 +123,6 @@ class Index
     }
 
 
-
     //测试接收数据并直接返回数据
     public function back_url(Request $request)
     {
@@ -148,7 +148,6 @@ class Index
         Test::dispatch(['name' => '李磊', 'age' => '32'], 8);
         return 'push message success!';
     }
-
 
 
     //测试批量写入
@@ -211,11 +210,19 @@ class Index
      * @note 服务提供者
      * @note 将服务注册到nacos，然后其他地方可以调用这个服务
      */
-    public function add(Request $request){
+    public function add(Request $request)
+    {
 
-        $a=$request->param('a',0);
-        $b=$request->param('b',0);
-        return (int)bcadd($a,$b);
+        $a = $request->param('a', 0);
+        $b = $request->param('b', 0);
+        return (int)bcadd($a, $b);
+    }
+
+    /** 下载文件到浏览器 */
+    public function down()
+    {
+        /** 语法：download_file(文件路径) */
+        return download_file(public_path().'/head.png');
     }
 
 }

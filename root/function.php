@@ -29,12 +29,14 @@ function public_path()
     return app_path() . '/public';
 }
 
-function command_path(){
-    return dirname(__DIR__).'/app/command';
+function command_path()
+{
+    return dirname(__DIR__) . '/app/command';
 }
 
-function timerLogPath(){
-    return dirname(__DIR__).'/root/timerLog';
+function timerLogPath()
+{
+    return dirname(__DIR__) . '/root/timerLog';
 }
 
 /**
@@ -64,8 +66,9 @@ function traverse($path = '.')
  * @param $path
  * @return array
  */
-function scan_dir($path = '.'){
-    $filePath=[];
+function scan_dir($path = '.')
+{
+    $filePath    = [];
     $current_dir = opendir($path);
     while (($file = readdir($current_dir)) !== false) {
         $sub_dir = $path . DIRECTORY_SEPARATOR . $file;
@@ -85,21 +88,23 @@ function scan_dir($path = '.'){
  * @param $php_code
  * @return array
  */
-function get_php_classes($php_code) {
+function get_php_classes($php_code)
+{
     $classes = array();
-    $tokens = token_get_all($php_code);
-    $count = count($tokens);
+    $tokens  = token_get_all($php_code);
+    $count   = count($tokens);
     for ($i = 2; $i < $count; $i++) {
-        if (   $tokens[$i - 2][0] == T_CLASS
+        if ($tokens[$i - 2][0] == T_CLASS
             && $tokens[$i - 1][0] == T_WHITESPACE
             && $tokens[$i][0] == T_STRING) {
 
             $class_name = $tokens[$i][1];
-            $classes[] = $class_name;
+            $classes[]  = $class_name;
         }
     }
     return $classes;
 }
+
 /**
  * 启动服务
  * @param $param
@@ -112,7 +117,7 @@ function start_server($param)
     check_env();
     $daemonize = false;
     $flag      = true;
-    global $_pid_file, $_port, $_listen, $_server_num, $_system, $_lock_file, $_has_epoll,$_system_command;
+    global $_pid_file, $_port, $_listen, $_server_num, $_system, $_lock_file, $_has_epoll, $_system_command;
     $_pid_file  = __DIR__ . '/my_pid.txt';
     $_lock_file = __DIR__ . '/lock.txt';
     require_once __DIR__ . '/Timer.php';
@@ -198,10 +203,10 @@ function start_server($param)
                 break;
             default:
                 /** 如果是自定义命令，则执行用户的逻辑 */
-                if (isset($_system_command[$param[1]])){
+                if (isset($_system_command[$param[1]])) {
                     (new $_system_command[$param[1]]())->handle();
                     exit;
-                }else{
+                } else {
                     /** 查看是否是用户自定义的命令 */
                     echo "未识别的命令\r\n";
                     $flag = false;
@@ -297,9 +302,9 @@ function deal_job($job = [])
 /** 执行定时器 */
 function xiaosongshu_timer()
 {
-    while(true){
+    while (true) {
         /** 管理定时器 */
-        foreach ( scan_dir(timerLogPath()) as $key=>$val){
+        foreach (scan_dir(timerLogPath()) as $key => $val) {
             $pid = file_get_contents($val);
             if ($pid > 0) {
                 \posix_kill($pid, SIGKILL);
@@ -317,8 +322,8 @@ function xiaosongshu_timer()
 /** 执行队列 */
 function xiaosongshu_queue()
 {
-    $enable=config('redis')['enable'];
-    if ($enable){
+    $enable = config('redis')['enable'];
+    if ($enable) {
         _queue_xiaosongshu();
     }
 }
@@ -390,10 +395,11 @@ function onMessage($socketAccept, $message, &$httpServer)
         }
         $url     = $fileName;
         $fileExt = preg_replace('/^.*\.(\w+)$/', '$1', $fileName);
-        fwrite($socketAccept, 'HTTP/1.1 200 OK' . PHP_EOL);
-        fwrite($socketAccept, 'Date:' . date('Y-m-d H:i:s') . PHP_EOL);
+
         switch ($fileExt) {
             case "html":
+                fwrite($socketAccept, 'HTTP/1.1 200 OK' . PHP_EOL);
+                fwrite($socketAccept, 'Date:' . date('Y-m-d H:i:s') . PHP_EOL);
                 fwrite($socketAccept, 'Content-Type: text/html' . PHP_EOL);
                 fwrite($socketAccept, '' . PHP_EOL);
                 $fileName = dirname(__DIR__) . '/view/' . $fileName;
@@ -406,6 +412,8 @@ function onMessage($socketAccept, $message, &$httpServer)
                 fwrite($socketAccept, $fileContent, strlen($fileContent));
                 break;
             case "ico": case "jpg": case "js": case "css": case "gif": case "png": case "icon": case "jpeg":
+                fwrite($socketAccept, 'HTTP/1.1 200 OK' . PHP_EOL);
+                fwrite($socketAccept, 'Date:' . date('Y-m-d H:i:s') . PHP_EOL);
                 fwrite($socketAccept, 'Content-Type: image/jpeg' . PHP_EOL);
                 $fileName = dirname(__DIR__) . '/public/' . $fileName;
                 if (file_exists($fileName)) {
@@ -417,6 +425,8 @@ function onMessage($socketAccept, $message, &$httpServer)
                 fwrite($socketAccept, $fileContent, strlen($fileContent));
                 break;
             case "doc": case "docx": case "ppt": case "pptx": case "xls": case "xlsx": case "zip": case "rar": case "txt":
+                fwrite($socketAccept, 'HTTP/1.1 200 OK' . PHP_EOL);
+                fwrite($socketAccept, 'Date:' . date('Y-m-d H:i:s') . PHP_EOL);
                 fwrite($socketAccept, 'Content-Type: application/octet-stream' . PHP_EOL);
                 fwrite($socketAccept, '' . PHP_EOL);
                 $fileName = dirname(__DIR__) . '/public/' . $fileName;
@@ -441,13 +451,24 @@ function onMessage($socketAccept, $message, &$httpServer)
                 } else {
                     $content = handle(route($url), $_param, $_request);
                 }
-
-                if (!is_string($content)) {
-                    $content = json_encode($content);
+                /** 文件下载 */
+                if (isset($content['type']) && $content['type'] == md5('_byte_for_down_load_file_')) {
+                    fwrite($socketAccept, 'HTTP/1.1 200 OK' . PHP_EOL);
+                    fwrite($socketAccept, 'Date:' . date('Y-m-d H:i:s') . PHP_EOL);
+                    fwrite($socketAccept, 'Content-Type: application/octet-stream' . PHP_EOL);
+                    fwrite($socketAccept, 'Accept-Ranges: bytes' . PHP_EOL);
+                    fwrite($socketAccept, 'Accept-Length:' . strlen($content['content']) . PHP_EOL);
+                    fwrite($socketAccept, 'Content-Disposition: attachment; filename=' . $content['name'] . "\r\n\r\n");
+                    fwrite($socketAccept, $content['content'], strlen($content['content']));
+                } else { /** 其他的暂时都做html处理 */
+                    if (!is_string($content)) { $content = json_encode($content); }
+                    fwrite($socketAccept, 'HTTP/1.1 200 OK' . PHP_EOL);
+                    fwrite($socketAccept, 'Date:' . date('Y-m-d H:i:s') . PHP_EOL);
+                    fwrite($socketAccept, 'Content-Type: text/html' . PHP_EOL);
+                    fwrite($socketAccept, "Content-Length: " . strlen($content) . "\r\n\r\n");
+                    fwrite($socketAccept, $content, strlen($content));
                 }
-                fwrite($socketAccept, 'Content-Type: text/html' . PHP_EOL);
-                fwrite($socketAccept, "Content-Length: " . strlen($content) . "\r\n\r\n");
-                fwrite($socketAccept, $content, strlen($content));
+
         }
         /** 这里必须关闭才能够给cli模式正常的返回数据，但是这个会影响需要长连接的浏览器或者其他服务，还不知道怎么处理 */
         fclose($socketAccept);
@@ -468,7 +489,7 @@ function epoll()
     /** 加载epoll模型类 */
     require_once __DIR__ . '/Epoll.php';
     /** @var object $httpServer 将对象加载到内存 */
-    $httpServer            = new Epoll();
+    $httpServer = new Epoll();
     /** @var callable onMessage 设置消息处理函数 */
     $httpServer->onMessage = function ($socketAccept, $message) use ($httpServer) {
         onMessage($socketAccept, $message, $httpServer);
@@ -510,28 +531,28 @@ function daemon()
     }
     /** 创建子进程 */
     create_process();
-    /** @var int $_this_pid  获取当前进程id */
+    /** @var int $_this_pid 获取当前进程id */
     $_this_pid = getmypid();
     /** 如果是主进程 */
     if ($_this_pid == $master_pid) {
         /** 在主进程里再创建一个子进程 */
-       \pcntl_fork();
+        \pcntl_fork();
         if (getmypid() == $master_pid) {
             /** 在主进程里面创建一个子进程负责处理rabbitmq的队列 */
-            $_small_son_id=\pcntl_fork();
-            if ($_small_son_id>0){
+            $_small_son_id = \pcntl_fork();
+            if ($_small_son_id > 0) {
                 /** 记录进程号 */
                 writePid();
                 /** 子进程 */
                 rabbitmqConsume();
-            }elseif($_small_son_id==0){
+            } elseif ($_small_son_id == 0) {
                 /** 主进程 */
                 /** 如果是主进程，则设置进程名称为master，管理定时器 */
                 cli_set_process_title("xiaosongshu_master");
                 writePid();
                 /** 在主进程里启动定时器 */
                 xiaosongshu_timer();
-            }else{
+            } else {
                 echo "在创建rabbitmq的管理进程的时候失败了\r\t";
                 exit;
             }
@@ -567,7 +588,8 @@ function daemon()
 }
 
 /** 记录pid到文件 */
-function writePid(){
+function writePid()
+{
     global $_pid_file;
     /** 记录进程号 */
     $fp = fopen($_pid_file, 'a+');
@@ -580,18 +602,20 @@ function writePid(){
  * @param $pid
  * @return void
  */
-function writeTimerPid(){
+function writeTimerPid()
+{
     /** 记录进程号 */
-    $myPid=getmypid();
-    file_put_contents(__DIR__.'/timerLog/'.$myPid.'.txt',$myPid);
+    $myPid = getmypid();
+    file_put_contents(__DIR__ . '/timerLog/' . $myPid . '.txt', $myPid);
 }
 
 /** 创建子进程 */
-function create_process(){
+function create_process()
+{
     /** 初始化工作进程数 */
     global $_server_num, $_pid_file;
     /** 至少要开启一个子进程才能开启http服务 */
-    if ($_server_num<2) $_server_num = 2;
+    if ($_server_num < 2) $_server_num = 2;
     /** 创建子进程，因为是多进程，所以会有以下的操作 */
     for ($i = 0; $i <= $_server_num; $i++) {
         /** @var string $read_log_content 读取已经开启的进程 */
@@ -801,24 +825,25 @@ function getUri($request = '')
  * 处理自定义的命令
  * @return void
  */
-function deal_command(){
+function deal_command()
+{
     global $_system_command;
     /** 加载所有自定义的命令 */
     foreach (scan_dir(command_path()) as $key => $file) {
         if (file_exists($file)) {
             require_once $file;
             $php_code = file_get_contents($file);
-            $classes = get_php_classes($php_code);
-            foreach ($classes as $class){
+            $classes  = get_php_classes($php_code);
+            foreach ($classes as $class) {
                 /** @var string $_class_name 拼接完整的路径 */
-                $_class_name='App\Command\\'.$class;
+                $_class_name = 'App\Command\\' . $class;
                 /** @var object $object 通过反射获取这个类 */
-                $object=new ReflectionClass(new $_class_name());
+                $object = new ReflectionClass(new $_class_name());
                 /** 如果这个类有command属性，并且有handle方法，则将这个方法和类名注册到全局命令行中 */
-                if ($object->hasMethod('handle')&&$object->hasProperty('command')){
-                    foreach ($object->getDefaultProperties() as $property => $command){
-                        if ($property=='command'){
-                            $_system_command[$command]=$_class_name;
+                if ($object->hasMethod('handle') && $object->hasProperty('command')) {
+                    foreach ($object->getDefaultProperties() as $property => $command) {
+                        if ($property == 'command') {
+                            $_system_command[$command] = $_class_name;
                         }
                     }
                 }
@@ -831,21 +856,22 @@ function deal_command(){
  * 处理rabbitmq的消费
  * @return void
  */
-function rabbitmqConsume(){
-    $enable=config('rabbitmq')['enable'];
-    if ($enable){
-        $config=config('rabbitmqProcess');
-        foreach ($config as $name=>$value){
-            if (isset($value['handler'])){
+function rabbitmqConsume()
+{
+    $enable = config('rabbitmq')['enable'];
+    if ($enable) {
+        $config = config('rabbitmqProcess');
+        foreach ($config as $name => $value) {
+            if (isset($value['handler'])) {
                 /** 创建一个子进程，在子进程里面执行消费 */
-                $rabbitmq_pid=\pcntl_fork();
-                if ($rabbitmq_pid>0) {
+                $rabbitmq_pid = \pcntl_fork();
+                if ($rabbitmq_pid > 0) {
                     /** 记录进程号 */
                     writePid();
                     cli_set_process_title($name);
                     if (class_exists($value['handler'])) {
-                        $className=$value['handler'];
-                        $queue = new $className();
+                        $className = $value['handler'];
+                        $queue     = new $className();
                         $queue->consume();
                     }
                 }
@@ -854,25 +880,47 @@ function rabbitmqConsume(){
     }
 }
 
-
-function prepareMysqlAndRedis(){
+/** 提前加载MySQL和redis */
+function prepareMysqlAndRedis()
+{
     /** 使用匿名函数提前连接数据库 */
-    (function(){
+    (function () {
         try {
-            $startMysql=config('database')['mysql']['preStart']??false;
-            if ($startMysql){
+            $startMysql = config('database')['mysql']['preStart'] ?? false;
+            if ($startMysql) {
                 new BaseModel();
             }
-            $startRedis=config('redis')['preStart']??false;
-            if ($startRedis){
+            $startRedis = config('redis')['preStart'] ?? false;
+            if ($startRedis) {
                 new \Root\Cache();
             }
-        }catch (RuntimeException $exception){
+        } catch (RuntimeException $exception) {
             echo "\r\n";
             echo $exception->getMessage();
             echo "\r\n";
         }
     })();
 }
+
+function download_file($path)
+{
+    if (!is_file($path)) {
+        throw new RuntimeException("[" . $path . "] 不是可用的文件 ！");
+    }
+    if (!file_exists($path)) {
+        throw new RuntimeException("[" . $path . "] 不是可用的文件 ！");
+    }
+    if (!is_readable($path)) {
+        throw new RuntimeException("[" . $path . "] 不可读 ！");
+    }
+    var_dump(basename($path));
+    $file    = $path;
+    $fd      = fopen($file, 'r');
+    $content = fread($fd, filesize($file));
+    fclose($fd);
+    return ['content' => $content, 'type' => md5('_byte_for_down_load_file_'), 'name' => time() . '.png'];
+}
+
+
 
 

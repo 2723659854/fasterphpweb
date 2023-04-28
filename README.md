@@ -344,5 +344,15 @@ public function search()
 # 其他用发参照 root\ESClient::class的源码，
 ```
 
+#### 下载文件到浏览器
 
+```php 
+ /** 下载文件到浏览器 */
+    public function down()
+    {
+        /** 语法：download_file(文件路径) */
+        return download_file(public_path().'/head.png');
+    }
+
+```
 
