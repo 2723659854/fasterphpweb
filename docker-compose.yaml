@@ -21,11 +21,14 @@ services:
     # 端口映射， 把容器里面的8080端口映射到外面宿主机的8800端口
     ports:
       - "8080:8080"
+      - "8000:8000"
+      - "8001:8001"
+      - "8002:8002"
 
     # 目录挂载 这里是把宿主机的目录/e/yanglong/webman  挂载到容器的 /var/www 目录
     # 这里使用了目录挂载，可以实现代码实时更新
     volumes:
-      - /e/yanglong/fasterphpweb:/usr/src/myapp
+      - /e/yanglong:/usr/src/myapp
     # 需要连接的容器名称，这里指定要连接redis容器
     links:
        - redis
@@ -47,7 +50,7 @@ services:
     # 端口映射
     ports:
       # 本项目内部使用可以用6379端口，如果外部项目需要使用这个redis请使用6389，可以自己设置
-      - "6389:6379"
+      - "6379:6379"
   # rabbitmq服务
   rabbitmq:
     # 是否自动重启
