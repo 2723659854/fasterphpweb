@@ -1,5 +1,6 @@
 <?php
-
+# 如果要使用命名空间，那么base和event_base这两个类必须加上\表示根目录，也是命名空间的意思，否则就会在当前目录里面寻找类，是找不到的
+namespace Root;
 
 //set_time_limit(0);
 require_once __DIR__ . '/function.php';
@@ -61,11 +62,11 @@ class Epoll
         $errno && exit($error);
         /** 设置为异步，不然fread,stream_socket_acceptd等会堵塞 */
         stream_set_blocking($this->serv, 0);
-        /** 获取eventBase实例 */
-        $this->event_base = new EventBase();
+        /** 获取eventBase实例 因为本文件使用了命名空间 所以这里必须指定eventbase 和 event 类的名命名空间是根目录\ 否则会在本类所在的命名空间查找，会报错，找不到这个类 */
+        $this->event_base = new \EventBase();
         /** 建立事件监听服务器socket可读事件， 获取event实例，这个是获取php的event扩展的基类 */
         /** 在react中，SyntheticEvent在调用事件回调之后该对象将被重用，并且其所有属性都将无效。如果要以异步方 式访问事件属性，则应调用event.persist()事件，这将从池中删除事件，并允许用户代码保留对该事件的引用。 */
-        $event = new Event($this->event_base, $this->serv, Event::READ | Event::PERSIST, function ($serv) {
+        $event = new \Event($this->event_base, $this->serv, \Event::READ | \Event::PERSIST, function ($serv) {
             /** 获取新的连接 */
             $cli = @stream_socket_accept($serv, 0);
             /** 如果有连接 */
@@ -73,7 +74,7 @@ class Epoll
                 /** 设置为异步 */
                 stream_set_blocking($cli, 0);
                 /** 将新的客户端连接投入到事件，构建客户端事件， */
-                $client_event = new Event($this->event_base, $cli, Event::READ | Event::PERSIST, function ($cli) {
+                $client_event = new \Event($this->event_base, $cli, \Event::READ | \Event::PERSIST, function ($cli) {
                     /** 客户端连接再添加监听可读事件，读取客户端连接的数据 */
                     $buffer = '';
                     $flag    = true;

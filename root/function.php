@@ -489,7 +489,7 @@ function epoll()
     /** 加载epoll模型类 */
     require_once __DIR__ . '/Epoll.php';
     /** @var object $httpServer 将对象加载到内存 */
-    $httpServer = new Epoll();
+    $httpServer = new Root\Epoll();
     /** @var callable onMessage 设置消息处理函数 */
     $httpServer->onMessage = function ($socketAccept, $message) use ($httpServer) {
         onMessage($socketAccept, $message, $httpServer);

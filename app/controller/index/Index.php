@@ -47,10 +47,10 @@ class Index
     public function query()
     {
         /** 第一种方法，实例化模型，然后查询数据库 */
-        $book = (new Book())->where('id', '=', 3)->first();
+        $book = (new Book())->where('id', '=', 1)->first();
         /** 第二种方法：使用门面类调用模型，需要自己创建门面类 */
-        $messages = Fbook::where('id', '=', 3)->first();
-        return ['status' => 1, 'data' => $messages, 'msg' => 'success', 'book' => $book];
+       // $messages = Fbook::where('id', '=', 3)->first();
+        return ['status' => 1,  'msg' => 'success', 'book' => $book];
     }
 
     /**
