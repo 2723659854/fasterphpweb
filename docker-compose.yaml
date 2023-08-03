@@ -11,6 +11,10 @@ services:
     # 容器使用的镜像名称 可以是本地的镜像名称，也可以线上的镜像名称 ，也可以直接填镜像的ID,如果重新编辑了Dockerfile文件，
     # 那么就要删除原来的镜像或者修改下面的image的名字,否则还是用的原来的镜像，巨坑
     image: five
+    # 设置网络
+    networks:
+      bridge:
+        ipv4_address: 172.28.0.2
     # 构建镜像的配置，如果没有这个镜像，则构建这个镜像
     # 参考地址：https://blog.csdn.net/rzy1248873545/article/details/121909623
     build:
@@ -20,11 +24,7 @@ services:
       dockerfile: Dockerfile
     # 端口映射， 把容器里面的8080端口映射到外面宿主机的8800端口
     ports:
-      - "8080:8080"
-      - "8000:8000"
-      - "8001:8001"
-      - "8002:8002"
-
+      - "8500:8500"
     # 目录挂载 这里是把宿主机的目录/e/yanglong/webman  挂载到容器的 /var/www 目录
     # 这里使用了目录挂载，可以实现代码实时更新
     volumes:
@@ -68,3 +68,11 @@ services:
     # 挂载目录
     volumes:
       - /d/rabbitmq/:/var/log/rabbitmq/
+# 创建桥接网络
+networks:
+  bridge:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.28.0.0/16
