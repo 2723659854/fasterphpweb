@@ -12,9 +12,9 @@ services:
     # 那么就要删除原来的镜像或者修改下面的image的名字,否则还是用的原来的镜像，巨坑
     image: five
     # 设置网络
-    networks:
-      bridge:
-        ipv4_address: 172.28.0.2
+#    networks:
+#      bridge:
+#        ipv4_address: 172.28.0.2
     # 构建镜像的配置，如果没有这个镜像，则构建这个镜像
     # 参考地址：https://blog.csdn.net/rzy1248873545/article/details/121909623
     build:
@@ -24,7 +24,11 @@ services:
       dockerfile: Dockerfile
     # 端口映射， 把容器里面的8080端口映射到外面宿主机的8800端口
     ports:
-      - "8500:8500"
+      - "8000:8000"
+      - "9501:9501"
+      - "9502:9502"
+      - "9503:9503"
+
     # 目录挂载 这里是把宿主机的目录/e/yanglong/webman  挂载到容器的 /var/www 目录
     # 这里使用了目录挂载，可以实现代码实时更新
     volumes:
@@ -51,6 +55,16 @@ services:
     ports:
       # 本项目内部使用可以用6379端口，如果外部项目需要使用这个redis请使用6389，可以自己设置
       - "6379:6379"
+    #  这个是挂载本地的配置文件，这里是把配置文件挂载进去 （后面加的，因为需要使用到redis的回调事件，所以使用了挂载配置文件的方法，
+    # 但是也可以使用命令行，redis-cli config set notify-keyspace-events Ex ，但是一旦重启容器就会失效）
+    # 参考地址：https://zhuanlan.zhihu.com/p/627184075?utm_id=0
+    volumes:
+      # 配置文件
+      - ./redis.conf:/etc/redis/redis.conf
+    # 后面加的 执行命令，将配置问价加载上去
+    command:
+       redis-server /etc/redis/redis.conf --appendonly yes
+
   # rabbitmq服务
   rabbitmq:
     # 是否自动重启
@@ -69,10 +83,10 @@ services:
     volumes:
       - /d/rabbitmq/:/var/log/rabbitmq/
 # 创建桥接网络
-networks:
-  bridge:
-    driver: bridge
-    ipam:
-      driver: default
-      config:
-        - subnet: 172.28.0.0/16
+#networks:
+#  bridge:
+#    driver: bridge
+#    ipam:
+#      driver: default
+#      config:
+#        - subnet: 172.28.0.0/16
