@@ -41,10 +41,10 @@ RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
     --with-freetype=/usr/include/ && \
     # 安装php扩展 bcmath：数学函数扩展
     docker-php-ext-install sockets pcntl pdo_mysql mysqli pdo_pgsql bcmath zip gd && \
-    # 安装pecl扩展
-    pecl install redis mongodb uuid amqp event && \
-    # 启用pecl扩展
-    docker-php-ext-enable redis mongodb uuid amqp && \
+    # 安装pecl扩展 这里安装了apcu内存缓存扩展
+    pecl install redis mongodb uuid amqp event apcu&& \
+    # 启用pecl扩展 开启扩展
+    docker-php-ext-enable redis mongodb uuid amqp apcu&& \
     # 启用event
     docker-php-ext-enable --ini-name event.ini event && \
     # 安装composer 这里使用的curl -o 保存路径  下载地址  意思是：将文件从这里下载后保存到指定目录 ，后面的命令是给这个目录添加可执行权限
