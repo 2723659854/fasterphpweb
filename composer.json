@@ -17,8 +17,12 @@
     ],
     "minimum-stability": "dev",
     "require": {
+        "php": ">=8.1",
         "php-amqplib/php-amqplib": "3.2.*",
-        "elasticsearch/elasticsearch": "7.17.*"
+        "elasticsearch/elasticsearch": "7.17.*",
+        "xiaosongshu/colorword": "dev-master",
+        "xiaosongshu/progress": "dev-master",
+        "xiaosongshu/table": "dev-master"
     },
     "config": {
         "allow-plugins": {

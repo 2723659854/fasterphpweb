@@ -201,6 +201,9 @@ function start_server($param)
                 \cli_set_process_title("xiaosongshu_queue");
                 xiaosongshu_queue();
                 break;
+            case "make:command":
+                make_command($param);
+                break;
             default:
                 /** 如果是自定义命令，则执行用户的逻辑 */
                 if (isset($_system_command[$param[1]])) {
@@ -245,6 +248,44 @@ function start_server($param)
         }
 
     }
+
+}
+
+function make_command($param){
+    $name = $param[2]??'';
+    if (!$name){
+        echo "请输入要创建的命令文件名称\r\n";
+        exit;
+    }
+    foreach (scan_dir(command_path()) as $key => $file) {
+        if (file_exists($file)) {
+            $fileName = basename($file);
+            if ($fileName==$name.'.php'){
+                echo "存在相同名称的文件：[{$fileName}]\r\n";
+                exit;
+            }
+            $content = <<<EOF
+<?php
+namespace App\Command;
+use Root\BaseCommand;
+class $name  extends BaseCommand
+{
+
+    /** @var string \$command 命令触发字段，必填 */
+    public \$command = 'your:command';
+    
+    /** 业务逻辑 必填 */
+    public function handle()
+    {
+        echo "请在这里写你的业务逻辑\r\n";
+    }
+}
+EOF;
+            @file_put_contents(app_path().'/app/command/'.$name.'.php',$content);
+        }
+    }
+    echo "创建完成\r\n";
+    exit;
 
 }
 

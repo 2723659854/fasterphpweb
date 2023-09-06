@@ -5,7 +5,7 @@ class DemoCommand  extends BaseCommand
 {
 
     /** @var string $command 命令触发字段，必填 */
-    public $command = 'check:wrong';
+    public $command = 'your:command';
 
     /** 业务逻辑 必填 */
     public function handle()
