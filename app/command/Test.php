@@ -1,5 +1,6 @@
 <?php
 namespace App\Command;
+use phpseclib3\Net\SSH2;
 use Root\BaseCommand;
 class Test  extends BaseCommand
 {
@@ -14,6 +15,7 @@ class Test  extends BaseCommand
         $this->test_table();
         $this->info("渲染完成");
         $this->error("错误信息");
+
     }
 
     /**
@@ -47,5 +49,26 @@ class Test  extends BaseCommand
         ];
         /** 渲染表格 */
         $this->table($header,$row);
+    }
+
+    /**
+     * ssh远程操作服务器
+     * @return void
+     * @note 如果安装扩展 composer require phpseclib/phpseclib 失败，
+     * @note 那就直接下载这个扩展https://github.com/phpseclib/phpseclib，然后手动拖动到vendor目录下，然后composer.json里面添加"phpseclib/phpseclib": "*"即可
+     */
+    public function test_ssh(){
+        /** 实例化一个ssh类 */
+        $ssh = new SSH2('ip地址，必须开启22端口 ');
+        /** 登陆服务器 ：使用账号和密码登陆*/
+        if (!$ssh->login('账户', '密码')) {
+            exit('Login Failed');
+        }
+        /** 执行shell命令，并获取执行结果，官方建议shiyong PHP_EOL 作为分隔符，但是实际测试是不行的，或者使用分号;分隔，测试可以使用 */
+        //$output=$ssh->exec( "要执行的命令");
+        $output=$ssh->exec( "set -e ; cd /www ; cd server ; cd test;ls");
+        /** 关闭连接 */
+        $ssh->disconnect();
+        print_r($output);
     }
 }
