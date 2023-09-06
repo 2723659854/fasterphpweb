@@ -22,7 +22,8 @@
         "elasticsearch/elasticsearch": "7.17.*",
         "xiaosongshu/colorword": "dev-master",
         "xiaosongshu/progress": "dev-master",
-        "xiaosongshu/table": "dev-master"
+        "xiaosongshu/table": "dev-master",
+        "phpseclib/phpseclib": "*"
     },
     "config": {
         "allow-plugins": {
