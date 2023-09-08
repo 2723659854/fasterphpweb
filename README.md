@@ -4,7 +4,9 @@
 <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;本框架尚处于开发测试阶段，请不要用于正式商用业务。</p>
 
 ### 项目安装
-composer require xiaosongshu/fasterphpweb
+```bash
+composer create-project xiaosongshu/fasterphpweb
+```
 
 ### 目录结构
 ~~~
@@ -67,7 +69,6 @@ docker-compose.yaml 里面的目录映射，端口映射。<br>
 5，业务代码不要使用sleep,exit这两个方法。否则导致整个进程阻塞或者中断。<br>
 ## 联系开发者
 2723659854@qq.com<br>
-171892716@qq.com
 ## 项目地址
 https://github.com/2723659854/fasterphpweb
 
