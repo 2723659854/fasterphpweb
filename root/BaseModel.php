@@ -30,6 +30,7 @@ use mysqli_sql_exception as MysqlException;
     {
         if (!self::$mysql){
             $this->connect();
+            var_dump("连接数据库");
         }
     }
 
@@ -463,4 +464,5 @@ use mysqli_sql_exception as MysqlException;
         }
 
     }
+
  }

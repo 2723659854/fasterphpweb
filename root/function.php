@@ -124,6 +124,7 @@ function start_server($param)
     require_once __DIR__ . '/view.php';
     require_once __DIR__ . '/Request.php';
     require_once __DIR__ . '/BaseModel.php';
+    require_once __DIR__ . '/Model.php';
     require_once __DIR__ . '/Cache.php';
     require_once __DIR__ . '/queue/Queue.php';
     require_once __DIR__ . '/Facade.php';
@@ -207,7 +208,47 @@ function start_server($param)
             default:
                 /** 如果是自定义命令，则执行用户的逻辑 */
                 if (isset($_system_command[$param[1]])) {
-                    (new $_system_command[$param[1]]())->handle();
+                    $arguments=$param;
+                    unset($arguments[0]);
+                    unset($arguments[1]);
+                    /** 这里可能用反射更好一点，懒得改了 */
+                    $specialCommandClass = (new $_system_command[$param[1]]());
+                    if (method_exists($specialCommandClass,'configure')){
+                        $specialCommandClass->configure();
+                    }
+                    /** 解析参数 */
+                    $needFillArguments=[];
+                    foreach ($arguments as $index=>$item){
+                        /** option 参数 */
+                        if (strpos($item,'=')){
+                            $value = explode('=',$item);
+                            $option_name = str_replace('--','',$value[0]??'');
+                            $option_value = $value[1]??null;
+                            /** 只有被定义了才被赋值，这里不可使用isset，因为如果默认值为null，则不能判断 */
+                            if (array_key_exists($option_name,$specialCommandClass->input['option'])){
+                                $specialCommandClass->input['option'][$option_name]=$option_value;
+                            }
+                        }else{
+                            /** argument参数,按顺序填充，如果类当中没有定义这个属性就丢弃 */
+                            $needFillArguments[] = $item;
+                        }
+                    }
+                    /** 赋值必填参数 */
+                    if ($needFillArguments){
+                        foreach ($specialCommandClass->input['argument'] as $k=>$v){
+                            $specialCommandClass->input['argument'][$k]=array_shift($needFillArguments);
+                        }
+                    }
+                    /** 执行命令行逻辑 */
+                    try {
+                        $specialCommandClass->handle();
+                    }catch (\Exception $exception){
+                        /** 捕获异常，并打印错误 */
+                        $colorClass = new Xiaosongshu\ColorWord\Transfer();
+                        echo $colorClass->error("报错：code:{$exception->getCode()},文件{$exception->getFile()}，第{$exception->getLine()}行发生错误，错误信息：{$exception->getMessage()}");
+                        echo "\r\n";
+                    }
+
                     exit;
                 } else {
                     /** 查看是否是用户自定义的命令 */
@@ -274,9 +315,23 @@ class $name  extends BaseCommand
     /** @var string \$command 命令触发字段，必填 */
     public \$command = 'your:command';
     
+     /**
+     * 配置参数
+     * @return void
+     */
+    protected function configure(){
+        /** 必选参数 */
+        \$this->addArgument('argument');
+        /** 可传参数 */
+        \$this->addOption('option');
+    }
     /** 业务逻辑 必填 */
     public function handle()
     {
+        /** 获取必选参数 */
+        var_dump(\$this->getOption('argument'));
+        /** 获取可选参数 */
+        var_dump(\$this->getOption('option'));
         echo "请在这里写你的业务逻辑\r\n";
     }
 }

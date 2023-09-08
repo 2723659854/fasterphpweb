@@ -17,12 +17,62 @@ abstract class BaseCommand
 
     protected $_table;
 
+    public $input = [
+        'argument'=>[],
+        'option'=>[],
+    ];
+
     public function __construct()
     {
-
         $this->_bar       = new ProgressBar();
         $this->_colorWord = new Transfer();
         $this->_table     = new Table();
+    }
+
+    /**
+     * 配置参数
+     * @return void
+     */
+    public function configure(){
+
+    }
+
+    /**
+     * 添加参数
+     * @param string $name
+     * @return void
+     */
+    public function addArgument(string $name){
+        $this->input['argument'][$name]=null;
+    }
+
+    /**
+     * 获取参数
+     * @param string $name
+     * @return mixed|null
+     */
+    public function getArgument(string $name){
+        return $this->input['argument'][$name]??null;
+    }
+
+
+
+    /**
+     * 设置可选参数
+     * @param string $name
+     * @return void
+     */
+    public function addOption(string $name){
+        $this->input['option'][$name]=null;
+    }
+
+    /**
+     * 获取选填参数
+     * @param string $name
+     * @return mixed|null
+     */
+    public function getOption(string $name){
+        return $this->input['option'][$name]??null;
     }
 
     /**

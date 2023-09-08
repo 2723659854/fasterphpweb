@@ -225,4 +225,13 @@ class Index
         return download_file(public_path().'/head.png');
     }
 
+    /**
+     * 静态话处理模型
+     * @return array
+     */
+    public function staticModel(){
+        $data = User::where('id','=',1)->first();
+        return ['data'=>$data];
+    }
+
 }
