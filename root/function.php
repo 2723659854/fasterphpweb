@@ -135,6 +135,8 @@ function start_server($param)
     require_once __DIR__ . '/BaseCommand.php';
     require_once __DIR__ . '/queue/RabbitMQBase.php';
     require_once __DIR__ . '/ESClient.php';
+    require_once __DIR__ . '/Container.php';
+    require_once __DIR__ . '/Ioc.php';
 
     /** @var bool $_has_epoll 默认不支持epoll模型 */
     $_has_epoll = false;
@@ -162,7 +164,7 @@ function start_server($param)
     /** 装载用户的自定义命令 */
     deal_command();
     /** 装载App目录下的所有文件 */
-    foreach (traverse(app_path() . '/app') as $key => $val) {
+    foreach (scan_dir(app_path() . '/app') as $key => $val) {
         if (file_exists($val)) {
             require_once $val;
         }
@@ -1221,6 +1223,24 @@ function download_file(string $path, string $name = null)
     fclose($fd);
     if (!trim($name)) $name = basename($path);
     return ['content' => $content, 'type' => md5('_byte_for_down_load_file_'), 'name' => $name];
+}
+
+/**
+ * 通过容器获取一个对象
+ * @param string $name
+ * @return object
+ */
+function G(string $name){
+    return \Root\Container::get($name);
+}
+
+/**
+ * 通过容器获取一个新的类
+ * @param string $name
+ * @return mixed
+ */
+function M(string $name){
+    return \Root\Container::make($name);
 }
 
 

@@ -2,6 +2,7 @@
 
 namespace App\Controller\Index;
 
+use App\Service\DemoService;
 use Root\Request;
 
 /**
@@ -17,6 +18,8 @@ class Demo
      * @return string|string[]|null
      */
     public function index(Request $request){
-        return $request->param();
+
+        /** 测试使用容器获取服务类 */
+        return ['data'=>G(DemoService::class)->talk(1)];
     }
 }

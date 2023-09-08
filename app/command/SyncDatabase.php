@@ -1,6 +1,7 @@
 <?php
 namespace App\Command;
 
+use App\Service\DemoService;
 use Root\BaseCommand;
 /**
  * @purpose 用户自定义命令
@@ -35,5 +36,6 @@ class SyncDatabase extends BaseCommand
         /** 获取可选参数 */
         var_dump($this->getOption('option'));
         $this->info("请在这里编写你的业务逻辑");
+        $this->info(G(DemoService::class)->talk());
     }
 }

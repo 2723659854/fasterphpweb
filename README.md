@@ -358,8 +358,17 @@ public function search()
 }
 # 其他用法参照 root\ESClient::class的源码，
 ```
-
-
+#### 加入容器
+解放双手，不需要每一次都去实例化需要调用的对象。使用容器简单方便。<br>
+```php 
+/** G方法： */
+G(App\Service\DemoService::class)->talk(1);
+/** M方法：*/
+M(App\Service\DemoService::class)->talk(1);
+```
+G方法和M方法的区别是：<br>
+G方法只会实例化一次对象，然后存储在内存中，下一次调用直接从内存中获取。<br>
+而M方法每一次都是重新实例化一个新的对象。<br>
 #### 自定义命令
 ```php 
 <?php

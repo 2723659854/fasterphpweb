@@ -1,35 +1,44 @@
 <?php
+
 namespace Root;
+/**
+ * 容器类
+ */
 class Container
 {
     /** @var array */
-    protected  $providers = [];
+    protected static $providers = [];
 
     /**
-     * 初始化配置
-     *
-     */
-    public function __construct()
-    {
-
-    }
-
-    /**
-     * 获取对象
+     * 获取一个已存储的对象
      * @param string $name
      * @return object
      */
-    public function get(string $name)
+    public static function get(string $name)
     {
-        if (!isset($this->providers[$name])) {
+        if (!isset(self::$providers[$name])) {
             if (class_exists($name)){
-                $class = new $name();
-                $this->providers[$name]=$class;
+                /** 必须使用一个反射类，因为这个对象可能需要实现自动依赖注入 */
+                $class = Ioc::make($name);
+                self::$providers[$name]=$class;
             }else{
                 throw new \RuntimeException("[$name]类不存在！");
             }
         }
-        return $this->providers[$name];
+        return self::$providers[$name];
+    }
+
+    /**
+     * 实例化一个新的对象
+     * @param string $name
+     * @return mixed
+     */
+    public static function make(string $name){
+        if (class_exists($name)){
+            return  Ioc::make($name);
+        }else{
+            throw new \RuntimeException("[$name]类不存在！");
+        }
     }
 
 
