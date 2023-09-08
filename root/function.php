@@ -68,7 +68,8 @@ function traverse($path = '.')
  */
 function scan_dir($path = '.')
 {
-    $filePath    = [];
+    /** 这里必须使用静态变量 ，否则递归调用的时候不能正确保存数据 */
+    static $filePath    = [];
     $current_dir = opendir($path);
     while (($file = readdir($current_dir)) !== false) {
         $sub_dir = $path . DIRECTORY_SEPARATOR . $file;
@@ -203,48 +204,69 @@ function start_server($param)
                 xiaosongshu_queue();
                 break;
             case "make:command":
-                make_command($param);
+                make_command($param[2]??'');
                 break;
+            case "make:model":
+                make_model($param[2]??'');
+                break;
+            case "make:controller":
+                make_controller($param[2]??'');
             default:
                 /** 如果是自定义命令，则执行用户的逻辑 */
                 if (isset($_system_command[$param[1]])) {
-                    $arguments=$param;
+                    $arguments = $param;
                     unset($arguments[0]);
                     unset($arguments[1]);
                     /** 这里可能用反射更好一点，懒得改了 */
                     $specialCommandClass = (new $_system_command[$param[1]]());
-                    if (method_exists($specialCommandClass,'configure')){
+                    if (method_exists($specialCommandClass, 'configure')) {
                         $specialCommandClass->configure();
                     }
                     /** 解析参数 */
-                    $needFillArguments=[];
-                    foreach ($arguments as $index=>$item){
+                    $needFillArguments = [];
+                    foreach ($arguments as $index => $item) {
                         /** option 参数 */
-                        if (strpos($item,'=')){
-                            $value = explode('=',$item);
-                            $option_name = str_replace('--','',$value[0]??'');
-                            $option_value = $value[1]??null;
-                            /** 只有被定义了才被赋值，这里不可使用isset，因为如果默认值为null，则不能判断 */
-                            if (array_key_exists($option_name,$specialCommandClass->input['option'])){
-                                $specialCommandClass->input['option'][$option_name]=$option_value;
+                        if (strpos($item, '=')) {
+                            $value        = explode('=', $item);
+                            $option_name  = str_replace('--', '', $value[0] ?? '');
+                            /** 丢弃help关键字 */
+                            if ($option_name=='help'){
+                                continue;
                             }
-                        }else{
+                            $option_value = $value[1] ?? null;
+                            /** 只有被定义了才被赋值，这里不可使用isset，因为如果默认值为null，则不能判断 */
+                            if (array_key_exists($option_name, $specialCommandClass->input['option'])) {
+                                $specialCommandClass->input['option'][$option_name] = $option_value;
+                            }
+                        } else {
                             /** argument参数,按顺序填充，如果类当中没有定义这个属性就丢弃 */
                             $needFillArguments[] = $item;
                         }
                     }
                     /** 赋值必填参数 */
-                    if ($needFillArguments){
-                        foreach ($specialCommandClass->input['argument'] as $k=>$v){
-                            $specialCommandClass->input['argument'][$k]=array_shift($needFillArguments);
+                    if ($needFillArguments) {
+                        foreach ($specialCommandClass->input['argument'] as $k => $v) {
+                            $specialCommandClass->input['argument'][$k] = array_shift($needFillArguments);
                         }
+                    }
+                    $colorClass = new Xiaosongshu\ColorWord\Transfer();
+                    /** 获取自定义命令的帮助 */
+                    if(in_array('-h',$param)||in_array('--help',$param)){
+                        $help_table = new Xiaosongshu\Table\Table();
+                        $head= array_shift($specialCommandClass->help);
+                        if (empty($specialCommandClass->help)){
+                            echo $colorClass->info("暂无帮助信息")."\r\n";
+                            exit;
+                        }
+                        $help_table->table($head,$specialCommandClass->help);
+                        exit;
                     }
                     /** 执行命令行逻辑 */
                     try {
                         $specialCommandClass->handle();
-                    }catch (\Exception $exception){
+                    } catch (\Exception $exception) {
                         /** 捕获异常，并打印错误 */
-                        $colorClass = new Xiaosongshu\ColorWord\Transfer();
+
                         echo $colorClass->error("报错：code:{$exception->getCode()},文件{$exception->getFile()}，第{$exception->getLine()}行发生错误，错误信息：{$exception->getMessage()}");
                         echo "\r\n";
                     }
@@ -292,56 +314,216 @@ function start_server($param)
 
 }
 
-function make_command($param){
-    $name = $param[2]??'';
-    if (!$name){
+/**
+ * 创建命令行
+ * @param string $name
+ * @return void
+ */
+function make_command(string $name):void{
+    if (!$name) {
         echo "请输入要创建的命令文件名称\r\n";
         exit;
     }
     foreach (scan_dir(command_path()) as $key => $file) {
         if (file_exists($file)) {
             $fileName = basename($file);
-            if ($fileName==$name.'.php'){
+            if ($fileName == $name . '.php') {
                 echo "存在相同名称的文件：[{$fileName}]\r\n";
                 exit;
             }
-            $content = <<<EOF
+        }
+    }
+    $time = date('Y-m-d H:i:s');
+    $content = <<<EOF
 <?php
 namespace App\Command;
+
 use Root\BaseCommand;
-class $name  extends BaseCommand
+/**
+ * @purpose 用户自定义命令
+ * @author administrator
+ * @time $time
+ */
+class $name extends BaseCommand
 {
 
-    /** @var string \$command 命令触发字段，必填 */
+    /** @var string \$command 命令触发字段，请替换为你自己的命令，执行：php start.php your:command */
     public \$command = 'your:command';
     
      /**
      * 配置参数
      * @return void
      */
-    protected function configure(){
+    public function configure(){
         /** 必选参数 */
-        \$this->addArgument('argument');
+        \$this->addArgument('argument','这个是参数argument的描述信息');
         /** 可传参数 */
-        \$this->addOption('option');
+        \$this->addOption('option','这个是option参数的描述信息');
     }
-    /** 业务逻辑 必填 */
+    
+    /**
+     * 清在这里编写你的业务逻辑
+     * @return void
+     */
     public function handle()
     {
         /** 获取必选参数 */
         var_dump(\$this->getOption('argument'));
         /** 获取可选参数 */
         var_dump(\$this->getOption('option'));
-        echo "请在这里写你的业务逻辑\r\n";
+        \$this->info("请在这里编写你的业务逻辑");
     }
 }
 EOF;
-            @file_put_contents(app_path().'/app/command/'.$name.'.php',$content);
-        }
-    }
+    @file_put_contents(app_path() . '/app/command/' . $name . '.php', $content);
     echo "创建完成\r\n";
     exit;
+}
 
+/**
+ * 创建模型
+ * @param string $name
+ * @return void
+ */
+function make_model(string $name):void {
+    if (!$name) {
+        echo "请输入要创建的模型名称\r\n";
+        exit;
+    }
+
+    $name =trim($name,'/');
+    $controller = strtolower(app_path().'/app/model/'.$name . '.php');
+    /**
+     * 检查是否存在相同的文件
+     */
+    foreach (scan_dir(app_path().'/app/model') as  $file) {
+        if (file_exists($file)) {
+            $fileName =strtolower($file);
+            if ($fileName == $controller ) {
+                echo "存在相同名称的文件：[{$fileName}]\r\n";
+                exit;
+            }
+        }
+    }
+    $name = array_filter(explode('/',$name));
+
+    $className = ucfirst(strtolower(array_pop($name)));
+    $nameSpace = "App\Model";
+    if ($name){
+        foreach ($name as $dir){
+            $dir = ucfirst(strtolower($dir));
+            $nameSpace =$nameSpace."\\".$dir;
+        }
+    }
+    $filePath = app_path().'/app/model';
+    foreach ($name as $dir){
+        $filePath = $filePath.'/'.strtolower($dir);
+    }
+    if (!is_dir($filePath)){
+        mkdir($filePath,'0777',true);
+    }
+    $filePath = $filePath."/".$className.'.php';
+
+    $time = date('Y-m-d H:i:s');
+    /** 表名 */
+    $lower_name = strtolower($className);
+    $content = <<<EOF
+<?php
+
+namespace $nameSpace;
+
+use Root\Model;
+/**
+ * @purpose mysql模型
+ * @author administrator
+ * @time $time
+ */
+class $className extends Model
+{
+    /** @var string \$table 建议指定表名，否则系统根据模型名推断表名，可能会不准确 */
+    public string \$table = "$lower_name";
+
+}
+EOF;
+
+    file_put_contents($filePath,$content);
+    echo "创建模型完成\r\n";
+    exit;
+}
+
+/**
+ * 创建控制器
+ * @param string $name 控制器名称
+ * @return void
+ */
+function make_controller(string $name):void {
+    if (!$name) {
+        echo "请输入要创建的控制器名称\r\n";
+        exit;
+    }
+    $time = date('Y-m-d H:i:s');
+
+    $name =trim($name,'/');
+    $controller = strtolower(app_path().'/app/controller/'.$name . '.php');
+    /**
+     * 检查是否存在相同的文件
+     */
+    foreach (scan_dir(app_path().'/app/controller') as $key => $file) {
+        if (file_exists($file)) {
+            $fileName =strtolower($file);
+            if ($fileName == $controller ) {
+                echo "存在相同名称的文件：[{$fileName}]\r\n";
+                exit;
+            }
+        }
+    }
+    $name = array_filter(explode('/',$name));
+    if (count($name)<2){
+        echo "必须是模块名称/控制器名称\r\n";exit;
+    }
+    $className = ucfirst(strtolower(array_pop($name)));
+    $nameSpace = "App\Controller";
+    if ($name){
+        foreach ($name as $dir){
+            $dir = ucfirst(strtolower($dir));
+            $nameSpace =$nameSpace."\\".$dir;
+        }
+    }
+    $filePath = app_path().'/app/controller';
+    foreach ($name as $dir){
+        $filePath = $filePath.'/'.strtolower($dir);
+    }
+    if (!is_dir($filePath)){
+        mkdir($filePath,'0777',true);
+    }
+    $filePath = $filePath."/".$className.'.php';
+    $content =<<<EOF
+<?php
+
+namespace $nameSpace;
+
+use Root\Request;
+
+/**
+ * @purpose 控制器
+ * @author administrator
+ * @time $time
+ */
+class $className
+{
+    /**
+     * index方法
+     * @param Request \$request 请求类
+     * @return string|string[]|null
+     */
+    public function index(Request \$request){
+        return \$request->param();
+    }
+}
+EOF;
+    file_put_contents($filePath,$content);
+    echo "创建控制器完成\r\n";
+    exit;
 }
 
 /** 队列 */
@@ -507,7 +689,14 @@ function onMessage($socketAccept, $message, &$httpServer)
                 fwrite($socketAccept, "Content-Length: " . strlen($fileContent) . "\r\n\r\n");
                 fwrite($socketAccept, $fileContent, strlen($fileContent));
                 break;
-            case "ico": case "jpg": case "js": case "css": case "gif": case "png": case "icon": case "jpeg":
+            case "ico":
+            case "jpg":
+            case "js":
+            case "css":
+            case "gif":
+            case "png":
+            case "icon":
+            case "jpeg":
                 fwrite($socketAccept, 'HTTP/1.1 200 OK' . PHP_EOL);
                 fwrite($socketAccept, 'Date:' . date('Y-m-d H:i:s') . PHP_EOL);
                 fwrite($socketAccept, 'Content-Type: image/jpeg' . PHP_EOL);
@@ -520,7 +709,15 @@ function onMessage($socketAccept, $message, &$httpServer)
                 fwrite($socketAccept, "Content-Length: " . strlen($fileContent) . "\r\n\r\n");
                 fwrite($socketAccept, $fileContent, strlen($fileContent));
                 break;
-            case "doc": case "docx": case "ppt": case "pptx": case "xls": case "xlsx": case "zip": case "rar": case "txt":
+            case "doc":
+            case "docx":
+            case "ppt":
+            case "pptx":
+            case "xls":
+            case "xlsx":
+            case "zip":
+            case "rar":
+            case "txt":
                 fwrite($socketAccept, 'HTTP/1.1 200 OK' . PHP_EOL);
                 fwrite($socketAccept, 'Date:' . date('Y-m-d H:i:s') . PHP_EOL);
                 fwrite($socketAccept, 'Content-Type: application/octet-stream' . PHP_EOL);
@@ -556,8 +753,11 @@ function onMessage($socketAccept, $message, &$httpServer)
                     fwrite($socketAccept, 'Accept-Length:' . strlen($content['content']) . PHP_EOL);
                     fwrite($socketAccept, 'Content-Disposition: attachment; filename=' . $content['name'] . "\r\n\r\n");
                     fwrite($socketAccept, $content['content'], strlen($content['content']));
-                } else { /** 其他的暂时都做html处理 */
-                    if (!is_string($content)) { $content = json_encode($content); }
+                } else {
+                    /** 其他的暂时都做html处理 */
+                    if (!is_string($content)) {
+                        $content = json_encode($content);
+                    }
                     fwrite($socketAccept, 'HTTP/1.1 200 OK' . PHP_EOL);
                     fwrite($socketAccept, 'Date:' . date('Y-m-d H:i:s') . PHP_EOL);
                     fwrite($socketAccept, 'Content-Type: text/html' . PHP_EOL);
@@ -1004,7 +1204,7 @@ function prepareMysqlAndRedis()
  * @param string $name 文件名称
  * @return array
  */
-function download_file(string $path,string $name=null)
+function download_file(string $path, string $name = null)
 {
     if (!is_file($path)) {
         throw new RuntimeException("[" . $path . "] 不是可用的文件 ！");
@@ -1019,7 +1219,7 @@ function download_file(string $path,string $name=null)
     $fd      = fopen($file, 'r');
     $content = fread($fd, filesize($file));
     fclose($fd);
-    if (!trim($name))$name=basename($path);
+    if (!trim($name)) $name = basename($path);
     return ['content' => $content, 'type' => md5('_byte_for_down_load_file_'), 'name' => $name];
 }
 

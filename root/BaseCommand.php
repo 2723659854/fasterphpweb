@@ -10,16 +10,20 @@ abstract class BaseCommand
 {
     /** @var string $command 命令触发字段 必填 */
     public $command = 'check:wrong';
-
+    /** 进度条 */
     protected $_bar;
-
+    /** 字体 */
     protected $_colorWord;
-
+    /** 表格 */
     protected $_table;
-
+    /** 输入的参数 */
     public $input = [
         'argument'=>[],
         'option'=>[],
+    ];
+    /** 帮助 */
+    public $help = [
+        ['类型','名称','描述']
     ];
 
     public function __construct()
@@ -39,11 +43,13 @@ abstract class BaseCommand
 
     /**
      * 添加参数
-     * @param string $name
+     * @param string $name 参数
+     * @param string $describe 描述
      * @return void
      */
-    public function addArgument(string $name){
+    public function addArgument(string $name,string $describe=''){
         $this->input['argument'][$name]=null;
+        $this->help[]=['argument',$name,$describe];
     }
 
     /**
@@ -59,11 +65,13 @@ abstract class BaseCommand
 
     /**
      * 设置可选参数
-     * @param string $name
+     * @param string $name 参数
+     * @param string $describe 描述
      * @return void
      */
-    public function addOption(string $name){
+    public function addOption(string $name,string $describe=''){
         $this->input['option'][$name]=null;
+        $this->help[]=['option',$name,$describe];
     }
 
     /**

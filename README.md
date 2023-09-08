@@ -45,7 +45,7 @@ composer require xiaosongshu/fasterphpweb
 5，重启项目:  php start.php restart<br>
 6，停止项目:  php start.php stop<br>
 7，项目默认端口为：8080, 你可以自行修改<br>
-8，项目访问地址：localhost://127.0.0.1:8080<br>
+8，项目访问地址：localhost://127.0.0.1:8000<br>
 9，windows默认只开启一个http服务<br>
 10，windows若需要测试队列，请单独开启一个窗口执行 php start.php queue ，监听队列<br>
 11，windows不支持定时器<br>
@@ -81,7 +81,7 @@ https://github.com/2723659854/fasterphpweb
 return [
     //监听端口
     'num'=>4,//启动进程数,建议不要超过CPU核数的两倍，windows无效
-    'port'=>8080,//http监听端口
+    'port'=>8000,//http监听端口
 ];
 
 ```
@@ -187,10 +187,10 @@ return [
 /** 命名空间 */
 namespace App\Model;
 /** 引入需要继承的模型基类 */
-use BaseModel;
+use Root\Model;
 
 /** 定义模型名称 并继承模型基类 */
-class Book extends BaseModel
+class Book extends Model
 {
     /** @var string $table 建议指定表名，否则系统根据模型名推断表名，可能会不准确 */
     public $table = 'messages';
@@ -209,6 +209,8 @@ class Book extends BaseModel
         $book=(new Book())->where('id','=',3)->first();
         /** 第二种方法：使用门面类调用模型，需要自己创建门面类 */
         $messages = Fbook::where('id', '=', 3)->first();
+        /** 第三种方法:直接静态化调用  */
+        $next = Book::where('id','=',1)->first();
         return ['status' => 1, 'data' => $messages, 'msg' => 'success','book'=>$book];
     }
 ```
@@ -378,3 +380,9 @@ class DemoCommand  extends BaseCommand
     }
 }
 ```
+#### 命令行工具
+创建命令行 php start.php make:command Test  <br>
+创建控制器 php start.php make:controller a/b/c <br>
+创建模型 php start.php make:model index/user <br>
+
+

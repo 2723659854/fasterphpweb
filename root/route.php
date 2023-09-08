@@ -24,6 +24,16 @@ function route($url){
             return '/app/controller/'.strtolower($new_url[0]).'/'.ucwords($new_url[1]).'.php@'.'App\\Controller\\'.ucwords($new_url[0]).'\\'.ucwords($new_url[1]).'@'.$new_url[2];
             break;
         default:
-            return '/app/controller/index/Index.php@APP\\Index\\Controller\\Index@index';
+            $file = '/app/controller';
+            $class = 'App\\Controller';
+            $method = array_pop($new_url);
+            $className = ucwords(strtolower(array_pop($new_url)));
+            foreach ($new_url as $k=>$v){
+                $file=$file.'/'.strtolower($v);
+                $class=$class.'\\'.ucwords($v);
+            }
+            return $file.'/'.$className.'.php@'.$class.'\\'.$className.'@'.$method;
+
+            //return '/app/controller/index/Index.php@APP\\Index\\Controller\\Index@index';
     }
 }

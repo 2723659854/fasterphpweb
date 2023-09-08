@@ -8,7 +8,7 @@ function handle($url, $param, $_request)
     list($file, $class, $method) = explode('@', $url);
     $file = app_path() . $file;
     if (!file_exists($file)) {
-        return dispay('index', ['msg' => $file . '文件不存在']);
+        return dispay('index', ['msg' => $file . '文件不存在123123']);
     }
     require_once $file;
     if (!class_exists($class)) {
