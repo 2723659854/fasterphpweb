@@ -8,7 +8,7 @@ return [
     /** redis连接基本配置 */
     'host'     => 'redis',
     //'host'     => '192.168.4.105',
-    'password' => '',
+    'password' => 'xT9=123456',
     'port'     => '6379',
     'database' => 0,
 ];

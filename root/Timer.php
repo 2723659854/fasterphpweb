@@ -103,7 +103,7 @@ class Timer
                     if (empty(self::$task)){
                         /** 记录进程号,主进程负责管理杀死这些 */
                         writeTimerPid();
-                        var_dump("任务清理完了");
+                        //var_dump("任务清理完了");
                         break;
                     }
                 }

@@ -6,7 +6,7 @@ class Demo extends RabbitMQBase
 {
 
     /** @var int $timeOut 延迟时间 秒 0 则不延时，延时需要安装官方插件 */
-    public $timeOut = 5;
+    public $timeOut = 0;
 
     /**
      * 业务逻辑

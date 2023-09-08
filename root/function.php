@@ -118,9 +118,11 @@ function start_server($param)
     check_env();
     $daemonize = false;
     $flag      = true;
-    global $_pid_file, $_port, $_listen, $_server_num, $_system, $_lock_file, $_has_epoll, $_system_command;
+    global $_pid_file, $_port, $_listen, $_server_num, $_system, $_lock_file, $_has_epoll, $_system_command,$_system_table,$_color_class;
     $_pid_file  = __DIR__ . '/my_pid.txt';
     $_lock_file = __DIR__ . '/lock.txt';
+    /** 加载必须的启动文件 */
+    require_once dirname(__DIR__) . '/vendor/autoload.php';
     require_once __DIR__ . '/Timer.php';
     require_once __DIR__ . '/view.php';
     require_once __DIR__ . '/Request.php';
@@ -162,6 +164,7 @@ function start_server($param)
     $_listen    = "http://127.0.0.1:" . $_port;
     $httpServer = null;
     /** 装载用户的自定义命令 */
+
     deal_command();
     /** 装载App目录下的所有文件 */
     foreach (scan_dir(app_path() . '/app') as $key => $val) {
@@ -169,6 +172,10 @@ function start_server($param)
             require_once $val;
         }
     }
+    /** 加载表格类工具 */
+    $_system_table = new Xiaosongshu\Table\Table();
+    /** 加载字体类工具 */
+    $_color_class = new Xiaosongshu\ColorWord\Transfer();
     /** 分析用户输入的命令，执行业务逻辑 */
     if (count($param) > 1) {
         switch ($param[1]) {
@@ -177,17 +184,21 @@ function start_server($param)
                     if ($_system) {
                         $daemonize = true;
                     } else {
-                        echo "当前环境是windows,只能在控制台运行\r\n";
+                        echo $_color_class->info("当前环境是windows,只能在控制台运行\r\n");
+                        echo "\r\n";
                     }
                 }
-                echo "进程启动中...\r\n";
+
+                echo $_color_class->info("进程启动中...\r\n");
+                echo "\r\n";
                 break;
             case "stop":
                 if ($_system) {
                     close();
-                    echo "进程已关闭\r\n";
+                    echo $_color_class->info("进程已关闭\r\n");
                 } else {
-                    echo "当前环境是windows,只能在控制台运行\r\n";
+                    echo $_color_class->info("当前环境是windows,只能在控制台运行\r\n");
+
                 }
                 $flag = false;
                 break;
@@ -195,13 +206,13 @@ function start_server($param)
                 if ($_system) {
                     close();
                     $daemonize = true;
-                    echo "进程重启中...\r\n";
+                    echo $_color_class->info("进程重启中\r\n");
                 } else {
-                    echo "当前环境是windows,只能在控制台运行\r\n";
+                    echo $_color_class->info("当前环境是windows,只能在控制台运行\r\n");
                 }
                 break;
             case "queue":
-                echo "测试队列,你可以按CTRL+C停止\r\n";
+                echo $_color_class->info("测试redis队列,你可以按CTRL+C停止");
                 \cli_set_process_title("xiaosongshu_queue");
                 xiaosongshu_queue();
                 break;
@@ -251,16 +262,15 @@ function start_server($param)
                             $specialCommandClass->input['argument'][$k] = array_shift($needFillArguments);
                         }
                     }
-                    $colorClass = new Xiaosongshu\ColorWord\Transfer();
+
                     /** 获取自定义命令的帮助 */
                     if(in_array('-h',$param)||in_array('--help',$param)){
-                        $help_table = new Xiaosongshu\Table\Table();
                         $head= array_shift($specialCommandClass->help);
                         if (empty($specialCommandClass->help)){
-                            echo $colorClass->info("暂无帮助信息")."\r\n";
+                            echo $_color_class->info("暂无帮助信息")."\r\n";
                             exit;
                         }
-                        $help_table->table($head,$specialCommandClass->help);
+                        $_system_table->table($head,$specialCommandClass->help);
                         exit;
                     }
                     /** 执行命令行逻辑 */
@@ -269,30 +279,32 @@ function start_server($param)
                     } catch (\Exception $exception) {
                         /** 捕获异常，并打印错误 */
 
-                        echo $colorClass->error("报错：code:{$exception->getCode()},文件{$exception->getFile()}，第{$exception->getLine()}行发生错误，错误信息：{$exception->getMessage()}");
+                        echo $_color_class->error("报错：code:{$exception->getCode()},文件{$exception->getFile()}，第{$exception->getLine()}行发生错误，错误信息：{$exception->getMessage()}");
                         echo "\r\n";
                     }
 
                     exit;
                 } else {
                     /** 查看是否是用户自定义的命令 */
-                    echo "未识别的命令\r\n";
+                    echo $_color_class->info("未识别的命令\r\n");
+                    echo "\r\n";
                     $flag = false;
                 }
 
         }
     } else {
-        echo "缺少必要参数，你可以输入start,start -d,stop,restart,queue\r\n";
+        echo $_color_class->info("缺少必要参数，你可以输入start,start -d,stop,restart,queue\r\n");
         $flag = false;
     }
     if ($flag == false) {
-        exit("脚本退出运行\r\n");
+        echo $_color_class->info("脚本退出运行\r\n");
+        exit;
     }
     $fd  = fopen($_lock_file, 'w');
     $res = flock($fd, LOCK_EX | LOCK_NB);
     if (!$res) {
-        echo $_listen . "\r\n";
-        echo "已有脚本正在运行，请勿重复启动，你可以使用stop停止运行或者使用restart重启\r\n";
+        echo $_color_class->info($_listen . "\r\n");
+        echo $_color_class->info("已有脚本正在运行，请勿重复启动，你可以使用stop停止运行或者使用restart重启\r\n");
         exit(0);
     }
 
@@ -301,9 +313,11 @@ function start_server($param)
     if ($daemonize) {
         daemon();
     } else {
-        echo $_listen . "\r\n";
-        echo "进程启动完成,你可以按ctrl+c停止运行\r\n";
-
+        $open=[
+            ['http','正常','1',$_listen]
+        ];
+        $_system_table->table(['名称','状态','进程数','服务'],$open);
+        echo $_color_class->info("进程启动完成,你可以按ctrl+c停止运行\r\n");
         if ($_system && $_has_epoll) {
             /** linux系统使用epoll模型 */
             epoll();
@@ -533,10 +547,11 @@ function _queue_xiaosongshu()
 {
     try {
         $config = config('redis');
-        $host   = isset($config['host']) ? $config['host'] : '127.0.0.1';
-        $port   = isset($config['port']) ? $config['port'] : '6379';
+        $host   = $config['host'] ?? '127.0.0.1';
+        $port   =  $config['port'] ?? '6379';
         $client = new Redis();
         $client->connect($host, $port);
+        $client->auth($config['password']??'');
         while (true) {
             $job = json_decode($client->RPOP('xiaosongshu_queue'), true);
             deal_job($job);
@@ -554,10 +569,12 @@ function _queue_xiaosongshu()
             }
         }
     } catch (\Exception $exception) {
-        echo $exception->getMessage();
+        global $_color_class;
+        echo $_color_class->error("\nredis连接失败,详情：{$exception->getMessage()}\n");
         echo "\r\n";
-        echo "redis连接失败";
-        echo "\r\n";
+        echo $_color_class->info("系统将在3秒后重试\n");
+        sleep(3);
+        _queue_xiaosongshu();
     }
 }
 
@@ -611,8 +628,8 @@ function xiaosongshu_queue()
 /** 关闭进程 */
 function close()
 {
-    echo "关闭进程中...\r\n";
-    global $_pid_file;
+    global $_pid_file,$_color_class;
+    echo $_color_class->info("关闭进程中...\r\n");
     if (file_exists($_pid_file)) {
         $master_ids = file_get_contents($_pid_file);
         $master_id  = explode('-', $master_ids);
@@ -804,6 +821,7 @@ function daemon()
     ini_set('display_errors', 'off');
     /** 设置文件权限掩码为0 就是最大权限 可读写 防止操作文件权限不够出错 */
     \umask(0);
+    global $_listen,$_color_class,$_system_table;
     /** @var int $pid 创建子进程 */
     $pid = \pcntl_fork();
     if (-1 === $pid) {
@@ -811,9 +829,30 @@ function daemon()
         throw new Exception('Fork fail');
     } elseif ($pid > 0) {
         /** 主进程退出 */
-        global $_listen;
-        echo $_listen . "\r\n";
-        echo "进程启动完成,你可以输入php start.php stop停止运行\r\n";
+        $head =  ['名称','状态','进程数','服务'];
+        $content =[];
+        /** http */
+        $http_count = config('server')['num']??4;
+        $content[]=['http','正常',$http_count,$_listen];
+        /** rabbitmq */
+        $rabbitmq_config = config('rabbitmq');
+        if ($rabbitmq_config['enable']){
+            $rabbitmq_count = 0;
+            foreach ((config('rabbitmqProcess')) as $item){
+                $rabbitmq_count+=$item['count'];
+            }
+            $content[]=['rabbitmq','正常',$rabbitmq_count,$rabbitmq_config['port']];
+        }
+        /** 定时器 */
+        $content[]=['timer','正常','--','--'];
+        /** redis队列 */
+        $redis_config = config('redis');
+        if ($redis_config['enable']){
+            $content[]=['redis_queue','正常',1,$redis_config['port']];
+        }
+        $_system_table->table($head,$content);
+        echo $_color_class->info($_listen . "\r\n");
+        echo $_color_class->info("进程启动完成,你可以输入php start.php stop停止运行\r\n");
         exit(0);
     }
 
@@ -851,7 +890,7 @@ function daemon()
                 /** 在主进程里启动定时器 */
                 xiaosongshu_timer();
             } else {
-                echo "在创建rabbitmq的管理进程的时候失败了\r\t";
+                echo $_color_class->info("在创建rabbitmq的管理进程的时候失败了\r\t");
                 exit;
             }
 
@@ -1162,17 +1201,23 @@ function rabbitmqConsume()
         foreach ($config as $name => $value) {
             if (isset($value['handler'])) {
                 /** 创建一个子进程，在子进程里面执行消费 */
-                $rabbitmq_pid = \pcntl_fork();
-                if ($rabbitmq_pid > 0) {
-                    /** 记录进程号 */
-                    writePid();
-                    cli_set_process_title($name);
-                    if (class_exists($value['handler'])) {
-                        $className = $value['handler'];
-                        $queue     = new $className();
-                        $queue->consume();
+                $count = $value['count']??1;
+                for($i=0;$i<$count;$i++){
+                    $rabbitmq_pid = \pcntl_fork();
+                    if ($rabbitmq_pid > 0) {
+                        /** 记录进程号 */
+                        writePid();
+                        cli_set_process_title($name.'_'.($i+1));
+                        if (class_exists($value['handler'])) {
+                            /** 切换CPU */
+                            sleep(1);
+                            $className = $value['handler'];
+                            $queue     = new $className();
+                            $queue->consume();
+                        }
                     }
                 }
+
             }
         }
     }

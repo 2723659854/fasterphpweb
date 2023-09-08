@@ -83,7 +83,7 @@ class RabbitMQBase
         原文链接：https://blog.csdn.net/heroiclee/article/details/122196087
          */
         /** 声明Exchange 这里比较关键的是要设置名称和类型，并且第四个参数设置为true，即持久化保存交换机，最后一个参数用来设置延迟队列的消息转发模式为路由完全匹配（就是延迟消息要求必须匹配路由才可以转发给消费者）*/
-        $this->channel->exchange_declare($this->exchangeDelayed, $type?:self::EXCHANGETYPE_DELAYED, false, true, false, false, false, new AMQPTable(["x-delayed-type" => self::EXCHANGETYPE_DIRECT]));
+        $this->channel->exchange_declare($this->exchangeDelayed, $type?:self::EXCHANGETYPE_DIRECT, false, true, false, false, false, new AMQPTable(["x-delayed-type" => self::EXCHANGETYPE_DIRECT]));
         /** 声明队列 也是需要持久化保存队列 */
         $this->channel->queue_declare($this->queueName, false, true, false, false);
         /** 将队列绑定到交换机 同时设置路由，这里的队列名称和路由是相同的字符串，这里应该是路由名称，作者直接把队列名称和队列名称公用 */

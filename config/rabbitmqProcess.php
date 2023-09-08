@@ -5,11 +5,13 @@ return [
     /** 队列名称 */
     'demoForOne'=>[
         /** 消费者名称 */
-        'handler'=>Demo::class
+        'handler'=>Demo::class,
+        'count'=>2
     ],
     /** 队列名称 */
-    'otherConsumer'=>[
+    'demoForTwo'=>[
         /** 消费者名称 */
         'handler'=>Demo2::class,
+        'count'=>2
     ]
 ];

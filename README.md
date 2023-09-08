@@ -289,7 +289,9 @@ return [
             var_dump($b);
         }, [3,5], false);
 
+//todo 需要添加删除定时器的方法，后期再来完善。
 ```
+
 
 #### rabbitmq消息队列
 
