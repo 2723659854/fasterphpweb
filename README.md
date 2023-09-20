@@ -8,7 +8,10 @@
 ```bash
 composer create-project xiaosongshu/fasterphpweb
 ```
-
+###启动项目
+```bash 
+php start.php start  或者 php songshu start 
+```
 ### 目录结构
 ~~~
 |-- app
@@ -397,5 +400,34 @@ class DemoCommand  extends BaseCommand
 创建命令行 php start.php make:command Test  <br>
 创建控制器 php start.php make:controller a/b/c <br>
 创建模型 php start.php make:model index/user <br>
+
+#### sqlite数据库支持
+创建模型
+```bash 
+php start.php make:sqlite Large
+```
+或者
+```bash 
+php songshu make:sqlite Large
+```
+用法
+```php 
+<?php
+use App\SqliteModel\Talk;
+/** 写入数据 */
+var_dump(Talk::insert(['name' => 'hello', 'created' => time()]));
+/** 更新数据 */
+var_dump(Talk::where([['id', '>=', 1]])->update(['name' => 'mm']));
+/** 查询1条数据 */
+var_dump(Talk::where([['id', '>=', 1]])->select(['name'])->first());
+/** 删除数据 */
+var_dump(Talk::where([['id', '=', 1]])->delete());
+/** 统计 */
+var_dump(Talk::where([['id', '>', 1]])->count());
+/** 查询多条数据并排序分页 */
+$res = Talk::where([['id', '>', 0]]) ->orderBy(['created'=>'asc']) ->page(1, 10) ->get();
+
+?>
+```
 
 
