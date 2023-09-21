@@ -204,7 +204,6 @@ class Xiaosongshu
         }
 
         /** 此处需要判断是否是是Linux系统，如果是则检查是否有epoll 有则调用epoll，否则调用select */
-        var_dump("======================");
         if ($daemonize) {
             $this->daemon();
         } else {
