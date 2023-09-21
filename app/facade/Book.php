@@ -1,10 +1,7 @@
 <?php
-
-
 namespace APP\Facade;
 
-
-use root\Facade;
+use Root\Facade;
 
 class Book extends Facade
 {

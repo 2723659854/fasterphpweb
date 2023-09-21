@@ -2,8 +2,6 @@
 
 namespace Root\Queue;
 
-use Redis;
-
 class Queue
 {
     /**
@@ -32,9 +30,11 @@ class Queue
         $config = config('redis');
         $host   = isset($config['host']) ? $config['host'] : '127.0.0.1';
         $port   = isset($config['port']) ? $config['port'] : '6379';
+        $password = $config['password']??'';
         try{
-            $client = new Redis();
+            $client = new \Redis();
             $client->connect($host, $port);
+            if ($password) $client->auth($password);
             $class = self::name();
             if ($delay > 0) {
                 $param['rand'] = uniqid();

@@ -1,28 +1,16 @@
 <?php
-# 如果要使用命名空间，那么base和event_base这两个类必须加上\表示根目录，也是命名空间的意思，否则就会在当前目录里面寻找类，是找不到的
+
 namespace Root;
-
-//set_time_limit(0);
-require_once __DIR__ . '/function.php';
-require_once __DIR__ . '/view.php';
-require_once __DIR__ . '/Request.php';
-
-require_once __DIR__ . '/route.php';
-require_once __DIR__ . '/app.php';
-if (file_exists(dirname(__DIR__) . '/vendor/autoload.php')) {
-    require_once dirname(__DIR__) . '/vendor/autoload.php';
-}
-
 
 class Epoll
 {
     /** 存所有的客户端事件 */
     public $events = [];
 
-    /** @var Event $event 整个服务的事件 */
+    /** @var \Event $event 整个服务的事件 */
     public $event;
 
-    /** @var EventBase $event_base eventBase实例 使用的epoll模型 */
+    /** @var \EventBase $event_base eventBase实例 使用的epoll模型 */
     public $event_base;
 
     /** @var false|resource tcp 服务 */

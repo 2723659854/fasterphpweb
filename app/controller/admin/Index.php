@@ -8,7 +8,7 @@ namespace App\Controller\Admin;
 
 use APP\Facade\Cache;
 use APP\Facade\User;
-use root\ESClient;
+use Root\ESClient;
 
 class Index
 {

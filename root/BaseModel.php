@@ -1,6 +1,6 @@
 <?php
-
-use mysqli_sql_exception as MysqlException;
+namespace Root;
+use \mysqli_sql_exception as MysqlException;
 
 /**
  * @purpose 数据库基类
@@ -38,7 +38,7 @@ use mysqli_sql_exception as MysqlException;
       * @return mixed
       */
     public function connect(){
-        mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+        \mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
         $config = config('database');
         $this->type = $config['default'];
         $database_config = $config[$this->type];
@@ -48,12 +48,12 @@ use mysqli_sql_exception as MysqlException;
         $this->dbname = $database_config['dbname'];
         $this->port = $database_config['port'];
         try{
-            $mysqli = new mysqli($this->host, $this->username, $this->password, $this->dbname, $this->port);
-        }catch (MysqlException $e){
-            throw new RuntimeException($e->getMessage(),$e->getCode());
+            $mysqli = new \mysqli($this->host, $this->username, $this->password, $this->dbname, $this->port);
+        }catch (\MysqlException $e){
+            throw new \RuntimeException($e->getMessage(),$e->getCode());
         }
         $mysqli->set_charset('utf8');
-        /** @var  mysql */
+        /** @var  \mysql */
         self::$mysql=$mysqli;
         $this->sql = '';
     }
@@ -90,7 +90,7 @@ use mysqli_sql_exception as MysqlException;
             /** 执行完之后需要清除sql语句，否则会保留上一次的sql语句 */
             $this->sql='';
             return $data;
-        }catch (MysqlException $e){
+        }catch (\MysqlException $e){
             /** 如果是连接超时，则重连，并重新执行sql语句 */
             if ($e->getCode()==2006){
                 /** 重连 */
@@ -236,7 +236,7 @@ use mysqli_sql_exception as MysqlException;
         try{
             $sql=$sql.';';
             return self::$mysql->query($sql);
-        }catch (MysqlException $e){
+        }catch (\MysqlException $e){
             /** 如果是连接超时，则重连，并重新执行sql语句 */
             if ($e->getCode()==2006){
                 /** 重连 */
@@ -274,7 +274,7 @@ use mysqli_sql_exception as MysqlException;
             $this->sql='';
             $sql=$sql.';';
             return self::$mysql->query($sql);
-        }catch (MysqlException $e){
+        }catch (\MysqlException $e){
             /** 如果是连接超时，则重连，并重新执行sql语句 */
             if ($e->getCode()==2006){
                 /** 重连 */
@@ -305,7 +305,7 @@ use mysqli_sql_exception as MysqlException;
             $this->sql='';
             $sql=$sql.';';
             return self::$mysql->query($sql);
-        }catch (MysqlException $e){
+        }catch (\MysqlException $e){
             /** 如果是连接超时，则重连，并重新执行sql语句 */
             if ($e->getCode()==2006){
                 /** 重连 */
@@ -397,7 +397,7 @@ use mysqli_sql_exception as MysqlException;
             }else{
                 return $res;
             }
-        }catch (MysqlException $e){
+        }catch (\MysqlException $e){
             /** 如果是连接超时，则重连，并重新执行sql语句 */
             if ($e->getCode()==2006){
                 /** 重连 */
@@ -449,7 +449,7 @@ use mysqli_sql_exception as MysqlException;
             $sql='insert into '.$this->table.'  '.$field.'  values '.$values;
             $sql=$sql.';';
             return self::$mysql->query($sql);
-        }catch (MysqlException $e){
+        }catch (\MysqlException $e){
             /** 如果是连接超时，则重连，并重新执行sql语句 */
             if ($e->getCode()==2006){
                 /** 重连 */

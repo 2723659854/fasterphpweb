@@ -1,6 +1,6 @@
 <?php
 
-namespace root;
+namespace Root;
 use Elasticsearch\Client;
 use Elasticsearch\ClientBuilder;
 

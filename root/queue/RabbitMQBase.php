@@ -1,6 +1,7 @@
 <?php
 namespace Root\Queue;
-//require_once __DIR__ . '/vendor/autoload.php';
+
+use PhpAmqpLib\Channel\AMQPChannel;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 use PhpAmqpLib\Exchange\AMQPExchangeType;
 use PhpAmqpLib\Message\AMQPMessage;
@@ -68,9 +69,9 @@ class RabbitMQBase
         $this->port=$config['port'];
         $this->user=$config['user'];
         $this->pass=$config['pass'];
-        /** @var  connection 创建一个rabbitmq连接*/
+        /** @var  AMQPStreamConnection 创建一个rabbitmq连接*/
         $this->connection = new AMQPStreamConnection($this->host, $this->port, $this->user, $this->pass);
-        /** @var  channel 创建一个通道*/
+        /** @var  AMQPChannel 创建一个通道*/
         $this->channel = $this->connection->channel();
         /** exchange: 交换机的名字，为空则自动创建一个名字
         exchange_type:  默认交换机类型为direct
@@ -118,7 +119,7 @@ class RabbitMQBase
      * 发送延迟消息
      * @param string $msg 消息内容
      * @return void
-     * @throws Exception
+     * @throws \Exception
      */
     private function sendDelay(string $msg)
     {
@@ -131,7 +132,7 @@ class RabbitMQBase
     /**
      * 关闭服务
      * @return void
-     * @throws Exception
+     * @throws \Exception
      */
     public function close(){
         //echo "关闭连接\r\n";
@@ -144,7 +145,7 @@ class RabbitMQBase
     /**
      * 消费延迟队列
      * @return void
-     * @throws Exception
+     * @throws \Exception
      */
     private function consumDelay()
     {
@@ -172,8 +173,8 @@ class RabbitMQBase
                 $this->handle($params);
                 /** 确认接收到消息 */
                 $this->channel->basic_ack($msg->delivery_info['delivery_tag'], false);
-            }catch (Exception|RuntimeException $exception){
-                var_dump($exception->getMessage());
+            }catch (\Exception|\RuntimeException $exception){
+                //var_dump($exception->getMessage());
                 /** 如果当前任务重试次数小于最大尝试次数，那么就继续重试， */
                 if ($params['_max_attempt_num']<=$this->_max_attempt_num){
                     //var_dump("重新投递");
@@ -210,7 +211,7 @@ class RabbitMQBase
      * @param array $msg
      * @param int $time
      * @return void
-     * @throws Exception
+     * @throws \Exception
      */
     public function send(array $msg){
         $this ->sendDelay(json_encode($msg));
@@ -219,7 +220,7 @@ class RabbitMQBase
     /**
      * 消费队列
      * @return void
-     * @throws Exception
+     * @throws \Exception
      */
     public function consume(){
         $this->consumDelay();

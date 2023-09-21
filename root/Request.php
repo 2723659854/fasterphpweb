@@ -4,11 +4,17 @@ namespace Root;
 class Request
 {
 
-    public $value=[];
+    public array $value=[];
 
-    public $_error=null;
+    public string $_error= '';
 
-    public $header=[];
+    public array $header=[];
+
+    private string $buffer = '';
+
+    public function __construct(string $buffer = ''){
+        //todo 解析传输过来的变量
+    }
 
     /**
      * 获取request请求参数

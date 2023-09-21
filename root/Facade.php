@@ -1,5 +1,5 @@
 <?php
-namespace root;
+namespace Root;
 use RuntimeException;
 
 abstract class Facade
@@ -15,6 +15,10 @@ abstract class Facade
     }
 
 
+    /**
+     * 获取静态实例
+     * @return mixed
+     */
     private static function getInstance()
     {
         $name = static::getAccessor();
@@ -26,6 +30,12 @@ abstract class Facade
     }
 
 
+    /**
+     * 静态调用实例
+     * @param $method
+     * @param $arguments
+     * @return mixed
+     */
     public static function __callStatic($method, $arguments)
     {
         $instance = static::getInstance();

@@ -1,15 +1,8 @@
 <?php
-//set_time_limit(0);
-require_once __DIR__ . '/function.php';
-require_once __DIR__ . '/view.php';
-require_once __DIR__ . '/Request.php';
-
-require_once __DIR__ . '/route.php';
-require_once __DIR__ . '/app.php';
-if (file_exists(dirname(__DIR__) . '/vendor/autoload.php')) {
-    require_once dirname(__DIR__) . '/vendor/autoload.php';
-}
-
+namespace Root;
+/**
+ * @purpose select的IO多路复用模型
+ */
 class Selector
 {
     /** 服务端 */

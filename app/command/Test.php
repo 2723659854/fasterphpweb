@@ -11,8 +11,8 @@ class Test  extends BaseCommand
     /** 业务逻辑 必填 */
     public function handle()
     {
-
-        $this->test_table();
+        /** 助手函数 */
+        version();
         $this->info("渲染完成");
         $this->error("错误信息");
 

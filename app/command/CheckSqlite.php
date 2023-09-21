@@ -48,6 +48,7 @@ class CheckSqlite extends BaseCommand
         var_dump(Talk::where([['id', '>', 1]])->count());
         /** 查询多条数据并排序分页 */
         $res = Talk::where([['id', '>', 0]]) ->orderBy(['created'=>'asc']) ->page(1, 10) ->get();
+        print_r($res);
         /** 表格渲染数据 */
         $head  =['id','name','time'];
         $data = [];

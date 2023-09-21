@@ -221,7 +221,22 @@ class Sqlite
     {
         @['DB' => $db, 'table' => $table, 'where' => $where, 'offset' => $offset, 'select' => $select, 'order' => $order] = self::$POOL[self::$uuid];
         $string = sprintf("SELECT %s FROM %s %s %s %s %s", $select, $table, $where, $order ? "ORDER BY $order" : "", "LIMIT 1", $offset);
+        $this->release();
         return $flag ? $string : $db->querySingle($string, true);
+    }
+
+    /**
+     * 释放资源
+     * @return void
+     * @note 因为是常驻内存，为了防止污染下一次操作，所以需要手动清理
+     */
+    private function release(){
+        self::$POOL[self::$uuid]['where']='';
+        self::$POOL[self::$uuid]['offset']=' OFFSET 0 ';
+        self::$POOL[self::$uuid]['select']='*';
+        self::$POOL[self::$uuid]['order']='';
+        self::$POOL[self::$uuid]['limit']=' LIMIT 15 ';
+        self::$POOL[self::$uuid]['set']=[];
     }
 
     // result_array
@@ -240,6 +255,7 @@ class Sqlite
         while ($row = $query->fetchArray(SQLITE3_ASSOC)) {
             $result[] = $row;
         }
+        $this->release();
         return $result ?? [];
     }
 
@@ -274,6 +290,7 @@ class Sqlite
             $list[] = $row;
         }
         @['count' => $count] = $db->querySingle(sprintf("SELECT COUNT(*) AS count FROM %s %s", $table, $where), true);
+        $this->release();
         return ['list' => $list ?? [], 'count' => $count ?? 0];
     }
 
@@ -303,6 +320,7 @@ class Sqlite
         $uuid = self::$uuid;
         @['DB' => $db, 'table' => $table, 'set' => [$keys, $vals]] = self::$POOL[$uuid];
         $string = sprintf("INSERT INTO %s %s VALUES %s ", $table, $keys, $vals);
+        $this->release();
         return $flag ? $string : (@$db->exec($string) ? $db->lastInsertRowID() : false);
     }
 
@@ -332,6 +350,7 @@ class Sqlite
         $uuid = self::$uuid;
         @['DB' => $db, 'table' => $table, 'where' => $where, 'set' => [$keys, $vals, $sets]] = self::$POOL[$uuid];
         $string = sprintf("UPDATE %s SET %s %s", $table, $sets, $where);
+        $this->release();
         return $flag ? $string : (@$db->exec($string) ? $db->changes() : false);
     }
 
@@ -347,6 +366,7 @@ class Sqlite
     {
         @['DB' => $db, 'table' => $table, 'where' => $where] = self::$POOL[self::$uuid];
         $string = sprintf("DELETE FROM %s %s", $table, $where);
+        $this->release();
         return $flag ? $string : (@$db->exec($string) ? $db->changes() : false);
     }
 

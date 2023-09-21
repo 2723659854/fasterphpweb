@@ -16,7 +16,7 @@ class Model
      * @return mixed
      */
     public static function __callStatic(string $name, array $arguments){
-        $class = (new \BaseModel());
+        $class = (new BaseModel());
         $model = new (get_called_class());
         if ($model->table){
             $class->table = $model->table;

@@ -118,7 +118,7 @@ class Timer
     /**
      * 删除所有定时器任务
      */
-    public function dellAll()
+    public function deleteAll()
     {
         self::$task = array();
     }

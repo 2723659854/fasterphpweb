@@ -1,30 +1,22 @@
 <?php
 
-set_time_limit(0);
-require_once __DIR__ . '/route.php';
-require_once __DIR__ . '/app.php';
-if (file_exists(dirname(__DIR__) . '/vendor/autoload.php')) {
-    require_once dirname(__DIR__) . '/vendor/autoload.php';
-}
-
-
+namespace Root;
 /**
  * @purpose 这个是同步阻塞io，可以自己测试使用
  */
-
 class Nginx
 {
-    private $ip      = '0.0.0.0';
-    private $port    = 8020;
+    private $ip = '0.0.0.0';
+    private $port = 8000;
     private $_socket = null;
 
     public function __construct()
     {
-        $this->_socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
+        $this->_socket = \socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
         @\socket_set_option($this->_socket, SOL_SOCKET, SO_REUSEADDR, 1);
         @\socket_set_option($this->_socket, SOL_SOCKET, SO_REUSEPORT, 1);
         if ($this->_socket === false) {
-            die(socket_strerror(socket_last_error($this->_socket)));
+            die(\socket_strerror(\socket_last_error($this->_socket)));
         }
         global $_port;
         $this->port = $_port;
@@ -42,15 +34,15 @@ class Nginx
             $request = '';
             $flag    = true;
             while ($flag) {
-                $_content = socket_read($socketAccept, 1024);
+                $_content = \socket_read($socketAccept, 1024);
                 if (strlen($_content) < 1024) {
                     $flag = false;
                 }
                 $request = $request . $_content;
             }
             $_param = [];
-            socket_write($socketAccept, 'HTTP/1.1 200 OK' . PHP_EOL);
-            socket_write($socketAccept, 'Date:' . date('Y-m-d H:i:s') . PHP_EOL);
+            \socket_write($socketAccept, 'HTTP/1.1 200 OK' . PHP_EOL);
+            \socket_write($socketAccept, 'Date:' . date('Y-m-d H:i:s') . PHP_EOL);
             $_mark    = $this->getUri($request);
             $fileName = $_mark['file'];
             $_request = $_mark['request'];
@@ -61,37 +53,52 @@ class Nginx
             $fileExt = preg_replace('/^.*\.(\w+)$/', '$1', $fileName);
             switch ($fileExt) {
                 case "html":
-                    socket_write($socketAccept, 'Content-Type: text/html' . PHP_EOL);
+                    \socket_write($socketAccept, 'Content-Type: text/html' . PHP_EOL);
                     $fileName = dirname(__DIR__) . '/view/' . $fileName;
                     if (file_exists($fileName)) {
                         $fileContent = file_get_contents($fileName);
                     } else {
                         $fileContent = 'sorry,the file is missing!';
                     }
-                    socket_write($socketAccept, "Content-Length: " . strlen($fileContent) . "\r\n\r\n");
-                    socket_write($socketAccept, $fileContent, strlen($fileContent));
+                    \socket_write($socketAccept, "Content-Length: " . strlen($fileContent) . "\r\n\r\n");
+                    \socket_write($socketAccept, $fileContent, strlen($fileContent));
                     break;
-                case "jpg": case "js": case "css": case "gif": case "png": case "icon": case "jpeg": case "ico":
-                    socket_write($socketAccept, 'Content-Type: image/jpeg' . PHP_EOL);
+                case "jpg":
+                case "js":
+                case "css":
+                case "gif":
+                case "png":
+                case "icon":
+                case "jpeg":
+                case "ico":
+                    \socket_write($socketAccept, 'Content-Type: image/jpeg' . PHP_EOL);
                     $fileName = dirname(__DIR__) . '/public/' . $fileName;
                     if (file_exists($fileName)) {
                         $fileContent = file_get_contents($fileName);
                     } else {
                         $fileContent = 'sorry,the file is missing!';
                     }
-                    socket_write($socketAccept, "Content-Length: " . strlen($fileContent) . "\r\n\r\n");
-                    socket_write($socketAccept, $fileContent, strlen($fileContent));
+                    \socket_write($socketAccept, "Content-Length: " . strlen($fileContent) . "\r\n\r\n");
+                    \socket_write($socketAccept, $fileContent, strlen($fileContent));
                     break;
-                case "doc": case "docx": case "ppt": case "pptx": case "xls": case "xlsx": case "zip": case "rar": case "txt":
-                    socket_write($socketAccept, 'Content-Type: application/octet-stream' . PHP_EOL);
+                case "doc":
+                case "docx":
+                case "ppt":
+                case "pptx":
+                case "xls":
+                case "xlsx":
+                case "zip":
+                case "rar":
+                case "txt":
+                    \socket_write($socketAccept, 'Content-Type: application/octet-stream' . PHP_EOL);
                     $fileName = dirname(__DIR__) . '/public/' . $fileName;
                     if (file_exists($fileName)) {
                         $fileContent = file_get_contents($fileName);
                     } else {
                         $fileContent = 'sorry,the file is missing!';
                     }
-                    socket_write($socketAccept, "Content-Length: " . strlen($fileContent) . "\r\n\r\n");
-                    socket_write($socketAccept, $fileContent, strlen($fileContent));
+                    \socket_write($socketAccept, "Content-Length: " . strlen($fileContent) . "\r\n\r\n");
+                    \socket_write($socketAccept, $fileContent, strlen($fileContent));
                     break;
                 default:
                     if (($url) && strpos($url, '?')) {
@@ -107,19 +114,20 @@ class Nginx
                         $content = handle(route($url), $_param, $_request);
                     }
                     if ($content) {
-                        $content      = is_string($content) ? $content : json_encode($content);
+                        $content = is_string($content) ? $content : json_encode($content);
                     } else {
-                        $content      = '';
+                        $content = '';
                     }
-                    socket_write($socketAccept, 'Content-Type: text/html' . PHP_EOL);
-                    socket_write($socketAccept, "Content-Length: " . strlen($content) . "\r\n\r\n");
-                    socket_write($socketAccept, $content, strlen($content));
+                    \socket_write($socketAccept, 'Content-Type: text/html' . PHP_EOL);
+                    \socket_write($socketAccept, "Content-Length: " . strlen($content) . "\r\n\r\n");
+                    \socket_write($socketAccept, $content, strlen($content));
             }
-            socket_close($socketAccept);
+            \socket_close($socketAccept);
 
         }
 
     }
+
     /**
      * 解析路由和参数
      * @param $request
@@ -130,11 +138,11 @@ class Nginx
         $arrayRequest = explode(PHP_EOL, $request);
         $line         = $arrayRequest[0];
         $str          = $line . ' ';
-        $url_length       = strlen($str);
+        $url_length   = strlen($str);
         static $fuck = '';
         $array = [];
         for ($i = 0; $i < $url_length; $i++) {
-            if (trim($str[$i])!=null) {
+            if (trim($str[$i]) != null) {
                 $fuck = $fuck . $str[$i];
             } else {
                 $array[] = $fuck;
@@ -236,7 +244,7 @@ class Nginx
     /** 关闭服务端 */
     public function close()
     {
-        socket_close($this->_socket);
+        \socket_close($this->_socket);
     }
 
 

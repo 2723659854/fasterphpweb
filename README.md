@@ -404,11 +404,11 @@ class DemoCommand  extends BaseCommand
 #### sqlite数据库支持
 创建模型
 ```bash 
-php start.php make:sqlite Large
+php start.php make:sqlite Talk
 ```
 或者
 ```bash 
-php songshu make:sqlite Large
+php songshu make:sqlite Talk
 ```
 用法
 ```php 

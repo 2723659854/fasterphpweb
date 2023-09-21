@@ -1,1381 +1,513 @@
 <?php
 
-
-
-/**
- * App目录
- * @return string
- */
-function app_path()
-{
-    return dirname(__DIR__);
-}
-
-/**
- * 获取配置文件
- * @param $path_name
- * @return mixed
- */
-function config($path_name)
-{
-    return include app_path() . '/config/' . $path_name . '.php';
-}
-
-/**
- * public目录
- * @return string
- */
-function public_path()
-{
-    return app_path() . '/public';
-}
-
-function command_path()
-{
-    return dirname(__DIR__) . '/app/command';
-}
-
-function timerLogPath()
-{
-    return dirname(__DIR__) . '/root/timerLog';
-}
-
-/**
- * 遍历目录
- * @param $path
- * @return mixed
- */
-function traverse($path = '.')
-{
-    global $filePath;
-    $current_dir = opendir($path);
-    while (($file = readdir($current_dir)) !== false) {
-        $sub_dir = $path . DIRECTORY_SEPARATOR . $file;
-        if ($file == '.' || $file == '..') {
-            continue;
-        } else if (is_dir($sub_dir)) {
-            traverse($sub_dir);
-        } else {
-            $filePath[$path . '/' . $file] = $path . '/' . $file;
-        }
-    }
-    return $filePath;
-}
-
-/**
- * 扫描目录的文件
- * @param $path
- * @return array
- */
-function scan_dir($path = '.')
-{
-    /** 这里必须使用静态变量 ，否则递归调用的时候不能正确保存数据 */
-    static $filePath    = [];
-    $current_dir = opendir($path);
-    while (($file = readdir($current_dir)) !== false) {
-        $sub_dir = $path . DIRECTORY_SEPARATOR . $file;
-        if ($file == '.' || $file == '..') {
-            continue;
-        } else if (is_dir($sub_dir)) {
-            scan_dir($sub_dir);
-        } else {
-            $filePath[$path . '/' . $file] = $path . '/' . $file;
-        }
-    }
-    return $filePath;
-}
-
-/**
- * 获取文件中定义的类名
- * @param $php_code
- * @return array
- */
-function get_php_classes($php_code)
-{
-    $classes = array();
-    $tokens  = token_get_all($php_code);
-    $count   = count($tokens);
-    for ($i = 2; $i < $count; $i++) {
-        if ($tokens[$i - 2][0] == T_CLASS
-            && $tokens[$i - 1][0] == T_WHITESPACE
-            && $tokens[$i][0] == T_STRING) {
-
-            $class_name = $tokens[$i][1];
-            $classes[]  = $class_name;
-        }
-    }
-    return $classes;
-}
-
-/**
- * 启动服务
- * @param $param
- * @return void
- * @throws Exception
- */
-function start_server($param)
-{
-
-    check_env();
-    $daemonize = false;
-    $flag      = true;
-    global $_pid_file, $_port, $_listen, $_server_num, $_system, $_lock_file, $_has_epoll, $_system_command,$_system_table,$_color_class;
-    $_pid_file  = __DIR__ . '/my_pid.txt';
-    $_lock_file = __DIR__ . '/lock.txt';
-    /** 加载必须的启动文件 */
-    require_once dirname(__DIR__) . '/vendor/autoload.php';
-    require_once __DIR__ . '/Timer.php';
-    require_once __DIR__ . '/view.php';
-    require_once __DIR__ . '/Request.php';
-    require_once __DIR__ . '/BaseModel.php';
-    require_once __DIR__ . '/Model.php';
-    require_once __DIR__ . '/Cache.php';
-    require_once __DIR__ . '/queue/Queue.php';
-    require_once __DIR__ . '/Facade.php';
-    require_once __DIR__ . '/Selector.php';
-    require_once __DIR__ . '/Epoll.php';
-    require_once __DIR__ . '/Nginx.php';
-    require_once __DIR__ . '/BaseCommand.php';
-    require_once __DIR__ . '/queue/RabbitMQBase.php';
-    require_once __DIR__ . '/ESClient.php';
-    require_once __DIR__ . '/Container.php';
-    require_once __DIR__ . '/Ioc.php';
-    require_once __DIR__ . '/Sqlite.php';
-    require_once __DIR__ . '/SqliteBaseModel.php';
-
-    /** @var bool $_has_epoll 默认不支持epoll模型 */
-    $_has_epoll = false;
-    /** @var bool $_system 是否是linux系统 */
-    $_system = true;
-    if (\DIRECTORY_SEPARATOR === '\\') {
-        $_system = false;
-    } else {
-        $_has_epoll = (new EventBase())->getMethod() == 'epoll';
-    }
-    $httpServer = null;
-    $server     = include dirname(__DIR__) . '/config/server.php';
-    if (isset($server['port']) && $server['port']) {
-        $_port = intval($server['port']);
-    } else {
-        $_port = 8020;
-    }
-    if (isset($server['num']) && $server['num']) {
-        $_server_num = intval($server['num']);
-    } else {
-        $_server_num = 2;
-    }
-    $_listen    = "http://127.0.0.1:" . $_port;
-    $httpServer = null;
-    /** 装载用户的自定义命令 */
-
-    deal_command();
-    /** 装载App目录下的所有文件 */
-    foreach (scan_dir(app_path() . '/app') as $key => $val) {
-        if (file_exists($val)) {
-            require_once $val;
-        }
-    }
-    /** 加载表格类工具 */
-    $_system_table = new Xiaosongshu\Table\Table();
-    /** 加载字体类工具 */
-    $_color_class = new Xiaosongshu\ColorWord\Transfer();
-    /** 分析用户输入的命令，执行业务逻辑 */
-    if (count($param) > 1) {
-        switch ($param[1]) {
-            case "start":
-                if (isset($param[2]) && ($param[2] == '-d')) {
-                    if ($_system) {
-                        $daemonize = true;
-                    } else {
-                        echo $_color_class->info("当前环境是windows,只能在控制台运行\r\n");
-                        echo "\r\n";
-                    }
-                }
-
-                echo $_color_class->info("进程启动中...\r\n");
-                echo "\r\n";
-                break;
-            case "stop":
-                if ($_system) {
-                    close();
-                    echo $_color_class->info("进程已关闭\r\n");
-                } else {
-                    echo $_color_class->info("当前环境是windows,只能在控制台运行\r\n");
-
-                }
-                $flag = false;
-                break;
-            case "restart":
-                if ($_system) {
-                    close();
-                    $daemonize = true;
-                    echo $_color_class->info("进程重启中\r\n");
-                } else {
-                    echo $_color_class->info("当前环境是windows,只能在控制台运行\r\n");
-                }
-                break;
-            case "queue":
-                echo $_color_class->info("测试redis队列,你可以按CTRL+C停止");
-                \cli_set_process_title("xiaosongshu_queue");
-                xiaosongshu_queue();
-                break;
-            case "make:command":
-                make_command($param[2]??'');
-                break;
-            case "make:model":
-                make_model($param[2]??'');
-                break;
-            case "make:controller":
-                make_controller($param[2]??'');
-                break;
-            case "make:sqlite":
-                make_sqlite_model($param[2]??'');
-                break;
-            default:
-                /** 如果是自定义命令，则执行用户的逻辑 */
-                if (isset($_system_command[$param[1]])) {
-                    $arguments = $param;
-                    unset($arguments[0]);
-                    unset($arguments[1]);
-                    /** 这里可能用反射更好一点，懒得改了 */
-                    $specialCommandClass = (new $_system_command[$param[1]]());
-                    if (method_exists($specialCommandClass, 'configure')) {
-                        $specialCommandClass->configure();
-                    }
-                    /** 解析参数 */
-                    $needFillArguments = [];
-                    foreach ($arguments as $index => $item) {
-                        /** option 参数 */
-                        if (strpos($item, '=')) {
-                            $value        = explode('=', $item);
-                            $option_name  = str_replace('--', '', $value[0] ?? '');
-                            /** 丢弃help关键字 */
-                            if ($option_name=='help'){
-                                continue;
-                            }
-                            $option_value = $value[1] ?? null;
-                            /** 只有被定义了才被赋值，这里不可使用isset，因为如果默认值为null，则不能判断 */
-                            if (array_key_exists($option_name, $specialCommandClass->input['option'])) {
-                                $specialCommandClass->input['option'][$option_name] = $option_value;
-                            }
-                        } else {
-                            /** argument参数,按顺序填充，如果类当中没有定义这个属性就丢弃 */
-                            $needFillArguments[] = $item;
-                        }
-                    }
-                    /** 赋值必填参数 */
-                    if ($needFillArguments) {
-                        foreach ($specialCommandClass->input['argument'] as $k => $v) {
-                            $specialCommandClass->input['argument'][$k] = array_shift($needFillArguments);
-                        }
-                    }
-
-                    /** 获取自定义命令的帮助 */
-                    if(in_array('-h',$param)||in_array('--help',$param)){
-                        $head= array_shift($specialCommandClass->help);
-                        if (empty($specialCommandClass->help)){
-                            echo $_color_class->info("暂无帮助信息")."\r\n";
-                            exit;
-                        }
-                        $_system_table->table($head,$specialCommandClass->help);
-                        exit;
-                    }
-                    /** 执行命令行逻辑 */
-                    try {
-                        $specialCommandClass->handle();
-                    } catch (\Exception $exception) {
-                        /** 捕获异常，并打印错误 */
-
-                        echo $_color_class->error("报错：code:{$exception->getCode()},文件{$exception->getFile()}，第{$exception->getLine()}行发生错误，错误信息：{$exception->getMessage()}");
-                        echo "\r\n";
-                    }
-
-                    exit;
-                } else {
-                    /** 查看是否是用户自定义的命令 */
-                    echo $_color_class->info("未识别的命令\r\n");
-                    echo "\r\n";
-                    $flag = false;
-                }
-
-        }
-    } else {
-        echo $_color_class->info("缺少必要参数，你可以输入start,start -d,stop,restart,queue\r\n");
-        $flag = false;
-    }
-    if ($flag == false) {
-        echo $_color_class->info("脚本退出运行\r\n");
-        exit;
-    }
-    $fd  = fopen($_lock_file, 'w');
-    $res = flock($fd, LOCK_EX | LOCK_NB);
-    if (!$res) {
-        echo $_color_class->info($_listen . "\r\n");
-        echo $_color_class->info("已有脚本正在运行，请勿重复启动，你可以使用stop停止运行或者使用restart重启\r\n");
-        exit(0);
-    }
-
-    /** 此处需要判断是否是是Linux系统，如果是则检查是否有epoll 有则调用epoll，否则调用select */
-
-    if ($daemonize) {
-        daemon();
-    } else {
-        $open=[
-            ['http','正常','1',$_listen]
-        ];
-        $_system_table->table(['名称','状态','进程数','服务'],$open);
-        echo $_color_class->info("进程启动完成,你可以按ctrl+c停止运行\r\n");
-        if ($_system && $_has_epoll) {
-            /** linux系统使用epoll模型 */
-            epoll();
-        } else {
-            /** windows系统使用select模型 */
-            select();
-        }
-
-    }
-
-}
-
-/**
- * 创建命令行
- * @param string $name
- * @return void
- */
-function make_command(string $name):void{
-    if (!$name) {
-        echo "请输入要创建的命令文件名称\r\n";
-        exit;
-    }
-    foreach (scan_dir(command_path()) as $key => $file) {
-        if (file_exists($file)) {
-            $fileName = basename($file);
-            if ($fileName == $name . '.php') {
-                echo "存在相同名称的文件：[{$fileName}]\r\n";
-                exit;
-            }
-        }
-    }
-    $time = date('Y-m-d H:i:s');
-    $content = <<<EOF
-<?php
-namespace App\Command;
-
-use Root\BaseCommand;
-/**
- * @purpose 用户自定义命令
- * @author administrator
- * @time $time
- */
-class $name extends BaseCommand
-{
-
-    /** @var string \$command 命令触发字段，请替换为你自己的命令，执行：php start.php your:command */
-    public \$command = 'your:command';
-    
-     /**
-     * 配置参数
-     * @return void
-     */
-    public function configure(){
-        /** 必选参数 */
-        \$this->addArgument('argument','这个是参数argument的描述信息');
-        /** 可传参数 */
-        \$this->addOption('option','这个是option参数的描述信息');
-    }
-    
+if (!function_exists('app_path')){
     /**
-     * 清在这里编写你的业务逻辑
-     * @return void
+     * App目录
+     * @return string
      */
-    public function handle()
+    function app_path()
     {
-        /** 获取必选参数 */
-        var_dump(\$this->getOption('argument'));
-        /** 获取可选参数 */
-        var_dump(\$this->getOption('option'));
-        \$this->info("请在这里编写你的业务逻辑");
+        return dirname(__DIR__);
     }
 }
-EOF;
-    @file_put_contents(app_path() . '/app/command/' . $name . '.php', $content);
-    echo "创建完成\r\n";
-    exit;
-}
 
-/**
- * 创建模型
- * @param string $name
- * @return void
- */
-function make_model(string $name):void {
-    if (!$name) {
-        echo "请输入要创建的模型名称\r\n";
-        exit;
-    }
-
-    $name =trim($name,'/');
-    $controller = strtolower(app_path().'/app/model/'.$name . '.php');
+if (!function_exists('config')){
     /**
-     * 检查是否存在相同的文件
+     * 获取配置文件
+     * @param $path_name
+     * @return mixed
      */
-    foreach (scan_dir(app_path().'/app/model') as  $file) {
-        if (file_exists($file)) {
-            $fileName =strtolower($file);
-            if ($fileName == $controller ) {
-                echo "存在相同名称的文件：[{$fileName}]\r\n";
-                exit;
-            }
-        }
+    function config($path_name)
+    {
+        return include app_path() . '/config/' . $path_name . '.php';
     }
-    $name = array_filter(explode('/',$name));
-
-    $className = ucfirst(strtolower(array_pop($name)));
-    $nameSpace = "App\Model";
-    if ($name){
-        foreach ($name as $dir){
-            $dir = ucfirst(strtolower($dir));
-            $nameSpace =$nameSpace."\\".$dir;
-        }
-    }
-    $filePath = app_path().'/app/model';
-    foreach ($name as $dir){
-        $filePath = $filePath.'/'.strtolower($dir);
-    }
-    if (!is_dir($filePath)){
-        mkdir($filePath,'0777',true);
-    }
-    $filePath = $filePath."/".$className.'.php';
-
-    $time = date('Y-m-d H:i:s');
-    /** 表名 */
-    $lower_name = strtolower($className);
-    $content = <<<EOF
-<?php
-
-namespace $nameSpace;
-
-use Root\Model;
-/**
- * @purpose mysql模型
- * @author administrator
- * @time $time
- */
-class $className extends Model
-{
-    /** @var string \$table 建议指定表名，否则系统根据模型名推断表名，可能会不准确 */
-    public string \$table = "$lower_name";
-
-}
-EOF;
-
-    file_put_contents($filePath,$content);
-    echo "创建模型完成\r\n";
-    exit;
 }
 
-/**
- * 创建sqlite模型
- * @param string $name
- * @return void
- */
-function make_sqlite_model(string $name):void {
-    if (!$name) {
-        echo "请输入要创建的sqlite模型名称\r\n";
-        exit;
-    }
-
-    $name =trim($name,'/');
-    $controller = strtolower(app_path().'/app/sqliteModel/'.$name . '.php');
+if (!function_exists('public_path')){
     /**
-     * 检查是否存在相同的文件
+     * public目录
+     * @return string
      */
-    foreach (scan_dir(app_path().'/app/sqliteModel') as  $file) {
-        if (file_exists($file)) {
-            $fileName =strtolower($file);
-            if ($fileName == $controller ) {
-                echo "存在相同名称的文件：[{$fileName}]\r\n";
-                exit;
-            }
-        }
+    function public_path()
+    {
+        return app_path() . '/public';
     }
-    $name = array_filter(explode('/',$name));
-
-    $className = ucfirst(strtolower(array_pop($name)));
-    $nameSpace = "App\SqliteModel";
-    if ($name){
-        foreach ($name as $dir){
-            $dir = ucfirst(strtolower($dir));
-            $nameSpace =$nameSpace."\\".$dir;
-        }
-    }
-    $filePath = app_path().'/app/sqliteModel';
-    foreach ($name as $dir){
-        $filePath = $filePath.'/'.strtolower($dir);
-    }
-    if (!is_dir($filePath)){
-        mkdir($filePath,'0777',true);
-    }
-    /** 文件名 */
-    $filePath = $filePath."/".$className.'.php';
-
-    /** 存放目录 */
-    $location = implode('/',$name);
-    /** 当前时间 */
-    $time = date('Y-m-d H:i:s');
-    /** 表名 */
-    $lower_name = strtolower($className);
-    $content = <<<EOF
-<?php
-
-namespace $nameSpace;
-
-use Root\SqliteBaseModel;
-/**
- * @purpose sqlite 模型
- * @author administrator
- * @time $time
- */
-class $className extends SqliteBaseModel
-{
-
-    /** 存放目录：请修改为你自己的字段，真实路径为config/sqlite.php里面absolute设置的路径 + \$dir ,例如：/usr/src/myapp/fasterphpweb/sqlite/datadir/hello/talk */
-    public string \$dir = '$location';
-
-    /** 表名称：请修改为你自己的表名称 */
-    public string \$table = '$lower_name';
-
-    /** 表字段：请修改为你自己的字段 */
-    public string \$field ='id INTEGER PRIMARY KEY,name varhcar(24),created text(12)';
-
-}
-EOF;
-
-    file_put_contents($filePath,$content);
-    echo "创建sqlite模型完成\r\n";
-    exit;
 }
 
-/**
- * 创建控制器
- * @param string $name 控制器名称
- * @return void
- */
-function make_controller(string $name):void {
-    if (!$name) {
-        echo "请输入要创建的控制器名称\r\n";
-        exit;
-    }
-    $time = date('Y-m-d H:i:s');
-
-    $name =trim($name,'/');
-    $controller = strtolower(app_path().'/app/controller/'.$name . '.php');
+if (!function_exists('command_path')){
     /**
-     * 检查是否存在相同的文件
+     * 命令行目录
+     * @return string
      */
-    foreach (scan_dir(app_path().'/app/controller') as $key => $file) {
-        if (file_exists($file)) {
-            $fileName =strtolower($file);
-            if ($fileName == $controller ) {
-                echo "存在相同名称的文件：[{$fileName}]\r\n";
-                exit;
-            }
-        }
+    function command_path()
+    {
+        return dirname(__DIR__) . '/app/command';
     }
-    $name = array_filter(explode('/',$name));
-    if (count($name)<2){
-        echo "必须是模块名称/控制器名称\r\n";exit;
-    }
-    $className = ucfirst(strtolower(array_pop($name)));
-    $nameSpace = "App\Controller";
-    if ($name){
-        foreach ($name as $dir){
-            $dir = ucfirst(strtolower($dir));
-            $nameSpace =$nameSpace."\\".$dir;
-        }
-    }
-    $filePath = app_path().'/app/controller';
-    foreach ($name as $dir){
-        $filePath = $filePath.'/'.strtolower($dir);
-    }
-    if (!is_dir($filePath)){
-        mkdir($filePath,'0777',true);
-    }
-    $filePath = $filePath."/".$className.'.php';
-    $content =<<<EOF
-<?php
+}
 
-namespace $nameSpace;
-
-use Root\Request;
-
-/**
- * @purpose 控制器
- * @author administrator
- * @time $time
- */
-class $className
-{
+if(!function_exists('timer_log_path')){
     /**
-     * index方法
-     * @param Request \$request 请求类
-     * @return string|string[]|null
+     * 定时器pid目录
+     * @return string
      */
-    public function index(Request \$request){
-        return \$request->param();
+    function timer_log_path()
+    {
+        return dirname(__DIR__) . '/root/timerLog';
     }
 }
-EOF;
-    file_put_contents($filePath,$content);
-    echo "创建控制器完成\r\n";
-    exit;
-}
 
-/** 队列 */
-function _queue_xiaosongshu()
-{
-    try {
-        $config = config('redis');
-        $host   = $config['host'] ?? '127.0.0.1';
-        $port   =  $config['port'] ?? '6379';
-        $client = new Redis();
-        $client->connect($host, $port);
-        $client->auth($config['password']??'');
-        while (true) {
-            $job = json_decode($client->RPOP('xiaosongshu_queue'), true);
-            deal_job($job);
-            $res = $client->zRangeByScore('xiaosongshu_delay_queue', 0, time(), ['limit' => 1]);
-            if ($res) {
-                $value = $res[0];
-                $res1  = $client->zRem('xiaosongshu_delay_queue', $value);
-                if ($res1) {
-                    $job = json_decode($value, true);
-                    deal_job($job);
-                }
-            }
-            if (empty($job) && empty($res)) {
-                sleep(1);
+
+
+if (!function_exists('scan_dir')){
+    /**
+     * 扫描目录的文件
+     * @param string $path 目录
+     * @param bool $force 首次调用：true返回本目录的文件，false返回包含上一次的数据
+     * @return array
+     */
+    function scan_dir(string $path = '.',bool $force=false)
+    {
+        /** 这里必须使用静态变量 ，否则递归调用的时候不能正确保存数据 */
+        static $filePath    = [];
+        if ($force){
+            $filePath =[];
+        }
+        $current_dir = opendir($path);
+        while (($file = readdir($current_dir)) !== false) {
+            $sub_dir = $path . DIRECTORY_SEPARATOR . $file;
+            if ($file == '.' || $file == '..') {
+                continue;
+            } else if (is_dir($sub_dir)) {
+                scan_dir($sub_dir);
+            } else {
+                $filePath[$path . '/' . $file] = $path . '/' . $file;
             }
         }
-    } catch (\Exception $exception) {
-        global $_color_class;
-        echo $_color_class->error("\nredis连接失败,详情：{$exception->getMessage()}\n");
-        echo "\r\n";
-        echo $_color_class->info("系统将在3秒后重试\n");
-        sleep(3);
-        _queue_xiaosongshu();
+        return $filePath;
     }
 }
 
-/**
- * 队列逻辑处理
- * @param $job
- * @return void
- */
-function deal_job($job = [])
-{
-    if (!empty($job)) {
-        if (class_exists($job['class'])) {
-            $class = new $job['class']($job['param']);
-            $class->handle();
-        } else {
-            echo $job['class'] . '不存在，队列任务执行失败！';
-            echo "\r\n";
-        }
-    }
-}
+if (!function_exists('get_php_classes')){
+    /**
+     * 解析文件中定义的类名
+     * @param string $php_code 文件代码
+     * @return array
+     */
+    function get_php_classes(string $php_code)
+    {
+        $classes = array();
+        $tokens  = token_get_all($php_code);
+        $count   = count($tokens);
+        for ($i = 2; $i < $count; $i++) {
+            if ($tokens[$i - 2][0] == T_CLASS
+                && $tokens[$i - 1][0] == T_WHITESPACE
+                && $tokens[$i][0] == T_STRING) {
 
-/** 执行定时器 */
-function xiaosongshu_timer()
-{
-    while (true) {
-        /** 管理定时器 */
-        foreach (scan_dir(timerLogPath()) as $key => $val) {
-            $pid = file_get_contents($val);
-            if ($pid > 0) {
-                \posix_kill($pid, SIGKILL);
-            }
-            @unlink($val);
-            /** 杀死进程必须等待1秒 */
-            sleep(1);
-        }
-
-        /** 每次执行完成后等待1秒，防止进程占用大量内存 */
-        sleep(1);
-    }
-}
-
-/** 执行队列 */
-function xiaosongshu_queue()
-{
-    $enable = config('redis')['enable'];
-    if ($enable) {
-        _queue_xiaosongshu();
-    }
-}
-
-/** 关闭进程 */
-function close()
-{
-    global $_pid_file,$_color_class;
-    echo $_color_class->info("关闭进程中...\r\n");
-    if (file_exists($_pid_file)) {
-        $master_ids = file_get_contents($_pid_file);
-        $master_id  = explode('-', $master_ids);
-        foreach ($master_id as $k => $v) {
-            if ($v > 0) {
-                \posix_kill($v, SIGKILL);
+                $class_name = $tokens[$i][1];
+                $classes[]  = $class_name;
             }
         }
-        file_put_contents($_pid_file, null);
-        sleep(1);
+        return $classes;
     }
 }
 
-/** 环境监测 */
-function check_env()
-{
-    if (!extension_loaded('sockets')) {
-        exit("请先安装sockets扩展，然后开启php.ini的sockets扩展");
+if (!function_exists('writePid')){
+    /**
+     * 记录pid到文件
+     * @return void
+     */
+    function writePid()
+    {
+        global $_pid_file;
+        /** 记录进程号 */
+        $fp = fopen($_pid_file, 'a+');
+        fwrite($fp, getmypid() . '-');
+        fclose($fp);
     }
 }
 
-/** 普通的阻塞模式,可以自己尝试使用 */
-function nginx()
-{
-    require_once __DIR__ . '/Nginx.php';
-    $worker = new Nginx();
-    $worker->start();
+if (!function_exists('writeTimerPid')){
+    /**
+     * 记录定时器的pid
+     * @return void
+     */
+    function writeTimerPid()
+    {
+        /** 记录进程号 */
+        $myPid = getmypid();
+        file_put_contents(__DIR__ . '/timerLog/' . $myPid . '.txt', $myPid);
+    }
 }
 
-/** 异步IO之select轮询模式 */
-function select()
-{
-    //echo "启动select异步IO模型\r\n";
-    require_once __DIR__ . '/Selector.php';
-    $httpServer = new Selector();
-    /** 消息接收  */
-    $httpServer->onMessage = function ($socketAccept, $message) use ($httpServer) {
-        onMessage($socketAccept, $message, $httpServer);
-    };
-    $httpServer->start();
-}
-
-/**
- * select和epoll消息处理事件
- * @param $socketAccept
- * @param $message
- * @param $httpServer
- * @return void
- */
-function onMessage($socketAccept, $message, &$httpServer)
-{
-    if (strpos($message, 'HTTP/')) {
-        $_param = [];
-        $_mark  = getUri($message);
-
-        $fileName = $_mark['file'];
-        $_request = $_mark['request'];
-        foreach ($_mark['post_param'] as $k => $v) {
-            $_param[$k] = $v;
+if (!function_exists('base64_file_upload')){
+    /**
+     * base64文件上传
+     * @param string $picture 文件内容
+     */
+    function base64_file_upload(string $picture)
+    {
+        if (!file_exists(app_path() . '/public/images/')) {
+            mkdir(app_path() . '/public/images/', 0777);
         }
-        $url     = $fileName;
-        $fileExt = preg_replace('/^.*\.(\w+)$/', '$1', $fileName);
-
-        switch ($fileExt) {
-            case "html":
-                fwrite($socketAccept, 'HTTP/1.1 200 OK' . PHP_EOL);
-                fwrite($socketAccept, 'Date:' . date('Y-m-d H:i:s') . PHP_EOL);
-                fwrite($socketAccept, 'Content-Type: text/html' . PHP_EOL);
-                fwrite($socketAccept, '' . PHP_EOL);
-                $fileName = dirname(__DIR__) . '/view/' . $fileName;
-                if (file_exists($fileName)) {
-                    $fileContent = file_get_contents($fileName);
-                } else {
-                    $fileContent = 'sorry,the file is missing!';
-                }
-                fwrite($socketAccept, "Content-Length: " . strlen($fileContent) . "\r\n\r\n");
-                fwrite($socketAccept, $fileContent, strlen($fileContent));
+        $image = explode(',', $picture);
+        $type  = $image[0];
+        switch ($type) {
+            case 'data:application/pdf;base64':
+                $type = 'pdf';
                 break;
-            case "ico":
-            case "jpg":
-            case "js":
-            case "css":
-            case "gif":
-            case "png":
-            case "icon":
-            case "jpeg":
-                fwrite($socketAccept, 'HTTP/1.1 200 OK' . PHP_EOL);
-                fwrite($socketAccept, 'Date:' . date('Y-m-d H:i:s') . PHP_EOL);
-                fwrite($socketAccept, 'Content-Type: image/jpeg' . PHP_EOL);
-                $fileName = dirname(__DIR__) . '/public/' . $fileName;
-                if (file_exists($fileName)) {
-                    $fileContent = file_get_contents($fileName);
-                } else {
-                    $fileContent = 'sorry,the file is missing!';
-                }
-                fwrite($socketAccept, "Content-Length: " . strlen($fileContent) . "\r\n\r\n");
-                fwrite($socketAccept, $fileContent, strlen($fileContent));
+            case 'data:image/png;base64':
+                $type = 'png';
                 break;
-            case "doc":
-            case "docx":
-            case "ppt":
-            case "pptx":
-            case "xls":
-            case "xlsx":
-            case "zip":
-            case "rar":
-            case "txt":
-                fwrite($socketAccept, 'HTTP/1.1 200 OK' . PHP_EOL);
-                fwrite($socketAccept, 'Date:' . date('Y-m-d H:i:s') . PHP_EOL);
-                fwrite($socketAccept, 'Content-Type: application/octet-stream' . PHP_EOL);
-                fwrite($socketAccept, '' . PHP_EOL);
-                $fileName = dirname(__DIR__) . '/public/' . $fileName;
-                if (file_exists($fileName)) {
-                    $fileContent = file_get_contents($fileName);
-                } else {
-                    $fileContent = 'sorry,the file is missing!';
-                }
-                fwrite($socketAccept, "Content-Length: " . strlen($fileContent) . "\r\n\r\n");
-                fwrite($socketAccept, $fileContent, strlen($fileContent));
+            case 'data:text/plain;base64':
+                $type = 'txt';
+                break;
+            case 'data:application/msword;base64':
+                $type = 'doc';
+                break;
+            case 'data:application/x-zip-compressed;base64':
+                $type = 'zip';
+                break;
+            case 'data:application/octet-stream;base64':
+                $type = 'txt';
+                break;
+            case 'data:application/vnd.openxmlformats-officedocument.presentationml.presentation;base64':
+                $type = 'doc';
+                break;
+            case 'data:application/vnd.ms-powerpoint;base64':
+                $type = 'ppt';
+                break;
+            case 'data:application/vnd.ms-excel;base64':
+                $type = 'xls';
                 break;
             default:
-                if (($url) && strpos($url, '?')) {
-                    $request_url = explode('?', $url);
-                    $route       = $request_url[0];
-                    $params      = explode('&', $request_url[1]);
-                    foreach ($params as $k => $v) {
-                        $_v             = explode('=', $v);
-                        $_param[$_v[0]] = $_v['1'];
-                    }
-                    $content = handle(route($route), $_param, $_request);
-                } else {
-                    $content = handle(route($url), $_param, $_request);
-                }
-                /** 文件下载 */
-                if (isset($content['type']) && $content['type'] == md5('_byte_for_down_load_file_')) {
-                    fwrite($socketAccept, 'HTTP/1.1 200 OK' . PHP_EOL);
-                    fwrite($socketAccept, 'Date:' . date('Y-m-d H:i:s') . PHP_EOL);
-                    fwrite($socketAccept, 'Content-Type: application/octet-stream' . PHP_EOL);
-                    fwrite($socketAccept, 'Accept-Ranges: bytes' . PHP_EOL);
-                    fwrite($socketAccept, 'Accept-Length:' . strlen($content['content']) . PHP_EOL);
-                    fwrite($socketAccept, 'Content-Disposition: attachment; filename=' . $content['name'] . "\r\n\r\n");
-                    fwrite($socketAccept, $content['content'], strlen($content['content']));
-                } else {
-                    /** 其他的暂时都做html处理 */
-                    if (!is_string($content)) {
-                        $content = json_encode($content);
-                    }
-                    fwrite($socketAccept, 'HTTP/1.1 200 OK' . PHP_EOL);
-                    fwrite($socketAccept, 'Date:' . date('Y-m-d H:i:s') . PHP_EOL);
-                    fwrite($socketAccept, 'Content-Type: text/html' . PHP_EOL);
-                    fwrite($socketAccept, "Content-Length: " . strlen($content) . "\r\n\r\n");
-                    fwrite($socketAccept, $content, strlen($content));
-                }
+                $type = 'txt';
 
         }
-        /** 这里必须关闭才能够给cli模式正常的返回数据，但是这个会影响需要长连接的浏览器或者其他服务，还不知道怎么处理 */
-        fclose($socketAccept);
-        /** 清理select连接 */
-        unset($httpServer->allSocket[(int)$socketAccept]);
-        /** 清理epoll连接 */
-        unset($httpServer->events[(int)$socketAccept]);
-        /** 释放客户端连接 */
-        unset($socketAccept);
+        $image    = $image[1];
+        $filename = app_path() . '/public/images/' . time() . '_' . uniqid() . '.' . $type;
+        $ifp      = fopen($filename, "wb");
+        fwrite($ifp, base64_decode($image));
+        fclose($ifp);
+        return $filename;
     }
-
 }
 
-/** 使用epoll异步io模型 */
-function epoll()
-{
-    //echo "启动epoll异步IO模型\r\n";
-    /** 加载epoll模型类 */
-    require_once __DIR__ . '/Epoll.php';
-    /** @var object $httpServer 将对象加载到内存 */
-    $httpServer = new Root\Epoll();
-    /** @var callable onMessage 设置消息处理函数 */
-    $httpServer->onMessage = function ($socketAccept, $message) use ($httpServer) {
-        onMessage($socketAccept, $message, $httpServer);
-    };
-    /** 启动服务 */
-    $httpServer->start();
-}
-
-
-/** 守护进程模式 */
-function daemon()
-{
-    /** 关闭错误 */
-    ini_set('display_errors', 'off');
-    /** 设置文件权限掩码为0 就是最大权限 可读写 防止操作文件权限不够出错 */
-    \umask(0);
-    global $_listen,$_color_class,$_system_table;
-    /** @var int $pid 创建子进程 */
-    $pid = \pcntl_fork();
-    if (-1 === $pid) {
-        /** 创建子进程失败 */
-        throw new Exception('Fork fail');
-    } elseif ($pid > 0) {
-        /** 主进程退出 */
-        $head =  ['名称','状态','进程数','服务'];
-        $content =[];
-        /** http */
-        $http_count = config('server')['num']??4;
-        $content[]=['http','正常',$http_count,$_listen];
-        /** rabbitmq */
-        $rabbitmq_config = config('rabbitmq');
-        if ($rabbitmq_config['enable']){
-            $rabbitmq_count = 0;
-            foreach ((config('rabbitmqProcess')) as $item){
-                $rabbitmq_count+=$item['count'];
-            }
-            $content[]=['rabbitmq','正常',$rabbitmq_count,$rabbitmq_config['port']];
-        }
-        /** 定时器 */
-        $content[]=['timer','正常','--','--'];
-        /** redis队列 */
-        $redis_config = config('redis');
-        if ($redis_config['enable']){
-            $content[]=['redis_queue','正常',1,$redis_config['port']];
-        }
-        $_system_table->table($head,$content);
-        echo $_color_class->info($_listen . "\r\n");
-        echo $_color_class->info("进程启动完成,你可以输入php start.php stop停止运行\r\n");
-        exit(0);
-    }
-
-    /** 子进程开始工作 */
-    global $_pid_file;
-    file_put_contents($_pid_file, '');
-
-    /** @var int $master_pid 获取当前进程id */
-    $master_pid = getmypid();
-    /** 将当前进程升级为主进程 */
-    if (-1 === \posix_setsid()) {
-        throw new Exception("Setsid fail");
-    }
-    /** 创建子进程 */
-    create_process();
-    /** @var int $_this_pid 获取当前进程id */
-    $_this_pid = getmypid();
-    /** 如果是主进程 */
-    if ($_this_pid == $master_pid) {
-        /** 在主进程里再创建一个子进程 */
-        \pcntl_fork();
-        if (getmypid() == $master_pid) {
-            /** 在主进程里面创建一个子进程负责处理rabbitmq的队列 */
-            $_small_son_id = \pcntl_fork();
-            if ($_small_son_id > 0) {
-                /** 记录进程号 */
-                writePid();
-                /** 子进程 */
-                rabbitmqConsume();
-            } elseif ($_small_son_id == 0) {
-                /** 主进程 */
-                /** 如果是主进程，则设置进程名称为master，管理定时器 */
-                cli_set_process_title("xiaosongshu_master");
-                writePid();
-                /** 在主进程里启动定时器 */
-                xiaosongshu_timer();
+if (!function_exists('getUri')){
+    /**
+     * 解析路由和参数
+     * @param string $request
+     * @return array
+     */
+    function getUri(string $request = '')
+    {
+        $arrayRequest = explode(PHP_EOL, $request);
+        $line         = $arrayRequest[0];
+        $str          = $line . ' ';
+        $url_length   = strlen($str);
+        static $fuck = '';
+        $array = [];
+        for ($i = 0; $i < $url_length; $i++) {
+            if (trim($str[$i]) != null) {
+                $fuck = $fuck . $str[$i];
             } else {
-                echo $_color_class->info("在创建rabbitmq的管理进程的时候失败了\r\t");
-                exit;
-            }
-
-        } else {
-            /** 在子进程里启动队列，并设置进程名称 */
-            cli_set_process_title("xiaosongshu_queue");
-            writePid();
-            xiaosongshu_queue();
-        }
-    } else {
-        /** 在子进程里启动队列，并设置进程名称 */
-        cli_set_process_title("xiaosongshu_http");
-        writePid();
-        global $_has_epoll;
-        /** 如果linux支持epoll模型则使用epoll */
-        if ($_has_epoll) {
-            /** 使用epoll */
-            epoll();
-        } else {
-            /** 使用普通的同步io */
-            select();
-        }
-    }
-    /** @var int $pid 再创建一个子进程，脱离主进程会话 */
-    $pid = \pcntl_fork();
-    if (-1 === $pid) {
-        throw new Exception("Fork fail");
-    } elseif (0 !== $pid) {
-        /** 脱离会话控制 */
-        exit(0);
-    }
-}
-
-/** 记录pid到文件 */
-function writePid()
-{
-    global $_pid_file;
-    /** 记录进程号 */
-    $fp = fopen($_pid_file, 'a+');
-    fwrite($fp, getmypid() . '-');
-    fclose($fp);
-}
-
-/**
- * 记录定时器的pid
- * @param $pid
- * @return void
- */
-function writeTimerPid()
-{
-    /** 记录进程号 */
-    $myPid = getmypid();
-    file_put_contents(__DIR__ . '/timerLog/' . $myPid . '.txt', $myPid);
-}
-
-/** 创建子进程 */
-function create_process()
-{
-    /** 初始化工作进程数 */
-    global $_server_num, $_pid_file;
-    /** 至少要开启一个子进程才能开启http服务 */
-    if ($_server_num < 2) $_server_num = 2;
-    /** 创建子进程，因为是多进程，所以会有以下的操作 */
-    for ($i = 0; $i <= $_server_num; $i++) {
-        /** @var string $read_log_content 读取已经开启的进程 */
-        $read_log_content = file_get_contents($_pid_file);
-        $father           = explode('-', $read_log_content);
-        $mother           = [];
-        /** 读取已有的进程 */
-        foreach ($father as $k => $v) {
-            /** 将进程id复制到新的数组 */
-            if (!array_search($v, $mother)) {
-                $mother[] = $v;
+                $array[] = $fuck;
+                $fuck    = '';
             }
         }
-        /** @var array $mother 进程id去重 */
-        $mother = array_unique($mother);
-        /** @var int $worker_num 统计当前已有的进程总数 */
-        $worker_num = count($mother);
-        /** 如果当前已开启的进程数大于设置的进程总数，则不再创建子进程，这里是多进程，所以会有反复的读写和比较操作，不能按单进程的思想理解 */
-        if ($worker_num > $_server_num) {
-            break;
+        $fuck = '';
+        if (isset($array[1])) {
+            $url = $array[1];
         } else {
-            /** 否则创建子进程 */
-            \pcntl_fork();
-            /** 将创建好的进程id存入文件 */
-            writePid();
+            $url = '/index/query';
         }
-    }
-}
-
-/** 文件上传 */
-function base64_file_upload($picture)
-{
-    if (!file_exists(app_path() . '/public/images/')) {
-        mkdir(app_path() . '/public/images/', 0777);
-    }
-    $image = explode(',', $picture);
-    $type  = $image[0];
-    //echo $type;
-    //echo "\r\n";
-    switch ($type) {
-        case 'data:application/pdf;base64':
-            $type = 'pdf';
-            break;
-        case 'data:image/png;base64':
-            $type = 'png';
-            break;
-        case 'data:text/plain;base64':
-            $type = 'txt';
-            break;
-        case 'data:application/msword;base64':
-            $type = 'doc';
-            break;
-        case 'data:application/x-zip-compressed;base64':
-            $type = 'zip';
-            break;
-        case 'data:application/octet-stream;base64':
-            $type = 'txt';
-            break;
-        case 'data:application/vnd.openxmlformats-officedocument.presentationml.presentation;base64':
-            $type = 'doc';
-            break;
-        case 'data:application/vnd.ms-powerpoint;base64':
-            $type = 'ppt';
-            break;
-        case 'data:application/vnd.ms-excel;base64':
-            $type = 'xls';
-            break;
-        default:
-            $type = 'txt';
-
-    }
-    $image    = $image[1];
-    $filename = app_path() . '/public/images/' . time() . '_' . uniqid() . '.' . $type;
-    $ifp      = fopen($filename, "wb");
-    fwrite($ifp, base64_decode($image));
-    fclose($ifp);
-    return $filename;
-}
-
-/**
- * 解析路由和参数
- * @param $request
- * @return array
- */
-function getUri($request = '')
-{
-    $arrayRequest = explode(PHP_EOL, $request);
-    $line         = $arrayRequest[0];
-    $str          = $line . ' ';
-    $url_length   = strlen($str);
-    static $fuck = '';
-    $array = [];
-    for ($i = 0; $i < $url_length; $i++) {
-        if (trim($str[$i]) != null) {
-            $fuck = $fuck . $str[$i];
+        if (isset($array[0])) {
+            $method = $array[0];
         } else {
-            $array[] = $fuck;
-            $fuck    = '';
+            $method = 'GET';
         }
-    }
-    $fuck = '';
-    if (isset($array[1])) {
-        $url = $array[1];
-    } else {
-        $url = '/index/query';
-    }
-    if (isset($array[0])) {
-        $method = $array[0];
-    } else {
-        $method = 'GET';
-    }
-    unset($arrayRequest[0]);
-    foreach ($arrayRequest as $k => $v) {
-        if ($v == null || $v == '') {
-            unset($arrayRequest[$k]);
-        }
-    }
-    $post_param = [];
-    if ($method == 'POST' || $method == 'post') {
-        $now   = $arrayRequest;
-        $param = array_pop($now);
-        if (strpos($param, '&')) {
-            $many = explode('&', $param);
-            foreach ($many as $a => $b) {
-                $dou                 = explode('=', $b);
-                $post_param[$dou[0]] = isset($dou[1]) ? $dou[1] : null;
+        unset($arrayRequest[0]);
+        foreach ($arrayRequest as $k => $v) {
+            if ($v == null || $v == '') {
+                unset($arrayRequest[$k]);
             }
         }
-        $length    = 0;
-        $fengexian = '';
-        foreach ($now as $a => $b) {
-            if (stripos($b, 'ength:')) {
-                $_vaka  = explode(':', $b);
-                $length = (int)$_vaka[1];
-            }
-            if (stripos($b, 'form-data; name="')) {
-                if ($now[$a - 1]) {
-                    $fengexian = $now[$a - 1];
+        $post_param = [];
+        if ($method == 'POST' || $method == 'post') {
+            $now   = $arrayRequest;
+            $param = array_pop($now);
+            if (strpos($param, '&')) {
+                $many = explode('&', $param);
+                foreach ($many as $a => $b) {
+                    $dou                 = explode('=', $b);
+                    $post_param[$dou[0]] = isset($dou[1]) ? $dou[1] : null;
                 }
-                $fenge_array    = array_keys($now, $fengexian, true);
-                $value_key_stop = 0;
-                foreach ($fenge_array as $m => $n) {
-                    if ($n > $a) {
-                        $value_key_stop = $n;
-                        break;
+            }
+            $length    = 0;
+            $fengexian = '';
+            foreach ($now as $a => $b) {
+                if (stripos($b, 'ength:')) {
+                    $_vaka  = explode(':', $b);
+                    $length = (int)$_vaka[1];
+                }
+                if (stripos($b, 'form-data; name="')) {
+                    if ($now[$a - 1]) {
+                        $fengexian = $now[$a - 1];
                     }
-                }
-                $value     = '';
-                $now_count = count($now);
-                if ($value_key_stop == 0) {
-                    $value_key_stop = $now_count;
-                }
-                if (strstr($now[$a + 1], 'Type:')) {
-                    $small_str = substr($request, stripos($request, $b));
-                    $pos1      = stripos($small_str, $now[$a + 3]);
-                    $pos2      = stripos($small_str, $now[$value_key_stop]);
-                    if ($value_key_stop == $now_count) {
-                        if (strstr($now[$a + 1], 'image')) {
-                            $value = substr($small_str, $pos1, ($pos2 - $pos1) + strlen($now[$value_key_stop]) + $length);
+                    $fenge_array    = array_keys($now, $fengexian, true);
+                    $value_key_stop = 0;
+                    foreach ($fenge_array as $m => $n) {
+                        if ($n > $a) {
+                            $value_key_stop = $n;
+                            break;
+                        }
+                    }
+                    $value     = '';
+                    $now_count = count($now);
+                    if ($value_key_stop == 0) {
+                        $value_key_stop = $now_count;
+                    }
+                    if (strstr($now[$a + 1], 'Type:')) {
+                        $small_str = substr($request, stripos($request, $b));
+                        $pos1      = stripos($small_str, $now[$a + 3]);
+                        $pos2      = stripos($small_str, $now[$value_key_stop]);
+                        if ($value_key_stop == $now_count) {
+                            if (strstr($now[$a + 1], 'image')) {
+                                $value = substr($small_str, $pos1, ($pos2 - $pos1) + strlen($now[$value_key_stop]) + $length);
+                            } else {
+                                $value = substr($small_str, $pos1, ($pos2 - $pos1) + strlen($now[$value_key_stop]));
+                            }
                         } else {
-                            $value = substr($small_str, $pos1, ($pos2 - $pos1) + strlen($now[$value_key_stop]));
+                            $value = substr($small_str, $pos1, ($pos2 - $pos1));
                         }
                     } else {
-                        $value = substr($small_str, $pos1, ($pos2 - $pos1));
-                    }
-                } else {
-                    $start = $a + 2;
-                    for ($ii = $start; $ii < $value_key_stop; $ii++) {
-                        $value = $value . $now[$ii];
-                    }
-                }
-                $str1 = substr($b, stripos($b, 'form-data; name="'));
-                $arr  = explode('"', $str1);
-                $key  = $arr[1];
-
-                $post_param[$key] = $value;
-                if (stripos($b, '; filename="')) {
-                    $str1                     = substr($b, stripos($b, '; filename="'));
-                    $arr                      = explode('"', $str1);
-                    $_filename                = $arr[1];
-                    $post_param['file'][$key] = ['filename' => $_filename, 'content' => $value];
-                    $post_param[$key]         = ['filename' => $_filename, 'content' => $value];
-                }
-            }
-        }
-    }
-
-    $arrayRequest[] = "method: " . $method;
-    $arrayRequest[] = "path: /" . $url;
-    $header         = [];
-    foreach ($arrayRequest as $k => $v) {
-        $v = trim($v);
-        if ($v) {
-            $_pos  = strripos($v, ": ");
-            $key   = trim(substr($v, 0, $_pos));
-            $value = trim(substr($v, $_pos + 1, strlen($v)));
-            if ($key) {
-                $header[$key] = $value;
-            }
-        }
-    }
-
-    return ['file' => $url, 'request' => $arrayRequest, 'post_param' => $post_param, 'header' => $header];
-}
-
-/**
- * 处理自定义的命令
- * @return void
- */
-function deal_command()
-{
-    global $_system_command;
-    /** 加载所有自定义的命令 */
-    foreach (scan_dir(command_path()) as $key => $file) {
-        if (file_exists($file)) {
-            require_once $file;
-            $php_code = file_get_contents($file);
-            $classes  = get_php_classes($php_code);
-            foreach ($classes as $class) {
-                /** @var string $_class_name 拼接完整的路径 */
-                $_class_name = 'App\Command\\' . $class;
-                /** @var object $object 通过反射获取这个类 */
-                $object = new ReflectionClass(new $_class_name());
-                /** 如果这个类有command属性，并且有handle方法，则将这个方法和类名注册到全局命令行中 */
-                if ($object->hasMethod('handle') && $object->hasProperty('command')) {
-                    foreach ($object->getDefaultProperties() as $property => $command) {
-                        if ($property == 'command') {
-                            $_system_command[$command] = $_class_name;
+                        $start = $a + 2;
+                        for ($ii = $start; $ii < $value_key_stop; $ii++) {
+                            $value = $value . $now[$ii];
                         }
                     }
-                }
-            }
-        }
-    }
-}
+                    $str1 = substr($b, stripos($b, 'form-data; name="'));
+                    $arr  = explode('"', $str1);
+                    $key  = $arr[1];
 
-/**
- * 处理rabbitmq的消费
- * @return void
- */
-function rabbitmqConsume()
-{
-    $enable = config('rabbitmq')['enable'];
-    if ($enable) {
-        $config = config('rabbitmqProcess');
-        foreach ($config as $name => $value) {
-            if (isset($value['handler'])) {
-                /** 创建一个子进程，在子进程里面执行消费 */
-                $count = $value['count']??1;
-                for($i=0;$i<$count;$i++){
-                    $rabbitmq_pid = \pcntl_fork();
-                    if ($rabbitmq_pid > 0) {
-                        /** 记录进程号 */
-                        writePid();
-                        cli_set_process_title($name.'_'.($i+1));
-                        if (class_exists($value['handler'])) {
-                            /** 切换CPU */
-                            sleep(1);
-                            $className = $value['handler'];
-                            $queue     = new $className();
-                            $queue->consume();
-                        }
+                    $post_param[$key] = $value;
+                    if (stripos($b, '; filename="')) {
+                        $str1                     = substr($b, stripos($b, '; filename="'));
+                        $arr                      = explode('"', $str1);
+                        $_filename                = $arr[1];
+                        $post_param['file'][$key] = ['filename' => $_filename, 'content' => $value];
+                        $post_param[$key]         = ['filename' => $_filename, 'content' => $value];
                     }
                 }
-
             }
+        }
+
+        $arrayRequest[] = "method: " . $method;
+        $arrayRequest[] = "path: /" . $url;
+        $header         = [];
+        foreach ($arrayRequest as $k => $v) {
+            $v = trim($v);
+            if ($v) {
+                $_pos  = strripos($v, ": ");
+                $key   = trim(substr($v, 0, $_pos));
+                $value = trim(substr($v, $_pos + 1, strlen($v)));
+                if ($key) {
+                    $header[$key] = $value;
+                }
+            }
+        }
+
+        return ['file' => $url, 'request' => $arrayRequest, 'post_param' => $post_param, 'header' => $header];
+    }
+}
+
+if (!function_exists('prepareMysqlAndRedis')){
+    /**
+     * 提前加载MySQL和redis
+     * @return void
+     */
+    function prepareMysqlAndRedis()
+    {
+        /** 使用匿名函数提前连接数据库 */
+        (function () {
+            try {
+                $startMysql = config('database')['mysql']['preStart'] ?? false;
+                if ($startMysql) {
+                    new \Root\BaseModel();
+                }
+                $startRedis = config('redis')['preStart'] ?? false;
+                if ($startRedis) {
+                    new \Root\Cache();
+                }
+            } catch (\RuntimeException $exception) {
+                echo "\r\n";
+                echo $exception->getMessage();
+                echo "\r\n";
+            }
+        })();
+    }
+}
+
+
+if (!function_exists('download_file')){
+    /**
+     * 下载文件到浏览器
+     * @param string $path 文件路径
+     * @param string $name 文件名称
+     * @return array
+     */
+    function download_file(string $path, string $name = '')
+    {
+        if (!is_file($path)) {
+            throw new RuntimeException("[" . $path . "] 不是可用的文件 ！");
+        }
+        if (!file_exists($path)) {
+            throw new RuntimeException("[" . $path . "] 不是可用的文件 ！");
+        }
+        if (!is_readable($path)) {
+            throw new RuntimeException("[" . $path . "] 不可读 ！");
+        }
+        $file    = $path;
+        $fd      = fopen($file, 'r');
+        $content = fread($fd, filesize($file));
+        fclose($fd);
+        if (!trim($name)) $name = basename($path);
+        return ['content' => $content, 'type' => md5('_byte_for_down_load_file_'), 'name' => $name];
+    }
+}
+
+if (!function_exists('G')){
+    /**
+     * 通过容器获取一个对象
+     * @param string $name
+     * @return object
+     * @note 不会重复new对象，且一直保存在内存中，不会销毁
+     */
+    function G(string $name){
+        return \Root\Container::get($name);
+    }
+}
+
+if (!function_exists('M')){
+    /**
+     * 通过容器获取一个对象
+     * @param string $name
+     * @return mixed
+     * @note 每一次返回一个新的对象，用完自动销毁
+     */
+    function M(string $name){
+        return \Root\Container::make($name);
+    }
+}
+
+if (!function_exists('view')){
+    /**
+     * 渲染模板
+     * @param string $path 路径
+     * @param array $param 参数
+     * @return array|false|string|string[]
+     * @throws Exception
+     */
+    function view(string $path,array $param=[]){
+        $content=file_get_contents(app_path().'/view/'.$path.'.html');
+        $preg= '/{\$[\s\S]*?}/i';
+        preg_match_all($preg,$content,$res);
+        $array=$res['0'];
+        $new_param=[];
+        foreach ($param as $k=>$v){
+            $key='{$'.$k.'}';
+            $new_param[$key]=$v;
+        }
+        foreach ($array as $k=>$v){
+            if (array_key_exists($v,$new_param)){
+                if ($new_param[$v]==null){
+                    $new_param[$v]='';
+                }
+                $content=str_replace($v,$new_param[$v],$content);
+            }else{
+                return no_declear('index',['msg'=>"未定义的变量".$v]);
+            }
+        }
+        return $content;
+    }
+}
+if (!function_exists('no_declear')){
+    /**
+     * 未定义变量
+     * @param $path
+     * @param $param
+     * @return array|false|string|string[]
+     * @throws Exception
+     */
+    function no_declear($path,$param){
+        $content=file_get_contents(app_path().'/root/error/'.$path.'.html');
+        if ($param){
+            $preg= '/{\$[\s\S]*?}/i';
+            preg_match_all($preg,$content,$res);
+            $array=$res['0'];
+            $new_param=[];
+            foreach ($param as $k=>$v){
+                $key='{$'.$k.'}';
+                $new_param[$key]=$v;
+            }
+            foreach ($array as $k=>$v){
+                if (isset($new_param[$v])){
+                    $content=str_replace($v,$new_param[$v],$content);
+                }else{
+                    throw new Exception("未定义的变量".$v);
+                }
+            }
+        }
+        return $content;
+    }
+}
+
+if (!function_exists('route')){
+    /**
+     * 解析路由
+     * @param string $url 路由地址
+     * @return string
+     */
+    function route(string $url){
+        if ($url){
+            $url=array_filter(explode('/',$url));
+        }else{
+            $url=[];
+        }
+        $new_url=[];
+        foreach ($url as $k=>$v){
+            $new_url[]=$v;
+        }
+        $num=count($new_url);
+        switch ($num){
+            case 0:
+                return '/app/controller/index/Index.php@APP\\Controller\\Index\\Index@index';
+                break;
+            case 1:
+                return '/app/controller/index/Index.php@App\\Controller\\Index\\Index@'.$new_url[0];
+                break;
+            case 2:
+                return '/app/controller/index/'.ucwords($new_url[0]).'.php@'.'App\\Controller\\Index\\'.ucwords($new_url[0]).'@'.$new_url[1];
+                break;
+            case 3:
+                return '/app/controller/'.strtolower($new_url[0]).'/'.ucwords($new_url[1]).'.php@'.'App\\Controller\\'.ucwords($new_url[0]).'\\'.ucwords($new_url[1]).'@'.$new_url[2];
+                break;
+            default:
+                $file = '/app/controller';
+                $class = 'App\\Controller';
+                $method = array_pop($new_url);
+                $className = ucwords(strtolower(array_pop($new_url)));
+                foreach ($new_url as $k=>$v){
+                    $file=$file.'/'.strtolower($v);
+                    $class=$class.'\\'.ucwords($v);
+                }
+                return $file.'/'.$className.'.php@'.$class.'\\'.$className.'@'.$method;
         }
     }
 }
 
-/** 提前加载MySQL和redis */
-function prepareMysqlAndRedis()
-{
-    /** 使用匿名函数提前连接数据库 */
-    (function () {
-        try {
-            $startMysql = config('database')['mysql']['preStart'] ?? false;
-            if ($startMysql) {
-                new BaseModel();
-            }
-            $startRedis = config('redis')['preStart'] ?? false;
-            if ($startRedis) {
-                new \Root\Cache();
-            }
-        } catch (RuntimeException $exception) {
-            echo "\r\n";
-            echo $exception->getMessage();
-            echo "\r\n";
-        }
-    })();
-}
 
-/**
- * 下载文件到浏览器
- * @param string $path 文件路径
- * @param string $name 文件名称
- * @return array
- */
-function download_file(string $path, string $name = null)
-{
-    if (!is_file($path)) {
-        throw new RuntimeException("[" . $path . "] 不是可用的文件 ！");
-    }
-    if (!file_exists($path)) {
-        throw new RuntimeException("[" . $path . "] 不是可用的文件 ！");
-    }
-    if (!is_readable($path)) {
-        throw new RuntimeException("[" . $path . "] 不可读 ！");
-    }
-    $file    = $path;
-    $fd      = fopen($file, 'r');
-    $content = fread($fd, filesize($file));
-    fclose($fd);
-    if (!trim($name)) $name = basename($path);
-    return ['content' => $content, 'type' => md5('_byte_for_down_load_file_'), 'name' => $name];
-}
 
-/**
- * 通过容器获取一个对象
- * @param string $name
- * @return object
- */
-function G(string $name){
-    return \Root\Container::get($name);
-}
 
-/**
- * 通过容器获取一个新的类
- * @param string $name
- * @return mixed
- */
-function M(string $name){
-    return \Root\Container::make($name);
-}
 
 
 
