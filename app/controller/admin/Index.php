@@ -9,12 +9,15 @@ namespace App\Controller\Admin;
 use APP\Facade\Cache;
 use APP\Facade\User;
 use Root\ESClient;
+use Root\Request;
 
 class Index
 {
 
-    public function index()
+    public function index(Request $request)
     {
+        var_dump($request->get());
+        var_dump("我是admin被调用了");
         return '/admin/index/index';
     }
 

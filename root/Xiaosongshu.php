@@ -20,16 +20,20 @@ class Xiaosongshu
         $this->check_env();
         $daemonize = false;
         $flag      = true;
-        global $_pid_file, $_port, $_listen, $_server_num, $_system, $_lock_file, $_has_epoll, $_system_command,$_system_table,$_color_class;
+        global $_pid_file, $_port, $_listen, $_server_num, $_system, $_lock_file, $_has_epoll, $_system_command, $_system_table, $_color_class;
         $_pid_file  = __DIR__ . '/my_pid.txt';
         $_lock_file = __DIR__ . '/lock.txt';
         /** 加载助手函数 */
-        require_once __DIR__.'/function.php';
+        require_once __DIR__ . '/function.php';
         /** 加载必须的启动文件 */
         require_once dirname(__DIR__) . '/vendor/autoload.php';
         /** 加载所有的必须的文件 */
-        foreach (scan_dir(app_path().'/root',true) as $k){ if (pathinfo($k)['extension']=='php')require_once $k; }
-        foreach (scan_dir(app_path().'/process',true) as $k){ if (pathinfo($k)['extension']=='php')require_once $k; }
+        foreach (scan_dir(app_path() . '/root', true) as $k) {
+            if (pathinfo($k)['extension'] == 'php') require_once $k;
+        }
+        foreach (scan_dir(app_path() . '/process', true) as $k) {
+            if (pathinfo($k)['extension'] == 'php') require_once $k;
+        }
         /** @var bool $_has_epoll 默认不支持epoll模型 */
         $_has_epoll = false;
         /** @var bool $_system 是否是linux系统 */
@@ -40,7 +44,7 @@ class Xiaosongshu
             $_has_epoll = (new \EventBase())->getMethod() == 'epoll';
         }
         $httpServer = null;
-        $server = config('server');
+        $server     = config('server');
         if (isset($server['port']) && $server['port']) {
             $_port = intval($server['port']);
         } else {
@@ -57,7 +61,7 @@ class Xiaosongshu
         $this->deal_command();
 
         /** 装载App目录下的所有文件 */
-        foreach (scan_dir(app_path() . '/app',true) as $key => $val) {
+        foreach (scan_dir(app_path() . '/app', true) as $key => $val) {
             if (file_exists($val)) {
                 require_once $val;
             }
@@ -68,7 +72,7 @@ class Xiaosongshu
         /** 加载字体类工具 */
         $_color_class = new \Xiaosongshu\ColorWord\Transfer();
         /** 支持持linux */
-        if ($_system){
+        if ($_system) {
             /** 创建定时器数据库 */
             @$this->makeTimeDatabase();
         }
@@ -113,16 +117,16 @@ class Xiaosongshu
                     $this->xiaosongshu_queue();
                     break;
                 case "make:command":
-                    $this->make_command($param[2]??'');
+                    $this->make_command($param[2] ?? '');
                     break;
                 case "make:model":
-                    $this->make_model($param[2]??'');
+                    $this->make_model($param[2] ?? '');
                     break;
                 case "make:controller":
-                    $this->make_controller($param[2]??'');
+                    $this->make_controller($param[2] ?? '');
                     break;
                 case "make:sqlite":
-                    $this->make_sqlite_model($param[2]??'');
+                    $this->make_sqlite_model($param[2] ?? '');
                     break;
                 default:
                     /** 如果是自定义命令，则执行用户的逻辑 */
@@ -137,13 +141,13 @@ class Xiaosongshu
                         }
                         /** 解析参数 */
                         $needFillArguments = [];
-                        foreach ($arguments as  $item) {
+                        foreach ($arguments as $item) {
                             /** option 参数 */
                             if (strpos($item, '=')) {
-                                $value        = explode('=', $item);
-                                $option_name  = str_replace('--', '', $value[0] ?? '');
+                                $value       = explode('=', $item);
+                                $option_name = str_replace('--', '', $value[0] ?? '');
                                 /** 丢弃help关键字 */
-                                if ($option_name=='help'){
+                                if ($option_name == 'help') {
                                     continue;
                                 }
                                 $option_value = $value[1] ?? null;
@@ -164,13 +168,13 @@ class Xiaosongshu
                         }
 
                         /** 获取自定义命令的帮助 */
-                        if(in_array('-h',$param)||in_array('--help',$param)){
-                            $head= array_shift($specialCommandClass->help);
-                            if (empty($specialCommandClass->help)){
-                                echo $_color_class->info("暂无帮助信息")."\r\n";
+                        if (in_array('-h', $param) || in_array('--help', $param)) {
+                            $head = array_shift($specialCommandClass->help);
+                            if (empty($specialCommandClass->help)) {
+                                echo $_color_class->info("暂无帮助信息") . "\r\n";
                                 exit;
                             }
-                            $_system_table->table($head,$specialCommandClass->help);
+                            $_system_table->table($head, $specialCommandClass->help);
                             exit;
                         }
                         /** 执行命令行逻辑 */
@@ -208,14 +212,17 @@ class Xiaosongshu
             exit(0);
         }
 
+        /** 加载路由 */
+        //$this->loadRoute();
+
         /** 此处需要判断是否是是Linux系统，如果是则检查是否有epoll 有则调用epoll，否则调用select */
         if ($daemonize) {
             $this->daemon();
         } else {
-            $open=[
-                ['http','正常','1',$_listen]
+            $open = [
+                ['http', '正常', '1', $_listen]
             ];
-            $_system_table->table(['名称','状态','进程数','服务'],$open);
+            $_system_table->table(['名称', '状态', '进程数', '服务'], $open);
             echo $_color_class->info("进程启动完成,你可以按ctrl+c停止运行\r\n");
             if ($_system && $_has_epoll) {
                 /** linux系统使用epoll模型 */
@@ -230,10 +237,21 @@ class Xiaosongshu
     }
 
     /**
+     * 加载路由
+     * @return void
+     * @throws \Exception
+     */
+    public function loadRoute()
+    {
+        Route::loadRoute();
+    }
+
+    /**
      * 生成定时器数据库
      * @return void
      */
-    public function makeTimeDatabase(){
+    public function makeTimeDatabase()
+    {
         TimerData::first();
     }
 
@@ -242,12 +260,13 @@ class Xiaosongshu
      * @param string $name
      * @return void
      */
-    public function make_command(string $name):void{
+    public function make_command(string $name): void
+    {
         if (!$name) {
             echo "请输入要创建的命令文件名称\r\n";
             exit;
         }
-        foreach (scan_dir(command_path(),true) as $key => $file) {
+        foreach (scan_dir(command_path(), true) as $key => $file) {
             if (file_exists($file)) {
                 $fileName = basename($file);
                 if ($fileName == $name . '.php') {
@@ -256,7 +275,7 @@ class Xiaosongshu
                 }
             }
         }
-        $time = date('Y-m-d H:i:s');
+        $time    = date('Y-m-d H:i:s');
         $content = <<<EOF
 <?php
 namespace App\Command;
@@ -308,49 +327,50 @@ EOF;
      * @param string $name
      * @return void
      */
-    public function make_model(string $name):void {
+    public function make_model(string $name): void
+    {
         if (!$name) {
             echo "请输入要创建的模型名称\r\n";
             exit;
         }
 
-        $name =trim($name,'/');
-        $controller = strtolower(app_path().'/app/model/'.$name . '.php');
+        $name       = trim($name, '/');
+        $controller = strtolower(app_path() . '/app/model/' . $name . '.php');
         /**
          * 检查是否存在相同的文件
          */
-        foreach (scan_dir(app_path().'/app/model',true) as  $file) {
+        foreach (scan_dir(app_path() . '/app/model', true) as $file) {
             if (file_exists($file)) {
-                $fileName =strtolower($file);
-                if ($fileName == $controller ) {
+                $fileName = strtolower($file);
+                if ($fileName == $controller) {
                     echo "存在相同名称的文件：[{$fileName}]\r\n";
                     exit;
                 }
             }
         }
-        $name = array_filter(explode('/',$name));
+        $name = array_filter(explode('/', $name));
 
         $className = ucfirst(strtolower(array_pop($name)));
         $nameSpace = "App\Model";
-        if ($name){
-            foreach ($name as $dir){
-                $dir = ucfirst(strtolower($dir));
-                $nameSpace =$nameSpace."\\".$dir;
+        if ($name) {
+            foreach ($name as $dir) {
+                $dir       = ucfirst(strtolower($dir));
+                $nameSpace = $nameSpace . "\\" . $dir;
             }
         }
-        $filePath = app_path().'/app/model';
-        foreach ($name as $dir){
-            $filePath = $filePath.'/'.strtolower($dir);
+        $filePath = app_path() . '/app/model';
+        foreach ($name as $dir) {
+            $filePath = $filePath . '/' . strtolower($dir);
         }
-        if (!is_dir($filePath)){
-            mkdir($filePath,'0777',true);
+        if (!is_dir($filePath)) {
+            mkdir($filePath, '0777', true);
         }
-        $filePath = $filePath."/".$className.'.php';
+        $filePath = $filePath . "/" . $className . '.php';
 
         $time = date('Y-m-d H:i:s');
         /** 表名 */
         $lower_name = strtolower($className);
-        $content = <<<EOF
+        $content    = <<<EOF
 <?php
 
 namespace $nameSpace;
@@ -369,7 +389,7 @@ class $className extends Model
 }
 EOF;
 
-        file_put_contents($filePath,$content);
+        file_put_contents($filePath, $content);
         echo "创建模型完成\r\n";
         exit;
     }
@@ -379,53 +399,54 @@ EOF;
      * @param string $name
      * @return void
      */
-    public function make_sqlite_model(string $name):void {
+    public function make_sqlite_model(string $name): void
+    {
         if (!$name) {
             echo "请输入要创建的sqlite模型名称\r\n";
             exit;
         }
 
-        $name =trim($name,'/');
-        $controller = strtolower(app_path().'/app/sqliteModel/'.$name . '.php');
+        $name       = trim($name, '/');
+        $controller = strtolower(app_path() . '/app/sqliteModel/' . $name . '.php');
         /**
          * 检查是否存在相同的文件
          */
-        foreach (scan_dir(app_path().'/app/sqliteModel',true) as  $file) {
+        foreach (scan_dir(app_path() . '/app/sqliteModel', true) as $file) {
             if (file_exists($file)) {
-                $fileName =strtolower($file);
-                if ($fileName == $controller ) {
+                $fileName = strtolower($file);
+                if ($fileName == $controller) {
                     echo "存在相同名称的文件：[{$fileName}]\r\n";
                     exit;
                 }
             }
         }
-        $name = array_filter(explode('/',$name));
+        $name = array_filter(explode('/', $name));
 
         $className = ucfirst(strtolower(array_pop($name)));
         $nameSpace = "App\SqliteModel";
-        if ($name){
-            foreach ($name as $dir){
-                $dir = ucfirst(strtolower($dir));
-                $nameSpace =$nameSpace."\\".$dir;
+        if ($name) {
+            foreach ($name as $dir) {
+                $dir       = ucfirst(strtolower($dir));
+                $nameSpace = $nameSpace . "\\" . $dir;
             }
         }
-        $filePath = app_path().'/app/sqliteModel';
-        foreach ($name as $dir){
-            $filePath = $filePath.'/'.strtolower($dir);
+        $filePath = app_path() . '/app/sqliteModel';
+        foreach ($name as $dir) {
+            $filePath = $filePath . '/' . strtolower($dir);
         }
-        if (!is_dir($filePath)){
-            mkdir($filePath,'0777',true);
+        if (!is_dir($filePath)) {
+            mkdir($filePath, '0777', true);
         }
         /** 文件名 */
-        $filePath = $filePath."/".$className.'.php';
+        $filePath = $filePath . "/" . $className . '.php';
 
         /** 存放目录 */
-        $location = implode('/',$name);
+        $location = implode('/', $name);
         /** 当前时间 */
         $time = date('Y-m-d H:i:s');
         /** 表名 */
         $lower_name = strtolower($className);
-        $content = <<<EOF
+        $content    = <<<EOF
 <?php
 
 namespace $nameSpace;
@@ -451,7 +472,7 @@ class $className extends SqliteBaseModel
 }
 EOF;
 
-        file_put_contents($filePath,$content);
+        file_put_contents($filePath, $content);
         echo "创建sqlite模型完成\r\n";
         exit;
     }
@@ -461,48 +482,50 @@ EOF;
      * @param string $name 控制器名称
      * @return void
      */
-    public function make_controller(string $name):void {
+    public function make_controller(string $name): void
+    {
         if (!$name) {
             echo "请输入要创建的控制器名称\r\n";
             exit;
         }
         $time = date('Y-m-d H:i:s');
 
-        $name =trim($name,'/');
-        $controller = strtolower(app_path().'/app/controller/'.$name . '.php');
+        $name       = trim($name, '/');
+        $controller = strtolower(app_path() . '/app/controller/' . $name . '.php');
         /**
          * 检查是否存在相同的文件
          */
-        foreach (scan_dir(app_path().'/app/controller',true) as $key => $file) {
+        foreach (scan_dir(app_path() . '/app/controller', true) as $key => $file) {
             if (file_exists($file)) {
-                $fileName =strtolower($file);
-                if ($fileName == $controller ) {
+                $fileName = strtolower($file);
+                if ($fileName == $controller) {
                     echo "存在相同名称的文件：[{$fileName}]\r\n";
                     exit;
                 }
             }
         }
-        $name = array_filter(explode('/',$name));
-        if (count($name)<2){
-            echo "必须是模块名称/控制器名称\r\n";exit;
+        $name = array_filter(explode('/', $name));
+        if (count($name) < 2) {
+            echo "必须是模块名称/控制器名称\r\n";
+            exit;
         }
         $className = ucfirst(strtolower(array_pop($name)));
         $nameSpace = "App\Controller";
-        if ($name){
-            foreach ($name as $dir){
-                $dir = ucfirst(strtolower($dir));
-                $nameSpace =$nameSpace."\\".$dir;
+        if ($name) {
+            foreach ($name as $dir) {
+                $dir       = ucfirst(strtolower($dir));
+                $nameSpace = $nameSpace . "\\" . $dir;
             }
         }
-        $filePath = app_path().'/app/controller';
-        foreach ($name as $dir){
-            $filePath = $filePath.'/'.strtolower($dir);
+        $filePath = app_path() . '/app/controller';
+        foreach ($name as $dir) {
+            $filePath = $filePath . '/' . strtolower($dir);
         }
-        if (!is_dir($filePath)){
-            mkdir($filePath,'0777',true);
+        if (!is_dir($filePath)) {
+            mkdir($filePath, '0777', true);
         }
-        $filePath = $filePath."/".$className.'.php';
-        $content =<<<EOF
+        $filePath = $filePath . "/" . $className . '.php';
+        $content  = <<<EOF
 <?php
 
 namespace $nameSpace;
@@ -526,7 +549,7 @@ class $className
     }
 }
 EOF;
-        file_put_contents($filePath,$content);
+        file_put_contents($filePath, $content);
         echo "创建控制器完成\r\n";
         exit;
     }
@@ -537,10 +560,10 @@ EOF;
         try {
             $config = config('redis');
             $host   = $config['host'] ?? '127.0.0.1';
-            $port   =  $config['port'] ?? '6379';
+            $port   = $config['port'] ?? '6379';
             $client = new \Redis();
             $client->connect($host, $port);
-            $client->auth($config['password']??'');
+            $client->auth($config['password'] ?? '');
             while (true) {
                 $job = json_decode($client->RPOP('xiaosongshu_queue'), true);
                 $this->deal_job($job);
@@ -589,9 +612,9 @@ EOF;
     public function xiaosongshu_timer()
     {
         /** 在这里添加定时任务 ，然后发送信号 */
-        foreach (config('timer') as $name=>$value){
-            if ($value['enable']){
-                Timer::add($value['time'],$value['function'],[],$value['persist']);
+        foreach (config('timer') as $name => $value) {
+            if ($value['enable']) {
+                Timer::add($value['time'], $value['function'], [], $value['persist']);
             }
         }
         /** 启动定时器 */
@@ -616,7 +639,7 @@ EOF;
     /** 关闭进程 */
     public function close()
     {
-        global $_pid_file,$_color_class;
+        global $_pid_file, $_color_class;
         echo $_color_class->info("关闭进程中...\r\n");
         if (file_exists($_pid_file)) {
             $master_ids = file_get_contents($_pid_file);
@@ -658,13 +681,70 @@ EOF;
     }
 
     /**
+     * 处理用户请求
+     * @param $socketAccept
+     * @param $message
+     * @param $httpServer
+     * @return mixed
+     */
+    public function onMessage($socketAccept, $message, &$httpServer)
+    {
+        $request = new Request($message);
+        $method  = $request->method();
+        $uri     = $request->path();
+
+        $info           = explode('.', $request->path());
+        $file_extension = end($info);
+        $backContenType =[
+            'html'=>'text/html; charset=UTF-8',
+            'js'=>'text/javascript; charset=UTF-8',
+            'css'=>'text/css; charset=UTF-8',
+            'svg'=>'image/svg+xml; charset=UTF-8',
+            'png'=>'image/jpeg; charset=UTF-8',
+            'jpg'=>'image/jpeg; charset=UTF-8',
+            'icon'=>'image/jpeg; charset=UTF-8',
+            'jpeg'=>'image/jpeg; charset=UTF-8',
+            'ico'=>'image/jpeg; charset=UTF-8',
+            'gif'=>'image/jpeg; charset=UTF-8',
+            "doc"=>'image/jpeg; charset=UTF-8',
+            "docx"=>'application/octet-stream; charset=UTF-8',
+            "ppt"=>'application/octet-stream; charset=UTF-8',
+            "pptx"=>'application/octet-stream; charset=UTF-8',
+            "xls"=>'application/octet-stream; charset=UTF-8',
+            "xlsx"=>'application/octet-stream; charset=UTF-8',
+            "zip"=>'application/octet-stream; charset=UTF-8',
+            "rar"=>'application/octet-stream; charset=UTF-8',
+            "txt"=>'application/octet-stream; charset=UTF-8'
+        ];
+        if (in_array($file_extension,array_keys($backContenType))) {
+
+        }
+        //todo 处理各种不同类型的文件，根据文件类型处理不同的请求
+        Route::loadRoute();
+        $content = Route::dispatch($method, $uri, $request);
+        fwrite($socketAccept, 'HTTP/1.1 200 OK' . PHP_EOL);
+        fwrite($socketAccept, 'Date:' . date('Y-m-d H:i:s') . PHP_EOL);
+        fwrite($socketAccept, 'Content-Type: text/html' . PHP_EOL);
+        fwrite($socketAccept, "Content-Length: " . strlen($content) . "\r\n\r\n");
+        fwrite($socketAccept, $content, strlen($content));
+        /** 这里必须关闭才能够给cli模式正常的返回数据，但是这个会影响需要长连接的浏览器或者其他服务，还不知道怎么处理 */
+        fclose($socketAccept);
+        /** 清理select连接 */
+        unset($httpServer->allSocket[(int)$socketAccept]);
+        /** 清理epoll连接 */
+        unset($httpServer->events[(int)$socketAccept]);
+        /** 释放客户端连接 */
+        unset($socketAccept);
+    }
+
+    /**
      * select和epoll消息处理事件
      * @param $socketAccept
      * @param $message
      * @param $httpServer
      * @return void
      */
-    public function onMessage($socketAccept, $message, &$httpServer)
+    public function onMessage_copy($socketAccept, $message, &$httpServer)
     {
         if (strpos($message, 'HTTP/')) {
             $_param = [];
@@ -736,6 +816,7 @@ EOF;
                     fwrite($socketAccept, $fileContent, strlen($fileContent));
                     break;
                 default:
+
                     if (($url) && strpos($url, '?')) {
                         $request_url = explode('?', $url);
                         $route       = $request_url[0];
@@ -744,8 +825,10 @@ EOF;
                             $_v             = explode('=', $v);
                             $_param[$_v[0]] = $_v['1'];
                         }
+                        var_dump('44444');
                         $content = $this->handle(route($route), $_param, $_request);
                     } else {
+                        var_dump('555555');
                         $content = $this->handle(route($url), $_param, $_request);
                     }
                     /** 文件下载 */
@@ -785,6 +868,7 @@ EOF;
     /** 使用epoll异步io模型 */
     public function epoll()
     {
+        var_dump(1111);
         /** @var object $httpServer 将对象加载到内存 */
         $httpServer = new Epoll();
         /** @var callable onMessage 设置消息处理函数 */
@@ -808,10 +892,11 @@ EOF;
 
         list($file, $class, $method) = explode('@', $url);
         $file = app_path() . $file;
+        var_dump($file);
         if (!file_exists($file)) {
             return $this->dispay('index', ['msg' => $file . '文件不存在123123']);
         }
-        require_once $file;
+        //require_once $file;
         if (!class_exists($class)) {
             return $this->dispay('index', ['msg' => $class . '类不存在']);
         }
@@ -819,13 +904,14 @@ EOF;
         if (!method_exists($class, $method)) {
             return $this->dispay('index', ['msg' => $method . '方法不存在']);
         }
+
         global $fuck;
         $fuck = new Request();
         foreach ($_request as $k => $v) {
             $v = trim($v);
             if ($v) {
-                $_pos = strripos($v, ": ");
-                $key = substr($v, 0, $_pos);
+                $_pos  = strripos($v, ": ");
+                $key   = substr($v, 0, $_pos);
                 $value = substr($v, $_pos + 1, strlen($v));
                 if ($key) {
                     $fuck->header($key, $value);
@@ -838,8 +924,8 @@ EOF;
         /** 这里必须捕获异常 */
         try {
             $response = $class->$method($fuck);
-        }catch (\Exception|\RuntimeException $e){
-            $fuck->_error=no_declear('index',['msg'=>"错误码：".$e->getCode()."<br>文件：".$e->getFile()."<br>行数：".$e->getLine().PHP_EOL."<br>错误详情：".$e->getMessage()]);
+        } catch (\Exception|\RuntimeException $e) {
+            $fuck->_error = no_declear('index', ['msg' => "错误码：" . $e->getCode() . "<br>文件：" . $e->getFile() . "<br>行数：" . $e->getLine() . PHP_EOL . "<br>错误详情：" . $e->getMessage()]);
         }
         if ($fuck->_error) {
 
@@ -864,10 +950,10 @@ EOF;
         if ($param) {
             $preg = '/{\$[\s\S]*?}/i';
             preg_match_all($preg, $content, $res);
-            $array = $res['0'];
+            $array     = $res['0'];
             $new_param = [];
             foreach ($param as $k => $v) {
-                $key = '{$' . $k . '}';
+                $key             = '{$' . $k . '}';
                 $new_param[$key] = $v;
             }
             foreach ($array as $k => $v) {
@@ -889,7 +975,7 @@ EOF;
         ini_set('display_errors', 'off');
         /** 设置文件权限掩码为0 就是最大权限 可读写 防止操作文件权限不够出错 */
         \umask(0);
-        global $_listen,$_color_class,$_system_table;
+        global $_listen, $_color_class, $_system_table;
         /** @var int $pid 创建子进程 */
         $pid = \pcntl_fork();
         if (-1 === $pid) {
@@ -897,28 +983,28 @@ EOF;
             throw new Exception('Fork fail');
         } elseif ($pid > 0) {
             /** 主进程退出 */
-            $head =  ['名称','状态','进程数','服务'];
-            $content =[];
+            $head    = ['名称', '状态', '进程数', '服务'];
+            $content = [];
             /** http */
-            $http_count = config('server')['num']??4;
-            $content[]=['http','正常',$http_count,$_listen];
+            $http_count = config('server')['num'] ?? 4;
+            $content[]  = ['http', '正常', $http_count, $_listen];
             /** rabbitmq */
             $rabbitmq_config = config('rabbitmq');
-            if ($rabbitmq_config['enable']){
+            if ($rabbitmq_config['enable']) {
                 $rabbitmq_count = 0;
-                foreach ((config('rabbitmqProcess')) as $item){
-                    $rabbitmq_count+=$item['count'];
+                foreach ((config('rabbitmqProcess')) as $item) {
+                    $rabbitmq_count += $item['count'];
                 }
-                $content[]=['rabbitmq','正常',$rabbitmq_count,$rabbitmq_config['port']];
+                $content[] = ['rabbitmq', '正常', $rabbitmq_count, $rabbitmq_config['port']];
             }
             /** 定时器 */
-            $content[]=['timer','正常','--','--'];
+            $content[] = ['timer', '正常', '--', '--'];
             /** redis队列 */
             $redis_config = config('redis');
-            if ($redis_config['enable']){
-                $content[]=['redis_queue','正常',1,$redis_config['port']];
+            if ($redis_config['enable']) {
+                $content[] = ['redis_queue', '正常', 1, $redis_config['port']];
             }
-            $_system_table->table($head,$content);
+            $_system_table->table($head, $content);
             echo $_color_class->info($_listen . "\r\n");
             echo $_color_class->info("进程启动完成,你可以输入php start.php stop停止运行\r\n");
             exit(0);
@@ -953,7 +1039,7 @@ EOF;
                 } elseif ($_small_son_id == 0) {
                     /** 主进程 */
                     $clear_task_id = \pcntl_fork();
-                    if ($clear_task_id){
+                    if ($clear_task_id) {
                         /** 如果是主进程，则设置进程名称为master，管理定时器 */
                         cli_set_process_title("xiaosongshu_master");
                         writePid();
@@ -1031,7 +1117,7 @@ EOF;
             }
         }
     }
-    
+
     /**
      * 处理自定义的命令
      * @return void
@@ -1040,7 +1126,7 @@ EOF;
     {
         global $_system_command;
         /** 加载所有自定义的命令 */
-        foreach (scan_dir(command_path(),true) as $key => $file) {
+        foreach (scan_dir(command_path(), true) as $key => $file) {
             if (file_exists($file)) {
                 require_once $file;
                 $php_code = file_get_contents($file);
@@ -1075,13 +1161,13 @@ EOF;
             foreach ($config as $name => $value) {
                 if (isset($value['handler'])) {
                     /** 创建一个子进程，在子进程里面执行消费 */
-                    $count = $value['count']??1;
-                    for($i=0;$i<$count;$i++){
+                    $count = $value['count'] ?? 1;
+                    for ($i = 0; $i < $count; $i++) {
                         $rabbitmq_pid = \pcntl_fork();
                         if ($rabbitmq_pid > 0) {
                             /** 记录进程号 */
                             writePid();
-                            cli_set_process_title($name.'_'.($i+1));
+                            cli_set_process_title($name . '_' . ($i + 1));
                             if (class_exists($value['handler'])) {
                                 /** 切换CPU */
                                 sleep(1);
@@ -1096,7 +1182,6 @@ EOF;
             }
         }
     }
-
 
 
 }

@@ -24,7 +24,8 @@
         "xiaosongshu/progress": "dev-master",
         "xiaosongshu/table": "dev-master",
         "phpseclib/phpseclib": "*",
-        "jeremeamia/superclosure": "^2.4@dev"
+        "jeremeamia/superclosure": "^2.4@dev",
+        "nikic/fast-route": "^2.0@dev"
     },
     "config": {
         "allow-plugins": {
