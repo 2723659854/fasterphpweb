@@ -5,6 +5,8 @@ namespace App\Command;
 use App\SqliteModel\Large;
 use App\SqliteModel\Talk;
 use Root\BaseCommand;
+use Root\Timer;
+use Root\TimerData;
 use Xiaosongshu\Table\Table;
 
 /**
@@ -36,27 +38,62 @@ class CheckSqlite extends BaseCommand
      */
     public function handle()
     {
-        /** 写入数据 */
-        var_dump(Talk::insert(['name' => 'hello', 'created' => time()]));
-        /** 更新数据 */
-        var_dump(Talk::where([['id', '>=', 1]])->update(['name' => 'mm']));
-        /** 查询1条数据 */
-        var_dump(Talk::where([['id', '>=', 1]])->select(['name'])->first());
-        /** 删除数据 */
-        var_dump(Talk::where([['id', '=', 1]])->delete());
-        /** 统计 */
-        var_dump(Talk::where([['id', '>', 1]])->count());
-        /** 查询多条数据并排序分页 */
-        $res = Talk::where([['id', '>', 0]]) ->orderBy(['created'=>'asc']) ->page(1, 10) ->get();
-        print_r($res);
-        /** 表格渲染数据 */
-        $head  =['id','name','time'];
-        $data = [];
-        foreach ($res as $v){
-            $data[]=[$v['id'],$v['name'],$v['created']];
-        }
-        $table = new Table();
-        $table->table($head,$data);
-        $this->info("查询完成了");
+//        /** 写入数据 */
+//        var_dump(Talk::insert(['name' => 'hello', 'created' => time()]));
+//        /** 更新数据 */
+//        var_dump(Talk::where([['id', '>=', 1]])->update(['name' => 'mm']));
+//        /** 查询1条数据 */
+//        var_dump(Talk::where([['id', '>=', 1]])->select(['name'])->first());
+//        /** 删除数据 */
+//        var_dump(Talk::where([['id', '=', 1]])->delete());
+//        /** 统计 */
+//        var_dump(Talk::where([['id', '>', 1]])->count());
+//        /** 查询多条数据并排序分页 */
+//        $res = Talk::where([['id', '>', 0]]) ->orderBy(['created'=>'asc']) ->page(1, 10) ->get();
+//        print_r($res);
+//        /** 表格渲染数据 */
+//        $head  =['id','name','time'];
+//        $data = [];
+//        foreach ($res as $v){
+//            $data[]=[$v['id'],$v['name'],$v['created']];
+//        }
+//        $table = new Table();
+//        $table->table($head,$data);
+//        $this->info("查询完成了");
+//        $data = [
+//
+//            /** 定时器 */
+//            'one' => [
+//                'argv' => '12313',
+//                'function' => [\Process\CornTask::class, 'say'],
+//                'interval' => 5,
+//                'persist' => 1,
+//            ],
+//        ];
+         $data = [
+             'argv' => '12313',
+             'function' => function (){echo "ok";},
+             'interval' => 5,
+             'persist' => 1,
+        ];
+        //print_r (json_decode(json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES),true));
+
+         $data = function (){
+             echo "ok";
+         };
+
+         var_dump($data);
+
+
+
+
+
+        //$data = base64_encode(json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+        //var_dump(json_decode(base64_decode($data),true));
+        //var_dump(TimerData::insert(['data' => $data,'id'=>md5($data),'time'=>time(),'status'=>1]));
+
+        //var_dump($res = TimerData::get());
+        //var_dump(json_decode(base64_decode($res[0]['data'])));
+
     }
 }

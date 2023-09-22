@@ -52,7 +52,17 @@ if(!function_exists('timer_log_path')){
      */
     function timer_log_path()
     {
-        return dirname(__DIR__) . '/root/timerLog';
+        return runtime_path().'/timer';
+    }
+}
+
+if (!function_exists('runtime_path')){
+    /**
+     * 运行目录
+     * @return string
+     */
+    function runtime_path( ){
+        return app_path().'/runtime';
     }
 }
 
@@ -134,8 +144,8 @@ if (!function_exists('writeTimerPid')){
     function writeTimerPid()
     {
         /** 记录进程号 */
-        $myPid = getmypid();
-        file_put_contents(__DIR__ . '/timerLog/' . $myPid . '.txt', $myPid);
+       $myPid = getmypid();
+       file_put_contents(runtime_path() .'/timer/'. $myPid . '.txt', $myPid);
     }
 }
 

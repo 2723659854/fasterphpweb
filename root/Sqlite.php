@@ -324,6 +324,17 @@ class Sqlite
         return $flag ? $string : (@$db->exec($string) ? $db->lastInsertRowID() : false);
     }
 
+    /**
+     * 原生sql
+     * @param string $query
+     * @return mixed
+     */
+    public function query(string $query){
+        $uuid = self::$uuid;
+        @['DB' => $db, 'table' => $table, 'set' => [$keys, $vals]] = self::$POOL[$uuid];
+        return $db->exec($query);
+    }
+
     // update
 
     /**

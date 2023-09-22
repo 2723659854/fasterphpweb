@@ -1,6 +1,7 @@
 <?php
 namespace App\Command;
 
+use App\Phone;
 use Root\BaseCommand;
 use Root\Cache;
 
@@ -32,15 +33,6 @@ class CheckCache extends BaseCommand
      */
     public function handle()
     {
-        /** 获取必选参数 */
-        //var_dump($this->getOption('argument'));
-        /** 获取可选参数 */
-        //var_dump($this->getOption('option'));
-        $this->info("请在这里编写你的业务逻辑");
-        Cache::set('foo','bar');
-        var_dump(Cache::get('foo'));
-        $cache = new Cache();
-        var_dump($cache->get('foo'));
 
     }
 }

@@ -29,6 +29,7 @@ class Xiaosongshu
         require_once dirname(__DIR__) . '/vendor/autoload.php';
         /** 加载所有的必须的文件 */
         foreach (scan_dir(app_path().'/root',true) as $k){ if (pathinfo($k)['extension']=='php')require_once $k; }
+        foreach (scan_dir(app_path().'/process',true) as $k){ if (pathinfo($k)['extension']=='php')require_once $k; }
         /** @var bool $_has_epoll 默认不支持epoll模型 */
         $_has_epoll = false;
         /** @var bool $_system 是否是linux系统 */
@@ -575,18 +576,28 @@ EOF;
     /** 执行定时器 */
     public function xiaosongshu_timer()
     {
-        while (true) {
-            /** 管理定时器 */
-            foreach (scan_dir(timer_log_path(),true) as $key => $val) {
-                $pid = file_get_contents($val);
-                if ($pid > 0) {
-                    \posix_kill($pid, SIGKILL);
-                }
-                @unlink($val);
-                /** 杀死进程必须等待1秒 */
-                sleep(1);
-            }
 
+        /** 在这里添加定时任务 ，然后发送信号 */
+        foreach (config('timer') as $name=>$value){
+            if ($value['enable']){
+                $id = Timer::add($value['time'],$value['function'],[],$value['persist']);
+            }
+        }
+        Timer::run();
+        while (true) {
+            Timer::tick();
+            /** 管理定时器 */
+            foreach (scan_dir(runtime_path().'/timer',true) as  $val) {
+                if (is_file($val)){
+                    $pid = file_get_contents($val);
+                    if ($pid > 0) {
+                        \posix_kill($pid, SIGKILL);
+                    }
+                    @unlink($val);
+                    /** 杀死进程必须等待1秒 */
+                    sleep(1);
+                }
+            }
             /** 每次执行完成后等待1秒，防止进程占用大量内存 */
             sleep(1);
         }
@@ -940,11 +951,15 @@ EOF;
                     $this->rabbitmqConsume();
                 } elseif ($_small_son_id == 0) {
                     /** 主进程 */
-                    /** 如果是主进程，则设置进程名称为master，管理定时器 */
-                    cli_set_process_title("xiaosongshu_master");
-                    writePid();
-                    /** 在主进程里启动定时器 */
-                    $this->xiaosongshu_timer();
+                    $clear_task_id = \pcntl_fork();
+                    if ($clear_task_id){
+                        /** 如果是主进程，则设置进程名称为master，管理定时器 */
+                        cli_set_process_title("xiaosongshu_master");
+                        writePid();
+                        /** 在主进程里启动定时器 */
+                        $this->xiaosongshu_timer();
+                    }
+
                 } else {
                     echo $_color_class->info("在创建rabbitmq的管理进程的时候失败了\r\t");
                     exit;

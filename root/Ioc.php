@@ -12,6 +12,7 @@ class Ioc
     protected static function getInstance($className)
     {
         $paramArr = self::getMethodParams($className);
+
         return (new \ReflectionClass($className))->newInstanceArgs($paramArr);
     }
 
@@ -24,6 +25,7 @@ class Ioc
      */
     public static function make($className, $methodName = '', $params = [])
     {
+
         // 获取类的实例
         $instance = self::getInstance($className);
         // 获取该方法所需要依赖注入的参数
