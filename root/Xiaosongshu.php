@@ -271,7 +271,7 @@ class $name extends BaseCommand
 {
 
     /** @var string \$command 命令触发字段，请替换为你自己的命令，执行：php start.php your:command */
-    public \$command = 'your:command';
+    public \$command = '$name';
     
      /**
      * 配置参数
@@ -299,7 +299,7 @@ class $name extends BaseCommand
 }
 EOF;
         @file_put_contents(app_path() . '/app/command/' . $name . '.php', $content);
-        echo "创建完成\r\n";
+        echo "创建命令行工具完成\r\n";
         exit;
     }
 
