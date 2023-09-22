@@ -287,14 +287,55 @@ return [
 只能在linux系统中使用定时器，或者使用docker环境。
 #### 添加定时任务
 ```php 
-/** 添加定时任务，周期，回调函数，参数，是否循环执行 */
-        \root\Timer::add(5, function ($a,$b) {
-            var_dump("我只执行一次额");
-            var_dump($a);
-            var_dump($b);
-        }, [3,5], false);
+//第一种方式
+/** 使用回调函数投递定时任务 */
+$first = Timer::add('5',function ($username){
+    echo date('Y-m-d H:i:s');
 
-//todo 需要添加删除定时器的方法，后期再来完善。
+    echo $username."\r\n";
+},['投递的定时任务'],true);
+echo "定时器id:".$first."\r\n";
+/** 根据id删除定时器 */
+Timer::delete($first);
+/** 使用数组投递定时任务 */
+Timer::add('5',[\Process\CornTask::class,'say'],['投递的定时任务'],true);
+/** 获取所有正在运行的定时任务 */
+print_r(Timer::getAll());
+/** 清除所有定时器 */
+Timer::deleteAll();
+
+//第二种，使用配置文件config/timer.php
+return [
+
+    /** 定时器 */
+    'one'=>[
+        /** 是否开启 */
+        'enable'=>true,
+        /** 回调函数，调用静态方法 */
+        'function'=>[Process\CornTask::class,'handle'],
+        /** 周期 */
+        'time'=>3,
+        /** 是否循环执行 */
+        'persist'=>true,
+    ],
+    'two'=>[
+        'enable'=>false,
+        /** 调用动态方法 */
+        'function'=>[Process\CornTask::class,'say'],
+        'time'=>5,
+        'persist'=>true,
+    ],
+    'three'=>[
+        'enable'=>true,
+        /** 调用匿名函数 */
+        'function'=>function(){$time=date('y-m-d H:i:s'); echo "\r\n {$time} 我是随手一敲的匿名函数！\r\n";},
+        'time'=>5,
+        'persist'=>true,
+    ]
+
+];
+
+
 ```
 
 

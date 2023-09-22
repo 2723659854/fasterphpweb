@@ -23,7 +23,8 @@
         "xiaosongshu/colorword": "dev-master",
         "xiaosongshu/progress": "dev-master",
         "xiaosongshu/table": "dev-master",
-        "phpseclib/phpseclib": "*"
+        "phpseclib/phpseclib": "*",
+        "jeremeamia/superclosure": "^2.4@dev"
     },
     "config": {
         "allow-plugins": {

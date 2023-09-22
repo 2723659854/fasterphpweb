@@ -135,12 +135,17 @@ class Sqlite
     {
         $default = [];
         foreach ($params as $key => $val) {
+
             if (is_array($val) && (count($val) == 3)) {
                 $default[] = sprintf("`%s` %s %s", $val[0], $val[1], is_string($val[2]) ? "'$val[2]'" : $val[2]);
             } else {
+                if (is_numeric($key)){
+                    throw new \Exception("未定义的字段【{$key}】");
+                }
                 $default[] = sprintf("`%s` = %s", $key, is_string($val) ? "'$val'" : $val);
             }
         }
+
         self::$POOL[self::$uuid]['where'] = sprintf("WHERE %s", implode(' AND ', $default));
         return $this;
     }

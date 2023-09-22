@@ -67,7 +67,11 @@ class Xiaosongshu
         $_system_table = new \Xiaosongshu\Table\Table();
         /** 加载字体类工具 */
         $_color_class = new \Xiaosongshu\ColorWord\Transfer();
-
+        /** 支持持linux */
+        if ($_system){
+            /** 创建定时器数据库 */
+            @$this->makeTimeDatabase();
+        }
         /** 分析用户输入的命令，执行业务逻辑 */
         if (count($param) > 1) {
             switch ($param[1]) {
@@ -223,6 +227,14 @@ class Xiaosongshu
 
         }
 
+    }
+
+    /**
+     * 生成定时器数据库
+     * @return void
+     */
+    public function makeTimeDatabase(){
+        TimerData::first();
     }
 
     /**
@@ -576,30 +588,19 @@ EOF;
     /** 执行定时器 */
     public function xiaosongshu_timer()
     {
-
         /** 在这里添加定时任务 ，然后发送信号 */
         foreach (config('timer') as $name=>$value){
             if ($value['enable']){
-                $id = Timer::add($value['time'],$value['function'],[],$value['persist']);
+                Timer::add($value['time'],$value['function'],[],$value['persist']);
             }
         }
+        /** 启动定时器 */
         Timer::run();
         while (true) {
+            /** 拦截闹钟信号*/
             Timer::tick();
-            /** 管理定时器 */
-            foreach (scan_dir(runtime_path().'/timer',true) as  $val) {
-                if (is_file($val)){
-                    $pid = file_get_contents($val);
-                    if ($pid > 0) {
-                        \posix_kill($pid, SIGKILL);
-                    }
-                    @unlink($val);
-                    /** 杀死进程必须等待1秒 */
-                    sleep(1);
-                }
-            }
-            /** 每次执行完成后等待1秒，防止进程占用大量内存 */
-            sleep(1);
+            /** 切换CPU */
+            usleep(1000);
         }
     }
 

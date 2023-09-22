@@ -2,16 +2,13 @@
 
 namespace Root;
 
+use SuperClosure\Serializer;
+
 /**
  *定时器
  */
 class Timer
 {
-
-    public static $task = array();
-
-    public static $time = 1;
-
     /**
      *开启服务
      * @param $time int
@@ -53,10 +50,11 @@ class Timer
     {
         $current = time();
         /** 取出所有的需要执行的定时任务 */
-        $task = TimerData::where([['status', '>', 0], ['time', '=', $current]])->get();
+        $task       = TimerData::where([['status', '>', 0], ['time', '=', $current]])->get();
+        $serializer = new Serializer();
         foreach ($task as $v) {
-            /** 解码定时任务 首选内存，若没有则读取数据库 */
-            $job = self::$task[$v['time']][$v['id']] ?? json_decode(base64_decode($v['data']), true);
+            /** 解码定时任务 */
+            $job = json_decode(base64_decode($v['data']), true);
             /** 回调方法 */
             $func = $job['func'];
             /** 参数 */
@@ -71,18 +69,12 @@ class Timer
             if (is_array($func)) {
                 call_user_func([G($func[0]), $func[1]], $argv);
             } else {
+                $func = $serializer->unserialize($func);
                 call_user_func_array($func, $argv);
-            }
-            /** 删除这个任务 */
-            unset(self::$task[$v['time']][$v['id']]);
-            if (empty(self::$task[$v['time']])){
-                unset(self::$task[$v['time']]);
             }
             if ($persist) {
                 /** 更新任务的下一次执行周期 */
                 TimerData::where([['id', '=', $v['id']]])->update(['time' => $next_time]);
-                /** 将任务投递到下一个周期 */
-                self::$task[$next_time][$v['id']] = $job;
             } else {
                 /** 关闭这个任务 */
                 TimerData::where([['id', '=', $v['id']]])->update(['status' => 0]);
@@ -103,15 +95,18 @@ class Timer
         if (!($interval)) {
             return false;
         }
-        $time   = time() + $interval;
+        $time = time() + $interval;
+        /** 用户设置的回调函数，如果是数组则说明投递的是对象，不需要序列化 */
+        if (is_callable($func)&&!is_array($func)) {
+            $serializer = new Serializer();
+            $func       = $serializer->serialize($func);
+        }
         $params = ['func' => $func, 'argv' => $argv, 'interval' => $interval, 'persist' => $persist];
-
         $data = base64_encode(json_encode($params));
         $id   = md5($data);
         /** 存入到sqlite */
         $add = TimerData::insert(['data' => $data, 'id' => $id, 'time' => $time, 'status' => 1]);
         /** 存入到内存，因为匿名函数不能转字符串存入数据库 */
-        self::$task[$time][$id] = $params;
         return $add ? $id : false;
     }
 
@@ -122,17 +117,7 @@ class Timer
      */
     public static function delete(string $id)
     {
-        foreach (self::$task as $time=>$item){
-            foreach ($item as $index=>$task){
-                if ($id==$index){
-                    unset(self::$task[$time][$id]);
-                    if (empty(self::$task[$time])){
-                        unset(self::$task[$time]);
-                    }
-                }
-            }
-        }
-        return TimerData::where(['id', '=', $id])->delete();
+        return TimerData::where(['id'=> $id])->delete();
     }
 
 
@@ -151,8 +136,15 @@ class Timer
      */
     public static function deleteAll()
     {
-        self::$task = [];
-        return TimerData::where(['status', '>', 0])->update(['status' => 0]);
+        return TimerData::where([['status', '>', 0]])->update(['status' => 0]);
+    }
+
+    /**
+     * 获取所有正在运行的定时任务
+     * @return mixed
+     */
+    public static function getAll(){
+        return TimerData::where([['status', '>', 0],['time','>=',time()]])->get();
     }
 }
 
