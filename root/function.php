@@ -195,34 +195,6 @@ if (!function_exists('prepareMysqlAndRedis')){
     }
 }
 
-
-if (!function_exists('download_file')){
-    /**
-     * 下载文件到浏览器
-     * @param string $path 文件路径
-     * @param string $name 文件名称
-     * @return array
-     */
-    function download_file(string $path, string $name = '')
-    {
-        if (!is_file($path)) {
-            throw new RuntimeException("[" . $path . "] 不是可用的文件 ！");
-        }
-        if (!file_exists($path)) {
-            throw new RuntimeException("[" . $path . "] 不是可用的文件 ！");
-        }
-        if (!is_readable($path)) {
-            throw new RuntimeException("[" . $path . "] 不可读 ！");
-        }
-        $file    = $path;
-        $fd      = fopen($file, 'r');
-        $content = fread($fd, filesize($file));
-        fclose($fd);
-        if (!trim($name)) $name = basename($path);
-        return ['content' => $content, 'type' => md5('_byte_for_down_load_file_'), 'name' => $name];
-    }
-}
-
 if (!function_exists('G')){
     /**
      * 通过容器获取一个对象

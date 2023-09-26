@@ -18,11 +18,16 @@ class Index
 
     public function index(Request $request)
     {
-        $request->all();
+        $data = $request->all();
         //return view('/index/index', ['time' => date('Y-m-d H:i:s')]);
         //return response(json_encode(['name'=>'zhangsan']),200)->file(public_path().'/favicon.ico');
         //return response()->download(public_path().'/favicon.ico','demo.ico');
-        return \response()->cookie('zhangsan','tom');
+        //return \response()->cookie('zhangsan','tom');
+        //return \response(['status'=>200,'msg'=>'ok','data'=>$data],200,['Content-Type'=>'application/json']);
+        //return \response(['status'=>200,'msg'=>'ok','data'=>$data])->header('Content-Type','application/json');
+        //return \response(['status'=>200,'msg'=>'ok','data'=>$data])->withHeader('Content-Type','application/json');
+        return \response(['status'=>200,'msg'=>'ok','data'=>$data])->withHeaders(['Content-Type'=>'application/json'])->withBody('som');
+
     }
 
     //模型

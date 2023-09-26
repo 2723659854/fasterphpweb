@@ -213,8 +213,8 @@ class Index
     public function add(Request $request)
     {
 
-        $a = $request->param('a', 0);
-        $b = $request->param('b', 0);
+        $a = $request->get('a', 0);
+        $b = $request->get('b', 0);
         return (int)bcadd($a, $b);
     }
 

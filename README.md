@@ -1,5 +1,5 @@
 
-#框架简介
+框架简介
 <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;socketweb是一款常驻内存的轻量级的php框架，遵循常用的mvc架构。</p>
 <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;本框架对定时器和队列，mysql数据库,redis缓存进行了简单封装，并且保留了部分代码实例。</p>
 <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;本框架尚处于开发测试阶段，请不要用于正式商用业务。</p>
@@ -40,6 +40,7 @@ php start.php start  或者 php songshu start
 |-- composer.json              <项目依赖>
 |-- README.md                  <项目说明文件>
 |-- start.php                  <服务启动文件>
+|-- songshu                    <服务启动文件>
 ~~~
 
 ###  快速开始
@@ -118,7 +119,7 @@ class Index
     }
 }
 ```
-#### 获取参数
+### 请求
 
 ```php 
  /**
@@ -141,8 +142,89 @@ class Index
         return view('index/database', ['var' => $var, 'str' => date('Y-m-d H:i:s'), 'user' => json_encode($data), 'app_name' => $app_name]);
     }
 ```
-#### 模板渲染
-<br>默认支持html文件，变量使用花括号表示{}<br>
+#### 获取get参数
+```php 
+/** 获取所有get参数 */
+$data = $request->get();
+/** 获取指定键名参数 */
+$name = $request->get('name','tom');
+```
+#### 获取post参数
+```php 
+/** 获取所有post请求参数 */
+$data = $request->post();
+/** 获取指定键名参数 */
+$name = $request->post('name','tom');
+```
+#### 获取所有请求参数
+```php 
+$data = $request->all();
+```
+####获取原始请求包体
+```php 
+$post = $request->rawBody();
+```
+#### 获取header头部信息
+```php 
+/** 获取所有的header */
+$request->header();
+/** 获取指定的header参数host */
+$request->header('host');
+```
+####获取原始querystring
+```php 
+$request->queryString()
+```
+#### 获取cookie
+```php 
+/** 获取cookie */
+$request->cookie('username');
+/** 获取cookie 并设置默认值 */
+$request->cookie('username', 'zhangsan');
+```
+
+### 响应
+
+####设置cookie
+```php 
+return \response()->cookie('zhangsan','tom');
+```
+####返回视图
+```php 
+return view('index/database', ['var' => $var, 'str' => date('Y-m-d H:i:s'), 'user' => json_encode($data), 'app_name' => $app_name]);
+```
+#### 返回数据
+```php
+return response(['status'=>200,'msg'=>'ok','data'=>$data]);
+/** 会覆盖response里面的数据 */
+return response()->withBody('返回的数据');
+```
+#### 重定向
+```php 
+ return redirect('/admin/user/list');
+```
+####下载文件
+```php 
+ /** 直接下载 */
+  return response()->file(public_path().'/favicon.ico');
+ /** 设置别名 */
+ return response()->download(public_path().'/favicon.ico','demo.ico');   
+```
+####设置响应头
+```php 
+ return \response(['status'=>200,'msg'=>'ok','data'=>$data],200,['Content-Type'=>'application/json']);
+ return \response(['status'=>200,'msg'=>'ok','data'=>$data])->header('Content-Type','application/json');
+ return \response(['status'=>200,'msg'=>'ok','data'=>$data])->withHeader('Content-Type','application/json');
+ return \response(['status'=>200,'msg'=>'ok','data'=>$data])->withHeaders(['Content-Type'=>'application/json']);
+```
+#### 设置响应状态码
+```php 
+return response([],200);
+return response([])->withStatus(200);
+```
+
+### 模板渲染
+<br>默认支持html文件，变量使用花括号表示{}，暂不支持for,foreach,if等复杂模板运算 <br>
 ```html
 <!DOCTYPE html>
 <html lang="en">
@@ -187,7 +269,6 @@ return [
 ];
 
 ```
-
 #### 模型的定义
 ```php
 <?php
@@ -253,41 +334,8 @@ return [
         return ['code' => 200, 'msg' => 'ok','普通的调用'=>(new Cache())->get('fuck'),'静态调用'=>Cache::get('happy')];
     }
 ```
-#### 文件上传
 
-```php 
-//普通上传文件
-        /** 判断是否获取到文件 */
-        if ($request->file('one')) {
-            /** 接收文件 */
-            $file    = $request->file('one');
-            /** 获取文件名称 */
-            $name    = $file['filename'] ? $file['filename'] : 'test.png';
-            /** 获取文件内容 */
-            $content = $file['content'];
-            /** 打开需要保存的文件fd */
-            $fp1     = fopen(app_path() . '/public/' . $name, 'wb');
-            /** 写入文件 */
-            fwrite($fp1, $content);
-            /** 关闭文件fd */
-            fclose($fp1);
-        }
-```
-#### 下载文件到浏览器
-
-```php 
- /** 下载文件到浏览器 */
-    public function down()
-    {
-        /** 直接下载 */
-        return response(json_encode(['name'=>'zhangsan']),200)->file(public_path().'/favicon.ico');
-        /** 设置别名 */
-        return response()->download(public_path().'/favicon.ico','demo.ico');
-    }
-
-```
-
-#### 定时器
+###定时器
 只能在linux系统中使用定时器，或者使用docker环境。
 #### 添加定时任务
 ```php 
@@ -343,7 +391,7 @@ return [
 ```
 
 
-#### rabbitmq消息队列
+### rabbitmq消息队列
 
 #### rabbitmq连接配置
 ```php 
@@ -396,7 +444,7 @@ return [
     ],
 ];
 ```
-#### elasticsearch 搜索
+### elasticsearch 搜索
 ```php 
 use root\ESClient;
 

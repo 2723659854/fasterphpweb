@@ -27,3 +27,21 @@ if (!function_exists('response')){
         return new Response($status, $headers, $body);
     }
 }
+
+if (!function_exists('redirect')){
+    /**
+     * 重定向
+     * @param string $location 跳转地址
+     * @param int $status 状态码
+     * @param array $headers 头部信息
+     * @return Response
+     */
+    function redirect(string $location, int $status = 302, array $headers = [])
+    {
+        $response = new Response($status, ['Location' => $location]);
+        if (!empty($headers)) {
+            $response->withHeaders($headers);
+        }
+        return $response;
+    }
+}
