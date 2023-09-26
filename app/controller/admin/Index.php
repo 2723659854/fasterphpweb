@@ -10,6 +10,8 @@ use APP\Facade\Cache;
 use APP\Facade\User;
 use Root\ESClient;
 use Root\Request;
+use Root\Response;
+
 
 class Index
 {
@@ -18,7 +20,10 @@ class Index
     {
         var_dump($request->get());
         var_dump("我是admin被调用了");
-        return '/admin/index/index';
+        //return response(json_encode(['name'=>'zhangsan']),200)->withFile(public_path().'/test.png',0,filesize(public_path().'/test.png'));
+        return view('/index/index', ['time' => date('Y-m-d H:i:s')]);
+        //return response()->file(public_path().'/test.png');
+
     }
 
     //模型

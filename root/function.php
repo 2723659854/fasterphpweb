@@ -411,13 +411,15 @@ if (!function_exists('M')){
 
 if (!function_exists('view')){
     /**
-     * 渲染模板
+     * 渲染模板 使用{}中括号作为变脸分隔符号
      * @param string $path 路径
      * @param array $param 参数
      * @return array|false|string|string[]
      * @throws Exception
+     * @note 模板渲染这个不完善，需要处理循环，布尔判断等等，不过这个主要是做后端服务，前端的事情就交给前端去做吧，
      */
     function view(string $path,array $param=[]){
+        $path = trim($path,'/');/** 去掉多余的目录分隔符 */
         $content=file_get_contents(app_path().'/view/'.$path.'.html');
         $preg= '/{\$[\s\S]*?}/i';
         preg_match_all($preg,$content,$res);
@@ -427,17 +429,17 @@ if (!function_exists('view')){
             $key='{$'.$k.'}';
             $new_param[$key]=$v;
         }
-        foreach ($array as $k=>$v){
+        foreach ($array as $v){
             if (array_key_exists($v,$new_param)){
                 if ($new_param[$v]==null){
                     $new_param[$v]='';
                 }
                 $content=str_replace($v,$new_param[$v],$content);
             }else{
-                return no_declear('index',['msg'=>"未定义的变量".$v]);
+                return no_declear('index',['msg'=>"文件：/view/$path.html，存在未定义的变量：".$v]);
             }
         }
-        return $content;
+        return response($content,200,['Content-Type'=>'text/html; charset=UTF-8']);
     }
 }
 if (!function_exists('no_declear')){
@@ -467,7 +469,7 @@ if (!function_exists('no_declear')){
                 }
             }
         }
-        return $content;
+        return response($content,200,['Content-Type'=>'text/html; charset=UTF-8']);
     }
 }
 

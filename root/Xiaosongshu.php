@@ -9,6 +9,29 @@ namespace Root;
 class Xiaosongshu
 {
 
+    /** 定义文件类型请求返回数据 */
+    protected $backContenType =[
+        'html'=>'text/html; charset=UTF-8',
+        'js'=>'text/javascript; charset=UTF-8',
+        'css'=>'text/css; charset=UTF-8',
+        'svg'=>'image/svg+xml; charset=UTF-8',
+        'png'=>'image/jpeg; charset=UTF-8',
+        'jpg'=>'image/jpeg; charset=UTF-8',
+        'icon'=>'image/jpeg; charset=UTF-8',
+        'jpeg'=>'image/jpeg; charset=UTF-8',
+        'ico'=>'image/jpeg; charset=UTF-8',
+        'gif'=>'image/jpeg; charset=UTF-8',
+        "doc"=>'image/jpeg; charset=UTF-8',
+        "docx"=>'application/octet-stream; charset=UTF-8',
+        "ppt"=>'application/octet-stream; charset=UTF-8',
+        "pptx"=>'application/octet-stream; charset=UTF-8',
+        "xls"=>'application/octet-stream; charset=UTF-8',
+        "xlsx"=>'application/octet-stream; charset=UTF-8',
+        "zip"=>'application/octet-stream; charset=UTF-8',
+        "rar"=>'application/octet-stream; charset=UTF-8',
+        "txt"=>'application/octet-stream; charset=UTF-8'
+    ];
+
     /**
      * 启动服务
      * @param $param
@@ -213,8 +236,7 @@ class Xiaosongshu
         }
 
         /** 加载路由 */
-        //$this->loadRoute();
-
+        $this->loadRoute();
         /** 此处需要判断是否是是Linux系统，如果是则检查是否有epoll 有则调用epoll，否则调用select */
         if ($daemonize) {
             $this->daemon();
@@ -662,13 +684,6 @@ EOF;
         }
     }
 
-    /** 普通的阻塞模式,可以自己尝试使用 */
-    public function nginx()
-    {
-        $worker = new Nginx();
-        $worker->start();
-    }
-
     /** 异步IO之select轮询模式 */
     public function select()
     {
@@ -695,40 +710,40 @@ EOF;
 
         $info           = explode('.', $request->path());
         $file_extension = end($info);
-        $backContenType =[
-            'html'=>'text/html; charset=UTF-8',
-            'js'=>'text/javascript; charset=UTF-8',
-            'css'=>'text/css; charset=UTF-8',
-            'svg'=>'image/svg+xml; charset=UTF-8',
-            'png'=>'image/jpeg; charset=UTF-8',
-            'jpg'=>'image/jpeg; charset=UTF-8',
-            'icon'=>'image/jpeg; charset=UTF-8',
-            'jpeg'=>'image/jpeg; charset=UTF-8',
-            'ico'=>'image/jpeg; charset=UTF-8',
-            'gif'=>'image/jpeg; charset=UTF-8',
-            "doc"=>'image/jpeg; charset=UTF-8',
-            "docx"=>'application/octet-stream; charset=UTF-8',
-            "ppt"=>'application/octet-stream; charset=UTF-8',
-            "pptx"=>'application/octet-stream; charset=UTF-8',
-            "xls"=>'application/octet-stream; charset=UTF-8',
-            "xlsx"=>'application/octet-stream; charset=UTF-8',
-            "zip"=>'application/octet-stream; charset=UTF-8',
-            "rar"=>'application/octet-stream; charset=UTF-8',
-            "txt"=>'application/octet-stream; charset=UTF-8'
-        ];
-        if (in_array($file_extension,array_keys($backContenType))) {
 
+        /**  说明是资源类请求，直接返回资源 */
+        if (in_array($file_extension,array_keys($this->backContenType))) {
+            $fileName = $request->path();
+            if ($file_extension=='html'){
+                $fileName= app_path().'/view'.$fileName;
+            }else{
+                $fileName = public_path().$fileName;
+            }
+            /** 如果有这个文件 */
+            if (is_file($fileName)){
+                $content = file_get_contents($fileName);
+                fwrite($socketAccept, 'HTTP/1.1 200 OK' . PHP_EOL);
+                fwrite($socketAccept, 'Date:' . date('Y-m-d H:i:s') . PHP_EOL);
+                fwrite($socketAccept, $this->backContenType[$file_extension] . PHP_EOL);
+                fwrite($socketAccept, '' . PHP_EOL);
+                fwrite($socketAccept,$content);
+                fclose($socketAccept);
+            }else{
+                /** 如果没有这个文件 */
+                $content ='<p>not found !</p>';
+                fwrite($socketAccept, 'HTTP/1.1 404 Not Found' . PHP_EOL);
+                fwrite($socketAccept, 'Date:' . date('Y-m-d H:i:s') . PHP_EOL);
+                fwrite($socketAccept, $this->backContenType['html'] . PHP_EOL);
+                fwrite($socketAccept, '' . PHP_EOL);
+                fwrite($socketAccept,$content);
+                fclose($socketAccept);
+            }
+        }else{
+            /** 动态路由 */
+            fwrite($socketAccept,Route::dispatch($method, $uri, $request));
+            fclose($socketAccept);
         }
-        //todo 处理各种不同类型的文件，根据文件类型处理不同的请求
-        Route::loadRoute();
-        $content = Route::dispatch($method, $uri, $request);
-        fwrite($socketAccept, 'HTTP/1.1 200 OK' . PHP_EOL);
-        fwrite($socketAccept, 'Date:' . date('Y-m-d H:i:s') . PHP_EOL);
-        fwrite($socketAccept, 'Content-Type: text/html' . PHP_EOL);
-        fwrite($socketAccept, "Content-Length: " . strlen($content) . "\r\n\r\n");
-        fwrite($socketAccept, $content, strlen($content));
-        /** 这里必须关闭才能够给cli模式正常的返回数据，但是这个会影响需要长连接的浏览器或者其他服务，还不知道怎么处理 */
-        fclose($socketAccept);
+
         /** 清理select连接 */
         unset($httpServer->allSocket[(int)$socketAccept]);
         /** 清理epoll连接 */
@@ -737,138 +752,11 @@ EOF;
         unset($socketAccept);
     }
 
-    /**
-     * select和epoll消息处理事件
-     * @param $socketAccept
-     * @param $message
-     * @param $httpServer
-     * @return void
-     */
-    public function onMessage_copy($socketAccept, $message, &$httpServer)
-    {
-        if (strpos($message, 'HTTP/')) {
-            $_param = [];
-            $_mark  = getUri($message);
 
-            $fileName = $_mark['file'];
-            $_request = $_mark['request'];
-            foreach ($_mark['post_param'] as $k => $v) {
-                $_param[$k] = $v;
-            }
-            $url     = $fileName;
-            $fileExt = preg_replace('/^.*\.(\w+)$/', '$1', $fileName);
-
-            switch ($fileExt) {
-                case "html":
-                    fwrite($socketAccept, 'HTTP/1.1 200 OK' . PHP_EOL);
-                    fwrite($socketAccept, 'Date:' . date('Y-m-d H:i:s') . PHP_EOL);
-                    fwrite($socketAccept, 'Content-Type: text/html' . PHP_EOL);
-                    fwrite($socketAccept, '' . PHP_EOL);
-                    $fileName = dirname(__DIR__) . '/view/' . $fileName;
-                    if (file_exists($fileName)) {
-                        $fileContent = file_get_contents($fileName);
-                    } else {
-                        $fileContent = 'sorry,the file is missing!';
-                    }
-                    fwrite($socketAccept, "Content-Length: " . strlen($fileContent) . "\r\n\r\n");
-                    fwrite($socketAccept, $fileContent, strlen($fileContent));
-                    break;
-                case "ico":
-                case "jpg":
-                case "js":
-                case "css":
-                case "gif":
-                case "png":
-                case "icon":
-                case "jpeg":
-                    fwrite($socketAccept, 'HTTP/1.1 200 OK' . PHP_EOL);
-                    fwrite($socketAccept, 'Date:' . date('Y-m-d H:i:s') . PHP_EOL);
-                    fwrite($socketAccept, 'Content-Type: image/jpeg' . PHP_EOL);
-                    $fileName = dirname(__DIR__) . '/public/' . $fileName;
-                    if (file_exists($fileName)) {
-                        $fileContent = file_get_contents($fileName);
-                    } else {
-                        $fileContent = 'sorry,the file is missing!';
-                    }
-                    fwrite($socketAccept, "Content-Length: " . strlen($fileContent) . "\r\n\r\n");
-                    fwrite($socketAccept, $fileContent, strlen($fileContent));
-                    break;
-                case "doc":
-                case "docx":
-                case "ppt":
-                case "pptx":
-                case "xls":
-                case "xlsx":
-                case "zip":
-                case "rar":
-                case "txt":
-                    fwrite($socketAccept, 'HTTP/1.1 200 OK' . PHP_EOL);
-                    fwrite($socketAccept, 'Date:' . date('Y-m-d H:i:s') . PHP_EOL);
-                    fwrite($socketAccept, 'Content-Type: application/octet-stream' . PHP_EOL);
-                    fwrite($socketAccept, '' . PHP_EOL);
-                    $fileName = dirname(__DIR__) . '/public/' . $fileName;
-                    if (file_exists($fileName)) {
-                        $fileContent = file_get_contents($fileName);
-                    } else {
-                        $fileContent = 'sorry,the file is missing!';
-                    }
-                    fwrite($socketAccept, "Content-Length: " . strlen($fileContent) . "\r\n\r\n");
-                    fwrite($socketAccept, $fileContent, strlen($fileContent));
-                    break;
-                default:
-
-                    if (($url) && strpos($url, '?')) {
-                        $request_url = explode('?', $url);
-                        $route       = $request_url[0];
-                        $params      = explode('&', $request_url[1]);
-                        foreach ($params as $k => $v) {
-                            $_v             = explode('=', $v);
-                            $_param[$_v[0]] = $_v['1'];
-                        }
-                        var_dump('44444');
-                        $content = $this->handle(route($route), $_param, $_request);
-                    } else {
-                        var_dump('555555');
-                        $content = $this->handle(route($url), $_param, $_request);
-                    }
-                    /** 文件下载 */
-                    if (isset($content['type']) && $content['type'] == md5('_byte_for_down_load_file_')) {
-                        fwrite($socketAccept, 'HTTP/1.1 200 OK' . PHP_EOL);
-                        fwrite($socketAccept, 'Date:' . date('Y-m-d H:i:s') . PHP_EOL);
-                        fwrite($socketAccept, 'Content-Type: application/octet-stream' . PHP_EOL);
-                        fwrite($socketAccept, 'Accept-Ranges: bytes' . PHP_EOL);
-                        fwrite($socketAccept, 'Accept-Length:' . strlen($content['content']) . PHP_EOL);
-                        fwrite($socketAccept, 'Content-Disposition: attachment; filename=' . $content['name'] . "\r\n\r\n");
-                        fwrite($socketAccept, $content['content'], strlen($content['content']));
-                    } else {
-                        /** 其他的暂时都做html处理 */
-                        if (!is_string($content)) {
-                            $content = json_encode($content);
-                        }
-                        fwrite($socketAccept, 'HTTP/1.1 200 OK' . PHP_EOL);
-                        fwrite($socketAccept, 'Date:' . date('Y-m-d H:i:s') . PHP_EOL);
-                        fwrite($socketAccept, 'Content-Type: text/html' . PHP_EOL);
-                        fwrite($socketAccept, "Content-Length: " . strlen($content) . "\r\n\r\n");
-                        fwrite($socketAccept, $content, strlen($content));
-                    }
-
-            }
-            /** 这里必须关闭才能够给cli模式正常的返回数据，但是这个会影响需要长连接的浏览器或者其他服务，还不知道怎么处理 */
-            fclose($socketAccept);
-            /** 清理select连接 */
-            unset($httpServer->allSocket[(int)$socketAccept]);
-            /** 清理epoll连接 */
-            unset($httpServer->events[(int)$socketAccept]);
-            /** 释放客户端连接 */
-            unset($socketAccept);
-        }
-
-    }
 
     /** 使用epoll异步io模型 */
     public function epoll()
     {
-        var_dump(1111);
         /** @var object $httpServer 将对象加载到内存 */
         $httpServer = new Epoll();
         /** @var callable onMessage 设置消息处理函数 */
@@ -878,64 +766,6 @@ EOF;
         /** 启动服务 */
         $httpServer->start();
     }
-
-    /**
-     * 处理request请求
-     * @param string $url
-     * @param array $param
-     * @param array $_request
-     * @return array|false|mixed|string|string[]|null
-     * @throws \Exception
-     */
-    public function handle(string $url, array $param, array $_request)
-    {
-
-        list($file, $class, $method) = explode('@', $url);
-        $file = app_path() . $file;
-        var_dump($file);
-        if (!file_exists($file)) {
-            return $this->dispay('index', ['msg' => $file . '文件不存在123123']);
-        }
-        //require_once $file;
-        if (!class_exists($class)) {
-            return $this->dispay('index', ['msg' => $class . '类不存在']);
-        }
-        $class = new $class;
-        if (!method_exists($class, $method)) {
-            return $this->dispay('index', ['msg' => $method . '方法不存在']);
-        }
-
-        global $fuck;
-        $fuck = new Request();
-        foreach ($_request as $k => $v) {
-            $v = trim($v);
-            if ($v) {
-                $_pos  = strripos($v, ": ");
-                $key   = substr($v, 0, $_pos);
-                $value = substr($v, $_pos + 1, strlen($v));
-                if ($key) {
-                    $fuck->header($key, $value);
-                }
-            }
-        }
-        foreach ($param as $k => $v) {
-            $fuck->set($k, $v);
-        }
-        /** 这里必须捕获异常 */
-        try {
-            $response = $class->$method($fuck);
-        } catch (\Exception|\RuntimeException $e) {
-            $fuck->_error = no_declear('index', ['msg' => "错误码：" . $e->getCode() . "<br>文件：" . $e->getFile() . "<br>行数：" . $e->getLine() . PHP_EOL . "<br>错误详情：" . $e->getMessage()]);
-        }
-        if ($fuck->_error) {
-
-            return $fuck->_error;
-        } else {
-            return $response;
-        }
-
-    }
-
 
     /**
      * 渲染模板

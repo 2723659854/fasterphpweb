@@ -65,7 +65,7 @@ class Request
      *
      * @param string $buffer
      */
-    public function __construct($buffer)
+    public function __construct($buffer='')
     {
         $this->_buffer = $buffer;
     }
