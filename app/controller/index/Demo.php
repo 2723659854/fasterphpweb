@@ -19,7 +19,6 @@ class Demo
      * @return string|string[]|null
      */
     public function index(Request $request){
-        var_dump(runtime_path().'/timer');
         Timer::add(4,function (){
             echo "sdfhkasghasgss\r\n";
 

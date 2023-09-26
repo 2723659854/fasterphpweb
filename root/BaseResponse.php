@@ -328,7 +328,7 @@ class BaseResponse
         $head = "HTTP/{$this->_version} {$this->_status} $reason\r\n";
         $headers = $this->_header;
         if (!isset($headers['Server'])) {
-            $head .= "Server: workerman\r\n";
+            $head .= "Server: xiaosongshu\r\n";
         }
         foreach ($headers as $name => $value) {
             if (\is_array($value)) {
@@ -364,8 +364,16 @@ class BaseResponse
                 $head .= 'Last-Modified: '. \gmdate('D, d M Y H:i:s', $mtime) . ' GMT' . "\r\n";
             }
         }
+        /** 追加文件内容，否则无法下载文件 */
+        if (is_file($file)){
+            $fd      = fopen($file, 'r');
+            $content = fread($fd, filesize($file));
+            fclose($fd);
+        }else{
+            $content='';
+        }
 
-        return "{$head}\r\n";
+        return "{$head}\r\n".$content;
     }
 
     /**
@@ -378,17 +386,16 @@ class BaseResponse
         if (isset($this->file)) {
             return $this->createHeadForFile($this->file);
         }
-
         $reason = $this->_reason ? $this->_reason : static::$_phrases[$this->_status];
         $body_len = \strlen($this->_body);
         if (empty($this->_header)) {
-            return "HTTP/{$this->_version} {$this->_status} $reason\r\nServer: workerman\r\nContent-Type: text/html;charset=utf-8\r\nContent-Length: $body_len\r\nConnection: keep-alive\r\n\r\n{$this->_body}";
+            return "HTTP/{$this->_version} {$this->_status} $reason\r\nServer: xiaosongshu\r\nContent-Type: text/html;charset=utf-8\r\nContent-Length: $body_len\r\nConnection: keep-alive\r\n\r\n{$this->_body}";
         }
 
         $head = "HTTP/{$this->_version} {$this->_status} $reason\r\n";
         $headers = $this->_header;
         if (!isset($headers['Server'])) {
-            $head .= "Server: workerman\r\n";
+            $head .= "Server: xiaosongshu\r\n";
         }
         foreach ($headers as $name => $value) {
             if (\is_array($value)) {

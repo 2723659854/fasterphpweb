@@ -50,7 +50,6 @@ class Response extends BaseResponse
      */
     protected function notModifiedSince(string $file): bool
     {
-        //todo 这里webman是用的App容器获取的，不知道怎么实现的这里获取到的request是空的，所以直接给她返回新的
         $ifModifiedSince = G(Request::class)->header('if-modified-since');
         if ($ifModifiedSince === null || !is_file($file) || !($mtime = filemtime($file))) {
             return false;

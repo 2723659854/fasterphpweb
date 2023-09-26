@@ -107,6 +107,14 @@ class Request
     }
 
     /**
+     * ALL
+     * @return mixed|null
+     */
+    public function all(){
+        return $this->get()+$this->post();
+    }
+
+    /**
      * Get header item by name.
      *
      * @param string|null $name
@@ -542,7 +550,7 @@ class Request
                         } else if ($boundary_value === '' && $file_name === '') {
                             $error = UPLOAD_ERR_NO_FILE;
                         } else {
-                            $tmp_file = \tempnam($tmp_upload_dir, 'workerman.upload.');
+                            $tmp_file = \tempnam($tmp_upload_dir, 'upload.');
                             if ($tmp_file === false || false === \file_put_contents($tmp_file, $boundary_value)) {
                                 $error = UPLOAD_ERR_CANT_WRITE;
                             }

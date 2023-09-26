@@ -45,28 +45,6 @@ if (!function_exists('command_path')){
     }
 }
 
-if(!function_exists('timer_log_path')){
-    /**
-     * 定时器pid目录
-     * @return string
-     */
-    function timer_log_path()
-    {
-        return runtime_path().'/timer';
-    }
-}
-
-if (!function_exists('runtime_path')){
-    /**
-     * 运行目录
-     * @return string
-     */
-    function runtime_path( ){
-        return app_path().'/runtime';
-    }
-}
-
-
 
 if (!function_exists('scan_dir')){
     /**
@@ -136,23 +114,10 @@ if (!function_exists('writePid')){
     }
 }
 
-if (!function_exists('writeTimerPid')){
-    /**
-     * 记录定时器的pid
-     * @return void
-     */
-    function writeTimerPid()
-    {
-        /** 记录进程号 */
-       $myPid = getmypid();
-       file_put_contents(runtime_path() .'/timer/'. $myPid . '.txt', $myPid);
-    }
-}
-
 if (!function_exists('base64_file_upload')){
     /**
      * base64文件上传
-     * @param string $picture 文件内容
+     * @param string $picture 文件内容:base64加密后的文件
      */
     function base64_file_upload(string $picture)
     {
@@ -202,133 +167,6 @@ if (!function_exists('base64_file_upload')){
     }
 }
 
-if (!function_exists('getUri')){
-    /**
-     * 解析路由和参数
-     * @param string $request
-     * @return array
-     */
-    function getUri(string $request = '')
-    {
-        $arrayRequest = explode(PHP_EOL, $request);
-        $line         = $arrayRequest[0];
-        $str          = $line . ' ';
-        $url_length   = strlen($str);
-        static $fuck = '';
-        $array = [];
-        for ($i = 0; $i < $url_length; $i++) {
-            if (trim($str[$i]) != null) {
-                $fuck = $fuck . $str[$i];
-            } else {
-                $array[] = $fuck;
-                $fuck    = '';
-            }
-        }
-        $fuck = '';
-        if (isset($array[1])) {
-            $url = $array[1];
-        } else {
-            $url = '/index/query';
-        }
-        if (isset($array[0])) {
-            $method = $array[0];
-        } else {
-            $method = 'GET';
-        }
-        unset($arrayRequest[0]);
-        foreach ($arrayRequest as $k => $v) {
-            if ($v == null || $v == '') {
-                unset($arrayRequest[$k]);
-            }
-        }
-        $post_param = [];
-        if ($method == 'POST' || $method == 'post') {
-            $now   = $arrayRequest;
-            $param = array_pop($now);
-            if (strpos($param, '&')) {
-                $many = explode('&', $param);
-                foreach ($many as $a => $b) {
-                    $dou                 = explode('=', $b);
-                    $post_param[$dou[0]] = isset($dou[1]) ? $dou[1] : null;
-                }
-            }
-            $length    = 0;
-            $fengexian = '';
-            foreach ($now as $a => $b) {
-                if (stripos($b, 'ength:')) {
-                    $_vaka  = explode(':', $b);
-                    $length = (int)$_vaka[1];
-                }
-                if (stripos($b, 'form-data; name="')) {
-                    if ($now[$a - 1]) {
-                        $fengexian = $now[$a - 1];
-                    }
-                    $fenge_array    = array_keys($now, $fengexian, true);
-                    $value_key_stop = 0;
-                    foreach ($fenge_array as $m => $n) {
-                        if ($n > $a) {
-                            $value_key_stop = $n;
-                            break;
-                        }
-                    }
-                    $value     = '';
-                    $now_count = count($now);
-                    if ($value_key_stop == 0) {
-                        $value_key_stop = $now_count;
-                    }
-                    if (strstr($now[$a + 1], 'Type:')) {
-                        $small_str = substr($request, stripos($request, $b));
-                        $pos1      = stripos($small_str, $now[$a + 3]);
-                        $pos2      = stripos($small_str, $now[$value_key_stop]);
-                        if ($value_key_stop == $now_count) {
-                            if (strstr($now[$a + 1], 'image')) {
-                                $value = substr($small_str, $pos1, ($pos2 - $pos1) + strlen($now[$value_key_stop]) + $length);
-                            } else {
-                                $value = substr($small_str, $pos1, ($pos2 - $pos1) + strlen($now[$value_key_stop]));
-                            }
-                        } else {
-                            $value = substr($small_str, $pos1, ($pos2 - $pos1));
-                        }
-                    } else {
-                        $start = $a + 2;
-                        for ($ii = $start; $ii < $value_key_stop; $ii++) {
-                            $value = $value . $now[$ii];
-                        }
-                    }
-                    $str1 = substr($b, stripos($b, 'form-data; name="'));
-                    $arr  = explode('"', $str1);
-                    $key  = $arr[1];
-
-                    $post_param[$key] = $value;
-                    if (stripos($b, '; filename="')) {
-                        $str1                     = substr($b, stripos($b, '; filename="'));
-                        $arr                      = explode('"', $str1);
-                        $_filename                = $arr[1];
-                        $post_param['file'][$key] = ['filename' => $_filename, 'content' => $value];
-                        $post_param[$key]         = ['filename' => $_filename, 'content' => $value];
-                    }
-                }
-            }
-        }
-
-        $arrayRequest[] = "method: " . $method;
-        $arrayRequest[] = "path: /" . $url;
-        $header         = [];
-        foreach ($arrayRequest as $k => $v) {
-            $v = trim($v);
-            if ($v) {
-                $_pos  = strripos($v, ": ");
-                $key   = trim(substr($v, 0, $_pos));
-                $value = trim(substr($v, $_pos + 1, strlen($v)));
-                if ($key) {
-                    $header[$key] = $value;
-                }
-            }
-        }
-
-        return ['file' => $url, 'request' => $arrayRequest, 'post_param' => $post_param, 'header' => $header];
-    }
-}
 
 if (!function_exists('prepareMysqlAndRedis')){
     /**
@@ -442,6 +280,7 @@ if (!function_exists('view')){
         return response($content,200,['Content-Type'=>'text/html; charset=UTF-8']);
     }
 }
+
 if (!function_exists('no_declear')){
     /**
      * 未定义变量
@@ -473,49 +312,6 @@ if (!function_exists('no_declear')){
     }
 }
 
-if (!function_exists('route')){
-    /**
-     * 解析路由
-     * @param string $url 路由地址
-     * @return string
-     */
-    function route(string $url){
-        if ($url){
-            $url=array_filter(explode('/',$url));
-        }else{
-            $url=[];
-        }
-        $new_url=[];
-        foreach ($url as $k=>$v){
-            $new_url[]=$v;
-        }
-        $num=count($new_url);
-        switch ($num){
-            case 0:
-                return '/app/controller/index/Index.php@APP\\Controller\\Index\\Index@index';
-                break;
-            case 1:
-                return '/app/controller/index/Index.php@App\\Controller\\Index\\Index@'.$new_url[0];
-                break;
-            case 2:
-                return '/app/controller/index/'.ucwords($new_url[0]).'.php@'.'App\\Controller\\Index\\'.ucwords($new_url[0]).'@'.$new_url[1];
-                break;
-            case 3:
-                return '/app/controller/'.strtolower($new_url[0]).'/'.ucwords($new_url[1]).'.php@'.'App\\Controller\\'.ucwords($new_url[0]).'\\'.ucwords($new_url[1]).'@'.$new_url[2];
-                break;
-            default:
-                $file = '/app/controller';
-                $class = 'App\\Controller';
-                $method = array_pop($new_url);
-                $className = ucwords(strtolower(array_pop($new_url)));
-                foreach ($new_url as $k=>$v){
-                    $file=$file.'/'.strtolower($v);
-                    $class=$class.'\\'.ucwords($v);
-                }
-                return $file.'/'.$className.'.php@'.$class.'\\'.$className.'@'.$method;
-        }
-    }
-}
 
 
 

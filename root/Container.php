@@ -17,7 +17,6 @@ class Container
     public static function get(string $name)
     {
         if (!isset(self::$providers[$name])) {
-
             if (class_exists($name)){
                 /** 必须使用一个反射类，因为这个对象可能需要实现自动依赖注入 */
                 $class = Ioc::make($name);

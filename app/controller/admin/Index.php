@@ -18,12 +18,11 @@ class Index
 
     public function index(Request $request)
     {
-        var_dump($request->get());
-        var_dump("我是admin被调用了");
-        //return response(json_encode(['name'=>'zhangsan']),200)->withFile(public_path().'/test.png',0,filesize(public_path().'/test.png'));
-        return view('/index/index', ['time' => date('Y-m-d H:i:s')]);
-        //return response()->file(public_path().'/test.png');
-
+        $request->all();
+        //return view('/index/index', ['time' => date('Y-m-d H:i:s')]);
+        //return response(json_encode(['name'=>'zhangsan']),200)->file(public_path().'/favicon.ico');
+        //return response()->download(public_path().'/favicon.ico','demo.ico');
+        return \response()->cookie('zhangsan','tom');
     }
 
     //模型

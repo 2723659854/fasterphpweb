@@ -29,7 +29,12 @@ class Xiaosongshu
         "xlsx"=>'application/octet-stream; charset=UTF-8',
         "zip"=>'application/octet-stream; charset=UTF-8',
         "rar"=>'application/octet-stream; charset=UTF-8',
-        "txt"=>'application/octet-stream; charset=UTF-8'
+        "txt"=>'application/octet-stream; charset=UTF-8',
+        'mp4'=>'video/mp4; charset=UTF-8',
+        'xml'=>'text/xml; charset=UTF-8',
+        'flv'=>'video/x-flv; charset=UTF-8',
+        'ttf'=>'font/ttf; charset=UTF-8',
+        'avi'=>'video/x-msvideo; charset=UTF-8',
     ];
 
     /**
@@ -54,8 +59,15 @@ class Xiaosongshu
         foreach (scan_dir(app_path() . '/root', true) as $k) {
             if (pathinfo($k)['extension'] == 'php') require_once $k;
         }
+        /** 加载process目录下的所有文件 */
         foreach (scan_dir(app_path() . '/process', true) as $k) {
             if (pathinfo($k)['extension'] == 'php') require_once $k;
+        }
+        /** 装载App目录下的所有文件 */
+        foreach (scan_dir(app_path() . '/app', true) as $key => $val) {
+            if (file_exists($val)) {
+                require_once $val;
+            }
         }
         /** @var bool $_has_epoll 默认不支持epoll模型 */
         $_has_epoll = false;
@@ -66,7 +78,6 @@ class Xiaosongshu
         } else {
             $_has_epoll = (new \EventBase())->getMethod() == 'epoll';
         }
-        $httpServer = null;
         $server     = config('server');
         if (isset($server['port']) && $server['port']) {
             $_port = intval($server['port']);
@@ -79,16 +90,8 @@ class Xiaosongshu
             $_server_num = 2;
         }
         $_listen    = "http://0.0.0.0:" . $_port;
-        $httpServer = null;
         /** 装载用户的自定义命令 */
         $this->deal_command();
-
-        /** 装载App目录下的所有文件 */
-        foreach (scan_dir(app_path() . '/app', true) as $key => $val) {
-            if (file_exists($val)) {
-                require_once $val;
-            }
-        }
 
         /** 加载表格类工具 */
         $_system_table = new \Xiaosongshu\Table\Table();
@@ -676,7 +679,7 @@ EOF;
         }
     }
 
-    /** 环境监测 */
+    /** 运行环境监测 */
     public function check_env()
     {
         if (!extension_loaded('sockets')) {
@@ -707,10 +710,8 @@ EOF;
         $request = new Request($message);
         $method  = $request->method();
         $uri     = $request->path();
-
         $info           = explode('.', $request->path());
         $file_extension = end($info);
-
         /**  说明是资源类请求，直接返回资源 */
         if (in_array($file_extension,array_keys($this->backContenType))) {
             $fileName = $request->path();
@@ -721,21 +722,11 @@ EOF;
             }
             /** 如果有这个文件 */
             if (is_file($fileName)){
-                $content = file_get_contents($fileName);
-                fwrite($socketAccept, 'HTTP/1.1 200 OK' . PHP_EOL);
-                fwrite($socketAccept, 'Date:' . date('Y-m-d H:i:s') . PHP_EOL);
-                fwrite($socketAccept, $this->backContenType[$file_extension] . PHP_EOL);
-                fwrite($socketAccept, '' . PHP_EOL);
-                fwrite($socketAccept,$content);
+                fwrite($socketAccept,response(file_get_contents($fileName),200,['Content-Type'=>$this->backContenType[$file_extension]]));
                 fclose($socketAccept);
             }else{
                 /** 如果没有这个文件 */
-                $content ='<p>not found !</p>';
-                fwrite($socketAccept, 'HTTP/1.1 404 Not Found' . PHP_EOL);
-                fwrite($socketAccept, 'Date:' . date('Y-m-d H:i:s') . PHP_EOL);
-                fwrite($socketAccept, $this->backContenType['html'] . PHP_EOL);
-                fwrite($socketAccept, '' . PHP_EOL);
-                fwrite($socketAccept,$content);
+                fwrite($socketAccept,response('Not Found',404));
                 fclose($socketAccept);
             }
         }else{
@@ -743,7 +734,6 @@ EOF;
             fwrite($socketAccept,Route::dispatch($method, $uri, $request));
             fclose($socketAccept);
         }
-
         /** 清理select连接 */
         unset($httpServer->allSocket[(int)$socketAccept]);
         /** 清理epoll连接 */
@@ -751,8 +741,6 @@ EOF;
         /** 释放客户端连接 */
         unset($socketAccept);
     }
-
-
 
     /** 使用epoll异步io模型 */
     public function epoll()
@@ -766,37 +754,6 @@ EOF;
         /** 启动服务 */
         $httpServer->start();
     }
-
-    /**
-     * 渲染模板
-     * @param string $path 模板路径
-     * @param array $param 变量
-     * @return array|false|string|string[]
-     * @throws \Exception
-     */
-    public function dispay(string $path, array $param = [])
-    {
-        $content = file_get_contents(app_path() . '/root/error/' . $path . '.html');
-        if ($param) {
-            $preg = '/{\$[\s\S]*?}/i';
-            preg_match_all($preg, $content, $res);
-            $array     = $res['0'];
-            $new_param = [];
-            foreach ($param as $k => $v) {
-                $key             = '{$' . $k . '}';
-                $new_param[$key] = $v;
-            }
-            foreach ($array as $k => $v) {
-                if (isset($new_param[$v])) {
-                    $content = str_replace($v, $new_param[$v], $content);
-                } else {
-                    throw new \Exception("未定义的变量" . $v);
-                }
-            }
-        }
-        return $content;
-    }
-
 
     /** 守护进程模式 */
     public function daemon()
@@ -1012,8 +969,5 @@ EOF;
             }
         }
     }
-
-
 }
-
 return new Xiaosongshu();

@@ -11,7 +11,7 @@ class Session
      *
      * @var string
      */
-    protected static $_handlerClass = 'Workerman\Protocols\Http\Session\FileSessionHandler';
+    protected static $_handlerClass = 'Root\FileSessionHandler';
 
     /**
      * Parameters of __constructor for session handler class.

@@ -129,7 +129,9 @@ class Index
     public function database(Request $request)
     {
         /** 获取var参数 */
-        $var      = $request->param('var');
+        $var      = $request->get('var');
+        $name     = $request->post('name');
+        $all = $request->all();
         /** 调用数据库 */
         $user     = new User();
         $data     = $user->where('username', '=', 'test')->first();
@@ -277,8 +279,10 @@ return [
  /** 下载文件到浏览器 */
     public function down()
     {
-        /** 语法：download_file(文件路径) */
-        return download_file(public_path().'/head.png');
+        /** 直接下载 */
+        return response(json_encode(['name'=>'zhangsan']),200)->file(public_path().'/favicon.ico');
+        /** 设置别名 */
+        return response()->download(public_path().'/favicon.ico','demo.ico');
     }
 
 ```
