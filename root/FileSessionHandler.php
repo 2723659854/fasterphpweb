@@ -4,8 +4,6 @@ namespace Root;
 
 use Root\Session;
 
-use Root\SessionHandlerInterface;
-
 class FileSessionHandler
 {
 

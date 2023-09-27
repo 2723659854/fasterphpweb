@@ -2,6 +2,12 @@
 
 namespace Root;
 
+use Root\Core\AppFactory;
+use Root\Core\Provider\IdentifyInterface;
+use Root\Queue\RabbitMqConsumer;
+use Root\Queue\RedisQueueConsumer;
+use Root\Queue\TimerConsumer;
+
 /**
  * @purpose 应用启动处理器
  * @time 2023年9月21日12:57:34
@@ -86,91 +92,29 @@ class Xiaosongshu
         if ($_system) { /** 创建定时器数据库 */ @G(Command::class)->makeTimeDatabase(); }
         /** 分析用户输入的命令，执行业务逻辑 */
         if (count($param) > 1) {
-            switch ($param[1]) {
-                case "start":
-                    if (isset($param[2]) && ($param[2] == '-d')) {
-                        if ($_system) { $daemonize = true; }
-                        else { echo $_color_class->info("当前环境是windows,只能在控制台运行\r\n"); echo "\r\n"; }
-                    }
-                    echo $_color_class->info("进程启动中...\r\n"); echo "\r\n";
-                    break;
-                case "stop":
-                    if ($_system) { $this->close(); echo $_color_class->info("进程已关闭\r\n"); }
-                    else { echo $_color_class->info("当前环境是windows,只能在控制台运行\r\n"); }
-                    $flag = false;
-                    break;
-                case "restart":
-                    if ($_system) { $this->close(); $daemonize = true; echo $_color_class->info("进程重启中\r\n"); }
-                    else { echo $_color_class->info("当前环境是windows,只能在控制台运行\r\n"); }
-                    break;
-                case "queue":
-                    $this->xiaosongshu_queue();
-                    break;
-                case "make:command":
-                    G(Command::class)->make_command($param[2] ?? '');
-                    break;
-                case "make:model":
-                    G(Command::class)->make_model($param[2] ?? '');
-                    break;
-                case "make:controller":
-                    G(Command::class)->make_controller($param[2] ?? '');
-                    break;
-                case "make:sqlite":
-                    G(Command::class)->make_sqlite_model($param[2] ?? '');
-                    break;
-                default:
-                    /** 如果是自定义命令，则执行用户的逻辑 */
-                    if (isset($_system_command[$param[1]])) {
-                        /** 处理用户自定义命令 */
-                        $this->handleOwnCommand($param);
-                    } else {
-                        /** 查看是否是用户自定义的命令 */
-                        echo $_color_class->info("未识别的命令\r\n");
-                        echo "\r\n";
-                        $flag = false;
-                    }
+            try {
+                $startAppAndCommandClass = G(AppFactory::class)->{$param[1]};
+            }catch (\Exception $exception){
+                $startAppAndCommandClass = null;
+            }
+            if ($startAppAndCommandClass instanceof IdentifyInterface){
+                $startAppAndCommandClass->handle($this,$param);
+            }else{
+                /** 如果是自定义命令，则执行用户的逻辑 */
+                if (isset($_system_command[$param[1]])) {
+                    /** 处理用户自定义命令 */
+                    $this->handleOwnCommand($param);
+                } else {
+                    /** 查看是否是用户自定义的命令 */
+                    echo $_color_class->info("未识别的命令:{$param[1]}\r\n");
+                }
             }
         } else {
             echo $_color_class->info("缺少必要参数，你可以输入start,start -d,stop,restart,queue\r\n");
-            $flag = false;
-        }
-        if ($flag == false) {
-            echo $_color_class->info("脚本退出运行\r\n");
-            exit;
-        }
-        /** 运行加锁 */
-        $fd  = fopen($_lock_file, 'w');
-        $res = flock($fd, LOCK_EX | LOCK_NB);
-        if (!$res) {
-            echo $_color_class->info($_listen . "\r\n");
-            echo $_color_class->info("已有脚本正在运行，请勿重复启动，你可以使用stop停止运行或者使用restart重启\r\n");
-            exit(0);
-        }
-
-        /** 加载路由 */
-        $this->loadRoute();
-        /** 此处需要判断是否是是Linux系统，如果是则检查是否有epoll 有则调用epoll，否则调用select */
-        if ($daemonize) {
-            $this->daemon();
-        } else {
-            /** 只开启http服务 */
-            $open = [
-                ['http', '正常', '1', $_listen]
-            ];
-            $_system_table->table(['名称', '状态', '进程数', '服务'], $open);
-            echo $_color_class->info("进程启动完成,你可以按ctrl+c停止运行\r\n");
-            /** 开启http调试模式 */
-            if ($_system && $_has_epoll) {
-                /** linux系统使用epoll模型 */
-                $this->epoll();
-            } else {
-                /** windows系统使用select模型 */
-                $this->select();
-            }
         }
     }
 
-    /**
+     /**
      * 处理用户自定义命令
      * @param $param
      * @return void
@@ -228,110 +172,10 @@ class Xiaosongshu
             $specialCommandClass->handle();
         } catch (\Exception $exception) {
             /** 捕获异常，并打印错误 */
-
             echo $_color_class->error("报错：code:{$exception->getCode()},文件{$exception->getFile()}，第{$exception->getLine()}行发生错误，错误信息：{$exception->getMessage()}");
             echo "\r\n";
         }
-
         exit;
-    }
-
-    /**
-     * 加载路由
-     * @return void
-     * @throws \Exception
-     */
-    public function loadRoute()
-    {
-        Route::loadRoute();
-    }
-
-    /**
-     * redis队列
-     * @return void
-     */
-    public function _queue_xiaosongshu()
-    {
-        try {
-            $config = config('redis');
-            $host   = $config['host'] ?? '127.0.0.1';
-            $port   = $config['port'] ?? '6379';
-            $client = new \Redis();
-            $client->connect($host, $port);
-            $client->auth($config['password'] ?? '');
-            while (true) {
-                $job = json_decode($client->RPOP('xiaosongshu_queue'), true);
-                $this->deal_job($job);
-                $res = $client->zRangeByScore('xiaosongshu_delay_queue', 0, time(), ['limit' => 1]);
-                if ($res) {
-                    $value = $res[0];
-                    $res1  = $client->zRem('xiaosongshu_delay_queue', $value);
-                    if ($res1) {
-                        $job = json_decode($value, true);
-                        $this->deal_job($job);
-                    }
-                }
-                if (empty($job) && empty($res)) {
-                    sleep(1);
-                }
-            }
-        } catch (\Exception $exception) {
-            global $_color_class;
-            echo $_color_class->error("\nredis连接失败,详情：{$exception->getMessage()}\n");
-            echo "\r\n";
-            echo $_color_class->info("系统将在3秒后重试\n");
-            sleep(3);
-            $this->_queue_xiaosongshu();
-        }
-    }
-
-    /**
-     * 队列逻辑处理
-     * @param $job
-     * @return void
-     */
-    public function deal_job($job = [])
-    {
-        if (!empty($job)) {
-            if (class_exists($job['class'])) {
-                $class = new $job['class']($job['param']);
-                $class->handle();
-            } else {
-                echo $job['class'] . '不存在，队列任务执行失败！';
-                echo "\r\n";
-            }
-        }
-    }
-
-    /** 执行定时器 */
-    public function xiaosongshu_timer()
-    {
-        /** 在这里添加定时任务 ，然后发送信号 */
-        foreach (config('timer') as $name => $value) {
-            if ($value['enable']) {
-                Timer::add($value['time'], $value['function'], [], $value['persist']);
-            }
-        }
-        /** 启动定时器 */
-        Timer::run();
-        while (true) {
-            /** 拦截闹钟信号*/
-            Timer::tick();
-            /** 切换CPU */
-            usleep(1000);
-        }
-    }
-
-    /** 执行队列 */
-    public function xiaosongshu_queue()
-    {
-        $enable = config('redis')['enable'];
-        if ($enable) {
-            global $_color_class;
-            echo $_color_class->info("测试redis队列,你可以按CTRL+C停止");
-            \cli_set_process_title("xiaosongshu_queue");
-            $this->_queue_xiaosongshu();
-        }
     }
 
     /** 关闭进程 */
@@ -502,7 +346,7 @@ class Xiaosongshu
                     /** 记录进程号 */
                     writePid();
                     /** 子进程 */
-                    $this->rabbitmqConsume();
+                    G(RabbitMqConsumer::class)->consume();
                 } elseif ($_small_son_id == 0) {
                     /** 主进程 */
                     $clear_task_id = \pcntl_fork();
@@ -511,7 +355,7 @@ class Xiaosongshu
                         cli_set_process_title("xiaosongshu_master");
                         writePid();
                         /** 在主进程里启动定时器 */
-                        $this->xiaosongshu_timer();
+                        G(TimerConsumer::class)->consume();
                     }
 
                 } else {
@@ -523,7 +367,7 @@ class Xiaosongshu
                 /** 在子进程里启动队列，并设置进程名称 */
                 cli_set_process_title("xiaosongshu_queue");
                 writePid();
-                $this->xiaosongshu_queue();
+                G(RedisQueueConsumer::class)->consume();
             }
         } else {
             /** 在子进程里启动队列，并设置进程名称 */
@@ -611,40 +455,6 @@ class Xiaosongshu
                             }
                         }
                     }
-                }
-            }
-        }
-    }
-
-    /**
-     * 处理rabbitmq的消费
-     * @return void
-     */
-    public function rabbitmqConsume()
-    {
-        $enable = config('rabbitmq')['enable'];
-        if ($enable) {
-            $config = config('rabbitmqProcess');
-            foreach ($config as $name => $value) {
-                if (isset($value['handler'])) {
-                    /** 创建一个子进程，在子进程里面执行消费 */
-                    $count = $value['count'] ?? 1;
-                    for ($i = 0; $i < $count; $i++) {
-                        $rabbitmq_pid = \pcntl_fork();
-                        if ($rabbitmq_pid > 0) {
-                            /** 记录进程号 */
-                            writePid();
-                            cli_set_process_title($name . '_' . ($i + 1));
-                            if (class_exists($value['handler'])) {
-                                /** 切换CPU */
-                                sleep(1);
-                                $className = $value['handler'];
-                                $queue     = new $className();
-                                $queue->consume();
-                            }
-                        }
-                    }
-
                 }
             }
         }
