@@ -76,9 +76,8 @@ class Xiaosongshu
         $_port = $server['port']??8000;
         $_server_num = $server['num']??2;
         $_listen    = "http://0.0.0.0:" . $_port;
-        /** 装载用户的自定义命令 */
-        $this->deal_command();
-
+        /** 安装用户的自定义命令 */
+        $this->installUserCommand();
         /** 加载表格类工具 */
         $_system_table = G(\Xiaosongshu\Table\Table::class);
         /** 加载字体类工具 */
@@ -90,39 +89,21 @@ class Xiaosongshu
             switch ($param[1]) {
                 case "start":
                     if (isset($param[2]) && ($param[2] == '-d')) {
-                        if ($_system) {
-                            $daemonize = true;
-                        } else {
-                            echo $_color_class->info("当前环境是windows,只能在控制台运行\r\n");
-                            echo "\r\n";
-                        }
+                        if ($_system) { $daemonize = true; }
+                        else { echo $_color_class->info("当前环境是windows,只能在控制台运行\r\n"); echo "\r\n"; }
                     }
-
-                    echo $_color_class->info("进程启动中...\r\n");
-                    echo "\r\n";
+                    echo $_color_class->info("进程启动中...\r\n"); echo "\r\n";
                     break;
                 case "stop":
-                    if ($_system) {
-                        $this->close();
-                        echo $_color_class->info("进程已关闭\r\n");
-                    } else {
-                        echo $_color_class->info("当前环境是windows,只能在控制台运行\r\n");
-
-                    }
+                    if ($_system) { $this->close(); echo $_color_class->info("进程已关闭\r\n"); }
+                    else { echo $_color_class->info("当前环境是windows,只能在控制台运行\r\n"); }
                     $flag = false;
                     break;
                 case "restart":
-                    if ($_system) {
-                        $this->close();
-                        $daemonize = true;
-                        echo $_color_class->info("进程重启中\r\n");
-                    } else {
-                        echo $_color_class->info("当前环境是windows,只能在控制台运行\r\n");
-                    }
+                    if ($_system) { $this->close(); $daemonize = true; echo $_color_class->info("进程重启中\r\n"); }
+                    else { echo $_color_class->info("当前环境是windows,只能在控制台运行\r\n"); }
                     break;
                 case "queue":
-                    echo $_color_class->info("测试redis队列,你可以按CTRL+C停止");
-                    \cli_set_process_title("xiaosongshu_queue");
                     $this->xiaosongshu_queue();
                     break;
                 case "make:command":
@@ -140,70 +121,14 @@ class Xiaosongshu
                 default:
                     /** 如果是自定义命令，则执行用户的逻辑 */
                     if (isset($_system_command[$param[1]])) {
-                        $arguments = $param;
-                        unset($arguments[0]);
-                        unset($arguments[1]);
-                        /** 这里可能用反射更好一点，懒得改了 */
-                        $specialCommandClass = (new $_system_command[$param[1]]());
-                        if (method_exists($specialCommandClass, 'configure')) {
-                            $specialCommandClass->configure();
-                        }
-                        /** 解析参数 */
-                        $needFillArguments = [];
-                        foreach ($arguments as $item) {
-                            /** option 参数 */
-                            if (strpos($item, '=')) {
-                                $value       = explode('=', $item);
-                                $option_name = str_replace('--', '', $value[0] ?? '');
-                                /** 丢弃help关键字 */
-                                if ($option_name == 'help') {
-                                    continue;
-                                }
-                                $option_value = $value[1] ?? null;
-                                /** 只有被定义了才被赋值，这里不可使用isset，因为如果默认值为null，则不能判断 */
-                                if (array_key_exists($option_name, $specialCommandClass->input['option'])) {
-                                    $specialCommandClass->input['option'][$option_name] = $option_value;
-                                }
-                            } else {
-                                /** argument参数,按顺序填充，如果类当中没有定义这个属性就丢弃 */
-                                $needFillArguments[] = $item;
-                            }
-                        }
-                        /** 赋值必填参数 */
-                        if ($needFillArguments) {
-                            foreach ($specialCommandClass->input['argument'] as $k => $v) {
-                                $specialCommandClass->input['argument'][$k] = array_shift($needFillArguments);
-                            }
-                        }
-
-                        /** 获取自定义命令的帮助 */
-                        if (in_array('-h', $param) || in_array('--help', $param)) {
-                            $head = array_shift($specialCommandClass->help);
-                            if (empty($specialCommandClass->help)) {
-                                echo $_color_class->info("暂无帮助信息") . "\r\n";
-                                exit;
-                            }
-                            $_system_table->table($head, $specialCommandClass->help);
-                            exit;
-                        }
-                        /** 执行命令行逻辑 */
-                        try {
-                            $specialCommandClass->handle();
-                        } catch (\Exception $exception) {
-                            /** 捕获异常，并打印错误 */
-
-                            echo $_color_class->error("报错：code:{$exception->getCode()},文件{$exception->getFile()}，第{$exception->getLine()}行发生错误，错误信息：{$exception->getMessage()}");
-                            echo "\r\n";
-                        }
-
-                        exit;
+                        /** 处理用户自定义命令 */
+                        $this->handleOwnCommand($param);
                     } else {
                         /** 查看是否是用户自定义的命令 */
                         echo $_color_class->info("未识别的命令\r\n");
                         echo "\r\n";
                         $flag = false;
                     }
-
             }
         } else {
             echo $_color_class->info("缺少必要参数，你可以输入start,start -d,stop,restart,queue\r\n");
@@ -213,6 +138,7 @@ class Xiaosongshu
             echo $_color_class->info("脚本退出运行\r\n");
             exit;
         }
+        /** 运行加锁 */
         $fd  = fopen($_lock_file, 'w');
         $res = flock($fd, LOCK_EX | LOCK_NB);
         if (!$res) {
@@ -227,11 +153,13 @@ class Xiaosongshu
         if ($daemonize) {
             $this->daemon();
         } else {
+            /** 只开启http服务 */
             $open = [
                 ['http', '正常', '1', $_listen]
             ];
             $_system_table->table(['名称', '状态', '进程数', '服务'], $open);
             echo $_color_class->info("进程启动完成,你可以按ctrl+c停止运行\r\n");
+            /** 开启http调试模式 */
             if ($_system && $_has_epoll) {
                 /** linux系统使用epoll模型 */
                 $this->epoll();
@@ -239,9 +167,73 @@ class Xiaosongshu
                 /** windows系统使用select模型 */
                 $this->select();
             }
+        }
+    }
 
+    /**
+     * 处理用户自定义命令
+     * @param $param
+     * @return void
+     */
+    public function handleOwnCommand($param){
+        global  $_system_command, $_system_table, $_color_class;
+        $arguments = $param;
+        unset($arguments[0]);
+        unset($arguments[1]);
+        /** 这里可能用反射更好一点，懒得改了 */
+        $specialCommandClass = (new $_system_command[$param[1]]());
+        if (method_exists($specialCommandClass, 'configure')) {
+            $specialCommandClass->configure();
+        }
+        /** 解析参数 */
+        $needFillArguments = [];
+        foreach ($arguments as $item) {
+            /** option 参数 */
+            if (strpos($item, '=')) {
+                $value       = explode('=', $item);
+                $option_name = str_replace('--', '', $value[0] ?? '');
+                /** 丢弃help关键字 */
+                if ($option_name == 'help') {
+                    continue;
+                }
+                $option_value = $value[1] ?? null;
+                /** 只有被定义了才被赋值，这里不可使用isset，因为如果默认值为null，则不能判断 */
+                if (array_key_exists($option_name, $specialCommandClass->input['option'])) {
+                    $specialCommandClass->input['option'][$option_name] = $option_value;
+                }
+            } else {
+                /** argument参数,按顺序填充，如果类当中没有定义这个属性就丢弃 */
+                $needFillArguments[] = $item;
+            }
+        }
+        /** 赋值必填参数 */
+        if ($needFillArguments) {
+            foreach ($specialCommandClass->input['argument'] as $k => $v) {
+                $specialCommandClass->input['argument'][$k] = array_shift($needFillArguments);
+            }
         }
 
+        /** 获取自定义命令的帮助 */
+        if (in_array('-h', $param) || in_array('--help', $param)) {
+            $head = array_shift($specialCommandClass->help);
+            if (empty($specialCommandClass->help)) {
+                echo $_color_class->info("暂无帮助信息") . "\r\n";
+                exit;
+            }
+            $_system_table->table($head, $specialCommandClass->help);
+            exit;
+        }
+        /** 执行命令行逻辑 */
+        try {
+            $specialCommandClass->handle();
+        } catch (\Exception $exception) {
+            /** 捕获异常，并打印错误 */
+
+            echo $_color_class->error("报错：code:{$exception->getCode()},文件{$exception->getFile()}，第{$exception->getLine()}行发生错误，错误信息：{$exception->getMessage()}");
+            echo "\r\n";
+        }
+
+        exit;
     }
 
     /**
@@ -254,7 +246,10 @@ class Xiaosongshu
         Route::loadRoute();
     }
 
-    /** 队列 */
+    /**
+     * redis队列
+     * @return void
+     */
     public function _queue_xiaosongshu()
     {
         try {
@@ -332,6 +327,9 @@ class Xiaosongshu
     {
         $enable = config('redis')['enable'];
         if ($enable) {
+            global $_color_class;
+            echo $_color_class->info("测试redis队列,你可以按CTRL+C停止");
+            \cli_set_process_title("xiaosongshu_queue");
             $this->_queue_xiaosongshu();
         }
     }
@@ -449,7 +447,7 @@ class Xiaosongshu
         $pid = \pcntl_fork();
         if (-1 === $pid) {
             /** 创建子进程失败 */
-            throw new Exception('Fork fail');
+            throw new \Exception('Fork fail');
         } elseif ($pid > 0) {
             /** 主进程退出 */
             $head    = ['名称', '状态', '进程数', '服务'];
@@ -467,7 +465,7 @@ class Xiaosongshu
                 $content[] = ['rabbitmq', '正常', $rabbitmq_count, $rabbitmq_config['port']];
             }
             /** 定时器 */
-            $content[] = ['timer', '正常', '--', '--'];
+            $content[] = ['定时任务', '正常', '1', 'timer'];
             /** redis队列 */
             $redis_config = config('redis');
             if ($redis_config['enable']) {
@@ -588,10 +586,10 @@ class Xiaosongshu
     }
 
     /**
-     * 处理自定义的命令
+     * 装载用户自定义的命令
      * @return void
      */
-    public function deal_command()
+    public function installUserCommand()
     {
         global $_system_command;
         /** 加载所有自定义的命令 */
