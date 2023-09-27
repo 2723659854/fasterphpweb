@@ -8,7 +8,7 @@ return [
         /** 是否提前连接MySQL */
         'preStart'=>false,
         /** mysql基本配置 */
-        'host'=>'192.168.4.85',
+        'host'=>'192.168.4.93',
         'username'=>'root',
         'passwd'=>'root',
         'dbname'=>'go_gin_chat',

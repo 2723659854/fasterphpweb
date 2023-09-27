@@ -33,7 +33,7 @@ class ElasticSearchClient
 
     /** 连接服务器 */
     private function connect(){
-        $nodes = config('elastic');
+        $nodes = config('elastic')['node']??[];
         if (empty($nodes)) $nodes = $this->nodes;
         self::$client = ClientBuilder::create()->setHosts($nodes)->build();
     }

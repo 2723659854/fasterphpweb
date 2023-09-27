@@ -35,7 +35,15 @@ class Route
             case Dispatcher::FOUND:
                 // 找到请求方法：调用方法即可
                 $handler = $routeInfo[1];
-                return G($handler[0])->{$handler[1]}($request);
+                $class = $handler[0];
+                $method = $handler[1];
+                if (!class_exists($class)){
+                    throw new \Exception("{$class}不存在");
+                }
+                if (!method_exists($class,$method)){
+                    throw new \Exception("{$class}::class->{$method}()方法不存在");
+                }
+                return G($class)->{$method}($request);
 
         }
     }

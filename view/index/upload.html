@@ -19,11 +19,9 @@
 </div>
 
 <h2>普通文件上传</h2>
-<form action="/index/index/store" method="post" enctype="multipart/form-data">
-    <input type="hidden" name="picture" value="" id="teacher" />文件<br>
-    <input type="text" name="teacher" value="" >文本<br>
-    <input type="file" name="one" value="">one文件<br>
-    <input type="file" name="two" value="">two文件<br>
+<form action="/base64_store" method="post" >
+    <input type="text" name="picture" value="" id="teacher" />文件<br>
+    <input type="text" name = "username" value="">
     <input type="submit">上传
 </form>
 

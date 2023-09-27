@@ -12,6 +12,6 @@ return [
     'demoForTwo'=>[
         /** 消费者名称 */
         'handler'=>Demo2::class,
-        'count'=>2
+        'count'=>1
     ]
 ];

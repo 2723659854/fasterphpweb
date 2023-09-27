@@ -23,7 +23,7 @@ class RabbitMqConsumer
                         if ($rabbitmq_pid > 0) {
                             /** 记录进程号 */
                             writePid();
-                            cli_set_process_title($name . '_' . ($i + 1));
+                            cli_set_process_title($name . '_' .rand(10000,99999));
                             if (class_exists($value['handler'])) {
                                 /** 切换CPU */
                                 sleep(1);

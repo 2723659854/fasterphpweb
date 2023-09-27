@@ -118,6 +118,7 @@ if (!function_exists('base64_file_upload')){
     /**
      * base64文件上传
      * @param string $picture 文件内容:base64加密后的文件
+     * @note 这个方法需要根据自己需求补全各种文件类型
      */
     function base64_file_upload(string $picture)
     {
@@ -131,6 +132,7 @@ if (!function_exists('base64_file_upload')){
                 $type = 'pdf';
                 break;
             case 'data:image/png;base64':
+            case 'data:image/jpeg;base64':
                 $type = 'png';
                 break;
             case 'data:text/plain;base64':

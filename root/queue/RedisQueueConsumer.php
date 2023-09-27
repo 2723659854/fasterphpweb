@@ -10,8 +10,6 @@ class RedisQueueConsumer
     {
         $enable = config('redis')['enable'];
         if ($enable) {
-            global $_color_class;
-            echo $_color_class->info("测试redis队列,你可以按CTRL+C停止");
             \cli_set_process_title("xiaosongshu_queue");
             $this->_queue_xiaosongshu();
         }

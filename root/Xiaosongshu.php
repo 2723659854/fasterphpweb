@@ -325,7 +325,7 @@ class Xiaosongshu
                 $content[] = ['redis_queue', '正常', 1, $redis_config['port']];
             }
             $_system_table->table($head, $content);
-            echo $_color_class->info($_listen . "\r\n");
+            //echo $_color_class->info($_listen . "\r\n");
             echo $_color_class->info("进程启动完成,你可以输入php start.php stop停止运行\r\n");
             exit(0);
         }

@@ -7,3 +7,4 @@ lock.txt
 /root/timerLog/*
 /sqlite
 /public/upload
+/public/images
