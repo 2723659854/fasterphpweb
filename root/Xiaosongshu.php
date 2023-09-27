@@ -4,6 +4,8 @@ namespace Root;
 
 use Root\Core\AppFactory;
 use Root\Core\Provider\IdentifyInterface;
+use Root\Io\Epoll;
+use Root\Io\Selector;
 use Root\Queue\RabbitMqConsumer;
 use Root\Queue\RedisQueueConsumer;
 use Root\Queue\TimerConsumer;
@@ -68,7 +70,7 @@ class Xiaosongshu
         require_once __DIR__ . '/function.php';
         /** 加载根文件，常驻内存文件，应用目录文件 */
         foreach (['root','process','app'] as $name){
-            foreach (scan_dir(app_path() .'/'.$name,true) as $val){
+            foreach (sortFiles(scan_dir(app_path() .'/'.$name,true)) as $val){
                 if (file_exists($val)&&(pathinfo($val)['extension'] == 'php')) {  require_once $val; }
             }
         }
@@ -89,7 +91,7 @@ class Xiaosongshu
         /** 加载字体类工具 */
         $_color_class = G(\Xiaosongshu\ColorWord\Transfer::class);
         /** 支持持linux */
-        if ($_system) { /** 创建定时器数据库 */ @G(Command::class)->makeTimeDatabase(); }
+        if ($_system) { /** 创建定时器数据库 */ @$this->makeTimeDatabase(); }
         /** 分析用户输入的命令，执行业务逻辑 */
         if (count($param) > 1) {
             try {
@@ -112,6 +114,11 @@ class Xiaosongshu
         } else {
             echo $_color_class->info("缺少必要参数，你可以输入start,start -d,stop,restart,queue\r\n");
         }
+    }
+
+    public function makeTimeDatabase()
+    {
+        TimerData::first();
     }
 
      /**
@@ -215,6 +222,19 @@ class Xiaosongshu
         $httpServer->start();
     }
 
+    /** 使用epoll异步io模型 */
+    public function epoll()
+    {
+        /** @var object $httpServer 将对象加载到内存 */
+        $httpServer = new Epoll();
+        /** @var callable onMessage 设置消息处理函数 */
+        $httpServer->onMessage = function ($socketAccept, $message) use ($httpServer) {
+            $this->onMessage($socketAccept, $message, $httpServer);
+        };
+        /** 启动服务 */
+        $httpServer->start();
+    }
+
     /**
      * 处理用户请求
      * @param $socketAccept
@@ -266,18 +286,7 @@ class Xiaosongshu
         unset($socketAccept);
     }
 
-    /** 使用epoll异步io模型 */
-    public function epoll()
-    {
-        /** @var object $httpServer 将对象加载到内存 */
-        $httpServer = new Epoll();
-        /** @var callable onMessage 设置消息处理函数 */
-        $httpServer->onMessage = function ($socketAccept, $message) use ($httpServer) {
-            $this->onMessage($socketAccept, $message, $httpServer);
-        };
-        /** 启动服务 */
-        $httpServer->start();
-    }
+
 
     /** 守护进程模式 */
     public function daemon()

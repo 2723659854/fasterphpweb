@@ -1,8 +1,8 @@
 <?php
 
-namespace Root;
+namespace Root\Lib;
 
-use Root\Session;
+use Root\Lib\Session;
 
 class FileSessionHandler
 {

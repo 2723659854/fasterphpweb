@@ -1,7 +1,7 @@
 <?php
 namespace App\Command;
 
-use Root\BaseCommand;
+use Root\Lib\BaseCommand;
 
 class DemoCommand  extends BaseCommand
 {

@@ -1,5 +1,5 @@
 <?php
-namespace Root;
+namespace Root\Lib;
 use \mysqli_sql_exception as MysqlException;
 
 /**

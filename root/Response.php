@@ -5,6 +5,7 @@ namespace Root;
 use Throwable;
 use function filemtime;
 use function gmdate;
+use Root\Lib\BaseResponse;
 class Response extends BaseResponse
 {
     /**

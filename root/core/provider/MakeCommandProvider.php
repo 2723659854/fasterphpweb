@@ -32,7 +32,7 @@ class MakeCommandProvider implements IdentifyInterface
 <?php
 namespace App\Command;
 
-use Root\BaseCommand;
+use Root\Lib\BaseCommand;
 /**
  * @purpose 用户自定义命令
  * @author administrator

@@ -1,6 +1,8 @@
 <?php
 
-namespace Root;
+namespace Root\Lib;
+
+use Root\Lib\Sqlite;
 /**
  * @purpose sqlite基类q
  * @note 请勿改动，除非你真的明白此文件的原理

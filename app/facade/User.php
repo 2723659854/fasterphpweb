@@ -1,7 +1,7 @@
 <?php
 namespace APP\Facade;
 
-use Root\Facade;
+use Root\Lib\Facade;
 
 //门面类，方便静态调用其他类
 class User extends Facade

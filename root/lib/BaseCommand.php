@@ -1,6 +1,6 @@
 <?php
 
-namespace Root;
+namespace Root\Lib;
 
 use Xiaosongshu\Colorword\Transfer;
 use Xiaosongshu\Progress\ProgressBar;

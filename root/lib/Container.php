@@ -1,6 +1,6 @@
 <?php
 
-namespace Root;
+namespace Root\Lib;
 /**
  * 容器类
  */

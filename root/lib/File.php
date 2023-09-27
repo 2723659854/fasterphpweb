@@ -1,6 +1,6 @@
 <?php
 
-namespace Root;
+namespace Root\Lib;
 
 use SplFileInfo;
 
@@ -10,7 +10,7 @@ class File extends SplFileInfo
     /**
      * Move.
      * @param string $destination
-     * @return \Root\File
+     * @return \Root\Lib\File
      */
     public function move(string $destination): File
     {

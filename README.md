@@ -474,7 +474,7 @@ G方法只会实例化一次对象，然后存储在内存中，下一次调用�
 <?php
 namespace App\Command;
 /** 引入命令行基类 */
-use Root\BaseCommand;
+use Root\Lib\BaseCommand;
 /** 创建自定义命令类 继承基类*/
 class DemoCommand  extends BaseCommand
 {

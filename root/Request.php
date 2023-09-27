@@ -1,9 +1,9 @@
 <?php
 namespace Root;
-use Root\UploadFile;
+use Root\Lib\UploadFile;
 use Root\Route;
 
-class Request extends \Root\BaseRequest
+class Request extends \Root\Lib\BaseRequest
 {
     /**
      * @var string

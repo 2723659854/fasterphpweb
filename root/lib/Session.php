@@ -1,8 +1,6 @@
 <?php
 
-namespace Root;
-
-
+namespace Root\Lib;
 
 class Session
 {

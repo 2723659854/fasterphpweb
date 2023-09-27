@@ -1,8 +1,8 @@
 <?php
 
-namespace Root;
+namespace Root\Lib;
 
-use Root\File;
+use Root\Lib\File;
 use function pathinfo;
 
 /**

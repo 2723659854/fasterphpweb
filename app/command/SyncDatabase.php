@@ -2,7 +2,7 @@
 namespace App\Command;
 
 use App\Service\DemoService;
-use Root\BaseCommand;
+use Root\Lib\BaseCommand;
 /**
  * @purpose 用户自定义命令
  * @author administrator

@@ -2,7 +2,7 @@
 
 namespace App\SqliteModel;
 
-use Root\SqliteBaseModel;
+use Root\Lib\SqliteBaseModel;
 
 class Demo extends SqliteBaseModel
 {

@@ -3,7 +3,7 @@
 namespace App\Command;
 
 use App\SqliteModel\Talk;
-use Root\BaseCommand;
+use Root\Lib\BaseCommand;
 use Xiaosongshu\Table\Table;
 
 /**

@@ -2,7 +2,7 @@
 namespace App\Command;
 
 use App\Phone;
-use Root\BaseCommand;
+use Root\Lib\BaseCommand;
 use Root\Cache;
 
 /**

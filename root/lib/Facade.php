@@ -1,12 +1,16 @@
 <?php
-namespace Root;
+namespace Root\Lib;
 use RuntimeException;
 
+/**
+ * @purpose 门面类
+ */
 abstract class Facade
 {
     protected static $instances = [];
 
     /**
+     * 获取对象名称
      * @return string
      */
     protected static function getAccessor()
@@ -23,7 +27,6 @@ abstract class Facade
     {
         $name = static::getAccessor();
         if (!isset(static::$instances[$name])) {
-
             static::$instances[$name] = new $name();
         }
         return static::$instances[$name];

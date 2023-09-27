@@ -1,7 +1,7 @@
 <?php
 namespace App\Command;
 use phpseclib3\Net\SSH2;
-use Root\BaseCommand;
+use Root\Lib\BaseCommand;
 class Test  extends BaseCommand
 {
 

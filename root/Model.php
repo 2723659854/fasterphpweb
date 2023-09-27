@@ -1,6 +1,6 @@
 <?php
 namespace Root;
-
+use Root\Lib\BaseModel;
 /**
  * 模型层
  */

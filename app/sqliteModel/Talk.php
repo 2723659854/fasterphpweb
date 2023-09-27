@@ -2,7 +2,7 @@
 
 namespace App\SqliteModel;
 
-use Root\SqliteBaseModel;
+use Root\Lib\SqliteBaseModel;
 
 /**
  * @purpose sqlite数据库

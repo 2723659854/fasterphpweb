@@ -180,7 +180,7 @@ if (!function_exists('prepareMysqlAndRedis')){
             try {
                 $startMysql = config('database')['mysql']['preStart'] ?? false;
                 if ($startMysql) {
-                    new \Root\BaseModel();
+                    new \Root\Lib\BaseModel();
                 }
                 $startRedis = config('redis')['preStart'] ?? false;
                 if ($startRedis) {
@@ -203,7 +203,7 @@ if (!function_exists('G')){
      * @note 不会重复new对象，且一直保存在内存中，不会销毁
      */
     function G(string $name){
-        return \Root\Container::get($name);
+        return \Root\Lib\Container::get($name);
     }
 }
 
@@ -215,7 +215,7 @@ if (!function_exists('M')){
      * @note 每一次返回一个新的对象，用完自动销毁
      */
     function M(string $name){
-        return \Root\Container::make($name);
+        return \Root\Lib\Container::make($name);
     }
 }
 
@@ -281,6 +281,28 @@ if (!function_exists('no_declear')){
             }
         }
         return response($content,200,['Content-Type'=>'text/html; charset=UTF-8']);
+    }
+}
+
+if (!function_exists('sortFiles')){
+    /**
+     * 按文件深度倒序排列文件
+     * @param array $files
+     * @return array
+     */
+    function sortFiles(array $files):array{
+        $_files = [];
+        foreach ($files as $v){
+            $length = count(explode('/',$v));
+            $_files[$length][]=$v;
+        }
+        ksort($_files);
+        $_files = array_reverse($_files);
+        $backFiles=[];
+        foreach ($_files as $value){
+            $backFiles = array_merge($backFiles,$value);
+        }
+        return $backFiles;
     }
 }
 

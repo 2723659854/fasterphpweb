@@ -1,6 +1,6 @@
 <?php
 
-namespace Root;
+namespace Root\Lib;
 /**
  *
  * 工具类，使用该类来实现自动依赖注入。

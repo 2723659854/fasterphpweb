@@ -63,7 +63,7 @@ class MakeSqliteProvider implements IdentifyInterface
 
 namespace $nameSpace;
 
-use Root\SqliteBaseModel;
+use Root\Lib\SqliteBaseModel;
 /**
  * @purpose sqlite 模型
  * @author administrator
