@@ -45,63 +45,46 @@ class Xiaosongshu
      */
     public function start_server($param)
     {
+        /** 环境监测 */
         $this->check_env();
+        /** 是否守护模式 */
         $daemonize = false;
+        /** 是否运行 */
         $flag      = true;
         global $_pid_file, $_port, $_listen, $_server_num, $_system, $_lock_file, $_has_epoll, $_system_command, $_system_table, $_color_class;
+        /** 进程管理文件 */
         $_pid_file  = __DIR__ . '/my_pid.txt';
+        /** 状态管理文件 */
         $_lock_file = __DIR__ . '/lock.txt';
-        /** 加载助手函数 */
-        require_once __DIR__ . '/function.php';
         /** 加载必须的启动文件 */
         require_once dirname(__DIR__) . '/vendor/autoload.php';
-        /** 加载所有的必须的文件 */
-        foreach (scan_dir(app_path() . '/root', true) as $k) {
-            if (pathinfo($k)['extension'] == 'php') require_once $k;
-        }
-        /** 加载process目录下的所有文件 */
-        foreach (scan_dir(app_path() . '/process', true) as $k) {
-            if (pathinfo($k)['extension'] == 'php') require_once $k;
-        }
-        /** 装载App目录下的所有文件 */
-        foreach (scan_dir(app_path() . '/app', true) as $key => $val) {
-            if (file_exists($val)) {
-                require_once $val;
+        /** 加载助手函数 */
+        require_once __DIR__ . '/function.php';
+        /** 加载根文件，常驻内存文件，应用目录文件 */
+        foreach (['root','process','app'] as $name){
+            foreach (scan_dir(app_path() .'/'.$name,true) as $val){
+                if (file_exists($val)&&(pathinfo($val)['extension'] == 'php')) {  require_once $val; }
             }
         }
-        /** @var bool $_has_epoll 默认不支持epoll模型 */
-        $_has_epoll = false;
-        /** @var bool $_system 是否是linux系统 */
-        $_system = true;
-        if (\DIRECTORY_SEPARATOR === '\\') {
-            $_system = false;
-        } else {
-            $_has_epoll = (new \EventBase())->getMethod() == 'epoll';
-        }
+
+        /** 是否linux系统 */
+        $_system = !(\DIRECTORY_SEPARATOR === '\\');
+        /** 是否有epoll模型 */
+        $_has_epoll = (new \EventBase())->getMethod() == 'epoll';
+        /** 读取服务器配置 */
         $server     = config('server');
-        if (isset($server['port']) && $server['port']) {
-            $_port = intval($server['port']);
-        } else {
-            $_port = 8000;
-        }
-        if (isset($server['num']) && $server['num']) {
-            $_server_num = intval($server['num']);
-        } else {
-            $_server_num = 2;
-        }
+        $_port = $server['port']??8000;
+        $_server_num = $server['num']??2;
         $_listen    = "http://0.0.0.0:" . $_port;
         /** 装载用户的自定义命令 */
         $this->deal_command();
 
         /** 加载表格类工具 */
-        $_system_table = new \Xiaosongshu\Table\Table();
+        $_system_table = G(\Xiaosongshu\Table\Table::class);
         /** 加载字体类工具 */
-        $_color_class = new \Xiaosongshu\ColorWord\Transfer();
+        $_color_class = G(\Xiaosongshu\ColorWord\Transfer::class);
         /** 支持持linux */
-        if ($_system) {
-            /** 创建定时器数据库 */
-            @G(Command::class)->makeTimeDatabase();
-        }
+        if ($_system) { /** 创建定时器数据库 */ @G(Command::class)->makeTimeDatabase(); }
         /** 分析用户输入的命令，执行业务逻辑 */
         if (count($param) > 1) {
             switch ($param[1]) {
