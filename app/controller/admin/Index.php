@@ -16,6 +16,11 @@ use Root\Response;
 class Index
 {
 
+    /**
+     * 设置头部
+     * @param Request $request
+     * @return Response
+     */
     public function index(Request $request)
     {
         $data = $request->all();
@@ -26,7 +31,7 @@ class Index
         //return \response(['status'=>200,'msg'=>'ok','data'=>$data],200,['Content-Type'=>'application/json']);
         //return \response(['status'=>200,'msg'=>'ok','data'=>$data])->header('Content-Type','application/json');
         //return \response(['status'=>200,'msg'=>'ok','data'=>$data])->withHeader('Content-Type','application/json');
-        return \response(['status'=>200,'msg'=>'ok','data'=>$data])->withHeaders(['Content-Type'=>'application/json'])->withBody('som');
+        return \response(['status'=>200,'msg'=>'ok','data'=>$data])->withHeaders(['Content-Type'=>'application/json']);
 
     }
 
@@ -65,6 +70,33 @@ class Index
         $client = new ESClient();
         /** 查询节点的所有数据 */
         return $client->all('v2_es_user3','_doc');
+    }
+
+    /**
+     * 上传图片
+     * @param Request $request
+     * @return array|false|string|string[]
+     * @throws \Exception
+     */
+    public function upload(Request $request){
+        return view('/index/file');
+    }
+
+    /**
+     * 保存图片
+     * @param Request $request
+     * @return Response
+     */
+    public function store(Request $request){
+
+
+        $file = $request->file('file');
+        $message = 'no file';
+        if ($file&&$file->isValid()){
+            $file->move(public_path().'/upload/'.time().$file->getUploadName());
+            $message = $file->getUploadName();
+        }
+        return \response(['data'=>$request->all(),'file'=>$message]);
     }
 
 }

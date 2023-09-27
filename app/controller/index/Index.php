@@ -61,7 +61,7 @@ class Index
     public function database(Request $request)
     {
         /** 获取var参数 */
-        $var = $request->param('var');
+        $var = $request->input('var');
         /** 调用数据库 */
         $user = new User();
         $data = $user->where('username', '=', 'test')->first();
@@ -112,13 +112,13 @@ class Index
             fclose($fp1);
         }
         //base64文件上传
-        $picture = $request->param('picture');
+        $picture = $request->input('picture');
         if ($picture && (strlen($picture) > 12)) {
             $image = base64_file_upload($picture);
         } else {
             $image = '';
         }
-        $teacher = $request->param('teacher');
+        $teacher = $request->input('teacher');
         return view('index/say', ['picture' => $image, 'teacher' => $teacher, 'file' => json_encode($request->file('file'))]);
     }
 
@@ -221,8 +221,8 @@ class Index
     /** 下载文件到浏览器 */
     public function down()
     {
-        /** 语法：download_file(文件路径) */
-        return download_file(public_path().'/head.png');
+        /** 语法：download(文件路径) */
+        return response()->download(public_path().'/head.png');
     }
 
     /**

@@ -402,6 +402,7 @@ class Xiaosongshu
         $request = new Request($message);
         $method  = $request->method();
         $uri     = $request->path();
+
         $info           = explode('.', $request->path());
         $file_extension = end($info);
         /**  说明是资源类请求，直接返回资源 */
@@ -423,8 +424,14 @@ class Xiaosongshu
             }
         }else{
             /** 动态路由 */
-            fwrite($socketAccept,Route::dispatch($method, $uri, $request));
-            fclose($socketAccept);
+            try {
+                fwrite($socketAccept,Route::dispatch($method, $uri, $request));
+                fclose($socketAccept);
+            }catch (\Exception|\RuntimeException $exception){
+                /** 如果出现了异常 */
+                fwrite($socketAccept,response($exception->getMessage(),400));
+                fclose($socketAccept);
+            }
         }
         /** 清理select连接 */
         unset($httpServer->allSocket[(int)$socketAccept]);

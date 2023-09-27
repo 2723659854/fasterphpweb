@@ -6,3 +6,4 @@ lock.txt
 /composer.lock
 /root/timerLog/*
 /sqlite
+/public/upload
