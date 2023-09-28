@@ -5,8 +5,6 @@ namespace Root;
 use FastRoute\Dispatcher;
 use FastRoute\RouteCollector;
 use Root\Lib\MiddlewareInterface;
-use Root\Middleware\MiddlewareA;
-use Root\Middleware\MiddlewareB;
 use function FastRoute\simpleDispatcher;
 
 /**
@@ -131,14 +129,18 @@ class Route
 
     /**
      * 添加路由
-     * @param string $method
+     * @param array $methods
      * @param string $url
      * @param array $middleware
      * @return void
      */
-    public static function add(string $method, string $url,array $callback, array $middleware)
+    public static function add(array $methods, string $url,array $callback, array $middleware= [])
     {
-        self::$urls = array_merge(self::$urls,[$method,$url,$callback,$middleware]);
+        $params = [];
+        foreach ($methods as $method){
+            $params[]=[$method,$url,$callback,$middleware];
+        }
+        self::$urls = array_merge(self::$urls,$params);
         self::loadRoute();
     }
 }

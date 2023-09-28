@@ -1,5 +1,6 @@
 <?php
 namespace Root\Core\Provider;
+use Root\Annotation\AnnotationRoute;
 use Root\Xiaosongshu;
 
 /**
@@ -25,6 +26,7 @@ class StartProvider implements IdentifyInterface
         echo $_color_class->info("进程启动中...\r\n");
         /** 加载路由 */
         G(\Root\Route::class)->loadRoute();
+        G(AnnotationRoute::class)->loadRoute();
         if (!empty($daemonize)){
             $app->daemon();
         }else{

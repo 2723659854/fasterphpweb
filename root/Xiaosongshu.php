@@ -116,6 +116,10 @@ class Xiaosongshu
         }
     }
 
+    /**
+     * 创建表
+     * @return void
+     */
     public function makeTimeDatabase()
     {
         TimerData::first();
@@ -370,9 +374,6 @@ class Xiaosongshu
                     /** 主进程 */
                     $clear_task_id = \pcntl_fork();
                     if ($clear_task_id) {
-                        /** 如果是主进程，则设置进程名称为master，管理定时器 */
-                        cli_set_process_title("xiaosongshu_master");
-                        writePid();
                         /** 在主进程里启动定时器 */
                         G(TimerConsumer::class)->consume();
                     }

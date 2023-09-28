@@ -32,6 +32,6 @@ return [
     /** 测试es搜索 */
     ['get', '/es', [\App\Controller\Index\Index::class, 'elasticsearch']],
     /** 测试中间件 */
-    ['GET','/middle',[\App\Controller\Index\Index::class,'middle'],[\Root\Middleware\MiddlewareA::class,\Root\Middleware\MiddlewareB::class]]
+    ['GET','/middle',[\App\Controller\Index\Index::class,'middle'],[\App\Middleware\MiddlewareA::class,\App\Middleware\MiddlewareB::class]]
 
 ];

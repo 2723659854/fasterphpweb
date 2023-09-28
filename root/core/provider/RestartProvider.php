@@ -2,6 +2,7 @@
 
 namespace Root\Core\Provider;
 
+use Root\Annotation\AnnotationRoute;
 use Root\Xiaosongshu;
 
 /**
@@ -23,6 +24,7 @@ class RestartProvider implements IdentifyInterface
         }
         /** 加载路由 */
         G(\Root\Route::class)->loadRoute();
+        G(AnnotationRoute::class)->loadRoute();
         $app->daemon();
     }
 

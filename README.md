@@ -134,8 +134,7 @@ class Index
         $name     = $request->post('name');
         $all = $request->all();
         /** 调用数据库 */
-        $user     = new User();
-        $data     = $user->where('username', '=', 'test')->first();
+        $data     = User::where('username', '=', 'test')->first();
         /** 读取配置 */
         $app_name = config('app')['app_name'];
         /** 模板渲染 参数传递 */
@@ -334,7 +333,119 @@ return [
         return ['code' => 200, 'msg' => 'ok','普通的调用'=>(new Cache())->get('fuck'),'静态调用'=>Cache::get('happy')];
     }
 ```
+### 路由
+#### 配置文件
+```php 
+# config/route.php
+<?php
+return [
 
+    /** 首页 */
+    ['GET', '/', [App\Controller\Index\Index::class, 'index']],
+    /** 路由测试 */
+    ['GET', '/index/demo/index', [\App\Controller\Admin\Index::class, 'index']],
+    /** 上传文件 */
+    ['GET', '/upload', [\App\Controller\Admin\Index::class, 'upload']],
+    /** 保存文件 */
+    ['post', '/store', [\App\Controller\Admin\Index::class, 'store']],
+    /** 缓存存取 */
+    ['get', '/cache', [\App\Controller\Index\Index::class, 'cache']],
+    /** 返回json */
+    ['get', '/json', [\App\Controller\Index\Index::class, 'json']],
+    /** 数据库 */
+    ['get', '/database', [\App\Controller\Index\Index::class, 'database']],
+    /** 数据库写入 */
+    ['get', '/insert', [\App\Controller\Index\Index::class, 'insert']],
+    /** base64 文件上传 */
+    ['get', '/base64', [\App\Controller\Index\Index::class, 'upload']],
+    /** base64 文件保存 */
+    ['post', '/base64_store', [\App\Controller\Index\Index::class, 'store']],
+    /** 测试redis队列 */
+    ['get', '/queue', [\App\Controller\Index\Index::class, 'queue']],
+    /** 测试rabbitmq队列 */
+    ['get', '/rabbitmq', [\App\Controller\Index\Index::class, 'rabbitmq']],
+    /** 文件下载 */
+    ['get', '/download', [\App\Controller\Index\Index::class, 'download']],
+    /** 测试门面类facade */
+    ['get', '/facade', [\App\Controller\Index\Index::class, 'facade']],
+    /** 测试es搜索 */
+    ['get', '/es', [\App\Controller\Index\Index::class, 'elasticsearch']],
+    /** 测试中间件 */
+    ['GET','/middle',[\App\Controller\Index\Index::class,'middle'],[\App\Middleware\MiddlewareA::class,\App\Middleware\MiddlewareB::class]]
+
+];
+```
+#### 注解路由
+```php 
+   /**
+     * 测试注解路由
+     * @param Request $request
+     * @return Response
+     */
+    #[RequestMapping(methods:'get',path:'/login')]
+    public function login(Request $request):Response{
+        return  \response(['I am a RequestMapping !']);
+    }
+
+    /**
+     * 测试注解路由和中间件
+     * @param Request $request
+     * @return Response
+     */
+    #[RequestMapping(methods:'get,post',path:'/chat'),Middlewares(MiddlewareA::class)]
+    public function chat(Request $request):Response{
+
+        return \response('我是用的注解路由');
+    }
+```
+
+### 中间件
+#### 创建中间件
+```bash 
+php songshu make:middleware Auth
+php start.php make:middleware Auth
+```
+中间件内容如下：
+```php 
+<?php
+namespace App\Middleware;
+use Root\Lib\MiddlewareInterface;
+use Root\Request;
+use Root\Response;
+
+/**
+ * @purpose 中间件
+ * @author administrator
+ * @time 2023-09-28 05:51:21
+ */
+class Auth implements MiddlewareInterface
+{
+    public function process(Request $request, callable $next):Response
+    {
+        //todo 这里处理你的逻辑
+        return $next($request);
+    }
+}
+```
+####使用中间件
+1,路由
+```php 
+/** 测试中间件 */
+['GET','/middle',[\App\Controller\Index\Index::class,'middle'],[\App\Middleware\MiddlewareA::class,\App\Middleware\MiddlewareB::class]]
+```
+2,注解
+```php 
+/**
+     * 测试注解路由和中间件
+     * @param Request $request
+     * @return Response
+     */
+    #[RequestMapping(methods:'get,post',path:'/chat'),Middlewares(MiddlewareA::class,Auth::class)]
+    public function chat(Request $request):Response{
+
+        return \response('我是用的注解路由');
+    }
+```
 ###定时器
 只能在linux系统中使用定时器，或者使用docker环境。
 #### 添加定时任务

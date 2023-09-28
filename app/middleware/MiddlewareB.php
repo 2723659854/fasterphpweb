@@ -1,5 +1,5 @@
 <?php
-namespace Root\Middleware;
+namespace App\Middleware;
 use Root\Request;
 use Root\Response;
 use Root\Lib\MiddlewareInterface;

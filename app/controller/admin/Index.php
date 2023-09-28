@@ -8,6 +8,7 @@ namespace App\Controller\Admin;
 
 use APP\Facade\Cache;
 use APP\Facade\User;
+use Root\Annotation\Mapping\RequestMapping;
 use Root\ESClient;
 use Root\Request;
 use Root\Response;
@@ -52,6 +53,11 @@ class Index
         return 'use facade/cache,and the cache data is :' . Cache::get('hot');
     }
 
+    /**
+     * 手动添加定时器
+     * @return int
+     */
+    #[RequestMapping(methods:'get',path:'/timer')]
     public function timer()
     {
         /** 添加定时任务，周期，回调函数，参数，是否循环执行 */

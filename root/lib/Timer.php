@@ -3,6 +3,7 @@
 namespace Root\Lib;
 
 use SuperClosure\Serializer;
+use Root\TimerData;
 
 /**
  *定时器

@@ -2,14 +2,19 @@
 
 namespace App\Controller\Index;
 
+use App\Middleware\Auth;
 use App\Model\User;
 use App\Rabbitmq\Demo2;
+use Root\Annotation\Mapping\Middlewares;
+use Root\Annotation\Mapping\RequestMapping;
 use Root\ESClient;
+use App\Middleware\MiddlewareA;
 use Root\Request;
 use Root\Cache;
 use App\Queue\Test;
 use App\Rabbitmq\Demo;
-use Root\Route;
+use Root\Response;
+
 
 class Index
 {
@@ -149,5 +154,26 @@ class Index
      */
     public function middle(Request $request){
         return response("我是中间件");
+    }
+
+    /**
+     * 测试注解路由
+     * @param Request $request
+     * @return Response
+     */
+    #[RequestMapping(methods:'get',path:'/login')]
+    public function login(Request $request):Response{
+        return  \response(['I am a RequestMapping !']);
+    }
+
+    /**
+     * 测试注解路由和中间件
+     * @param Request $request
+     * @return Response
+     */
+    #[RequestMapping(methods:'get,post',path:'/chat'),Middlewares(MiddlewareA::class,Auth::class)]
+    public function chat(Request $request):Response{
+
+        return \response('我是用的注解路由');
     }
 }

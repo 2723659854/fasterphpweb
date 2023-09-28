@@ -2,6 +2,7 @@
 namespace Root\Core;
 use Root\Core\Provider\MakeCommandProvider;
 use Root\Core\Provider\MakeControllerProvider;
+use Root\Core\Provider\MakeMiddlewareProvider;
 use Root\Core\Provider\MakeModelProvider;
 use Root\Core\Provider\MakeSqliteProvider;
 use Root\Core\Provider\QueueProvider;
@@ -12,9 +13,8 @@ use Root\Core\Provider\StopProvider;
 
 class AppFactory
 {
-    /** @var array|string[] */
+    /** @var array|string[] 注册系统命令 */
     protected array $alias = [
-        /** 腾讯邮箱 */
         'start' => StartProvider::class,
         'stop'=>StopProvider::class,
         'restart'=>RestartProvider::class,
@@ -22,8 +22,8 @@ class AppFactory
         'make:command'=>MakeCommandProvider::class,
         'make:model'=>MakeModelProvider::class,
         'make:controller'=>MakeControllerProvider::class,
-        'make:sqlite'=>MakeSqliteProvider::class
-
+        'make:sqlite'=>MakeSqliteProvider::class,
+        'make:middleware'=>MakeMiddlewareProvider::class
     ];
 
     /** @var array */
