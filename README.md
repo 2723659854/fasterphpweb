@@ -5,14 +5,17 @@
 <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;本框架尚处于开发测试阶段，请不要用于正式商用业务。</p>
 
 ### 项目安装
+
 ```bash
 composer create-project xiaosongshu/fasterphpweb
 ```
 ###启动项目
+
 ```bash 
 php start.php start  或者 php songshu start 
 ```
 ### 目录结构
+
 ~~~
 |-- app
     |-- controller               <控制层>
@@ -64,23 +67,27 @@ php start.php start  或者 php songshu start
 16，假设你使用docker配置，首先要安装docker，然后执行命令：docker-compose up -d 启动环境。注意修改
 docker-compose.yaml 里面的目录映射，端口映射。<br>
 
-
-
 ### 注意
+
 1，原则上本项目只依赖socket，mysqli，redis扩展和pcntl系列函数，如需要第三方扩展，请自行安装。<br>
 2，因为是常驻内存，所以每一次修改了php代码后需要重启项目。<br>
 3，start.php为项目启动源码，root目录为运行源码，除非你已经完全明白代码意图，否则不要轻易修改代码。<br>
 4，所有的控制器方法都必须返回一个字符串，否则连接一直占用进程，超时后系统自动断开连接。<br>
 5，业务代码不要使用sleep,exit这两个方法。否则导致整个进程阻塞或者中断。<br>
+
 ## 联系开发者
+
 2723659854@qq.com<br>
+
 ## 项目地址
+
 https://github.com/2723659854/fasterphpweb
 
 
 ### 项目文档
 
 #### 项目基本配置
+
 ```php 
 # 请在config/server.php 当中配置项目的端口和进程数
 <?php
@@ -93,6 +100,7 @@ return [
 ```
 
 #### 控制层
+
 ```php
 # 注意命名空间
 /** 这里表示admin模块 */
@@ -142,6 +150,7 @@ class Index
     }
 ```
 #### 获取get参数
+
 ```php 
 /** 获取所有get参数 */
 $data = $request->get();
@@ -149,6 +158,7 @@ $data = $request->get();
 $name = $request->get('name','tom');
 ```
 #### 获取post参数
+
 ```php 
 /** 获取所有post请求参数 */
 $data = $request->post();
@@ -156,14 +166,17 @@ $data = $request->post();
 $name = $request->post('name','tom');
 ```
 #### 获取所有请求参数
+
 ```php 
 $data = $request->all();
 ```
 ####获取原始请求包体
+
 ```php 
 $post = $request->rawBody();
 ```
 #### 获取header头部信息
+
 ```php 
 /** 获取所有的header */
 $request->header();
@@ -171,10 +184,12 @@ $request->header();
 $request->header('host');
 ```
 ####获取原始querystring
+
 ```php 
 $request->queryString()
 ```
 #### 获取cookie
+
 ```php 
 /** 获取cookie */
 $request->cookie('username');
@@ -185,24 +200,29 @@ $request->cookie('username', 'zhangsan');
 ### 响应
 
 ####设置cookie
+
 ```php 
 return \response()->cookie('zhangsan','tom');
 ```
 ####返回视图
+
 ```php 
 return view('index/database', ['var' => $var, 'str' => date('Y-m-d H:i:s'), 'user' => json_encode($data), 'app_name' => $app_name]);
 ```
 #### 返回数据
+
 ```php
 return response(['status'=>200,'msg'=>'ok','data'=>$data]);
 /** 会覆盖response里面的数据 */
 return response()->withBody('返回的数据');
 ```
 #### 重定向
+
 ```php 
  return redirect('/admin/user/list');
 ```
 ####下载文件
+
 ```php 
  /** 直接下载 */
   return response()->file(public_path().'/favicon.ico');
@@ -210,19 +230,23 @@ return response()->withBody('返回的数据');
  return response()->download(public_path().'/favicon.ico','demo.ico');   
 ```
 ####设置响应头
+
 ```php 
  return \response(['status'=>200,'msg'=>'ok','data'=>$data],200,['Content-Type'=>'application/json']);
  return \response(['status'=>200,'msg'=>'ok','data'=>$data])->header('Content-Type','application/json');
  return \response(['status'=>200,'msg'=>'ok','data'=>$data])->withHeader('Content-Type','application/json');
  return \response(['status'=>200,'msg'=>'ok','data'=>$data])->withHeaders(['Content-Type'=>'application/json']);
 ```
+
 #### 设置响应状态码
+
 ```php 
 return response([],200);
 return response([])->withStatus(200);
 ```
 
 ### 模板渲染
+
 <br>默认支持html文件，变量使用花括号表示{}，暂不支持for,foreach,if等复杂模板运算 <br>
 ```html
 <!DOCTYPE html>
@@ -248,7 +272,9 @@ return response([])->withStatus(200);
 #### 模型层
 
 #### 默认使用mysql数据库
+
 #### 数据库配置
+
 ```php 
 # 在config/database.php 当中配置
 <?php
@@ -268,7 +294,9 @@ return [
 ];
 
 ```
+
 #### 模型的定义
+
 ```php
 <?php
 /** 命名空间 */
@@ -303,8 +331,11 @@ class Book extends Model
 ```
 
 ### 缓存的使用
+
 #### 项目默认支持redis缓存
+
 #### 缓存的配置
+
 ```php 
 # 请在config/redis.php 当中配置
 <?php
@@ -333,8 +364,11 @@ return [
         return ['code' => 200, 'msg' => 'ok','普通的调用'=>(new Cache())->get('fuck'),'静态调用'=>Cache::get('happy')];
     }
 ```
+
 ### 路由
+
 #### 配置文件
+
 ```php 
 # config/route.php
 <?php
@@ -374,8 +408,11 @@ return [
     ['GET','/middle',[\App\Controller\Index\Index::class,'middle'],[\App\Middleware\MiddlewareA::class,\App\Middleware\MiddlewareB::class]]
 
 ];
+
 ```
+
 #### 注解路由
+
 ```php 
    /**
      * 测试注解路由
@@ -400,7 +437,9 @@ return [
 ```
 
 ### 中间件
+
 #### 创建中间件
+
 ```bash 
 php songshu make:middleware Auth
 php start.php make:middleware Auth
@@ -427,7 +466,9 @@ class Auth implements MiddlewareInterface
     }
 }
 ```
+
 ####使用中间件
+
 1,路由
 ```php 
 /** 测试中间件 */
@@ -446,8 +487,11 @@ class Auth implements MiddlewareInterface
         return \response('我是用的注解路由');
     }
 ```
+
 ###定时器
+
 只能在linux系统中使用定时器，或者使用docker环境。
+
 #### 添加定时任务
 ```php 
 //第一种方式
@@ -505,6 +549,7 @@ return [
 ### rabbitmq消息队列
 
 #### rabbitmq连接配置
+
 ```php 
 <?php
 return [
@@ -517,6 +562,7 @@ return [
     'pass'=>'guest',
 ];
 ```
+
 #### 定义消费者类
 
 ```php 
@@ -542,6 +588,7 @@ class Demo extends RabbitMQBase
     }
 }
 ```
+
 #### 开启消费者任务
 
 ```php 
@@ -555,6 +602,7 @@ return [
     ],
 ];
 ```
+
 ### elasticsearch 搜索
 ```php 
 use root\ESClient;
@@ -569,6 +617,7 @@ public function search()
 }
 # 其他用法参照 root\ESClient::class的源码，
 ```
+
 #### 加入容器
 解放双手，不需要每一次都去实例化需要调用的对象。使用容器简单方便。<br>
 ```php 
@@ -580,6 +629,7 @@ M(App\Service\DemoService::class)->talk(1);
 G方法和M方法的区别是：<br>
 G方法只会实例化一次对象，然后存储在内存中，下一次调用直接从内存中获取。<br>
 而M方法每一次都是重新实例化一个新的对象。<br>
+
 #### 自定义命令
 ```php 
 <?php
@@ -600,10 +650,7 @@ class DemoCommand  extends BaseCommand
     }
 }
 ```
-#### 命令行工具
-创建命令行 php start.php make:command Test  <br>
-创建控制器 php start.php make:controller a/b/c <br>
-创建模型 php start.php make:model index/user <br>
+
 
 #### sqlite数据库支持
 创建模型
@@ -634,4 +681,10 @@ $res = Talk::where([['id', '>', 0]]) ->orderBy(['created'=>'asc']) ->page(1, 10)
 ?>
 ```
 
+#### 命令行工具
+创建自定义命令行： php start.php make:command Test  <br>
+创建控制器： php start.php make:controller a/b/c <br>
+创建mysql模型: php start.php make:model index/user <br>
+创建sqlite模型: php start.php make:sqlite Demo<br>
+创建中间件: php start.php make:middleware Auth<br>
 
