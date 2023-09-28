@@ -680,11 +680,153 @@ $res = Talk::where([['id', '>', 0]]) ->orderBy(['created'=>'asc']) ->page(1, 10)
 
 ?>
 ```
+###ws服务（websocket）
 
+创建服务
+```bash 
+php start.php make:ws Just
+```
+自动生成的ws服务类如下
+```php 
+<?php
+namespace Ws;
+use Root\Lib\Websocket;
+
+/**
+ * @purpose ws服务
+ * @author administrator
+ * @time 2023-09-28 10:47:59
+ */
+class Just extends Websocket
+{
+    /** ws 监听ip */
+    public string $host= '0.0.0.0';
+    /** 监听端口 */
+    public int $port = 9501;
+
+    public function __construct(){
+        //todo 编写可能需要的逻辑
+    }
+
+    /**
+     * 建立连接事件
+     * @param $socket
+     * @return mixed|void
+     */
+    public function onConnect($socket)
+    {
+        // TODO: Implement onConnect() method.
+    }
+
+    /**
+     * 消息事件
+     * @param $socket
+     * @param $message
+     * @return mixed|void
+     */
+    public function onMessage($socket, $message)
+    {
+        // TODO: Implement onMessage() method.
+        switch ($message){
+            case 'Ping':
+                $this->sendTo($socket,'Pong');
+                break;
+            default:
+                $this->sendTo($socket,['data'=>$message,'time'=>date('Y-m-d H:i:s')]);
+        }
+    }
+
+    /**
+     * 连接断开事件
+     * @param $socket
+     * @return mixed|void
+     */
+    public function onClose($socket)
+    {
+        // TODO: Implement onClose() method.
+    }
+}
+```
+
+####开启服务 config/ws.php
+```php 
+<?php
+return [
+    'ws1'=>[
+        /** 是否开启 */
+        'enable'=>true,
+        /** 服务类 */
+        'handler'=>\Ws\TestWs::class,
+        /** 监听ip */
+        'host'=>'0.0.0.0',
+        /** 监听端口 */
+        'port'=>'9502'
+    ],
+    'ws2'=>[
+        'enable'=>true,
+        'handler'=>\Ws\TestWs2::class,
+        'host'=>'0.0.0.0',
+        'port'=>'9504'
+    ],
+    'ws3'=>[
+        'enable'=>true,
+        'handler'=>\Ws\Just::class,
+        'host'=>'0.0.0.0',
+        'port'=>'9501'
+    ]
+];
+```
+
+#### 客户端测试代码
+```php 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>测试一下ws</title>
+</head>
+<body>
+<div onclick="send()">发送</div>
+<div id = 'content'></div>
+<script>
+    var connection = null;
+    /** 连接ws服务*/
+    window.onload = function() {
+        console.log('页面加载完成了！');
+        connection = new WebSocket('ws://localhost:9501');
+        connection.onopen = function () {
+            connection.send('hi'); 
+            console.log("连接成功，发送数据")
+            /** 发送心跳 */
+            setInterval(function() {
+                connection.send('Ping');
+            }, 10000);
+        };
+        /** 错误 */
+        connection.onerror = function (error) {
+            console.log(error)
+        };
+        /** 接收到消息 */
+        connection.onmessage = function (e) {
+            console.log('Server: ' + e.data);
+            var own =document.getElementById('content')
+            var content  = "<p>"+e.data+"</p>"
+            own.innerHTML = own.innerHTML+content;
+        };
+    };
+    /** 发送消息*/
+    function send(){
+        connection.send('date');
+    }
+</script>
+</body>
+</html>
+```
 #### 命令行工具
 创建自定义命令行： php start.php make:command Test  <br>
 创建控制器： php start.php make:controller a/b/c <br>
 创建mysql模型: php start.php make:model index/user <br>
 创建sqlite模型: php start.php make:sqlite Demo<br>
 创建中间件: php start.php make:middleware Auth<br>
+创建ws服务：php start.php make:ws Just<br>
 

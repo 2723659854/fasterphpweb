@@ -5,6 +5,7 @@ use Root\Core\Provider\MakeControllerProvider;
 use Root\Core\Provider\MakeMiddlewareProvider;
 use Root\Core\Provider\MakeModelProvider;
 use Root\Core\Provider\MakeSqliteProvider;
+use Root\Core\Provider\MakeWsProvider;
 use Root\Core\Provider\QueueProvider;
 use Root\Core\Provider\RestartProvider;
 use Root\Core\Provider\StartProvider;
@@ -23,7 +24,8 @@ class AppFactory
         'make:model'=>MakeModelProvider::class,
         'make:controller'=>MakeControllerProvider::class,
         'make:sqlite'=>MakeSqliteProvider::class,
-        'make:middleware'=>MakeMiddlewareProvider::class
+        'make:middleware'=>MakeMiddlewareProvider::class,
+        'make:ws'=>MakeWsProvider::class
     ];
 
     /** @var array */

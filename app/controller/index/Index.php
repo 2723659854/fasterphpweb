@@ -176,4 +176,14 @@ class Index
 
         return \response('我是用的注解路由');
     }
+
+    /**
+     * 测试ws服务
+     * @return array|false|Response|string|string[]
+     * @throws \Exception
+     */
+    #[RequestMapping(methods:'get',path:'/ws')]
+    public function ws(){
+        return view('/index/ws');
+    }
 }

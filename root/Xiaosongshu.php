@@ -9,6 +9,7 @@ use Root\Io\Selector;
 use Root\Queue\RabbitMqConsumer;
 use Root\Queue\RedisQueueConsumer;
 use Root\Queue\TimerConsumer;
+use Root\Queue\WsConsumer;
 
 /**
  * @purpose 应用启动处理器
@@ -69,7 +70,7 @@ class Xiaosongshu
         /** 加载助手函数 */
         require_once __DIR__ . '/function.php';
         /** 加载根文件，常驻内存文件，应用目录文件 */
-        foreach (['root','process','app'] as $name){
+        foreach (['root','process','ws','app'] as $name){
             foreach (sortFiles(scan_dir(app_path() .'/'.$name,true)) as $val){
                 if (file_exists($val)&&(pathinfo($val)['extension'] == 'php')) {  require_once $val; }
             }
@@ -338,8 +339,19 @@ class Xiaosongshu
             if ($redis_config['enable']) {
                 $content[] = ['redis_queue', '正常', 1, $redis_config['port']];
             }
+            /** ws 服务 */
+            $ws_count =0;
+            $ws_port = [];
+            foreach (config('ws') as $k=>$v){
+                if ($v['enable']){
+                    $ws_count++;
+                    $ws_port[] = $v['port'];
+                }
+            }
+            if ($ws_count){
+                $content[] = ['ws服务', '正常', $ws_count, implode(',',$ws_port)];
+            }
             $_system_table->table($head, $content);
-            //echo $_color_class->info($_listen . "\r\n");
             echo $_color_class->info("进程启动完成,你可以输入php start.php stop停止运行\r\n");
             exit(0);
         }
@@ -366,10 +378,18 @@ class Xiaosongshu
                 /** 在主进程里面创建一个子进程负责处理rabbitmq的队列 */
                 $_small_son_id = \pcntl_fork();
                 if ($_small_son_id > 0) {
-                    /** 记录进程号 */
-                    writePid();
-                    /** 子进程 */
-                    G(RabbitMqConsumer::class)->consume();
+                    $createWs = \pcntl_fork();
+                    if ($createWs>0){
+                        /** 处理可能的ws服务 */
+                        G(WsConsumer::class)->consume();
+                    }
+                    if ($createWs==0){
+                        /** 记录进程号 */
+                        writePid();
+                        /** 子进程 */
+                        G(RabbitMqConsumer::class)->consume();
+                    }
+
                 } elseif ($_small_son_id == 0) {
                     /** 主进程 */
                     $clear_task_id = \pcntl_fork();

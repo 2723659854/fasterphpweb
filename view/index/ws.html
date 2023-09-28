@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>测试一下ws</title>
+</head>
+<body>
+<div onclick="send()">发送</div>
+<div id = 'content'></div>
+<script>
+    var connection = null;
+    /** 连接ws服务*/
+    window.onload = function() {
+        console.log('页面加载完成了！');
+        connection = new WebSocket('ws://localhost:9501');
+        connection.onopen = function () {
+            connection.send('hi');
+            console.log("连接成功，发送数据")
+            /** 发送心跳 */
+            setInterval(function() {
+                connection.send('Ping');
+            }, 10000);
+        };
+        /** 错误 */
+        connection.onerror = function (error) {
+            console.log(error)
+        };
+        /** 接收到消息 */
+        connection.onmessage = function (e) {
+            console.log('Server: ' + e.data);
+            var own =document.getElementById('content')
+            var content  = "<p>"+e.data+"</p>"
+            own.innerHTML = own.innerHTML+content;
+        };
+    };
+    /** 发送消息*/
+    function send(){
+        connection.send('date');
+    }
+</script>
+</body>
+</html>

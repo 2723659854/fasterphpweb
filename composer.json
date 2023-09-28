@@ -35,7 +35,8 @@
     "nikic/fast-route": "^2.0@dev",
     "ext-pcntl": "*",
     "ext-mbstring": "*",
-    "ext-posix": "*"
+    "ext-posix": "*",
+    "ext-sockets": "*"
   },
   "config": {
     "allow-plugins": {
