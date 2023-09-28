@@ -406,7 +406,7 @@ class Xiaosongshu
         /** @var int $pid 再创建一个子进程，脱离主进程会话 */
         $pid = \pcntl_fork();
         if (-1 === $pid) {
-            throw new Exception("Fork fail");
+            throw new \Exception("Fork fail");
         } elseif (0 !== $pid) {
             /** 脱离会话控制 */
             exit(0);

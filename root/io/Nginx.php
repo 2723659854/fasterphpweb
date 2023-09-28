@@ -1,6 +1,6 @@
 <?php
 
-namespace Root\Lib;
+namespace Root\Io;
 /**
  * @purpose 这个是同步阻塞io，可以自己测试使用
  */

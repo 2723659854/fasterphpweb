@@ -31,11 +31,7 @@ class CheckMysql extends BaseCommand
      */
     public function handle()
     {
-        /** 获取必选参数 */
-        //var_dump($this->getOption('argument'));
-        /** 获取可选参数 */
-        //var_dump($this->getOption('option'));
         $this->info("请在这里编写你的业务逻辑");
-        print_r(User::where('id','=',1)->first());
+
     }
 }

@@ -9,22 +9,22 @@ use \mysqli_sql_exception as MysqlException;
  class BaseModel
 {
 
-    private $host = null;
-    private $username = null;
-    private $password = null;
-    private $dbname = null;
-    private $port = null;
-    private $type = 'mysql';
+    private string $host = '127.0.0.1';
+    private string $username = '';
+    private string $password = '';
+    private string $dbname = '';
+    private int|string $port = 3306;
+    private string $type = 'mysql';
 
     /** mysql连接公用的关键就是把mysql静态化存储，防止每一次类被实例化的时候重复的创建连接，减少tcp握手开销 */
-    private static $mysql;
+    private static  $mysql;
 
-    protected $sql='';
-    public $table = '';
-    private $field='*';
-    private $order='id asc';
-    private $limit=0;
-    private $offset=0;
+    protected string $sql='';
+    public string $table = '';
+    private mixed $field='*';
+    private string $order='id asc';
+    private int $limit=0;
+    private int $offset=0;
     /** 初始化 */
     public function __construct()
     {
@@ -100,8 +100,6 @@ use \mysqli_sql_exception as MysqlException;
                 /** 重新执行 */
                 return $this->first();
             }
-            global $fuck;
-            $fuck->_error=no_declear('index',['msg'=>"错误码：".$e->getCode()."<br>文件：".$e->getFile()."<br>行数：".$e->getLine().PHP_EOL."<br>错误详情：".$e->getMessage()]);
             return [];
         }
     }
@@ -142,7 +140,7 @@ use \mysqli_sql_exception as MysqlException;
             }
             $this->sql='';
             return $data;
-        }catch (MysqlException $e){
+        }catch (\MysqlException $e){
             /** 如果是连接超时，则重连，并重新执行sql语句 */
             if ($e->getCode()==2006){
                 /** 重连 */
@@ -152,8 +150,6 @@ use \mysqli_sql_exception as MysqlException;
                 /** 重新执行 */
                 return $this->get();
             }
-            global $fuck;
-            $fuck->_error=no_declear('index',['msg'=>"错误码：".$e->getCode()."<br>文件：".$e->getFile()."<br>行数：".$e->getLine().PHP_EOL."<br>错误详情：".$e->getMessage()]);
             return [];
         }
 
@@ -244,11 +240,8 @@ use \mysqli_sql_exception as MysqlException;
                 /** 重新执行 */
                 return $this->insert($param);
             }
-            global $fuck;
-            $fuck->_error=no_declear('index',['msg'=>"错误码：".$e->getCode()."<br>文件：".$e->getFile()."<br>行数：".$e->getLine().PHP_EOL."<br>错误详情：".$e->getMessage()]);
             return false;
         }
-
     }
 
 
@@ -284,8 +277,6 @@ use \mysqli_sql_exception as MysqlException;
                 /** 重新执行 */
                 return $this->update($param);
             }
-            global $fuck;
-            $fuck->_error=no_declear('index',['msg'=>"错误码：".$e->getCode()."<br>文件：".$e->getFile()."<br>行数：".$e->getLine().PHP_EOL."<br>错误详情：".$e->getMessage()]);
             return false;
         }
     }
@@ -314,8 +305,6 @@ use \mysqli_sql_exception as MysqlException;
                 /** 重新执行 */
                 return $this->delete();
             }
-            global $fuck;
-            $fuck->_error=no_declear('index',['msg'=>"错误码：".$e->getCode()."<br>文件：".$e->getFile()."<br>行数：".$e->getLine().PHP_EOL."<br>错误详情：".$e->getMessage()]);
             return false;
         }
     }
@@ -405,14 +394,9 @@ use \mysqli_sql_exception as MysqlException;
                 /** 重新执行 */
                 return $this->query($sql);
             }
-            global $fuck;
-            $fuck->_error=no_declear('index',['msg'=>"错误码：".$e->getCode()."<br>文件：".$e->getFile()."<br>行数：".$e->getLine().PHP_EOL."<br>错误详情：".$e->getMessage()]);
             return false;
         }
-
-
     }
-
 
     /**
      * 批量写入数据库
@@ -457,11 +441,7 @@ use \mysqli_sql_exception as MysqlException;
                 /** 重新执行 */
                 return $this->insertAll($array);
             }
-            global $fuck;
-            $fuck->_error=no_declear('index',['msg'=>"错误码：".$e->getCode()."<br>文件：".$e->getFile()."<br>行数：".$e->getLine().PHP_EOL."<br>错误详情：".$e->getMessage()]);
             return false;
         }
-
     }
-
  }
