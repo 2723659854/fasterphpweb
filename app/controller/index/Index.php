@@ -9,11 +9,10 @@ use Root\Request;
 use Root\Cache;
 use App\Queue\Test;
 use App\Rabbitmq\Demo;
+use Root\Route;
 
 class Index
 {
-    //todo 以下代码均为演示代码
-    //如果需要渲染模板就调用view 不需要渲染模板就不调用view
 
     /** 默认首页,测试html */
     public function index()
@@ -141,5 +140,14 @@ class Index
         $client = new ESClient();
         return response($client->all('index','_doc'));
 
+    }
+
+    /**
+     * 测试中间件
+     * @param Request $request
+     * @return \Root\Response
+     */
+    public function middle(Request $request){
+        return response("我是中间件");
     }
 }

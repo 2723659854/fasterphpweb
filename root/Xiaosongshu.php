@@ -264,14 +264,24 @@ class Xiaosongshu
                 fclose($socketAccept);
             }else{
                 /** 如果没有这个文件 */
-                fwrite($socketAccept,response('Not Found',404));
+                fwrite($socketAccept,response('<h1>Not Found</h1>',404));
                 fclose($socketAccept);
             }
         }else{
             /** 动态路由 */
             try {
-                fwrite($socketAccept,Route::dispatch($method, $uri, $request));
+                $content = Route::dispatch($method, $uri, $request);
+                /** 用户返回的不是对象 */
+                if (!is_object($content)){
+                    $content = response($content);
+                }
+                /** 用户返回的不是response对象 */
+                if (!($content instanceof Response)){
+                    $content = response($content);
+                }
+                fwrite($socketAccept,$content);
                 fclose($socketAccept);
+
             }catch (\Exception|\RuntimeException $exception){
                 /** 如果出现了异常 */
                 fwrite($socketAccept,response($exception->getMessage(),400));
