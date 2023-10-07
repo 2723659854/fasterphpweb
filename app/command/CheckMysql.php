@@ -33,5 +33,16 @@ class CheckMysql extends BaseCommand
     {
         $this->info("请在这里编写你的业务逻辑");
 
+        $time = time();
+        $count = 100000;
+
+        $this->info("开始查询数据库");
+        for($i=0;$i<=$count;$i++){
+            //User::where('id','=',1)->first();
+            User::query('select * from users where id = 1');
+        }
+        $time2 = time();
+        $spend = $time2 - $time;
+        $this->info("查询数据库{$count}次，耗时{$spend}s");
     }
 }

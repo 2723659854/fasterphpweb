@@ -36,7 +36,9 @@
     "ext-pcntl": "*",
     "ext-mbstring": "*",
     "ext-posix": "*",
-    "ext-sockets": "*"
+    "ext-sockets": "*",
+    "ext-mysqli": "*",
+    "illuminate/database": "*"
   },
   "config": {
     "allow-plugins": {
