@@ -29,6 +29,17 @@ class Container
     }
 
     /**
+     * 设置容器内的对象
+     * @param string $name
+     * @param $buffer
+     * @return object|null
+     */
+    public static function set(string $name,$buffer){
+        self::$providers[$name]=new $name(...$buffer);
+        return self::$providers[$name];
+    }
+
+    /**
      * 实例化一个新的对象
      * @param string $name
      * @return mixed
@@ -40,6 +51,5 @@ class Container
             throw new \RuntimeException("[$name]类不存在！");
         }
     }
-
 
 }

@@ -25,7 +25,6 @@ class Ioc
      */
     public static function make($className, $methodName = '', $params = [])
     {
-
         // 获取类的实例
         $instance = self::getInstance($className);
         // 获取该方法所需要依赖注入的参数
@@ -35,7 +34,6 @@ class Ioc
         }else{
             return $instance;
         }
-
     }
 
     /**

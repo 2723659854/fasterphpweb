@@ -30,6 +30,8 @@ class Request extends \Root\Lib\BaseRequest
      */
     public $route = null;
 
+
+
     /**
      * @return mixed|null
      */
@@ -149,7 +151,11 @@ class Request extends \Root\Lib\BaseRequest
      */
     public function getRemoteIp(): string
     {
-        return $this->connection->getRemoteIp();
+        $pos = \strrpos($this->remote_address, ':');
+        if ($pos) {
+            return (string) \substr($this->remote_address, 0, $pos);
+        }
+        return '';
     }
 
     /**
@@ -158,26 +164,22 @@ class Request extends \Root\Lib\BaseRequest
      */
     public function getRemotePort(): int
     {
-        return $this->connection->getRemotePort();
+        if ($this->remote_address) {
+            return (int) \substr(\strrchr($this->remote_address, ':'), 1);
+        }
+        return 0;
     }
 
     /**
-     * GetLocalIp
+     * Get remote address.
+     *
      * @return string
      */
-    public function getLocalIp(): string
+    public function getRemoteAddress()
     {
-        return $this->connection->getLocalIp();
+        return $this->remote_address;
     }
 
-    /**
-     * GetLocalPort
-     * @return int
-     */
-    public function getLocalPort(): int
-    {
-        return $this->connection->getLocalPort();
-    }
 
     /**
      * GetRealIp

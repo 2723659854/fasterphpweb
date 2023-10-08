@@ -1,5 +1,6 @@
 <?php
 use Root\Response;
+
 if (!function_exists('app_path')){
     /**
      * App目录
@@ -220,6 +221,8 @@ if (!function_exists('M')){
         return \Root\Lib\Container::make($name);
     }
 }
+
+
 
 if (!function_exists('view')){
     /**

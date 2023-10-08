@@ -20,12 +20,9 @@ class Response extends BaseResponse
      */
     public function file(string $file): Response
     {
-
         if ($this->notModifiedSince($file)) {
-
             return $this->withStatus(304);
         }
-
         return $this->withFile($file);
     }
 

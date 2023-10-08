@@ -20,7 +20,7 @@ class Index
 {
 
     /** 默认首页,测试html */
-    public function index()
+    public function index(Request $request)
     {
         //模板在根目录下的view目录里面
         return view('/index/index', ['time' => date('Y-m-d H:i:s')]);
@@ -53,7 +53,8 @@ class Index
         /** 获取var参数 */
         $var = $request->input('var');
         /** 调用数据库 */
-        $data = User::where('username', '=', 'mmlady')->first();
+        //$data = User::where('username', '=', 'mmlady')->first();
+        $data = [];
         /** 读取配置 */
         $app_name = config('app')['app_name'];
         /** 模板渲染 参数传递 */

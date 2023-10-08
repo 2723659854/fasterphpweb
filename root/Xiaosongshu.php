@@ -6,6 +6,7 @@ use Root\Core\AppFactory;
 use Root\Core\Provider\IdentifyInterface;
 use Root\Io\Epoll;
 use Root\Io\Selector;
+use Root\Lib\Container;
 use Root\Queue\RabbitMqConsumer;
 use Root\Queue\RedisQueueConsumer;
 use Root\Queue\TimerConsumer;
@@ -221,8 +222,8 @@ class Xiaosongshu
     {
         $httpServer = new Selector();
         /** 消息接收  */
-        $httpServer->onMessage = function ($socketAccept, $message) use ($httpServer) {
-            $this->onMessage($socketAccept, $message, $httpServer);
+        $httpServer->onMessage = function ($socketAccept, $message,$remote_address) use ($httpServer) {
+            $this->onMessage($socketAccept, $message, $httpServer,$remote_address);
         };
         $httpServer->start();
     }
@@ -233,8 +234,8 @@ class Xiaosongshu
         /** @var object $httpServer 将对象加载到内存 */
         $httpServer = new Epoll();
         /** @var callable onMessage 设置消息处理函数 */
-        $httpServer->onMessage = function ($socketAccept, $message) use ($httpServer) {
-            $this->onMessage($socketAccept, $message, $httpServer);
+        $httpServer->onMessage = function ($socketAccept, $message,$remote_address) use ($httpServer) {
+            $this->onMessage($socketAccept, $message, $httpServer,$remote_address);
         };
         /** 启动服务 */
         $httpServer->start();
@@ -247,12 +248,12 @@ class Xiaosongshu
      * @param $httpServer
      * @return mixed
      */
-    public function onMessage($socketAccept, $message, &$httpServer)
+    public function onMessage($socketAccept, $message, &$httpServer,$remote_address)
     {
-        $request = new Request($message);
+        /** 这里不能这么用request ，用法应该是使用set方法 */
+        $request = Container::set(Request::class,[$message,$remote_address]);
         $method  = $request->method();
         $uri     = $request->path();
-
         $info           = explode('.', $request->path());
         $file_extension = end($info);
         /**  说明是资源类请求，直接返回资源 */

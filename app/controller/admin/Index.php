@@ -26,8 +26,8 @@ class Index
     {
         $data = $request->all();
         //return view('/index/index', ['time' => date('Y-m-d H:i:s')]);
-        //return response(json_encode(['name'=>'zhangsan']),200)->file(public_path().'/favicon.ico');
-        //return response()->download(public_path().'/favicon.ico','demo.ico');
+        //return response()->download(public_path().'/head.png');
+        return response()->file(public_path().'/favicon.ico');
         //return \response()->cookie('zhangsan','tom');
         //return \response(['status'=>200,'msg'=>'ok','data'=>$data],200,['Content-Type'=>'application/json']);
         //return \response(['status'=>200,'msg'=>'ok','data'=>$data])->header('Content-Type','application/json');

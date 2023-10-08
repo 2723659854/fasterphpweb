@@ -372,7 +372,6 @@ class BaseResponse
         }else{
             $content='';
         }
-
         return "{$head}\r\n".$content;
     }
 

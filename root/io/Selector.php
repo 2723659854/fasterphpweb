@@ -25,6 +25,8 @@ class Selector
 
     /** @var string $protocol 通信协议 */
     public $protocol='tcp';
+    /** 所有的客户端ip */
+    private $clientIp = [];
 
     /** 初始化 */
     public function __construct()
@@ -74,15 +76,18 @@ class Selector
                 /** 如果这个可读的连接是服务端，那么说明是有新的客户端连接进来 */
                 if ($val === $this->socket) {
                     /** 读取服务端接收到的 消息，这个消息的内容是客户端连接 ，stream_socket_accept方法负责接收客户端连接 */
-                    $clientSocket = stream_socket_accept($this->socket); //阻塞监听
+                    $clientSocket = stream_socket_accept($this->socket,0,$remote_address); //阻塞监听 设置超时0，并获取客户端地址
+
                     //触发事件的连接的回调
                     /** 如果这个客户端连接不为空，并且本服务的onConnect是回调函数 */
                     if (!empty($clientSocket) && is_callable($this->onConnect)) {
                         /** 把客户端连接传递到onConnect回调函数 */
-                        call_user_func($this->onConnect, $clientSocket);
+                        call_user_func($this->onConnect, $clientSocket,$remote_address);
                     }
                     /** 将这个客户端连接保存，目测这里如果不保存，应该是无法发送和接收消息的，就是要把所有的连接都保存在内存中 */
                     $this->allSocket[(int)$clientSocket] = $clientSocket;
+                    /** 单独用一个数组保存客户端ip地址和端口信息 */
+                    $this->clientIp[(int)$clientSocket] = $remote_address;
                 } else {
 
                     $buffer = '';
@@ -111,7 +116,7 @@ class Selector
                     /** 正常读取到数据,触发消息接收事件,响应内容，如果读取的内容不为空，并且设置了onMessage回调函数 */
                     if (!empty($buffer) && is_callable($this->onMessage)) {
                         /** 传入连接，接收的值到回调函数 */
-                        call_user_func($this->onMessage, $val, $buffer);
+                        call_user_func($this->onMessage, $val, $buffer,$this->clientIp[(int)$val]??'');
                     }
                 }
             }

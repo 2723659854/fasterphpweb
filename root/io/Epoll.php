@@ -55,14 +55,14 @@ class Epoll
         /** 建立事件监听服务器socket可读事件， 获取event实例，这个是获取php的event扩展的基类 */
         /** 在react中，SyntheticEvent在调用事件回调之后该对象将被重用，并且其所有属性都将无效。如果要以异步方 式访问事件属性，则应调用event.persist()事件，这将从池中删除事件，并允许用户代码保留对该事件的引用。 */
         $event = new \Event($this->event_base, $this->serv, \Event::READ | \Event::PERSIST, function ($serv) {
-            /** 获取新的连接 */
-            $cli = @stream_socket_accept($serv, 0);
+            /** 获取新的连接 stream_socket_accept语法：socket连接，超时，客户端地址 */
+            $cli = @stream_socket_accept($serv, 0,$remote_address);
             /** 如果有连接 */
             if ($cli) {
                 /** 设置为异步 */
                 stream_set_blocking($cli, 0);
                 /** 将新的客户端连接投入到事件，构建客户端事件， */
-                $client_event = new \Event($this->event_base, $cli, \Event::READ | \Event::PERSIST, function ($cli) {
+                $client_event = new \Event($this->event_base, $cli, \Event::READ | \Event::PERSIST, function ($cli)use($remote_address) {
                     /** 客户端连接再添加监听可读事件，读取客户端连接的数据 */
                     $buffer = '';
                     $flag    = true;
@@ -83,7 +83,7 @@ class Epoll
                     /** 正常读取到数据,触发消息接收事件,响应内容，如果读取的内容不为空，并且设置了onMessage回调函数 */
                     if (!empty($buffer) && is_callable($this->onMessage)) {
                         /** 传入连接，接收的值到回调函数 */
-                        call_user_func($this->onMessage, $cli, $buffer);
+                        call_user_func($this->onMessage, $cli, $buffer,$remote_address);
                     }
                 }, $cli);
                 /** 将构建的客户端事件添加到epoll当中 */

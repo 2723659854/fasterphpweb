@@ -5,6 +5,8 @@ return [
     ['GET', '/', [App\Controller\Index\Index::class, 'index']],
     /** 路由测试 */
     ['GET', '/index/demo/index', [\App\Controller\Admin\Index::class, 'index']],
+    ['GET', '/just1', [\App\Controller\Admin\Index::class, 'index']],
+
     /** 上传文件 */
     ['GET', '/upload', [\App\Controller\Admin\Index::class, 'upload']],
     /** 保存文件 */
@@ -15,6 +17,7 @@ return [
     ['get', '/json', [\App\Controller\Index\Index::class, 'json']],
     /** 数据库 */
     ['get', '/database', [\App\Controller\Index\Index::class, 'database']],
+    ['get', '/fuck/query', [\App\Controller\Index\Index::class, 'database']],
     /** 数据库写入 */
     ['get', '/insert', [\App\Controller\Index\Index::class, 'insert']],
     /** base64 文件上传 */

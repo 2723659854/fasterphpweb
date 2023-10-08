@@ -57,15 +57,18 @@ class BaseRequest
      */
     protected $_isSafe = true;
 
+    /** 客户端IP地址信息 */
+    public $remote_address = null;
 
     /**
      * Request constructor.
      *
      * @param string $buffer
      */
-    public function __construct($buffer='')
+    public function __construct($buffer='',$remote_address='')
     {
         $this->_buffer = $buffer;
+        $this->remote_address = $remote_address;
     }
 
     /**
