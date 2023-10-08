@@ -36,7 +36,7 @@ class Route
      * 路由调度
      * @param string $httpMethod 请求方法
      * @param string $uri 请求路由
-     * @param Request $request 请求内容
+     * @param Request|mixed $request 请求内容
      * @return mixed
      * @throws \Exception
      */
