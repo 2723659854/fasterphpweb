@@ -12,10 +12,7 @@ class Test  extends BaseCommand
     public function handle()
     {
         /** 助手函数 */
-        version();
-        $this->info("渲染完成");
-        $this->error("错误信息");
-
+        $message = 'hello ,you are a student !';
     }
 
     /**

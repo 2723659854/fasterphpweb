@@ -112,6 +112,17 @@ class $className extends Websocket
     {
         // TODO: Implement onClose() method.
     }
+    
+    /**
+     * 异常处理
+     * @param \$socket
+     * @param \Exception \$exception
+     * @return mixed|void 
+     */
+    public function onError(\$socket, \Exception \$exception)
+    {
+        // TODO: Implement onError() method.
+    }
 }
 EOF;
 

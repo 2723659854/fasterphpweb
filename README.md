@@ -829,4 +829,8 @@ return [
 创建sqlite模型: php start.php make:sqlite Demo<br>
 创建中间件: php start.php make:middleware Auth<br>
 创建ws服务：php start.php make:ws Just<br>
+#### 其他
+现在的网站都已经发展到前后端分离了，默认是无状态请求，cookie几乎没有用了。
+所以没有编写cookie和session操作类了。
+你可以使用token来识别用户，而不是cookie或者session。
 

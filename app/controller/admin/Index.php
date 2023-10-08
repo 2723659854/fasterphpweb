@@ -25,7 +25,8 @@ class Index
     public function index(Request $request)
     {
         $data = $request->all();
-        //return view('/index/index', ['time' => date('Y-m-d H:i:s')]);
+
+        return view('/index/index', ['time' => date('Y-m-d H:i:s')]);
         //return response()->download(public_path().'/head.png');
         return response()->file(public_path().'/favicon.ico');
         //return \response()->cookie('zhangsan','tom');

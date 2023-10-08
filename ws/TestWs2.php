@@ -55,4 +55,9 @@ class TestWs2 extends Websocket
     {
         // TODO: Implement onClose() method.
     }
+
+    public function onError($socket, \Exception $exception)
+    {
+        // TODO: Implement onError() method.
+    }
 }

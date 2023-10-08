@@ -23,7 +23,7 @@ class Index
     public function index(Request $request)
     {
         //模板在根目录下的view目录里面
-        return view('/index/index', ['time' => date('Y-m-d H:i:s')]);
+        return view('/index/index', ['time' => date('Y-m-d H:i:s')])->cookie('name','how are you !');
     }
 
     /** 测试缓存 */

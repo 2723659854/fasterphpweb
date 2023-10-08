@@ -55,4 +55,17 @@ class TestWs extends Websocket
     {
         // TODO: Implement onClose() method.
     }
+
+    /**
+     * 发生了错误
+     * @param $socket
+     * @param \Exception $exception
+     * @return mixed|void
+     * @note 此处仅仅作为举例，实际应用请根据自己的业务需求处理报错信息
+     */
+    public function onError($socket, \Exception $exception)
+    {
+        $this->sendTo($socket,$exception->getMessage());
+        $this->close($socket);
+    }
 }

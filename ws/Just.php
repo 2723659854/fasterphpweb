@@ -1,5 +1,6 @@
 <?php
 namespace Ws;
+use http\Exception\RuntimeException;
 use Root\Lib\Websocket;
 
 /**
@@ -54,5 +55,17 @@ class Just extends Websocket
     public function onClose($socket)
     {
         // TODO: Implement onClose() method.
+    }
+
+    /**
+     * 异常事件
+     * @param $socket
+     * @param \Exception $exception
+     * @return mixed|void
+     */
+    public function onError($socket, \Exception $exception)
+    {
+        //var_dump($exception->getMessage());
+        $this->close($socket);
     }
 }
