@@ -36,32 +36,52 @@ abstract class Websocket
             //todo 后期需要根据系统自动切换epoll模型和select模型 ，
             //todo 这个select模型默认只支持1024个客户端连接，可以通过重新编译PHP实现更大连接，但是效率很低的，建议换epoll模型
             /** 客户端连接写入数据后select需要手动遍历连接， */
-            socket_select($changed, $write, $except, NULL);
+
+            stream_select( $changed, $write, $except, 60);
+
+
             /** 遍历每一个连接 */
             foreach ($changed as $socket) {
+
                 /** 如果是服务端连接 */
                 if ($socket == $master) {
-                    /** 读取服务端连接的数据 */
-                    $client = socket_accept($master);
+                    /** 读取服务端连接的数据 socket_accept需要配合socket_create， socket_bind，socket_listen,socket_recv， socket_write，socket_close使用*/
+                    //$client = socket_accept($master);
+                    /** 改版后 ，stream_socket_accept 配合fread,fwrite，fclose使用*/
+                    $client = stream_socket_accept($master,0,$remote_address); //阻塞监听 设置超时0，并获取客户端地址
+
                     /** 没有数据，说明没有新的客户端发起连接请求 */
                     if ($client < 0) {
                         continue;
                     } else {
                         /** 保存客户端到内存 */
-                        $this->connect($client);
+                        $this->connect($client,$remote_address);
                     }
                 } else {
+
                     /** 如果是客户端，则读取连接中的数据 */
-                    $bytes = @socket_recv($socket, $buffer, 2048, 0);
+                    //$bytes = @socket_recv($socket, $buffer, 2048, 0);
+                    $buffer = '';
+                    $flag    = true;
+                    while ($flag) {
+                        $_content = fread($socket, 1024);
+                        if (strlen($_content) < 1024) {
+                            $flag = false;
+                        }
+                        $buffer = $buffer. $_content;
+                    }
+                    $bytes = $buffer;
+
                     if ($bytes == 0) {
                         /** 如果客户端没有数据，则断开客户端连接 */
                         $this->disconnect($socket);
                     } else {
                         /** 通过socket获取用户信息 */
                         $user = $this->getuserbysocket($socket);
+
                         if (!$user->handshake) {
                             /** 如果没有握手，则先握手 */
-                            $this->dohandshake($user, $buffer);
+                            $res = $this->dohandshake($user, $buffer);
                         } else {
                             /** 处理客户端发送的数据 */
                             $this->process($user, $buffer);
@@ -193,7 +213,8 @@ abstract class Websocket
         /** 对消息进行编码 */
         $msg = $this->encode($msg);
         /** 发送消息  */
-        socket_write($client, $msg, strlen($msg));
+        //socket_write($client, $msg, strlen($msg));
+        fwrite($client, $msg, strlen($msg));
     }
 
     /**
@@ -202,7 +223,7 @@ abstract class Websocket
      * @param $port
      * @return resource|\Socket|void
      */
-    private function WebSocket($address, $port)
+    private function WebSocket1($address, $port)
     {
         /** 创建一个通讯节点，套字节语法： IPv4 网络协议，流式套接字。使用全双工协议tcp协议 参考：https://blog.csdn.net/sn_qmzm521/article/details/80756771 */
         $master = socket_create(AF_INET, SOCK_STREAM, SOL_TCP) or die("socket_create() failed");
@@ -218,17 +239,37 @@ abstract class Websocket
     }
 
     /**
+     * 创建socket服务
+     * @param $address
+     * @param $port
+     * @return false|resource
+     */
+    public function WebSocket($address,$port){
+        /** 配置socket流参数 */
+        $context = stream_context_create();
+        /** 设置端口复用 */
+        stream_context_set_option($context, 'socket', 'so_reuseport', 1);
+        stream_context_set_option($context, 'socket', 'so_reuseaddr', 1);
+        /** 设置服务端：监听地址+端口 */
+        $socket = stream_socket_server('tcp://'.$address.':'.$port,$errno, $errstr, STREAM_SERVER_BIND | STREAM_SERVER_LISTEN, $context);
+        /** 设置非阻塞，语法是关闭阻塞 */
+        stream_set_blocking($socket, 0);
+        return $socket;
+    }
+
+    /**
      * 连接客户端
      * @param $socket
      * @return void
      * @note 保存客户端连接
      */
-    private function connect($socket)
+    private function connect($socket,$remote_address)
     {
         $user            = new \stdClass();
         $user->id        = uniqid();
         $user->socket    = $socket;
         $user->handshake = false;
+        $user->remote_address = $remote_address;
         /** 保存客户端 */
         array_push($this->users, $user);
         /** 保存连接 */
@@ -239,7 +280,15 @@ abstract class Websocket
         }catch (\Exception|\RuntimeException $exception){
             $this->onError($socket,$exception);
         }
+    }
 
+    /**
+     * 通过socket获取用户信息
+     * @param $socket
+     * @return mixed|null
+     */
+    protected function getUserInfoBySocket($socket){
+        return $this->getuserbysocket($socket);
     }
 
     /**
@@ -278,7 +327,8 @@ abstract class Websocket
         }
         /** 关闭这个连接 */
         $index = array_search($socket, $this->sockets);
-        socket_close($socket);
+        //socket_close($socket);
+        fclose($socket);
         if ($index >= 0) {
             array_splice($this->sockets, $index, 1);
         }
@@ -292,7 +342,7 @@ abstract class Websocket
      * @note 这个是建立socket连接的关键，首先是接受到http连接，然后http连接里面 有升级websocket的要求，服务端对key加密后返回给客户端，客户端
      * 会使用自己的key和服务端返回的key进行对比，如果相等，则建立连接成功，否则建立连接失败。
      */
-    private function dohandshake($user, $buffer)
+    private function dohandshake(&$user, $buffer)
     {
         /** 解码http请求头部信息 */
         list($resource, $host, $upgrade, $connection, $key, $protocol, $version, $origin, $data) = $this->getheaders($buffer);
@@ -301,7 +351,7 @@ abstract class Websocket
         /** 握手需要返回给客户端的数据 */
         $upgrade   = "HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Accept: $acceptkey\r\n\r\n";
         /** 将消息返回给客户端 */
-        socket_write($user->socket, $upgrade, strlen($upgrade));
+        fwrite($user->socket, $upgrade, strlen($upgrade));
         /** 标记为已完成握手 */
         $user->handshake = true;
         return true;

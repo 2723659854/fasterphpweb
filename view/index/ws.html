@@ -19,7 +19,7 @@
             /** 发送心跳 */
             setInterval(function() {
                 connection.send('Ping');
-            }, 1000);
+            }, 5000);
         };
         /** 错误 */
         connection.onerror = function (error) {

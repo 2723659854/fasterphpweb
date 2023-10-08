@@ -43,7 +43,8 @@ class Just extends Websocket
                 $this->sendTo($socket,'Pong');
                 break;
             default:
-                $this->sendTo($socket,['data'=>$message,'time'=>date('Y-m-d H:i:s')]);
+                /** 发送当前时间 ，和客户端地址 */
+                $this->sendTo($socket,['data'=>$message,'time'=>date('Y-m-d H:i:s'),'ip'=>$this->getUserInfoBySocket($socket)->remote_address??'']);
         }
     }
 
