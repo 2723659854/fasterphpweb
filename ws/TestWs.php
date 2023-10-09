@@ -1,13 +1,13 @@
 <?php
 namespace Ws;
-use Root\Lib\Websocket;
+use Root\Lib\WsSelectorService;
 
 /**
  * @purpose ws服务
  * @author administrator
  * @time 2023年9月28日17:56:05
  */
-class TestWs extends Websocket
+class TestWs extends WsSelectorService
 {
     /** ws 监听ip */
     public string $host= '0.0.0.0';

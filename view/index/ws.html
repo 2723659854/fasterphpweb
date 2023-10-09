@@ -2,14 +2,16 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>测试一下ws</title>
+    <title>ws服务演示</title>
 </head>
 <body>
-<div onclick="send()">发送</div>
+<center><h3>ws服务演示</h3></center>
+<p>本页面仅作为演示，请根据自己的也无需求调整逻辑。</p>
+<input type="text" name = "content" id = "say"/>
+<button onclick="send()">发送消息</button>
 <div id = 'content'></div>
 <script>
     var connection = null;
-    var timer = [];
     var ping = null;
     /** 连接ws服务*/
     window.onload = function() {
@@ -19,7 +21,9 @@
     /** 连接ws */
     function connect(){
         console.log("连接服务器")
+        /** 连接服务器 */
         connection = new WebSocket('ws://localhost:9501');
+        /** 设置回调事件 */
         connection.onopen = onopen;
         connection.onerror = onerror;
         connection.onclose = onclose;
@@ -28,7 +32,13 @@
 
     /** 发送消息*/
     function send(){
-        connection.send('date');
+        var content = document.getElementById('say').value;
+        if (content){
+            connection.send(content);
+        }else{
+            connection.send('date');
+        }
+
     }
 
      function onopen () {
@@ -59,6 +69,7 @@
     /** 接收到消息 */
     function onmessage (e) {
         console.log('Server: ' + e.data);
+        /** 将接收到的消息追加到页面 */
         var own =document.getElementById('content')
         var content  = "<p>"+e.data+"</p>"
         own.innerHTML = own.innerHTML+content;

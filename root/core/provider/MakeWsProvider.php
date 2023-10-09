@@ -2,7 +2,7 @@
 
 namespace Root\Core\Provider;
 
-use Root\Lib\Websocket;
+use Root\Lib\WsSelectorService;
 use Root\Xiaosongshu;
 
 /**
@@ -57,14 +57,19 @@ class MakeWsProvider implements IdentifyInterface
         $content    = <<<EOF
 <?php
 namespace Ws;
-use Root\Lib\Websocket;
+
+/** 最大连接数1240，默认支持selector模型 */
+use Root\Lib\WsSelectorService;
+/** 最大连接无上限，需系统支持epoll模型 */
+use Root\Lib\WsEpollService;
 
 /**
  * @purpose ws服务
  * @author administrator
  * @time $time
+ * @note 默认使用WsSelectorService，若系统支持event事件，支持epoll模型，则可以继承WsEpollService
  */
-class $className extends Websocket
+class $className extends WsSelectorService
 {
     /** ws 监听ip */
     public string \$host= '0.0.0.0';

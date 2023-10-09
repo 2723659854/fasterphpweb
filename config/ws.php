@@ -11,7 +11,7 @@ return [
         'port'=>'9502'
     ],
     'ws2'=>[
-        'enable'=>false,
+        'enable'=>true,
         'handler'=>\Ws\TestWs2::class,
         'host'=>'0.0.0.0',
         'port'=>'9504'
@@ -21,5 +21,5 @@ return [
         'handler'=>\Ws\Just::class,
         'host'=>'0.0.0.0',
         'port'=>'9501'
-    ]
+    ],
 ];

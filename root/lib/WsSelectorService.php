@@ -7,7 +7,7 @@ namespace Root\Lib;
  * 这里定时器需要单独开一个进程，同时客户端心跳信息单独保存到一个静态数组中，直接使用一个while循环就行了
  * @note 客户端分组，需要用户自己创建一个数组保存给个分组的用户
  */
-abstract class Websocket
+abstract class WsSelectorService
 {
 
     /** 监听地址 */
@@ -33,8 +33,6 @@ abstract class Websocket
             /** 将所有的连接复制给change */
             $changed = $this->sockets;
             /** 这里使用了select模型监听io读写事件 */
-            //todo 后期需要根据系统自动切换epoll模型和select模型 ，
-            //todo 这个select模型默认只支持1024个客户端连接，可以通过重新编译PHP实现更大连接，但是效率很低的，建议换epoll模型
             /** 客户端连接写入数据后select需要手动遍历连接， */
 
             stream_select( $changed, $write, $except, 60);

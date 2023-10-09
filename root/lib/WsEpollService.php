@@ -2,7 +2,7 @@
 
 namespace Root\Lib;
 
-abstract class WsService
+abstract class WsEpollService
 {
     /** 存所有的客户端事件 */
     public $events = [];
@@ -32,17 +32,6 @@ abstract class WsService
     private array $users = [];
     /** 所有的连接 */
     private array $sockets = [];
-
-    /**
-     * 定义消息处理方法
-     * @param $str
-     * @return void
-     */
-    public function message($str)
-    {
-        /** 直接打印 */
-        echo $str . "\r\n";
-    }
 
     /**
      * 构建ws服务
