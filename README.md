@@ -320,11 +320,10 @@ class Book extends Model
 /** 测试数据库 */
     public function query()
     {
-        /** 第一种方法，实例化模型，然后查询数据库 */
-        $book=(new Book())->where('id','=',3)->first();
-        /** 第二种方法：使用门面类调用模型，需要自己创建门面类 */
+       
+        /** 第1种方法：使用门面类调用模型，需要自己创建门面类 */
         $messages = Fbook::where('id', '=', 3)->first();
-        /** 第三种方法:直接静态化调用  */
+        /** 第2种方法:直接静态化调用  */
         $next = Book::where('id','=',1)->first();
         return ['status' => 1, 'data' => $messages, 'msg' => 'success','book'=>$book];
     }
@@ -357,17 +356,16 @@ return [
 /** 测试缓存 */
     public function cache()
     {
-        /** 第一种方法，先实例化，在调用 */
-        (new Cache())->set('fuck','you');
-        /** 第二种方法，直接静态方法调用 */
+       
+        /** 第1种方法，直接静态方法调用 */
         Cache::set('happy','new year');
-        return ['code' => 200, 'msg' => 'ok','普通的调用'=>(new Cache())->get('fuck'),'静态调用'=>Cache::get('happy')];
+        return ['code' => 200, 'msg' => 'ok','静态调用'=>Cache::get('happy')];
     }
 ```
 
 ### 路由
 
-#### 配置文件
+###  配置文件
 
 ```php 
 # config/route.php
@@ -411,7 +409,7 @@ return [
 
 ```
 
-#### 注解路由
+###  注解路由
 
 ```php 
    /**
@@ -436,9 +434,9 @@ return [
     }
 ```
 
-### 中间件
+###  中间件
 
-#### 创建中间件
+###  创建中间件
 
 ```bash 
 php songshu make:middleware Auth
@@ -467,7 +465,7 @@ class Auth implements MiddlewareInterface
 }
 ```
 
-####使用中间件
+### 使用中间件
 
 1,路由
 ```php 
@@ -488,11 +486,11 @@ class Auth implements MiddlewareInterface
     }
 ```
 
-###定时器
+### 定时器
 
 只能在linux系统中使用定时器，或者使用docker环境。
 
-#### 添加定时任务
+### 添加定时任务
 ```php 
 //第一种方式
 /** 使用回调函数投递定时任务 */
@@ -618,7 +616,7 @@ public function search()
 # 其他用法参照 root\ESClient::class的源码，
 ```
 
-#### 加入容器
+####  加入容器
 解放双手，不需要每一次都去实例化需要调用的对象。使用容器简单方便。<br>
 ```php 
 /** G方法： */
@@ -630,7 +628,7 @@ G方法和M方法的区别是：<br>
 G方法只会实例化一次对象，然后存储在内存中，下一次调用直接从内存中获取。<br>
 而M方法每一次都是重新实例化一个新的对象。<br>
 
-#### 自定义命令
+####  自定义命令
 ```php 
 <?php
 namespace App\Command;
@@ -661,6 +659,32 @@ php start.php make:sqlite Talk
 ```bash 
 php songshu make:sqlite Talk
 ```
+模型内容如下
+```php 
+<?php
+
+namespace App\SqliteModel;
+
+use Root\Lib\SqliteBaseModel;
+
+/**
+ * @purpose sqlite数据库
+ * @note 示例
+ */
+class Talk extends SqliteBaseModel
+{
+
+    /** 存放目录：请修改为你自己的字段，真实路径为config/sqlite.php里面absolute设置的路径 + $dir ,例如：/usr/src/myapp/fasterphpweb/sqlite/datadir/hello/talk */
+    public string $dir = 'hello/talk';
+
+    /** 表名称：请修改为你自己的表名称 */
+    public string $table = 'talk';
+
+    /** 表字段：请修改为你自己的字段 */
+    public string $field ='id INTEGER PRIMARY KEY,name varhcar(24),created text(12)';
+
+}
+```
 用法
 ```php 
 <?php
@@ -682,7 +706,7 @@ $res = Talk::where([['id', '>', 0]]) ->orderBy(['created'=>'asc']) ->page(1, 10)
 ```
 ###ws服务（websocket）
 
-创建服务
+创建ws服务
 ```bash 
 php start.php make:ws Just
 ```
@@ -797,10 +821,10 @@ return [
         connection.onopen = function () {
             connection.send('hi'); 
             console.log("连接成功，发送数据")
-            /** 发送心跳 */
+            /** 每隔5秒发送一次心跳 */
             setInterval(function() {
                 connection.send('Ping');
-            }, 10000);
+            }, 5000);
         };
         /** 错误 */
         connection.onerror = function (error) {
