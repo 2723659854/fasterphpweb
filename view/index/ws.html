@@ -9,33 +9,59 @@
 <div id = 'content'></div>
 <script>
     var connection = null;
+    var timer = [];
+    var ping = null;
     /** 连接ws服务*/
     window.onload = function() {
-        console.log('页面加载完成了！');
-        connection = new WebSocket('ws://localhost:9501');
-        connection.onopen = function () {
-            connection.send('hi');
-            console.log("连接成功，发送数据")
-            /** 发送心跳 */
-            setInterval(function() {
-                connection.send('Ping');
-            }, 5000);
-        };
-        /** 错误 */
-        connection.onerror = function (error) {
-            console.log(error)
-        };
-        /** 接收到消息 */
-        connection.onmessage = function (e) {
-            console.log('Server: ' + e.data);
-            var own =document.getElementById('content')
-            var content  = "<p>"+e.data+"</p>"
-            own.innerHTML = own.innerHTML+content;
-        };
+        console.log('页面加载完成了！连接ws服务器');
+        connect();
     };
+    /** 连接ws */
+    function connect(){
+        console.log("连接服务器")
+        connection = new WebSocket('ws://localhost:9501');
+        connection.onopen = onopen;
+        connection.onerror = onerror;
+        connection.onclose = onclose;
+        connection.onmessage = onmessage;
+    }
+
     /** 发送消息*/
     function send(){
         connection.send('date');
+    }
+
+     function onopen () {
+        connection.send('hi');
+        console.log("连接成功，发送数据")
+        /** 发送心跳 */
+        ping = setInterval(function() {
+            connection.send('Ping');
+        }, 5000);
+    }
+    /** 错误 */
+      function onerror (error) {
+        console.log(error)
+    }
+    /** 连接断开了 */
+    function onclose (){
+        /** 重连服务器 */
+        console.log("重新连接服务器")
+        /** 清除心跳 */
+        clearInterval(ping)
+        /** 3秒后重连 */
+        setTimeout(function (){
+            connect();
+        },3000)
+
+
+    }
+    /** 接收到消息 */
+    function onmessage (e) {
+        console.log('Server: ' + e.data);
+        var own =document.getElementById('content')
+        var content  = "<p>"+e.data+"</p>"
+        own.innerHTML = own.innerHTML+content;
     }
 </script>
 </body>

@@ -74,7 +74,7 @@ class Epoll
                         $buffer = $buffer. $_content;
                     }
                     /** 如果用户输入为空或者输入不是资源 */
-                    if ($buffer == false || !is_resource($cli)) {
+                    if (!$buffer  || !is_resource($cli)) {
                         /** 释放事件 */
                         unset($this->events[(int)$cli]);
                         unset($cli);

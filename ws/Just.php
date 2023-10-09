@@ -1,14 +1,15 @@
 <?php
 namespace Ws;
-use http\Exception\RuntimeException;
+use RuntimeException;
 use Root\Lib\Websocket;
+use Root\Lib\WsService;
 
 /**
  * @purpose ws服务
  * @author administrator
  * @time 2023-09-28 10:47:59
  */
-class Just extends Websocket
+class Just extends WsService
 {
     /** ws 监听ip */
     public string $host= '0.0.0.0';
