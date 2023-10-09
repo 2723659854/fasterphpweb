@@ -714,14 +714,16 @@ php start.php make:ws Just
 ```php 
 <?php
 namespace Ws;
-use Root\Lib\Websocket;
+use RuntimeException;
+use Root\Lib\WsSelectorService;
+use Root\Lib\WsEpollService;
 
 /**
  * @purpose ws服务
  * @author administrator
  * @time 2023-09-28 10:47:59
  */
-class Just extends Websocket
+class Just extends WsEpollService
 {
     /** ws 监听ip */
     public string $host= '0.0.0.0';
@@ -756,7 +758,8 @@ class Just extends Websocket
                 $this->sendTo($socket,'Pong');
                 break;
             default:
-                $this->sendTo($socket,['data'=>$message,'time'=>date('Y-m-d H:i:s')]);
+                /** 发送当前时间 ，和客户端地址 */
+                $this->sendTo($socket,['data'=>$message,'time'=>date('Y-m-d H:i:s'),'ip'=>$this->getUserInfoBySocket($socket)->remote_address??'']);
         }
     }
 
@@ -768,6 +771,18 @@ class Just extends Websocket
     public function onClose($socket)
     {
         // TODO: Implement onClose() method.
+    }
+
+    /**
+     * 异常事件
+     * @param $socket
+     * @param \Exception $exception
+     * @return mixed|void
+     */
+    public function onError($socket, \Exception $exception)
+    {
+        //var_dump($exception->getMessage());
+        $this->close($socket);
     }
 }
 ```
@@ -800,6 +815,15 @@ return [
     ]
 ];
 ```
+为方便测试，可以仅开启某一个ws服务，
+```bash 
+php songshu ws:start Ws.Just
+```
+或者
+```bash 
+php start.php ws:start Ws.Just
+```
+需注意命名空间大小写。须严格匹配。
 
 #### 客户端测试代码
 ```php 
