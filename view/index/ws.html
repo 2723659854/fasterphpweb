@@ -6,7 +6,7 @@
 </head>
 <body>
 <center><h3>ws服务演示</h3></center>
-<p>本页面仅作为演示，请根据自己的也无需求调整逻辑。</p>
+<p>本页面仅作为演示，请根据自己的业务需求调整逻辑。</p>
 <input type="text" name = "content" id = "say"/>
 <button onclick="send()">发送消息</button>
 <div id = 'content'></div>
@@ -33,12 +33,7 @@
     /** 发送消息*/
     function send(){
         var content = document.getElementById('say').value;
-        if (content){
-            connection.send(content);
-        }else{
-            connection.send('date');
-        }
-
+        connection.send(content);
     }
 
      function onopen () {
@@ -72,7 +67,7 @@
         /** 将接收到的消息追加到页面 */
         var own =document.getElementById('content')
         var content  = "<p>"+e.data+"</p>"
-        own.innerHTML = own.innerHTML+content;
+        own.innerHTML = content + own.innerHTML;
     }
 </script>
 </body>
