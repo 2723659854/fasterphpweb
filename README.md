@@ -9,7 +9,7 @@
 ```bash
 composer create-project xiaosongshu/fasterphpweb
 ```
-###启动项目
+### 启动项目
 
 ```bash 
 php start.php start  或者 php songshu start 
@@ -170,7 +170,7 @@ $name = $request->post('name','tom');
 ```php 
 $data = $request->all();
 ```
-####获取原始请求包体
+#### 获取原始请求包体
 
 ```php 
 $post = $request->rawBody();
@@ -183,7 +183,7 @@ $request->header();
 /** 获取指定的header参数host */
 $request->header('host');
 ```
-####获取原始querystring
+#### 获取原始querystring
 
 ```php 
 $request->queryString()
@@ -199,12 +199,12 @@ $request->cookie('username', 'zhangsan');
 
 ### 响应
 
-####设置cookie
+#### 设置cookie
 
 ```php 
 return \response()->cookie('zhangsan','tom');
 ```
-####返回视图
+#### 返回视图
 
 ```php 
 return view('index/database', ['var' => $var, 'str' => date('Y-m-d H:i:s'), 'user' => json_encode($data), 'app_name' => $app_name]);
@@ -221,7 +221,7 @@ return response()->withBody('返回的数据');
 ```php 
  return redirect('/admin/user/list');
 ```
-####下载文件
+#### 下载文件
 
 ```php 
  /** 直接下载 */
@@ -229,7 +229,7 @@ return response()->withBody('返回的数据');
  /** 设置别名 */
  return response()->download(public_path().'/favicon.ico','demo.ico');   
 ```
-####设置响应头
+#### 设置响应头
 
 ```php 
  return \response(['status'=>200,'msg'=>'ok','data'=>$data],200,['Content-Type'=>'application/json']);
@@ -704,7 +704,7 @@ $res = Talk::where([['id', '>', 0]]) ->orderBy(['created'=>'asc']) ->page(1, 10)
 
 ?>
 ```
-###ws服务（websocket）
+### ws服务（websocket）
 
 创建ws服务
 ```bash 
@@ -787,7 +787,7 @@ class Just extends WsEpollService
 }
 ```
 
-####开启服务 config/ws.php
+###  开启服务 config/ws.php
 ```php 
 <?php
 return [
@@ -826,45 +826,77 @@ php start.php ws:start Ws.Just
 需注意命名空间大小写。须严格匹配。
 
 #### 客户端测试代码
-```php 
+```html 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>测试一下ws</title>
+    <title>ws服务演示</title>
 </head>
 <body>
-<div onclick="send()">发送</div>
+<center><h3>ws服务演示</h3></center>
+<p>本页面仅作为演示，请根据自己的业务需求调整逻辑。</p>
+<input type="text" name = "content" id = "say"/>
+<button onclick="send()">发送消息</button>
 <div id = 'content'></div>
 <script>
     var connection = null;
+    var ping = null;
     /** 连接ws服务*/
     window.onload = function() {
-        console.log('页面加载完成了！');
-        connection = new WebSocket('ws://localhost:9501');
-        connection.onopen = function () {
-            connection.send('hi'); 
-            console.log("连接成功，发送数据")
-            /** 每隔5秒发送一次心跳 */
-            setInterval(function() {
-                connection.send('Ping');
-            }, 5000);
-        };
-        /** 错误 */
-        connection.onerror = function (error) {
-            console.log(error)
-        };
-        /** 接收到消息 */
-        connection.onmessage = function (e) {
-            console.log('Server: ' + e.data);
-            var own =document.getElementById('content')
-            var content  = "<p>"+e.data+"</p>"
-            own.innerHTML = own.innerHTML+content;
-        };
+        console.log('页面加载完成了！连接ws服务器');
+        connect();
     };
+    /** 连接ws */
+    function connect(){
+        console.log("连接服务器")
+        /** 连接服务器 */
+        connection = new WebSocket('ws://localhost:9501');
+        /** 设置回调事件 */
+        connection.onopen = onopen;
+        connection.onerror = onerror;
+        connection.onclose = onclose;
+        connection.onmessage = onmessage;
+    }
+
     /** 发送消息*/
     function send(){
-        connection.send('date');
+        var content = document.getElementById('say').value;
+        connection.send(content);
+    }
+
+     function onopen () {
+        connection.send('hi');
+        console.log("连接成功，发送数据")
+        /** 发送心跳 */
+        ping = setInterval(function() {
+            connection.send('Ping');
+        }, 5000);
+    }
+    /** 错误 */
+      function onerror (error) {
+        console.log(error)
+    }
+    /** 连接断开了 */
+    function onclose (){
+        /** 重连服务器 */
+        console.log("重新连接服务器")
+        /** 清除心跳 */
+        clearInterval(ping)
+        /** 3秒后重连 */
+        setTimeout(function (){
+            connect();
+        },3000)
+
+
+    }
+    /** 接收到消息 */
+    function onmessage (e) {
+        console.log('Server: ' + e.data);
+        /** 将接收到的消息追加到页面 */
+        var own =document.getElementById('content')
+        var content  = "<p>"+e.data+"</p>"
+        own.innerHTML = content + own.innerHTML;
     }
 </script>
 </body>
