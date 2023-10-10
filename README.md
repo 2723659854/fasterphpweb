@@ -686,23 +686,49 @@ G方法只会实例化一次对象，然后存储在内存中，下一次调用�
 而M方法每一次都是重新实例化一个新的对象。<br>
 
 #### 自定义命令
-
+创建
+```bash 
+php start.php make:command Demo
+```
+生成的自定义命令类如下：
 ```php 
 <?php
 namespace App\Command;
-/** 引入命令行基类 */
+
 use Root\Lib\BaseCommand;
-/** 创建自定义命令类 继承基类*/
-class DemoCommand  extends BaseCommand
+/**
+ * @purpose 用户自定义命令
+ * @author administrator
+ * @time 2023-10-10 09:11:34
+ */
+class Demo extends BaseCommand
 {
 
-    /** @var string $command 命令触发字段，必填 */
-    public $command = 'check:wrong';
-
-    /** 业务逻辑 必填 */
+    /** @var string $command 命令触发字段，请替换为你自己的命令，执行：php start.php your:command */
+    public $command = 'Demo';
+    
+     /**
+     * 配置参数
+     * @return void
+     */
+    public function configure(){
+        /** 必选参数 */
+        $this->addArgument('argument','这个是参数argument的描述信息');
+        /** 可传参数 */
+        $this->addOption('option','这个是option参数的描述信息');
+    }
+    
+    /**
+     * 清在这里编写你的业务逻辑
+     * @return void
+     */
     public function handle()
     {
-        echo "请在这里写你的业务逻辑\r\n";
+        /** 获取必选参数 */
+        var_dump($this->getOption('argument'));
+        /** 获取可选参数 */
+        var_dump($this->getOption('option'));
+        $this->info("请在这里编写你的业务逻辑");
     }
 }
 ```

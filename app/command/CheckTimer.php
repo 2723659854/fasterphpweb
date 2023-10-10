@@ -3,7 +3,6 @@ namespace App\Command;
 
 use Root\Lib\BaseCommand;
 use Root\Timer;
-use Root\TimerData;
 
 /**
  * @purpose 用户自定义命令
