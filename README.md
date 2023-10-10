@@ -1,4 +1,3 @@
-
 框架简介
 <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;socketweb是一款常驻内存的轻量级的php框架，遵循常用的mvc架构。</p>
 <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;本框架对定时器和队列，mysql数据库,redis缓存进行了简单封装，并且保留了部分代码实例。</p>
@@ -9,11 +8,13 @@
 ```bash
 composer create-project xiaosongshu/fasterphpweb
 ```
+
 ### 启动项目
 
 ```bash 
 php start.php start  或者 php songshu start 
 ```
+
 ### 目录结构
 
 ~~~
@@ -46,7 +47,7 @@ php start.php start  或者 php songshu start
 |-- songshu                    <服务启动文件>
 ~~~
 
-###  快速开始
+### 快速开始
 
 1，导入mysql文件到你的数据库或者自己创建 <br>
 2，进入项目根目录:cd /your_project_root_path<br>
@@ -62,10 +63,8 @@ php start.php start  或者 php songshu start
 12，本项目支持普通的redis的list队列，同时支持rabbitmq队列，如果需要使用延时队列，需要安装插件<br>
 13，在windows上默认使用select的io多路复用模型，在linux上默认使用epoll的io多路复用模型<br>
 14，但是在linux系统上，如果使用开启后台运行，加入不支持epoll模型，则使用的多进程同步阻塞io模型。<br>
-15，系统环境搭建，默认需要php,mysql,redis，而rabbitmq不是必须的。你可以自己搭建所需要的环境，也可以
-使用本项目下面的docker配置。<br>
-16，假设你使用docker配置，首先要安装docker，然后执行命令：docker-compose up -d 启动环境。注意修改
-docker-compose.yaml 里面的目录映射，端口映射。<br>
+15，系统环境搭建，默认需要php,mysql,redis，而rabbitmq不是必须的。你可以自己搭建所需要的环境，也可以 使用本项目下面的docker配置。<br>
+16，假设你使用docker配置，首先要安装docker，然后执行命令：docker-compose up -d 启动环境。注意修改 docker-compose.yaml 里面的目录映射，端口映射。<br>
 
 ### 注意
 
@@ -82,7 +81,6 @@ docker-compose.yaml 里面的目录映射，端口映射。<br>
 ## 项目地址
 
 https://github.com/2723659854/fasterphpweb
-
 
 ### 项目文档
 
@@ -127,6 +125,7 @@ class Index
     }
 }
 ```
+
 ### 请求
 
 ```php 
@@ -149,6 +148,7 @@ class Index
         return view('index/database', ['var' => $var, 'str' => date('Y-m-d H:i:s'), 'user' => json_encode($data), 'app_name' => $app_name]);
     }
 ```
+
 #### 获取get参数
 
 ```php 
@@ -157,6 +157,7 @@ $data = $request->get();
 /** 获取指定键名参数 */
 $name = $request->get('name','tom');
 ```
+
 #### 获取post参数
 
 ```php 
@@ -165,16 +166,19 @@ $data = $request->post();
 /** 获取指定键名参数 */
 $name = $request->post('name','tom');
 ```
+
 #### 获取所有请求参数
 
 ```php 
 $data = $request->all();
 ```
+
 #### 获取原始请求包体
 
 ```php 
 $post = $request->rawBody();
 ```
+
 #### 获取header头部信息
 
 ```php 
@@ -183,11 +187,13 @@ $request->header();
 /** 获取指定的header参数host */
 $request->header('host');
 ```
+
 #### 获取原始querystring
 
 ```php 
 $request->queryString()
 ```
+
 #### 获取cookie
 
 ```php 
@@ -204,11 +210,13 @@ $request->cookie('username', 'zhangsan');
 ```php 
 return \response()->cookie('zhangsan','tom');
 ```
+
 #### 返回视图
 
 ```php 
 return view('index/database', ['var' => $var, 'str' => date('Y-m-d H:i:s'), 'user' => json_encode($data), 'app_name' => $app_name]);
 ```
+
 #### 返回数据
 
 ```php
@@ -216,11 +224,13 @@ return response(['status'=>200,'msg'=>'ok','data'=>$data]);
 /** 会覆盖response里面的数据 */
 return response()->withBody('返回的数据');
 ```
+
 #### 重定向
 
 ```php 
  return redirect('/admin/user/list');
 ```
+
 #### 下载文件
 
 ```php 
@@ -229,6 +239,7 @@ return response()->withBody('返回的数据');
  /** 设置别名 */
  return response()->download(public_path().'/favicon.ico','demo.ico');   
 ```
+
 #### 设置响应头
 
 ```php 
@@ -248,6 +259,7 @@ return response([])->withStatus(200);
 ### 模板渲染
 
 <br>默认支持html文件，变量使用花括号表示{}，暂不支持for,foreach,if等复杂模板运算 <br>
+
 ```html
 <!DOCTYPE html>
 <html lang="en">
@@ -269,6 +281,7 @@ return response([])->withStatus(200);
 </html>
 
 ```
+
 #### 模型层
 
 #### 默认使用mysql数据库
@@ -350,6 +363,7 @@ return [
     'database' => 0,
 ];
 ```
+
 #### 缓存的使用
 
 ```php 
@@ -365,7 +379,7 @@ return [
 
 ### 路由
 
-###  配置文件
+### 配置文件
 
 ```php 
 # config/route.php
@@ -409,7 +423,7 @@ return [
 
 ```
 
-###  注解路由
+### 注解路由
 
 ```php 
    /**
@@ -434,15 +448,17 @@ return [
     }
 ```
 
-###  中间件
+### 中间件
 
-###  创建中间件
+### 创建中间件
 
 ```bash 
 php songshu make:middleware Auth
 php start.php make:middleware Auth
 ```
+
 中间件内容如下：
+
 ```php 
 <?php
 namespace App\Middleware;
@@ -468,11 +484,14 @@ class Auth implements MiddlewareInterface
 ### 使用中间件
 
 1,路由
+
 ```php 
 /** 测试中间件 */
 ['GET','/middle',[\App\Controller\Index\Index::class,'middle'],[\App\Middleware\MiddlewareA::class,\App\Middleware\MiddlewareB::class]]
 ```
+
 2,注解
+
 ```php 
 /**
      * 测试注解路由和中间件
@@ -491,6 +510,7 @@ class Auth implements MiddlewareInterface
 只能在linux系统中使用定时器，或者使用docker环境。
 
 ### 添加定时任务
+
 ```php 
 //第一种方式
 /** 使用回调函数投递定时任务 */
@@ -542,7 +562,6 @@ return [
 
 
 ```
-
 
 ### rabbitmq消息队列
 
@@ -600,8 +619,13 @@ return [
     ],
 ];
 ```
+若不满足需求，可以使用插件
+```bash 
+composer require xiaosongshu/rabbitmq
+```
 
 ### elasticsearch 搜索
+
 ```php 
 use root\ESClient;
 
@@ -615,20 +639,54 @@ public function search()
 }
 # 其他用法参照 root\ESClient::class的源码，
 ```
+elasticsearch 支持的方法<br>
+```php 
+创建索引：createIndex
+创建表结构：createMappings
+删除索引：deleteIndex
+获取索引详情：getIndex
+新增一行数据：create
+批量写入数据：insert
+根据id批量删除数据：deleteMultipleByIds
+根据Id 删除一条记录：deleteById
+获取表结构：getMap
+根据id查询数据：find
+根据某一个关键字搜索：search
+使用原生方式查询es的数据：nativeQuerySearch
+多个字段并列查询，多个字段同时满足需要查询的值：andSearch
+or查询  多字段或者查询：orSearch
+根据条件删除数据：deleteByQuery
+根据权重查询：searchByRank
+获取所有数据：all
+添加脚本：addScript
+获取脚本：getScript
+使用脚本查询：searchByScript
+使用脚本更新文档：updateByScript
+索引是否存在：IndexExists
+根据id更新数据：updateById
+```
+若不满足需求，可以使用插件
+```bash 
+composer require xiaosongshu/elasticsearch
+```
 
-####  加入容器
+#### 加入容器
+
 解放双手，不需要每一次都去实例化需要调用的对象。使用容器简单方便。<br>
+
 ```php 
 /** G方法： */
 G(App\Service\DemoService::class)->talk(1);
 /** M方法：*/
 M(App\Service\DemoService::class)->talk(1);
 ```
+
 G方法和M方法的区别是：<br>
 G方法只会实例化一次对象，然后存储在内存中，下一次调用直接从内存中获取。<br>
 而M方法每一次都是重新实例化一个新的对象。<br>
 
-####  自定义命令
+#### 自定义命令
+
 ```php 
 <?php
 namespace App\Command;
@@ -649,17 +707,22 @@ class DemoCommand  extends BaseCommand
 }
 ```
 
-
 #### sqlite数据库支持
+
 创建模型
+
 ```bash 
 php start.php make:sqlite Talk
 ```
+
 或者
+
 ```bash 
 php songshu make:sqlite Talk
 ```
+
 模型内容如下
+
 ```php 
 <?php
 
@@ -685,7 +748,9 @@ class Talk extends SqliteBaseModel
 
 }
 ```
+
 用法
+
 ```php 
 <?php
 use App\SqliteModel\Talk;
@@ -704,13 +769,17 @@ $res = Talk::where([['id', '>', 0]]) ->orderBy(['created'=>'asc']) ->page(1, 10)
 
 ?>
 ```
+
 ### ws服务（websocket）
 
 创建ws服务
+
 ```bash 
 php start.php make:ws Just
 ```
+
 自动生成的ws服务类如下
+
 ```php 
 <?php
 namespace Ws;
@@ -722,6 +791,7 @@ use Root\Lib\WsEpollService;
  * @purpose ws服务
  * @author administrator
  * @time 2023-09-28 10:47:59
+ * @note 这是一个websocket服务端示例
  */
 class Just extends WsEpollService
 {
@@ -742,6 +812,12 @@ class Just extends WsEpollService
     public function onConnect($socket)
     {
         // TODO: Implement onConnect() method.
+        $allClients = $this->getAllUser();
+        $clients = [];
+        foreach ($allClients as $client){
+            $clients[]=$client->id;
+        }
+        $this->sendTo($socket,['type'=>'getAllClients','content'=>$clients,'from'=>'server','to'=>$this->getUserInfoBySocket($socket)->id]);
     }
 
     /**
@@ -753,15 +829,51 @@ class Just extends WsEpollService
     public function onMessage($socket, $message)
     {
         // TODO: Implement onMessage() method.
-        switch ($message){
-            case 'Ping':
-                $this->sendTo($socket,'Pong');
+
+        /** 消息格式 */
+        # type:[ping,message,getAllClients],content:[string,array,json],to:[uid,all]
+        $message = json_decode($message,true);
+        /** 消息类型 */
+        $type = $message['type']??null;
+        /** 消息体 */
+        $content = $message['content']??'';
+        /** 接收人 */
+        $sendTo = $message['to']??'all';
+        /** 处理消息 */
+        switch ($type){
+            /** 心跳 */
+            case 'ping':
+                $this->sendTo($socket,['type'=>'pong','content'=>'pong','from'=>'sever','to'=>$this->getUserInfoBySocket($socket)->id??0]);
+                break;
+                /** 消息 */
+            case 'message':
+                if ($sendTo=='all'){
+                    $this->sendToAll(['type'=>'message','content'=>$content,'to'=>'all','from'=>$this->getUserInfoBySocket($socket)->id??0]);
+                }else{
+                    $to = $this->getUserInfoByUid($sendTo);
+                    $from = $this->getUserInfoBySocket($socket);
+                    if ($to){
+                        $this->sendTo($to->socket,['type'=>'message','content'=>$content,'to'=>$to->id??0,'from'=>$from->id??0]);
+                    }else{
+                        $this->sendTo($socket,['type'=>'message','content'=>'send message fail,the client is off line !','to'=>$from->id??0,'from'=>'server']);
+                    }
+                }
+                break;
+                /** 获取所有的客户端 */
+            case "getAllClients":
+                $allClients = $this->getAllUser();
+                $clients = [];
+                foreach ($allClients as $client){
+                    $clients[]=$client->id;
+                }
+                $this->sendTo($socket,['type'=>'getAllClients','content'=>$clients,'from'=>'server','to'=>$this->getUserInfoBySocket($socket)->id]);
                 break;
             default:
-                /** 发送当前时间 ，和客户端地址 */
-                $this->sendTo($socket,['data'=>$message,'time'=>date('Y-m-d H:i:s'),'ip'=>$this->getUserInfoBySocket($socket)->remote_address??'']);
+                /** 未识别的消息类型 */
+                $this->sendTo($socket,['type'=>'error','content'=>'wrong message type !','from'=>'server','to'=>$this->getUserInfoBySocket($socket)->id]);
         }
     }
+
 
     /**
      * 连接断开事件
@@ -787,13 +899,14 @@ class Just extends WsEpollService
 }
 ```
 
-###  开启服务 config/ws.php
+### 开启服务 config/ws.php
+
 ```php 
 <?php
 return [
     'ws1'=>[
         /** 是否开启 */
-        'enable'=>true,
+        'enable'=>false,
         /** 服务类 */
         'handler'=>\Ws\TestWs::class,
         /** 监听ip */
@@ -811,47 +924,65 @@ return [
         'enable'=>true,
         'handler'=>\Ws\Just::class,
         'host'=>'0.0.0.0',
-        'port'=>'9501'
-    ]
+        'port'=>'9503'
+    ],
 ];
 ```
+
 为方便测试，可以仅开启某一个ws服务，
+
 ```bash 
 php songshu ws:start Ws.Just
 ```
+
 或者
+
 ```bash 
 php start.php ws:start Ws.Just
 ```
+
 需注意命名空间大小写。须严格匹配。
 
-#### 客户端测试代码
+#### javaScript客户端测试代码
+
 ```html 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>ws服务演示</title>
+    <title>websocket服务演示</title>
 </head>
 <body>
 <center><h3>ws服务演示</h3></center>
-<p>本页面仅作为演示，请根据自己的业务需求调整逻辑。</p>
-<input type="text" name = "content" id = "say"/>
-<button onclick="send()">发送消息</button>
-<div id = 'content'></div>
+<p>本页面仅作为演示，请根据自己的业务需求调整逻辑页面展示效果。</p>
+<input type="text" name="content" id="say" placeholder="请输入消息内容"/>
+<input type="text" name="uuid" id="uuid" placeholder="请输入消息接收人UUID"/>
+<button onclick="send()">发送广播消息</button>
+<button onclick="sendToOne()">发送私聊消息</button>
+<button onclick="getUser()">刷新在线用户</button>
+<div style="border: black solid 1px;width: 300px">
+    <h3>用户列表区</h3>
+    <div id="user"></div>
+</div>
+<div>
+    <h3>消息内容区</h3>
+    <div id='content'></div>
+</div>
+
 <script>
     var connection = null;
     var ping = null;
     /** 连接ws服务*/
-    window.onload = function() {
+    window.onload = function () {
         console.log('页面加载完成了！连接ws服务器');
         connect();
     };
+
     /** 连接ws */
-    function connect(){
+    function connect() {
         console.log("连接服务器")
         /** 连接服务器 */
-        connection = new WebSocket('ws://localhost:9501');
+        connection = new WebSocket('ws://localhost:9503');
         /** 设置回调事件 */
         connection.onopen = onopen;
         connection.onerror = onerror;
@@ -860,57 +991,140 @@ php start.php ws:start Ws.Just
     }
 
     /** 发送消息*/
-    function send(){
+    function send() {
         var content = document.getElementById('say').value;
-        connection.send(content);
+        let msg = {
+            type: 'message',
+            content: content,
+            to: 'all'
+        };
+        connection.send(JSON.stringify(msg));
     }
 
-     function onopen () {
-        connection.send('hi');
+    /**
+     * 发送私聊信息
+     */
+    function sendToOne() {
+        var content = document.getElementById('say').value;
+        var uuid = document.getElementById('uuid').value;
+        let msg = {
+            type: 'message',
+            content: content,
+            to: uuid
+        };
+        connection.send(JSON.stringify(msg));
+    }
+
+    /** 连接成功 */
+    function onopen() {
+        let msg = {
+            type: "ping",
+        };
+        connection.send(JSON.stringify(msg));
         console.log("连接成功，发送数据")
         /** 发送心跳 */
-        ping = setInterval(function() {
-            connection.send('Ping');
-        }, 5000);
+        ping = setInterval(function () {
+            let msg = {
+                type: "ping",
+            };
+            connection.send(JSON.stringify(msg));
+        }, 10000);
     }
+
     /** 错误 */
-      function onerror (error) {
+    function onerror(error) {
         console.log(error)
     }
+
     /** 连接断开了 */
-    function onclose (){
+    function onclose() {
         /** 重连服务器 */
         console.log("重新连接服务器")
         /** 清除心跳 */
         clearInterval(ping)
         /** 3秒后重连 */
-        setTimeout(function (){
+        setTimeout(function () {
             connect();
-        },3000)
-
-
+        }, 10000)
     }
+
     /** 接收到消息 */
-    function onmessage (e) {
-        console.log('Server: ' + e.data);
-        /** 将接收到的消息追加到页面 */
-        var own =document.getElementById('content')
-        var content  = "<p>"+e.data+"</p>"
-        own.innerHTML = content + own.innerHTML;
+    function onmessage(e) {
+        var data = JSON.parse(e.data);
+        /** 获取的在线用户列表 */
+        if (data.type == 'getAllClients') {
+            var string = '';
+            data.content.forEach(function (item, index) {
+                string = string + "<p>" + item + "</p>"
+            })
+            document.getElementById('user').innerHTML = string
+        }else{
+            /** 将接收到的普通聊天消息追加到页面 */
+            var own = document.getElementById('content')
+            var content = "<p>" + e.data + "</p>"
+            own.innerHTML = content + own.innerHTML;
+        }
+    }
+
+    /**
+     * 获取在线用户
+     */
+    function getUser() {
+        let msg = {
+            type: 'getAllClients',
+        };
+        connection.send(JSON.stringify(msg));
     }
 </script>
 </body>
 </html>
 ```
+
+#### php版本的websocket客户端
+以下是客户端使用示例。<br>
+首次使用需要初始化，调用setUp()设置服务端ip和port。<br>
+回调函数onMessage()方法负责处理用户的业务逻辑。<br>
+start()方法是阻塞函数，负责监听服务端消息。<br>
+send()函数负责发送消息，可以在任意地方调用。<br>
+get()方法负责读取一条消息，可以在任意地方调用。<br>
+```php 
+ use Root\Lib\WsClient;
+
+ /** 初始化 设置需要连接的ws服务器 */
+ WsClient::setUp('127.0.0.1',9503);
+ /** 发送一条数据 */
+ WsClient::send(['type'=>'ping']);
+ /** 读取一条数据 */
+ var_dump(WsClient::get());
+ /** 设置消息回调函数，负责处理接收到消息后逻辑，若不设置，则自动丢弃消息 */
+ WsClient::$onMessage = function ($message){
+            $message = json_decode($message,true);
+            /** 消息类型 */
+            $type = $message['type']??null;
+            /** 消息体 */
+            $content = $message['content']??'';
+            /** 接收人 */
+            $sendTo = $message['to']??'all';
+            if ($sendTo=='all'){
+                var_dump("广播的消息",$content);
+            }else{
+                var_dump("私聊给我的消息",$content);
+            }
+        };
+ /** 开启客户端监听 */
+ WsClient::start();
+```
+
 #### 命令行工具
+
 创建自定义命令行： php start.php make:command Test  <br>
 创建控制器： php start.php make:controller a/b/c <br>
 创建mysql模型: php start.php make:model index/user <br>
 创建sqlite模型: php start.php make:sqlite Demo<br>
 创建中间件: php start.php make:middleware Auth<br>
 创建ws服务：php start.php make:ws Just<br>
+
 #### 其他
-现在的网站都已经发展到前后端分离了，默认是无状态请求，cookie几乎没有用了。
-所以没有编写cookie和session操作类了。
-你可以使用token来识别用户，而不是cookie或者session。
+
+现在的网站都已经发展到前后端分离了，默认是无状态请求，cookie几乎没有用了。 所以没有编写cookie和session操作类了。 你可以使用token来识别用户，而不是cookie或者session。
 

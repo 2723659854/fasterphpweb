@@ -20,6 +20,6 @@ return [
         'enable'=>true,
         'handler'=>\Ws\Just::class,
         'host'=>'0.0.0.0',
-        'port'=>'9501'
+        'port'=>'9503'
     ],
 ];

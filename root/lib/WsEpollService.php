@@ -16,9 +16,6 @@ abstract class WsEpollService
     /** @var false|resource tcp 服务 */
     public $serv;
 
-    /** @var callable $onMessage 消息处理事件 */
-    public $onMessage;
-
     /** @var string $host 监听的ip和协议 */
     public string $host = '0.0.0.0';
 
@@ -89,6 +86,12 @@ abstract class WsEpollService
                         if (!$user->handshake){
                             /** 握手 */
                             $this->dohandshake($user,$buffer);
+                            /** 调用用户自定义的onConnect方法 */
+                            try {
+                                $this->onConnect($cli);
+                            }catch (\Exception|\RuntimeException $exception){
+                                $this->onError($cli,$exception);
+                            }
                         }else{
                             /** 处理用户信息 */
                             $this->process($user, $buffer);
@@ -132,12 +135,6 @@ abstract class WsEpollService
         array_push($this->users, $user);
         /** 保存连接 */
         array_push($this->sockets, $socket);
-        /** 调用用户自定义的onConnect方法 */
-        try {
-            $this->onConnect($socket);
-        }catch (\Exception|\RuntimeException $exception){
-            $this->onError($socket,$exception);
-        }
     }
 
     /**
@@ -275,6 +272,30 @@ abstract class WsEpollService
     }
 
     /**
+     * 根据uid获取客户端
+     * @param $uid
+     * @return mixed|null
+     */
+    protected function getUserInfoByUid($uid){
+        $found = null;
+        foreach ($this->users as $user) {
+            if ($user->id == $uid) {
+                $found = $user;
+                break;
+            }
+        }
+        return $found;
+    }
+
+    /**
+     * 获取所有的用户
+     * @return array
+     */
+    protected function getAllUser(){
+        return $this->users;
+    }
+
+    /**
      * 关闭客户端连接
      * @param $socket
      * @return void
@@ -327,7 +348,6 @@ abstract class WsEpollService
      */
     private function dohandshake(&$user, $buffer)
     {
-        file_put_contents(public_path().'/some.txt',$buffer);
         /** 解码http请求头部信息 */
         list($resource, $host, $upgrade, $connection, $key, $protocol, $version, $origin, $data) = $this->getheaders($buffer);
         /** 将获取到的key和常量258EAFA5-E914-47DA-95CA-C5AB0DC85B11拼接后加密，这个常量是文档约定俗成的，是一个常量 */

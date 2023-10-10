@@ -1,4 +1,5 @@
 <?php
+
 namespace Root\Lib;
 
 /**
@@ -26,7 +27,7 @@ abstract class WsSelectorService
     public function start()
     {
         /** 首先开启服务端监听 */
-        $master        = $this->WebSocket($this->host, $this->port);
+        $master = $this->WebSocket($this->host, $this->port);
         /** 保存服务端连接 ，必须保存保存到内存中，否则后面的连接马上就销毁，无法建立连接 */
         $this->sockets = array($master);
         while (true) {
@@ -35,7 +36,7 @@ abstract class WsSelectorService
             /** 这里使用了select模型监听io读写事件 */
             /** 客户端连接写入数据后select需要手动遍历连接， */
 
-            stream_select( $changed, $write, $except, 60);
+            stream_select($changed, $write, $except, 60);
 
 
             /** 遍历每一个连接 */
@@ -46,27 +47,27 @@ abstract class WsSelectorService
                     /** 读取服务端连接的数据 socket_accept需要配合socket_create， socket_bind，socket_listen,socket_recv， socket_write，socket_close使用*/
                     //$client = socket_accept($master);
                     /** 改版后 ，stream_socket_accept 配合fread,fwrite，fclose使用*/
-                    $client = stream_socket_accept($master,0,$remote_address); //阻塞监听 设置超时0，并获取客户端地址
+                    $client = stream_socket_accept($master, 0, $remote_address); //阻塞监听 设置超时0，并获取客户端地址
 
                     /** 没有数据，说明没有新的客户端发起连接请求 */
                     if ($client < 0) {
                         continue;
                     } else {
                         /** 保存客户端到内存 */
-                        $this->connect($client,$remote_address);
+                        $this->connect($client, $remote_address);
                     }
                 } else {
 
                     /** 如果是客户端，则读取连接中的数据 */
                     //$bytes = @socket_recv($socket, $buffer, 2048, 0);
                     $buffer = '';
-                    $flag    = true;
+                    $flag = true;
                     while ($flag) {
                         $_content = fread($socket, 1024);
                         if (strlen($_content) < 1024) {
                             $flag = false;
                         }
-                        $buffer = $buffer. $_content;
+                        $buffer = $buffer . $_content;
                     }
                     $bytes = $buffer;
 
@@ -79,7 +80,13 @@ abstract class WsSelectorService
 
                         if (!$user->handshake) {
                             /** 如果没有握手，则先握手 */
-                            $res = $this->dohandshake($user, $buffer);
+                            $this->dohandshake($user, $buffer);
+                            /** 调用用户自定义的onConnect方法 */
+                            try {
+                                $this->onConnect($socket);
+                            } catch (\Exception|\RuntimeException $exception) {
+                                $this->onError($socket, $exception);
+                            }
                         } else {
                             /** 处理客户端发送的数据 */
                             $this->process($user, $buffer);
@@ -102,23 +109,23 @@ abstract class WsSelectorService
         $decoded = null;
         /** 获取消息长度：返回buffer的第一个asc码 ，然后和127 进行补码运算 */
         /** "&" 按位与运算：只有对应的两个二进位均为1时，结果位才为1，否则为0。 参考地址：https://blog.csdn.net/alashan007/article/details/89885879 */
-        $len     = ord($buffer[1]) & 127;
+        $len = ord($buffer[1]) & 127;
         /** 长度为126 */
         if ($len === 126) {
             /** 获取masks，就是密码 */
             $masks = substr($buffer, 4, 4);
             /** 获取data，加密后的数据 */
-            $data  = substr($buffer, 8);
+            $data = substr($buffer, 8);
         } else if ($len === 127) {
             /** 获取masks */
             $masks = substr($buffer, 10, 4);
             /** 获取data */
-            $data  = substr($buffer, 14);
+            $data = substr($buffer, 14);
         } else {
             /** 获取masks */
             $masks = substr($buffer, 2, 4);
             /** 获取data */
-            $data  = substr($buffer, 6);
+            $data = substr($buffer, 6);
         }
         /** 逐个字节解码 */
         for ($index = 0; $index < strlen($data); $index++) {
@@ -164,7 +171,7 @@ abstract class WsSelectorService
         /** 调用用户定义的message方法处理业务逻辑 */
         try {
             $this->onMessage($user->socket, $action);
-        }catch (\Exception|\RuntimeException $exception){
+        } catch (\Exception|\RuntimeException $exception) {
             $this->onError($user->socket, $exception);
         }
 
@@ -190,12 +197,13 @@ abstract class WsSelectorService
      * @param $msg
      * @return void
      */
-    protected function sendToAll($msg){
+    protected function sendToAll($msg)
+    {
         if (!is_string($msg)) {
             $msg = json_encode($msg);
         }
-        foreach ($this->users as $user){
-            $this->send($user->socket,$msg);
+        foreach ($this->users as $user) {
+            $this->send($user->socket, $msg);
         }
     }
 
@@ -242,14 +250,15 @@ abstract class WsSelectorService
      * @param $port
      * @return false|resource
      */
-    public function WebSocket($address,$port){
+    public function WebSocket($address, $port)
+    {
         /** 配置socket流参数 */
         $context = stream_context_create();
         /** 设置端口复用 */
         stream_context_set_option($context, 'socket', 'so_reuseport', 1);
         stream_context_set_option($context, 'socket', 'so_reuseaddr', 1);
         /** 设置服务端：监听地址+端口 */
-        $socket = stream_socket_server('tcp://'.$address.':'.$port,$errno, $errstr, STREAM_SERVER_BIND | STREAM_SERVER_LISTEN, $context);
+        $socket = stream_socket_server('tcp://' . $address . ':' . $port, $errno, $errstr, STREAM_SERVER_BIND | STREAM_SERVER_LISTEN, $context);
         /** 设置非阻塞，语法是关闭阻塞 */
         stream_set_blocking($socket, 0);
         return $socket;
@@ -261,23 +270,17 @@ abstract class WsSelectorService
      * @return void
      * @note 保存客户端连接
      */
-    private function connect($socket,$remote_address)
+    private function connect($socket, $remote_address)
     {
-        $user            = new \stdClass();
-        $user->id        = uniqid();
-        $user->socket    = $socket;
+        $user = new \stdClass();
+        $user->id = uniqid();
+        $user->socket = $socket;
         $user->handshake = false;
         $user->remote_address = $remote_address;
         /** 保存客户端 */
         array_push($this->users, $user);
         /** 保存连接 */
         array_push($this->sockets, $socket);
-        /** 调用用户自定义的onConnect方法 */
-        try {
-            $this->onConnect($socket);
-        }catch (\Exception|\RuntimeException $exception){
-            $this->onError($socket,$exception);
-        }
     }
 
     /**
@@ -285,8 +288,25 @@ abstract class WsSelectorService
      * @param $socket
      * @return mixed|null
      */
-    protected function getUserInfoBySocket($socket){
+    protected function getUserInfoBySocket($socket)
+    {
         return $this->getuserbysocket($socket);
+    }
+
+    /**
+     * 根据uid获取客户端
+     * @param $uid
+     * @return mixed|null
+     */
+    protected function getUserInfoByUid($uid){
+        $found = null;
+        foreach ($this->users as $user) {
+            if ($user->id == $uid) {
+                $found = $user;
+                break;
+            }
+        }
+        return $found;
     }
 
     /**
@@ -294,7 +314,8 @@ abstract class WsSelectorService
      * @param $socket
      * @return void
      */
-    protected function close($socket){
+    protected function close($socket)
+    {
         $this->disconnect($socket);
     }
 
@@ -308,11 +329,11 @@ abstract class WsSelectorService
         /** 吊起用户自定义 的onClose方法 */
         try {
             $this->onClose($socket);
-        }catch (\Exception|\RuntimeException $exception){
-            $this->onError($socket,$exception);
+        } catch (\Exception|\RuntimeException $exception) {
+            $this->onError($socket, $exception);
         }
         $found = null;
-        $n     = count($this->users);
+        $n = count($this->users);
         for ($i = 0; $i < $n; $i++) {
             if ($this->users[$i]->socket == $socket) {
                 $found = $i;
@@ -347,7 +368,7 @@ abstract class WsSelectorService
         /** 将获取到的key和常量258EAFA5-E914-47DA-95CA-C5AB0DC85B11拼接后加密，这个常量是文档约定俗成的，是一个常量 */
         $acceptkey = base64_encode(sha1($key . "258EAFA5-E914-47DA-95CA-C5AB0DC85B11", true));
         /** 握手需要返回给客户端的数据 */
-        $upgrade   = "HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Accept: $acceptkey\r\n\r\n";
+        $upgrade = "HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Accept: $acceptkey\r\n\r\n";
         /** 将消息返回给客户端 */
         fwrite($user->socket, $upgrade, strlen($upgrade));
         /** 标记为已完成握手 */
@@ -411,6 +432,13 @@ abstract class WsSelectorService
         return $found;
     }
 
+    /**
+     * 获取所有的用户
+     * @return array
+     */
+    protected function getAllUser(){
+        return $this->users;
+    }
 
     /**
      * 连接成功事件
@@ -441,6 +469,6 @@ abstract class WsSelectorService
      * @param \Exception $exception
      * @return mixed
      */
-    public abstract function onError($socket,\Exception $exception);
+    public abstract function onError($socket, \Exception $exception);
 }
 

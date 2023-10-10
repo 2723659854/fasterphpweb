@@ -1,6 +1,7 @@
 <?php
 namespace App\Command;
 
+use Root\ESClient;
 use Root\Lib\BaseCommand;
 /**
  * @purpose 用户自定义命令
@@ -29,5 +30,7 @@ class CheckEs extends BaseCommand
     {
         $this->info("请在这里编写你的业务逻辑");
 
+        $client = new ESClient();
+        $client->andSearch();
     }
 }

@@ -2,27 +2,39 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>ws服务演示</title>
+    <title>websocket服务演示</title>
 </head>
 <body>
 <center><h3>ws服务演示</h3></center>
-<p>本页面仅作为演示，请根据自己的业务需求调整逻辑。</p>
-<input type="text" name = "content" id = "say"/>
-<button onclick="send()">发送消息</button>
-<div id = 'content'></div>
+<p>本页面仅作为演示，请根据自己的业务需求调整逻辑页面展示效果。</p>
+<input type="text" name="content" id="say" placeholder="请输入消息内容"/>
+<input type="text" name="uuid" id="uuid" placeholder="请输入消息接收人UUID"/>
+<button onclick="send()">发送广播消息</button>
+<button onclick="sendToOne()">发送私聊消息</button>
+<button onclick="getUser()">刷新在线用户</button>
+<div style="border: black solid 1px;width: 300px">
+    <h3>用户列表区</h3>
+    <div id="user"></div>
+</div>
+<div>
+    <h3>消息内容区</h3>
+    <div id='content'></div>
+</div>
+
 <script>
     var connection = null;
     var ping = null;
     /** 连接ws服务*/
-    window.onload = function() {
+    window.onload = function () {
         console.log('页面加载完成了！连接ws服务器');
         connect();
     };
+
     /** 连接ws */
-    function connect(){
+    function connect() {
         console.log("连接服务器")
         /** 连接服务器 */
-        connection = new WebSocket('ws://localhost:9501');
+        connection = new WebSocket('ws://localhost:9503');
         /** 设置回调事件 */
         connection.onopen = onopen;
         connection.onerror = onerror;
@@ -31,43 +43,89 @@
     }
 
     /** 发送消息*/
-    function send(){
+    function send() {
         var content = document.getElementById('say').value;
-        connection.send(content);
+        let msg = {
+            type: 'message',
+            content: content,
+            to: 'all'
+        };
+        connection.send(JSON.stringify(msg));
     }
 
-     function onopen () {
-        connection.send('hi');
+    /**
+     * 发送私聊信息
+     */
+    function sendToOne() {
+        var content = document.getElementById('say').value;
+        var uuid = document.getElementById('uuid').value;
+        let msg = {
+            type: 'message',
+            content: content,
+            to: uuid
+        };
+        connection.send(JSON.stringify(msg));
+    }
+
+    /** 连接成功 */
+    function onopen() {
+        let msg = {
+            type: "ping",
+        };
+        connection.send(JSON.stringify(msg));
         console.log("连接成功，发送数据")
         /** 发送心跳 */
-        ping = setInterval(function() {
-            connection.send('Ping');
-        }, 5000);
+        ping = setInterval(function () {
+            let msg = {
+                type: "ping",
+            };
+            connection.send(JSON.stringify(msg));
+        }, 10000);
     }
+
     /** 错误 */
-      function onerror (error) {
+    function onerror(error) {
         console.log(error)
     }
+
     /** 连接断开了 */
-    function onclose (){
+    function onclose() {
         /** 重连服务器 */
         console.log("重新连接服务器")
         /** 清除心跳 */
         clearInterval(ping)
         /** 3秒后重连 */
-        setTimeout(function (){
+        setTimeout(function () {
             connect();
-        },3000)
-
-
+        }, 10000)
     }
+
     /** 接收到消息 */
-    function onmessage (e) {
-        console.log('Server: ' + e.data);
-        /** 将接收到的消息追加到页面 */
-        var own =document.getElementById('content')
-        var content  = "<p>"+e.data+"</p>"
-        own.innerHTML = content + own.innerHTML;
+    function onmessage(e) {
+        var data = JSON.parse(e.data);
+        /** 获取的在线用户列表 */
+        if (data.type == 'getAllClients') {
+            var string = '';
+            data.content.forEach(function (item, index) {
+                string = string + "<p>" + item + "</p>"
+            })
+            document.getElementById('user').innerHTML = string
+        }else{
+            /** 将接收到的普通聊天消息追加到页面 */
+            var own = document.getElementById('content')
+            var content = "<p>" + e.data + "</p>"
+            own.innerHTML = content + own.innerHTML;
+        }
+    }
+
+    /**
+     * 获取在线用户
+     */
+    function getUser() {
+        let msg = {
+            type: 'getAllClients',
+        };
+        connection.send(JSON.stringify(msg));
     }
 </script>
 </body>

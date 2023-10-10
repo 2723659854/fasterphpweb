@@ -1,5 +1,5 @@
 GET / HTTP/1.1
-Host: localhost:9501
+Host: localhost:9503
 Connection: Upgrade
 Pragma: no-cache
 Cache-Control: no-cache
@@ -9,5 +9,6 @@ Origin: http://127.0.0.1:8000
 Sec-WebSocket-Version: 13
 Accept-Encoding: gzip, deflate, br
 Accept-Language: zh-CN,zh;q=0.9
-Sec-WebSocket-Key: 123
+Sec-WebSocket-Key: pKOQx6TuplbXTGJNRB1QJw==
 Sec-WebSocket-Extensions: permessage-deflate; client_max_window_bits
+

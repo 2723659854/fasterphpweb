@@ -8,6 +8,7 @@ use Root\Lib\WsEpollService;
  * @purpose ws服务
  * @author administrator
  * @time 2023-09-28 10:47:59
+ * @note 这是一个websocket服务端示例
  */
 class Just extends WsEpollService
 {
@@ -28,6 +29,12 @@ class Just extends WsEpollService
     public function onConnect($socket)
     {
         // TODO: Implement onConnect() method.
+        $allClients = $this->getAllUser();
+        $clients = [];
+        foreach ($allClients as $client){
+            $clients[]=$client->id;
+        }
+        $this->sendTo($socket,['type'=>'getAllClients','content'=>$clients,'from'=>'server','to'=>$this->getUserInfoBySocket($socket)->id]);
     }
 
     /**
@@ -40,22 +47,47 @@ class Just extends WsEpollService
     {
         // TODO: Implement onMessage() method.
 
-        var_dump($message);
-        switch ($message){
-            case 'Ping':
-                $this->sendTo($socket,'Pong');
+        /** 消息格式 */
+        # type:[ping,message,getAllClients],content:[string,array,json],to:[uid,all]
+        $message = json_decode($message,true);
+        /** 消息类型 */
+        $type = $message['type']??null;
+        /** 消息体 */
+        $content = $message['content']??'';
+        /** 接收人 */
+        $sendTo = $message['to']??'all';
+        /** 处理消息 */
+        switch ($type){
+            /** 心跳 */
+            case 'ping':
+                $this->sendTo($socket,['type'=>'pong','content'=>'pong','from'=>'sever','to'=>$this->getUserInfoBySocket($socket)->id??0]);
                 break;
-            case 'say':
-                $this->sendToAll('this is a special day ! 2023年10月10日11:56:54');
+                /** 消息 */
+            case 'message':
+                if ($sendTo=='all'){
+                    $this->sendToAll(['type'=>'message','content'=>$content,'to'=>'all','from'=>$this->getUserInfoBySocket($socket)->id??0]);
+                }else{
+                    $to = $this->getUserInfoByUid($sendTo);
+                    $from = $this->getUserInfoBySocket($socket);
+                    if ($to){
+                        $this->sendTo($to->socket,['type'=>'message','content'=>$content,'to'=>$to->id??0,'from'=>$from->id??0]);
+                    }else{
+                        $this->sendTo($socket,['type'=>'message','content'=>'send message fail,the client is off line !','to'=>$from->id??0,'from'=>'server']);
+                    }
+                }
+                break;
+                /** 获取所有的客户端 */
+            case "getAllClients":
+                $allClients = $this->getAllUser();
+                $clients = [];
+                foreach ($allClients as $client){
+                    $clients[]=$client->id;
+                }
+                $this->sendTo($socket,['type'=>'getAllClients','content'=>$clients,'from'=>'server','to'=>$this->getUserInfoBySocket($socket)->id]);
                 break;
             default:
-                if (!trim($message)){
-                    $message =$this->getRandString();
-                }
-                /** 发送当前时间 ，和客户端地址 */
-                $this->sendTo($socket,['data'=>$message,'time'=>date('Y-m-d H:i:s'),'ip'=>$this->getUserInfoBySocket($socket)->remote_address??'']);
-
-
+                /** 未识别的消息类型 */
+                $this->sendTo($socket,['type'=>'error','content'=>'wrong message type !','from'=>'server','to'=>$this->getUserInfoBySocket($socket)->id]);
         }
     }
 
