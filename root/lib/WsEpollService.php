@@ -327,6 +327,7 @@ abstract class WsEpollService
      */
     private function dohandshake(&$user, $buffer)
     {
+        file_put_contents(public_path().'/some.txt',$buffer);
         /** 解码http请求头部信息 */
         list($resource, $host, $upgrade, $connection, $key, $protocol, $version, $origin, $data) = $this->getheaders($buffer);
         /** 将获取到的key和常量258EAFA5-E914-47DA-95CA-C5AB0DC85B11拼接后加密，这个常量是文档约定俗成的，是一个常量 */

@@ -39,9 +39,14 @@ class Just extends WsEpollService
     public function onMessage($socket, $message)
     {
         // TODO: Implement onMessage() method.
+
+        var_dump($message);
         switch ($message){
             case 'Ping':
                 $this->sendTo($socket,'Pong');
+                break;
+            case 'say':
+                $this->sendToAll('this is a special day ! 2023年10月10日11:56:54');
                 break;
             default:
                 if (!trim($message)){
@@ -49,6 +54,8 @@ class Just extends WsEpollService
                 }
                 /** 发送当前时间 ，和客户端地址 */
                 $this->sendTo($socket,['data'=>$message,'time'=>date('Y-m-d H:i:s'),'ip'=>$this->getUserInfoBySocket($socket)->remote_address??'']);
+
+
         }
     }
 

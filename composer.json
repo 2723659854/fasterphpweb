@@ -37,7 +37,8 @@
     "ext-mbstring": "*",
     "ext-posix": "*",
     "ext-sockets": "*",
-    "ext-mysqli": "*"
+    "ext-mysqli": "*",
+    "textalk/websocket": "dev-master"
   },
   "config": {
     "allow-plugins": {
