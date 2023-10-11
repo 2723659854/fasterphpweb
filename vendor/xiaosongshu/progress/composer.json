@@ -1,0 +1,21 @@
+{
+    "name": "xiaosongshu/progress",
+    "description": "php的进度条，在cli模式下使用。（A progress bar plugin used in PHP's cli mode.）",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Xiaosongshu\\Progress\\": "src/"
+        }
+    },
+    "minimum-stability": "dev",
+    "authors": [
+        {
+            "name": "xiaosongshu",
+            "email": "2723659854@qq.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.0"
+    }
+}

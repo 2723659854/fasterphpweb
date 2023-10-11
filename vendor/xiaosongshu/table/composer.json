@@ -1,0 +1,21 @@
+{
+    "name": "xiaosongshu/table",
+    "description": "PHP在cli模式下输出表格",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Xiaosongshu\\Table\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "xiaosongshu",
+            "email": "2723659854@qq.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "php": ">=7.0"
+    }
+}

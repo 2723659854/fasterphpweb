@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<psalm
+    xmlns="https://getpsalm.org/schema/config"
+    errorLevel="1"
+    errorBaseline="psalm_baseline.xml"
+    findUnusedCode="true"
+    findUnusedPsalmSuppress="true"
+    sealAllMethods="true"
+    ensureArrayStringOffsetsExist="true"
+    ensureArrayIntOffsetsExist="true"
+    ignoreInternalFunctionNullReturn="false"
+    ignoreInternalFunctionFalseReturn="false"
+>
+    <projectFiles>
+        <directory name="../phpseclib"/>
+        <directory name="../tests"/>
+    </projectFiles>
+    <issueHandlers>
+        <Trace>
+            <errorLevel type="error">
+                <directory name=".."/>
+            </errorLevel>
+        </Trace>
+    </issueHandlers>
+</psalm>
