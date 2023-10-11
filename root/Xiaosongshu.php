@@ -7,6 +7,7 @@ use Root\Core\Provider\IdentifyInterface;
 use Root\Io\Epoll;
 use Root\Io\Selector;
 use Root\Lib\Container;
+use Root\Lib\PhpRtmpServer;
 use Root\Queue\RabbitMqConsumer;
 use Root\Queue\RedisQueueConsumer;
 use Root\Queue\TimerConsumer;
@@ -367,6 +368,12 @@ class Xiaosongshu
             if ($ws_count){
                 $content[] = ['ws服务', '正常', $ws_count, implode(',',$ws_port)];
             }
+            /** 直播服务 */
+//            $rtmp = config('rtmp');
+//            if ($rtmp['enable']){
+//                $content[] = ['rtmp', '正常', 1,  $rtmp['rtmp']];
+//                $content[] = ['flv', '正常', 1,  $rtmp['flv']];
+//            }
             $_system_table->table($head, $content);
             echo $_color_class->info("进程启动完成,你可以输入php start.php stop停止运行\r\n");
             exit(0);
@@ -409,9 +416,13 @@ class Xiaosongshu
                 } elseif ($_small_son_id == 0) {
                     /** 主进程 */
                     $clear_task_id = \pcntl_fork();
-                    if ($clear_task_id) {
+                    if ($clear_task_id>0) {
                         /** 在主进程里启动定时器 */
                         G(TimerConsumer::class)->consume();
+                    }
+                    /** 直播服务 */
+                    if ($clear_task_id ==0){
+                        //G(PhpRtmpServer::class)->consume();
                     }
 
                 } else {

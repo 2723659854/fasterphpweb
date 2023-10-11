@@ -38,7 +38,8 @@
     "evenement/evenement": "^3.0",
     "apix/log": "^1.2",
     "workerman/workerman": "v4.1.9",
-    "react/promise": "^2.9"
+    "react/promise": "^2.9",
+    "xiaosongshu/nacos": "dev-master"
   },
   "config": {
     "allow-plugins": {

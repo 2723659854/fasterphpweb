@@ -1,7 +1,10 @@
 框架简介
 <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;socketweb是一款常驻内存的轻量级的php框架，遵循常用的mvc架构。</p>
-<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;本框架对定时器和队列，mysql数据库,redis缓存进行了简单封装，并且保留了部分代码实例。</p>
-<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;本框架尚处于开发测试阶段，请不要用于正式商用业务。</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;本框架对timer,redis,mysql,rabbitmq,websocket,elasticsearch,nacos,sqlite 进行了简单封装，并且保留了部分代码实例。</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;本框架提供基本的http服务，可支持api接口或者web网页。</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;本框架提供基本的websocket服务，可支持长链接，适用于聊天等场景。</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;本框架提供rtmp流媒体服务，纯PHP开发，不需要其他依赖。支持rtmp推流，rtmp拉流和flv拉流。适用于直播场景。</p>
+
 
 ### 项目安装
 
@@ -795,6 +798,52 @@ $res = Talk::where([['id', '>', 0]]) ->orderBy(['created'=>'asc']) ->page(1, 10)
 
 ?>
 ```
+###  nacos服务
+#### 安装客户端
+```bash 
+composer require xiaosongshu/nacos
+```
+#### nacos提供的方法
+```php 
+require_once __DIR__.'/vendor/autoload.php';
+$dataId      = 'CalculatorService';
+$group       = 'api';
+$serviceName = 'mother';
+$namespace   = 'public';
+$client      = new \Xiaosongshu\Nacos\Client('http://127.0.0.1:8848','nacos','nacos');
+/** 发布配置 */
+print_r($client->publishConfig($dataId, $group, json_encode(['name' => 'fool', 'bar' => 'ha'])));
+/** 获取配置 */
+print_r($client->getConfig($dataId, $group,'public'));
+/** 监听配置 */
+print_r($client->listenerConfig($dataId, $group, json_encode(['name' => 'fool', 'bar' => 'ha'])));
+/** 删除配置 */
+print_r($client->deleteConfig($dataId, $group));
+/** 创建服务 */
+print_r($client->createService($serviceName, $namespace, json_encode(['name' => 'tom', 'age' => 15])));
+/** 创建实例 */
+print_r($client->createInstance($serviceName, "192.168.4.110", '9504', $namespace, json_encode(['name' => 'tom', 'age' => 15]), 99, 1, false));
+/** 获取服务列表 */
+print_r($client->getServiceList($namespace));
+/** 服务详情 */
+print_r($client->getServiceDetail($serviceName, $namespace));
+/** 获取实例列表 */
+print_r($client->getInstanceList($serviceName, $namespace));
+/** 获取实例详情 */
+print_r($client->getInstanceDetail($serviceName, false, '192.168.4.110', '9504'));
+/** 更新实例健康状态 */
+print_r($client->updateInstanceHealthy($serviceName, $namespace, '192.168.4.110', '9504',false));
+/** 发送心跳 */
+print_r($client->sendBeat($serviceName, '192.168.4.110', 9504, $namespace, false, 'beat'));
+/** 移除实例*/
+print_r($client->removeInstance($serviceName, '192.168.4.110', 9504, $namespace, false));
+/** 删除服务 */
+print_r($client->removeService($serviceName, $namespace));
+        
+```
+可以根据自己的需求，给项目添加配置检测，微服务管理。<br>
+配置检测：创建一个常驻内存进程，每隔30秒，读取一次nacos服务器上的配置，配置发生了变化，则修改配置，并重启服务。<br>
+微服务管理：创建一个常驻内存进程，进程启动的时候注册服务。
 
 ### ws服务（websocket）
 
@@ -1140,7 +1189,99 @@ get()方法负责读取一条消息，可以在任意地方调用。<br>
  /** 开启客户端监听 */
  WsClient::start();
 ```
+###  流媒体服务rtmp
+####  创建流媒体服务
+```bash 
+php start.php make:command CheckRtmp
+```
+#### 编辑文件内容app/command/CheckRtmp.php 如下
+```php 
+<?php
+namespace App\Command;
+use Root\Lib\BaseCommand;
+/**
+ * @purpose 用户自定义命令
+ * @author administrator
+ * @time 2023-10-10 09:11:34
+ */
+class CheckRtmp extends BaseCommand
+{
 
+    /** @var string $command 测试直播推流 */
+    public $command = 'check:rtmp';
+
+    /** 监听ip */
+    public string $host = '0.0.0.0';
+    /** rtmp服务监听端口 */
+    public int $rtmp_port = 1935;
+    /** flv服务监听端口 */
+    public int $flv_port = 18080;
+    
+     /**
+     * 配置参数
+     * @return void
+     */
+    public function configure(){
+        $this->addArgument('cmd','命令类型：start,stop,reload,restart,status');
+        $this->addArgument('damon','是否开启后台运行 -d：后台运行,否则为调试模式');
+    }
+    
+    /**
+     * 清在这里编写你的业务逻辑
+     * @return void
+     * @note 比如 应用名称为 a,直播间名称为 b
+     * @note 推流地址：rtmp://127.0.0.1:1935/a/b
+     * @note rtmp拉流地址：rtmp://127.0.0.1/a/b
+     * @note http-flv播放地址: http://127.0.0.1:18080/a/b.flv
+     * @note ws-flv播放地址: ws://127.0.0.1:18080/a/b.flv
+     * @note 推流工具 可以使用obs，也可以使用FFmpeg
+     * @note
+     */
+    public function handle()
+    {
+        /** 开启一个tcp服务，监听1935端口 */
+        $rtmpServer = new  \Workerman\Worker('tcp://'.$this->host.':'.$this->rtmp_port);
+        /** 当客户端连接服务端的时候触发 */
+        $rtmpServer->onConnect = function (\Workerman\Connection\TcpConnection $connection) {
+            logger()->info("connection" . $connection->getRemoteAddress() . " connected . ");
+            new \MediaServer\Rtmp\RtmpStream(
+                new \MediaServer\Utils\WMBufferStream($connection)
+            );
+        };
+        /** 下面是提供flv播放资源的接口 */
+        $rtmpServer->onWorkerStart = function ($worker) {
+            $this->info("rtmp server " . $worker->getSocketName() . " start . ");
+            \MediaServer\Http\HttpWMServer::$publicPath = __DIR__.'/public';
+            $httpServer = new \MediaServer\Http\HttpWMServer("\\MediaServer\\Http\\ExtHttpProtocol://".$this->host.":".$this->flv_port);
+            $httpServer->listen();
+            $this->info("rtmp推流地址：rtmp://{$this->host}:{$this->rtmp_port}/{your_app_name}/{your_live_room_name}");
+            $this->info("rtmp拉流地址：rtmp://{$this->host}/{your_app_name}/{your_live_room_name}");
+            $this->info("http-flv地址：http://{$this->host}:{$this->flv_port}/{your_app_name}/{your_live_room_name}.flv");
+            $this->info("ws-flv地址：ws://{$this->host}:{$this->flv_port}/{your_app_name}/{your_live_room_name}.flv");
+        };
+        \Workerman\Worker::runAll();
+    }
+}
+```
+开启流媒体服务
+```bash 
+php start.php check:rtmp start
+```
+开启流媒体服务守护进程模式
+```bash
+php start.php check:rtmp start -d
+```
+关闭流媒体服务
+```bash 
+php start.php check:rtmp stop 
+```
+直播推流地址：rtmp://127.0.0.1:1935/a/b<br>
+rtmp 拉流地址：rtmp://127.0.0.1:1935/a/b<br>
+http-flv播放地址: http://127.0.0.1:18080/a/b.flv<br>
+ws-flv播放地址: ws://127.0.0.1:18080/a/b.flv<br>
+推流工具 ：obs,ffmpeg<br>
+拉流工具 ：vlc播放器，web拉流<br>
+本框架提供web拉流，详见示例：http://localhost:8000/video/play
 #### 命令行工具
 
 创建自定义命令行： php start.php make:command Test  <br>
