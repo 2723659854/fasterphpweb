@@ -21,9 +21,12 @@ class ComposerStaticInitcbb973351035d2749c2ce7735e220087
         'X' => 
         array (
             'Xiaosongshu\\Table\\' => 18,
-            'Xiaosongshu\\Socketweb\\' => 22,
             'Xiaosongshu\\Progress\\' => 21,
             'Xiaosongshu\\Colorword\\' => 22,
+        ),
+        'W' => 
+        array (
+            'Workerman\\' => 10,
         ),
         'S' => 
         array (
@@ -40,6 +43,10 @@ class ComposerStaticInitcbb973351035d2749c2ce7735e220087
             'PhpAmqpLib\\' => 11,
             'ParagonIE\\ConstantTime\\' => 23,
         ),
+        'M' => 
+        array (
+            'MediaServer\\' => 12,
+        ),
         'G' => 
         array (
             'GuzzleHttp\\Stream\\' => 18,
@@ -51,7 +58,12 @@ class ComposerStaticInitcbb973351035d2749c2ce7735e220087
         ),
         'E' => 
         array (
+            'Evenement\\' => 10,
             'Elasticsearch\\' => 14,
+        ),
+        'A' => 
+        array (
+            'Apix\\Log\\' => 9,
         ),
     );
 
@@ -64,10 +76,6 @@ class ComposerStaticInitcbb973351035d2749c2ce7735e220087
         array (
             0 => __DIR__ . '/..' . '/xiaosongshu/table/src',
         ),
-        'Xiaosongshu\\Socketweb\\' => 
-        array (
-            0 => __DIR__ . '/../..' . '/src',
-        ),
         'Xiaosongshu\\Progress\\' => 
         array (
             0 => __DIR__ . '/..' . '/xiaosongshu/progress/src',
@@ -75,6 +83,10 @@ class ComposerStaticInitcbb973351035d2749c2ce7735e220087
         'Xiaosongshu\\Colorword\\' => 
         array (
             0 => __DIR__ . '/..' . '/xiaosongshu/colorword/src',
+        ),
+        'Workerman\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/workerman/workerman',
         ),
         'SuperClosure\\' => 
         array (
@@ -86,7 +98,7 @@ class ComposerStaticInitcbb973351035d2749c2ce7735e220087
         ),
         'Psr\\Log\\' => 
         array (
-            0 => __DIR__ . '/..' . '/psr/log/src',
+            0 => __DIR__ . '/..' . '/psr/log/Psr/Log',
         ),
         'PhpParser\\' => 
         array (
@@ -100,6 +112,10 @@ class ComposerStaticInitcbb973351035d2749c2ce7735e220087
         array (
             0 => __DIR__ . '/..' . '/paragonie/constant_time_encoding/src',
         ),
+        'MediaServer\\' => 
+        array (
+            0 => __DIR__ . '/../..' . '/src',
+        ),
         'GuzzleHttp\\Stream\\' => 
         array (
             0 => __DIR__ . '/..' . '/ezimuel/guzzlestreams/src',
@@ -112,9 +128,17 @@ class ComposerStaticInitcbb973351035d2749c2ce7735e220087
         array (
             0 => __DIR__ . '/..' . '/nikic/fast-route/src',
         ),
+        'Evenement\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/evenement/evenement/src',
+        ),
         'Elasticsearch\\' => 
         array (
             0 => __DIR__ . '/..' . '/elasticsearch/elasticsearch/src/Elasticsearch',
+        ),
+        'Apix\\Log\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/apix/log/src',
         ),
     );
 

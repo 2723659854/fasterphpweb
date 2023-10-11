@@ -1,0 +1,504 @@
+2023-10-11 03:35:50 pid:175 Workerman[start.php] start in DEBUG mode
+2023-10-11 03:35:51 pid:176 Error: Call to undefined function App\Command\logger() in /usr/src/myapp/fasterphpweb/app/command/Demo.php:44
+Stack trace:
+#0 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(2488): App\Command\Demo->App\Command\{closure}(Object(Workerman\Worker))
+#1 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1627): Workerman\Worker->run()
+#2 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1423): Workerman\Worker::forkOneWorkerForLinux(Object(Workerman\Worker))
+#3 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1397): Workerman\Worker::forkWorkersForLinux()
+#4 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(560): Workerman\Worker::forkWorkers()
+#5 /usr/src/myapp/fasterphpweb/app/command/Demo.php(52): Workerman\Worker::runAll()
+#6 /usr/src/myapp/fasterphpweb/root/Xiaosongshu.php(185): App\Command\Demo->handle()
+#7 /usr/src/myapp/fasterphpweb/root/Xiaosongshu.php(110): Root\Xiaosongshu->handleOwnCommand(Array)
+#8 /usr/src/myapp/fasterphpweb/start.php(4): Root\Xiaosongshu->start_server(Array)
+#9 /usr/src/myapp/fasterphpweb/start.php(5): {closure}()
+#10 {main}
+2023-10-11 03:35:51 pid:175 worker[none:176] exit with status 64000
+2023-10-11 03:35:52 pid:177 Error: Call to undefined function App\Command\logger() in /usr/src/myapp/fasterphpweb/app/command/Demo.php:44
+Stack trace:
+#0 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(2488): App\Command\Demo->App\Command\{closure}(Object(Workerman\Worker))
+#1 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1627): Workerman\Worker->run()
+#2 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1423): Workerman\Worker::forkOneWorkerForLinux(Object(Workerman\Worker))
+#3 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1397): Workerman\Worker::forkWorkersForLinux()
+#4 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1779): Workerman\Worker::forkWorkers()
+#5 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1715): Workerman\Worker::monitorWorkersForLinux()
+#6 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(562): Workerman\Worker::monitorWorkers()
+#7 /usr/src/myapp/fasterphpweb/app/command/Demo.php(52): Workerman\Worker::runAll()
+#8 /usr/src/myapp/fasterphpweb/root/Xiaosongshu.php(185): App\Command\Demo->handle()
+#9 /usr/src/myapp/fasterphpweb/root/Xiaosongshu.php(110): Root\Xiaosongshu->handleOwnCommand(Array)
+#10 /usr/src/myapp/fasterphpweb/start.php(4): Root\Xiaosongshu->start_server(Array)
+#11 /usr/src/myapp/fasterphpweb/start.php(5): {closure}()
+#12 {main}
+2023-10-11 03:35:52 pid:175 worker[none:177] exit with status 64000
+2023-10-11 03:35:53 pid:178 Error: Call to undefined function App\Command\logger() in /usr/src/myapp/fasterphpweb/app/command/Demo.php:44
+Stack trace:
+#0 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(2488): App\Command\Demo->App\Command\{closure}(Object(Workerman\Worker))
+#1 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1627): Workerman\Worker->run()
+#2 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1423): Workerman\Worker::forkOneWorkerForLinux(Object(Workerman\Worker))
+#3 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1397): Workerman\Worker::forkWorkersForLinux()
+#4 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1779): Workerman\Worker::forkWorkers()
+#5 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1715): Workerman\Worker::monitorWorkersForLinux()
+#6 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(562): Workerman\Worker::monitorWorkers()
+#7 /usr/src/myapp/fasterphpweb/app/command/Demo.php(52): Workerman\Worker::runAll()
+#8 /usr/src/myapp/fasterphpweb/root/Xiaosongshu.php(185): App\Command\Demo->handle()
+#9 /usr/src/myapp/fasterphpweb/root/Xiaosongshu.php(110): Root\Xiaosongshu->handleOwnCommand(Array)
+#10 /usr/src/myapp/fasterphpweb/start.php(4): Root\Xiaosongshu->start_server(Array)
+#11 /usr/src/myapp/fasterphpweb/start.php(5): {closure}()
+#12 {main}
+2023-10-11 03:35:53 pid:175 worker[none:178] exit with status 64000
+2023-10-11 03:35:54 pid:179 Error: Call to undefined function App\Command\logger() in /usr/src/myapp/fasterphpweb/app/command/Demo.php:44
+Stack trace:
+#0 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(2488): App\Command\Demo->App\Command\{closure}(Object(Workerman\Worker))
+#1 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1627): Workerman\Worker->run()
+#2 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1423): Workerman\Worker::forkOneWorkerForLinux(Object(Workerman\Worker))
+#3 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1397): Workerman\Worker::forkWorkersForLinux()
+#4 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1779): Workerman\Worker::forkWorkers()
+#5 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1715): Workerman\Worker::monitorWorkersForLinux()
+#6 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(562): Workerman\Worker::monitorWorkers()
+#7 /usr/src/myapp/fasterphpweb/app/command/Demo.php(52): Workerman\Worker::runAll()
+#8 /usr/src/myapp/fasterphpweb/root/Xiaosongshu.php(185): App\Command\Demo->handle()
+#9 /usr/src/myapp/fasterphpweb/root/Xiaosongshu.php(110): Root\Xiaosongshu->handleOwnCommand(Array)
+#10 /usr/src/myapp/fasterphpweb/start.php(4): Root\Xiaosongshu->start_server(Array)
+#11 /usr/src/myapp/fasterphpweb/start.php(5): {closure}()
+#12 {main}
+2023-10-11 03:35:54 pid:175 Workerman[start.php] stopping ...
+2023-10-11 03:35:54 pid:175 worker[none:179] exit with status 64000
+2023-10-11 03:35:54 pid:175 Workerman[start.php] has been stopped
+2023-10-11 03:36:38 pid:180 Workerman[start.php] start in DEBUG mode
+2023-10-11 03:36:39 pid:181 Error: Class "MediaServer\Http\HttpWMServer" not found in /usr/src/myapp/fasterphpweb/app/command/Demo.php:45
+Stack trace:
+#0 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(2488): App\Command\Demo->App\Command\{closure}(Object(Workerman\Worker))
+#1 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1627): Workerman\Worker->run()
+#2 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1423): Workerman\Worker::forkOneWorkerForLinux(Object(Workerman\Worker))
+#3 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1397): Workerman\Worker::forkWorkersForLinux()
+#4 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(560): Workerman\Worker::forkWorkers()
+#5 /usr/src/myapp/fasterphpweb/app/command/Demo.php(52): Workerman\Worker::runAll()
+#6 /usr/src/myapp/fasterphpweb/root/Xiaosongshu.php(185): App\Command\Demo->handle()
+#7 /usr/src/myapp/fasterphpweb/root/Xiaosongshu.php(110): Root\Xiaosongshu->handleOwnCommand(Array)
+#8 /usr/src/myapp/fasterphpweb/start.php(4): Root\Xiaosongshu->start_server(Array)
+#9 /usr/src/myapp/fasterphpweb/start.php(5): {closure}()
+#10 {main}
+2023-10-11 03:36:39 pid:180 worker[none:181] exit with status 64000
+2023-10-11 03:36:40 pid:182 Error: Class "MediaServer\Http\HttpWMServer" not found in /usr/src/myapp/fasterphpweb/app/command/Demo.php:45
+Stack trace:
+#0 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(2488): App\Command\Demo->App\Command\{closure}(Object(Workerman\Worker))
+#1 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1627): Workerman\Worker->run()
+#2 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1423): Workerman\Worker::forkOneWorkerForLinux(Object(Workerman\Worker))
+#3 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1397): Workerman\Worker::forkWorkersForLinux()
+#4 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1779): Workerman\Worker::forkWorkers()
+#5 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1715): Workerman\Worker::monitorWorkersForLinux()
+#6 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(562): Workerman\Worker::monitorWorkers()
+#7 /usr/src/myapp/fasterphpweb/app/command/Demo.php(52): Workerman\Worker::runAll()
+#8 /usr/src/myapp/fasterphpweb/root/Xiaosongshu.php(185): App\Command\Demo->handle()
+#9 /usr/src/myapp/fasterphpweb/root/Xiaosongshu.php(110): Root\Xiaosongshu->handleOwnCommand(Array)
+#10 /usr/src/myapp/fasterphpweb/start.php(4): Root\Xiaosongshu->start_server(Array)
+#11 /usr/src/myapp/fasterphpweb/start.php(5): {closure}()
+#12 {main}
+2023-10-11 03:36:40 pid:180 worker[none:182] exit with status 64000
+2023-10-11 03:36:41 pid:183 Error: Class "MediaServer\Http\HttpWMServer" not found in /usr/src/myapp/fasterphpweb/app/command/Demo.php:45
+Stack trace:
+#0 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(2488): App\Command\Demo->App\Command\{closure}(Object(Workerman\Worker))
+#1 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1627): Workerman\Worker->run()
+#2 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1423): Workerman\Worker::forkOneWorkerForLinux(Object(Workerman\Worker))
+#3 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1397): Workerman\Worker::forkWorkersForLinux()
+#4 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1779): Workerman\Worker::forkWorkers()
+#5 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1715): Workerman\Worker::monitorWorkersForLinux()
+#6 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(562): Workerman\Worker::monitorWorkers()
+#7 /usr/src/myapp/fasterphpweb/app/command/Demo.php(52): Workerman\Worker::runAll()
+#8 /usr/src/myapp/fasterphpweb/root/Xiaosongshu.php(185): App\Command\Demo->handle()
+#9 /usr/src/myapp/fasterphpweb/root/Xiaosongshu.php(110): Root\Xiaosongshu->handleOwnCommand(Array)
+#10 /usr/src/myapp/fasterphpweb/start.php(4): Root\Xiaosongshu->start_server(Array)
+#11 /usr/src/myapp/fasterphpweb/start.php(5): {closure}()
+#12 {main}
+2023-10-11 03:36:41 pid:180 Workerman[start.php] stopping ...
+2023-10-11 03:36:41 pid:180 worker[none:183] exit with status 64000
+2023-10-11 03:36:41 pid:180 Workerman[start.php] has been stopped
+2023-10-11 03:36:54 pid:184 Workerman[start.php] start in DEBUG mode
+2023-10-11 03:36:55 pid:185 Error: Class "MediaServer\Http\HttpWMServer" not found in /usr/src/myapp/fasterphpweb/app/command/Demo.php:45
+Stack trace:
+#0 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(2488): App\Command\Demo->App\Command\{closure}(Object(Workerman\Worker))
+#1 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1627): Workerman\Worker->run()
+#2 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1423): Workerman\Worker::forkOneWorkerForLinux(Object(Workerman\Worker))
+#3 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1397): Workerman\Worker::forkWorkersForLinux()
+#4 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(560): Workerman\Worker::forkWorkers()
+#5 /usr/src/myapp/fasterphpweb/app/command/Demo.php(52): Workerman\Worker::runAll()
+#6 /usr/src/myapp/fasterphpweb/root/Xiaosongshu.php(185): App\Command\Demo->handle()
+#7 /usr/src/myapp/fasterphpweb/root/Xiaosongshu.php(110): Root\Xiaosongshu->handleOwnCommand(Array)
+#8 /usr/src/myapp/fasterphpweb/start.php(4): Root\Xiaosongshu->start_server(Array)
+#9 /usr/src/myapp/fasterphpweb/start.php(5): {closure}()
+#10 {main}
+2023-10-11 03:36:56 pid:184 worker[none:185] exit with status 64000
+2023-10-11 03:36:57 pid:186 Error: Class "MediaServer\Http\HttpWMServer" not found in /usr/src/myapp/fasterphpweb/app/command/Demo.php:45
+Stack trace:
+#0 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(2488): App\Command\Demo->App\Command\{closure}(Object(Workerman\Worker))
+#1 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1627): Workerman\Worker->run()
+#2 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1423): Workerman\Worker::forkOneWorkerForLinux(Object(Workerman\Worker))
+#3 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1397): Workerman\Worker::forkWorkersForLinux()
+#4 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1779): Workerman\Worker::forkWorkers()
+#5 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1715): Workerman\Worker::monitorWorkersForLinux()
+#6 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(562): Workerman\Worker::monitorWorkers()
+#7 /usr/src/myapp/fasterphpweb/app/command/Demo.php(52): Workerman\Worker::runAll()
+#8 /usr/src/myapp/fasterphpweb/root/Xiaosongshu.php(185): App\Command\Demo->handle()
+#9 /usr/src/myapp/fasterphpweb/root/Xiaosongshu.php(110): Root\Xiaosongshu->handleOwnCommand(Array)
+#10 /usr/src/myapp/fasterphpweb/start.php(4): Root\Xiaosongshu->start_server(Array)
+#11 /usr/src/myapp/fasterphpweb/start.php(5): {closure}()
+#12 {main}
+2023-10-11 03:36:57 pid:184 worker[none:186] exit with status 64000
+2023-10-11 03:36:57 pid:184 Workerman[start.php] stopping ...
+2023-10-11 03:36:58 pid:187 Error: Class "MediaServer\Http\HttpWMServer" not found in /usr/src/myapp/fasterphpweb/app/command/Demo.php:45
+Stack trace:
+#0 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(2488): App\Command\Demo->App\Command\{closure}(Object(Workerman\Worker))
+#1 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1627): Workerman\Worker->run()
+#2 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1423): Workerman\Worker::forkOneWorkerForLinux(Object(Workerman\Worker))
+#3 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1397): Workerman\Worker::forkWorkersForLinux()
+#4 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1779): Workerman\Worker::forkWorkers()
+#5 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1715): Workerman\Worker::monitorWorkersForLinux()
+#6 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(562): Workerman\Worker::monitorWorkers()
+#7 /usr/src/myapp/fasterphpweb/app/command/Demo.php(52): Workerman\Worker::runAll()
+#8 /usr/src/myapp/fasterphpweb/root/Xiaosongshu.php(185): App\Command\Demo->handle()
+#9 /usr/src/myapp/fasterphpweb/root/Xiaosongshu.php(110): Root\Xiaosongshu->handleOwnCommand(Array)
+#10 /usr/src/myapp/fasterphpweb/start.php(4): Root\Xiaosongshu->start_server(Array)
+#11 /usr/src/myapp/fasterphpweb/start.php(5): {closure}()
+#12 {main}
+2023-10-11 03:36:58 pid:184 worker[none:187] exit with status 64000
+2023-10-11 03:36:58 pid:184 Workerman[start.php] has been stopped
+2023-10-11 03:38:15 pid:188 Workerman[start.php] start in DEBUG mode
+2023-10-11 03:38:16 pid:189 Error: Class "MediaServer\Http\HttpWMServer" not found in /usr/src/myapp/fasterphpweb/app/command/Demo.php:45
+Stack trace:
+#0 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(2488): App\Command\Demo->App\Command\{closure}(Object(Workerman\Worker))
+#1 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1627): Workerman\Worker->run()
+#2 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1423): Workerman\Worker::forkOneWorkerForLinux(Object(Workerman\Worker))
+#3 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1397): Workerman\Worker::forkWorkersForLinux()
+#4 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(560): Workerman\Worker::forkWorkers()
+#5 /usr/src/myapp/fasterphpweb/app/command/Demo.php(52): Workerman\Worker::runAll()
+#6 /usr/src/myapp/fasterphpweb/root/Xiaosongshu.php(185): App\Command\Demo->handle()
+#7 /usr/src/myapp/fasterphpweb/root/Xiaosongshu.php(110): Root\Xiaosongshu->handleOwnCommand(Array)
+#8 /usr/src/myapp/fasterphpweb/start.php(4): Root\Xiaosongshu->start_server(Array)
+#9 /usr/src/myapp/fasterphpweb/start.php(5): {closure}()
+#10 {main}
+2023-10-11 03:38:16 pid:188 worker[none:189] exit with status 64000
+2023-10-11 03:38:17 pid:190 Error: Class "MediaServer\Http\HttpWMServer" not found in /usr/src/myapp/fasterphpweb/app/command/Demo.php:45
+Stack trace:
+#0 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(2488): App\Command\Demo->App\Command\{closure}(Object(Workerman\Worker))
+#1 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1627): Workerman\Worker->run()
+#2 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1423): Workerman\Worker::forkOneWorkerForLinux(Object(Workerman\Worker))
+#3 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1397): Workerman\Worker::forkWorkersForLinux()
+#4 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1779): Workerman\Worker::forkWorkers()
+#5 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1715): Workerman\Worker::monitorWorkersForLinux()
+#6 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(562): Workerman\Worker::monitorWorkers()
+#7 /usr/src/myapp/fasterphpweb/app/command/Demo.php(52): Workerman\Worker::runAll()
+#8 /usr/src/myapp/fasterphpweb/root/Xiaosongshu.php(185): App\Command\Demo->handle()
+#9 /usr/src/myapp/fasterphpweb/root/Xiaosongshu.php(110): Root\Xiaosongshu->handleOwnCommand(Array)
+#10 /usr/src/myapp/fasterphpweb/start.php(4): Root\Xiaosongshu->start_server(Array)
+#11 /usr/src/myapp/fasterphpweb/start.php(5): {closure}()
+#12 {main}
+2023-10-11 03:38:17 pid:188 worker[none:190] exit with status 64000
+2023-10-11 03:38:17 pid:188 Workerman[start.php] stopping ...
+2023-10-11 03:38:18 pid:191 Error: Class "MediaServer\Http\HttpWMServer" not found in /usr/src/myapp/fasterphpweb/app/command/Demo.php:45
+Stack trace:
+#0 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(2488): App\Command\Demo->App\Command\{closure}(Object(Workerman\Worker))
+#1 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1627): Workerman\Worker->run()
+#2 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1423): Workerman\Worker::forkOneWorkerForLinux(Object(Workerman\Worker))
+#3 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1397): Workerman\Worker::forkWorkersForLinux()
+#4 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1779): Workerman\Worker::forkWorkers()
+#5 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1715): Workerman\Worker::monitorWorkersForLinux()
+#6 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(562): Workerman\Worker::monitorWorkers()
+#7 /usr/src/myapp/fasterphpweb/app/command/Demo.php(52): Workerman\Worker::runAll()
+#8 /usr/src/myapp/fasterphpweb/root/Xiaosongshu.php(185): App\Command\Demo->handle()
+#9 /usr/src/myapp/fasterphpweb/root/Xiaosongshu.php(110): Root\Xiaosongshu->handleOwnCommand(Array)
+#10 /usr/src/myapp/fasterphpweb/start.php(4): Root\Xiaosongshu->start_server(Array)
+#11 /usr/src/myapp/fasterphpweb/start.php(5): {closure}()
+#12 {main}
+2023-10-11 03:38:18 pid:188 worker[none:191] exit with status 64000
+2023-10-11 03:38:18 pid:188 Workerman[start.php] has been stopped
+2023-10-11 04:43:11 pid:231 Workerman[start.php] start in DEBUG mode
+2023-10-11 04:43:12 pid:232 Error: Class "MediaServer\Http\HttpWMServer" not found in /usr/src/myapp/fasterphpweb/app/command/Demo.php:45
+Stack trace:
+#0 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(2488): App\Command\Demo->App\Command\{closure}(Object(Workerman\Worker))
+#1 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1627): Workerman\Worker->run()
+#2 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1423): Workerman\Worker::forkOneWorkerForLinux(Object(Workerman\Worker))
+#3 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1397): Workerman\Worker::forkWorkersForLinux()
+#4 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(560): Workerman\Worker::forkWorkers()
+#5 /usr/src/myapp/fasterphpweb/app/command/Demo.php(52): Workerman\Worker::runAll()
+#6 /usr/src/myapp/fasterphpweb/root/Xiaosongshu.php(194): App\Command\Demo->handle()
+#7 /usr/src/myapp/fasterphpweb/root/Xiaosongshu.php(109): Root\Xiaosongshu->handleOwnCommand(Array)
+#8 /usr/src/myapp/fasterphpweb/start.php(4): Root\Xiaosongshu->start_server(Array)
+#9 /usr/src/myapp/fasterphpweb/start.php(5): {closure}()
+#10 {main}
+2023-10-11 04:43:12 pid:231 worker[none:232] exit with status 64000
+2023-10-11 04:43:13 pid:233 Error: Class "MediaServer\Http\HttpWMServer" not found in /usr/src/myapp/fasterphpweb/app/command/Demo.php:45
+Stack trace:
+#0 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(2488): App\Command\Demo->App\Command\{closure}(Object(Workerman\Worker))
+#1 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1627): Workerman\Worker->run()
+#2 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1423): Workerman\Worker::forkOneWorkerForLinux(Object(Workerman\Worker))
+#3 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1397): Workerman\Worker::forkWorkersForLinux()
+#4 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1779): Workerman\Worker::forkWorkers()
+#5 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1715): Workerman\Worker::monitorWorkersForLinux()
+#6 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(562): Workerman\Worker::monitorWorkers()
+#7 /usr/src/myapp/fasterphpweb/app/command/Demo.php(52): Workerman\Worker::runAll()
+#8 /usr/src/myapp/fasterphpweb/root/Xiaosongshu.php(194): App\Command\Demo->handle()
+#9 /usr/src/myapp/fasterphpweb/root/Xiaosongshu.php(109): Root\Xiaosongshu->handleOwnCommand(Array)
+#10 /usr/src/myapp/fasterphpweb/start.php(4): Root\Xiaosongshu->start_server(Array)
+#11 /usr/src/myapp/fasterphpweb/start.php(5): {closure}()
+#12 {main}
+2023-10-11 04:43:13 pid:231 worker[none:233] exit with status 64000
+2023-10-11 04:43:14 pid:234 Error: Class "MediaServer\Http\HttpWMServer" not found in /usr/src/myapp/fasterphpweb/app/command/Demo.php:45
+Stack trace:
+#0 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(2488): App\Command\Demo->App\Command\{closure}(Object(Workerman\Worker))
+#1 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1627): Workerman\Worker->run()
+#2 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1423): Workerman\Worker::forkOneWorkerForLinux(Object(Workerman\Worker))
+#3 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1397): Workerman\Worker::forkWorkersForLinux()
+#4 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1779): Workerman\Worker::forkWorkers()
+#5 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1715): Workerman\Worker::monitorWorkersForLinux()
+#6 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(562): Workerman\Worker::monitorWorkers()
+#7 /usr/src/myapp/fasterphpweb/app/command/Demo.php(52): Workerman\Worker::runAll()
+#8 /usr/src/myapp/fasterphpweb/root/Xiaosongshu.php(194): App\Command\Demo->handle()
+#9 /usr/src/myapp/fasterphpweb/root/Xiaosongshu.php(109): Root\Xiaosongshu->handleOwnCommand(Array)
+#10 /usr/src/myapp/fasterphpweb/start.php(4): Root\Xiaosongshu->start_server(Array)
+#11 /usr/src/myapp/fasterphpweb/start.php(5): {closure}()
+#12 {main}
+2023-10-11 04:43:14 pid:231 worker[none:234] exit with status 64000
+2023-10-11 04:43:15 pid:235 Error: Class "MediaServer\Http\HttpWMServer" not found in /usr/src/myapp/fasterphpweb/app/command/Demo.php:45
+Stack trace:
+#0 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(2488): App\Command\Demo->App\Command\{closure}(Object(Workerman\Worker))
+#1 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1627): Workerman\Worker->run()
+#2 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1423): Workerman\Worker::forkOneWorkerForLinux(Object(Workerman\Worker))
+#3 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1397): Workerman\Worker::forkWorkersForLinux()
+#4 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1779): Workerman\Worker::forkWorkers()
+#5 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1715): Workerman\Worker::monitorWorkersForLinux()
+#6 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(562): Workerman\Worker::monitorWorkers()
+#7 /usr/src/myapp/fasterphpweb/app/command/Demo.php(52): Workerman\Worker::runAll()
+#8 /usr/src/myapp/fasterphpweb/root/Xiaosongshu.php(194): App\Command\Demo->handle()
+#9 /usr/src/myapp/fasterphpweb/root/Xiaosongshu.php(109): Root\Xiaosongshu->handleOwnCommand(Array)
+#10 /usr/src/myapp/fasterphpweb/start.php(4): Root\Xiaosongshu->start_server(Array)
+#11 /usr/src/myapp/fasterphpweb/start.php(5): {closure}()
+#12 {main}
+2023-10-11 04:43:15 pid:231 worker[none:235] exit with status 64000
+2023-10-11 04:43:16 pid:236 Error: Class "MediaServer\Http\HttpWMServer" not found in /usr/src/myapp/fasterphpweb/app/command/Demo.php:45
+Stack trace:
+#0 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(2488): App\Command\Demo->App\Command\{closure}(Object(Workerman\Worker))
+#1 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1627): Workerman\Worker->run()
+#2 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1423): Workerman\Worker::forkOneWorkerForLinux(Object(Workerman\Worker))
+#3 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1397): Workerman\Worker::forkWorkersForLinux()
+#4 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1779): Workerman\Worker::forkWorkers()
+#5 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1715): Workerman\Worker::monitorWorkersForLinux()
+#6 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(562): Workerman\Worker::monitorWorkers()
+#7 /usr/src/myapp/fasterphpweb/app/command/Demo.php(52): Workerman\Worker::runAll()
+#8 /usr/src/myapp/fasterphpweb/root/Xiaosongshu.php(194): App\Command\Demo->handle()
+#9 /usr/src/myapp/fasterphpweb/root/Xiaosongshu.php(109): Root\Xiaosongshu->handleOwnCommand(Array)
+#10 /usr/src/myapp/fasterphpweb/start.php(4): Root\Xiaosongshu->start_server(Array)
+#11 /usr/src/myapp/fasterphpweb/start.php(5): {closure}()
+#12 {main}
+2023-10-11 04:43:16 pid:231 Workerman[start.php] stopping ...
+2023-10-11 04:43:16 pid:231 worker[none:236] exit with status 64000
+2023-10-11 04:43:16 pid:231 Workerman[start.php] has been stopped
+2023-10-11 04:45:35 pid:238 Workerman[start.php] start in DEBUG mode
+2023-10-11 04:45:36 pid:240 Error: Class "MediaServer\Http\HttpWMServer" not found in /usr/src/myapp/fasterphpweb/app/command/Demo.php:45
+Stack trace:
+#0 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(2488): App\Command\Demo->App\Command\{closure}(Object(Workerman\Worker))
+#1 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1627): Workerman\Worker->run()
+#2 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1423): Workerman\Worker::forkOneWorkerForLinux(Object(Workerman\Worker))
+#3 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1397): Workerman\Worker::forkWorkersForLinux()
+#4 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(560): Workerman\Worker::forkWorkers()
+#5 /usr/src/myapp/fasterphpweb/app/command/Demo.php(52): Workerman\Worker::runAll()
+#6 /usr/src/myapp/fasterphpweb/root/Xiaosongshu.php(196): App\Command\Demo->handle()
+#7 /usr/src/myapp/fasterphpweb/root/Xiaosongshu.php(111): Root\Xiaosongshu->handleOwnCommand(Array)
+#8 /usr/src/myapp/fasterphpweb/start.php(4): Root\Xiaosongshu->start_server(Array)
+#9 /usr/src/myapp/fasterphpweb/start.php(5): {closure}()
+#10 {main}
+2023-10-11 04:45:36 pid:238 worker[none:240] exit with status 64000
+2023-10-11 04:45:37 pid:241 Error: Class "MediaServer\Http\HttpWMServer" not found in /usr/src/myapp/fasterphpweb/app/command/Demo.php:45
+Stack trace:
+#0 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(2488): App\Command\Demo->App\Command\{closure}(Object(Workerman\Worker))
+#1 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1627): Workerman\Worker->run()
+#2 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1423): Workerman\Worker::forkOneWorkerForLinux(Object(Workerman\Worker))
+#3 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1397): Workerman\Worker::forkWorkersForLinux()
+#4 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1779): Workerman\Worker::forkWorkers()
+#5 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1715): Workerman\Worker::monitorWorkersForLinux()
+#6 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(562): Workerman\Worker::monitorWorkers()
+#7 /usr/src/myapp/fasterphpweb/app/command/Demo.php(52): Workerman\Worker::runAll()
+#8 /usr/src/myapp/fasterphpweb/root/Xiaosongshu.php(196): App\Command\Demo->handle()
+#9 /usr/src/myapp/fasterphpweb/root/Xiaosongshu.php(111): Root\Xiaosongshu->handleOwnCommand(Array)
+#10 /usr/src/myapp/fasterphpweb/start.php(4): Root\Xiaosongshu->start_server(Array)
+#11 /usr/src/myapp/fasterphpweb/start.php(5): {closure}()
+#12 {main}
+2023-10-11 04:45:37 pid:238 worker[none:241] exit with status 64000
+2023-10-11 04:45:38 pid:242 Error: Class "MediaServer\Http\HttpWMServer" not found in /usr/src/myapp/fasterphpweb/app/command/Demo.php:45
+Stack trace:
+#0 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(2488): App\Command\Demo->App\Command\{closure}(Object(Workerman\Worker))
+#1 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1627): Workerman\Worker->run()
+#2 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1423): Workerman\Worker::forkOneWorkerForLinux(Object(Workerman\Worker))
+#3 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1397): Workerman\Worker::forkWorkersForLinux()
+#4 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1779): Workerman\Worker::forkWorkers()
+#5 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1715): Workerman\Worker::monitorWorkersForLinux()
+#6 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(562): Workerman\Worker::monitorWorkers()
+#7 /usr/src/myapp/fasterphpweb/app/command/Demo.php(52): Workerman\Worker::runAll()
+#8 /usr/src/myapp/fasterphpweb/root/Xiaosongshu.php(196): App\Command\Demo->handle()
+#9 /usr/src/myapp/fasterphpweb/root/Xiaosongshu.php(111): Root\Xiaosongshu->handleOwnCommand(Array)
+#10 /usr/src/myapp/fasterphpweb/start.php(4): Root\Xiaosongshu->start_server(Array)
+#11 /usr/src/myapp/fasterphpweb/start.php(5): {closure}()
+#12 {main}
+2023-10-11 04:45:38 pid:238 worker[none:242] exit with status 64000
+2023-10-11 04:45:39 pid:243 Error: Class "MediaServer\Http\HttpWMServer" not found in /usr/src/myapp/fasterphpweb/app/command/Demo.php:45
+Stack trace:
+#0 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(2488): App\Command\Demo->App\Command\{closure}(Object(Workerman\Worker))
+#1 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1627): Workerman\Worker->run()
+#2 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1423): Workerman\Worker::forkOneWorkerForLinux(Object(Workerman\Worker))
+#3 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1397): Workerman\Worker::forkWorkersForLinux()
+#4 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1779): Workerman\Worker::forkWorkers()
+#5 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1715): Workerman\Worker::monitorWorkersForLinux()
+#6 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(562): Workerman\Worker::monitorWorkers()
+#7 /usr/src/myapp/fasterphpweb/app/command/Demo.php(52): Workerman\Worker::runAll()
+#8 /usr/src/myapp/fasterphpweb/root/Xiaosongshu.php(196): App\Command\Demo->handle()
+#9 /usr/src/myapp/fasterphpweb/root/Xiaosongshu.php(111): Root\Xiaosongshu->handleOwnCommand(Array)
+#10 /usr/src/myapp/fasterphpweb/start.php(4): Root\Xiaosongshu->start_server(Array)
+#11 /usr/src/myapp/fasterphpweb/start.php(5): {closure}()
+#12 {main}
+2023-10-11 04:45:39 pid:238 worker[none:243] exit with status 64000
+2023-10-11 04:45:39 pid:238 Workerman[start.php] stopping ...
+2023-10-11 04:45:39 pid:244 Error: Class "MediaServer\Http\HttpWMServer" not found in /usr/src/myapp/fasterphpweb/app/command/Demo.php:45
+Stack trace:
+#0 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(2488): App\Command\Demo->App\Command\{closure}(Object(Workerman\Worker))
+#1 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1627): Workerman\Worker->run()
+#2 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1423): Workerman\Worker::forkOneWorkerForLinux(Object(Workerman\Worker))
+#3 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1397): Workerman\Worker::forkWorkersForLinux()
+#4 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1779): Workerman\Worker::forkWorkers()
+#5 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1715): Workerman\Worker::monitorWorkersForLinux()
+#6 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(562): Workerman\Worker::monitorWorkers()
+#7 /usr/src/myapp/fasterphpweb/app/command/Demo.php(52): Workerman\Worker::runAll()
+#8 /usr/src/myapp/fasterphpweb/root/Xiaosongshu.php(196): App\Command\Demo->handle()
+#9 /usr/src/myapp/fasterphpweb/root/Xiaosongshu.php(111): Root\Xiaosongshu->handleOwnCommand(Array)
+#10 /usr/src/myapp/fasterphpweb/start.php(4): Root\Xiaosongshu->start_server(Array)
+#11 /usr/src/myapp/fasterphpweb/start.php(5): {closure}()
+#12 {main}
+2023-10-11 04:45:39 pid:238 worker[none:244] exit with status 64000
+2023-10-11 04:45:39 pid:238 Workerman[start.php] has been stopped
+2023-10-11 04:49:48 pid:257 Workerman[start.php] start in DEBUG mode
+2023-10-11 04:49:58 pid:257 Workerman[start.php] stopping ...
+2023-10-11 04:49:58 pid:257 Workerman[start.php] has been stopped
+2023-10-11 05:05:21 pid:22 Workerman[start.php] start in DEBUG mode
+2023-10-11 05:06:24 pid:23 Error: Call to a member function close() on null in /usr/src/myapp/fasterphpweb/src/Rtmp/RtmpPlayerTrait.php:175
+Stack trace:
+#0 /usr/src/myapp/fasterphpweb/src/MediaServer.php(185): MediaServer\Rtmp\RtmpStream->playClose()
+#1 /usr/src/myapp/fasterphpweb/vendor/evenement/evenement/src/EventEmitterTrait.php(143): MediaServer\MediaServer::MediaServer\{closure}()
+#2 /usr/src/myapp/fasterphpweb/src/Rtmp/RtmpTrait.php(95): Evenement\EventEmitter->emit('on_close')
+#3 /usr/src/myapp/fasterphpweb/src/Rtmp/RtmpStream.php(241): MediaServer\Rtmp\RtmpStream->stop()
+#4 /usr/src/myapp/fasterphpweb/vendor/evenement/evenement/src/EventEmitterTrait.php(143): MediaServer\Rtmp\RtmpStream->onStreamClose()
+#5 /usr/src/myapp/fasterphpweb/src/Utils/WMBufferStream.php(38): MediaServer\Utils\WMBufferStream->emit('onClose')
+#6 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Connection/TcpConnection.php(928): MediaServer\Utils\WMBufferStream->_onClose(Object(Workerman\Connection\TcpConnection))
+#7 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Connection/TcpConnection.php(835): Workerman\Connection\TcpConnection->destroy()
+#8 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(2523): Workerman\Connection\TcpConnection->close()
+#9 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1961): Workerman\Worker->stop()
+#10 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1223): Workerman\Worker::stopAll()
+#11 [internal function]: Workerman\Worker::signalHandler(2, NULL)
+#12 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Events/Event.php(193): EventBase->loop()
+#13 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1629): Workerman\Events\Event->loop()
+#14 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1423): Workerman\Worker::forkOneWorkerForLinux(Object(Workerman\Worker))
+#15 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1397): Workerman\Worker::forkWorkersForLinux()
+#16 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(560): Workerman\Worker::forkWorkers()
+#17 /usr/src/myapp/fasterphpweb/app/command/Demo.php(52): Workerman\Worker::runAll()
+#18 /usr/src/myapp/fasterphpweb/root/Xiaosongshu.php(200): App\Command\Demo->handle()
+#19 /usr/src/myapp/fasterphpweb/root/Xiaosongshu.php(110): Root\Xiaosongshu->handleOwnCommand(Array)
+#20 /usr/src/myapp/fasterphpweb/start.php(4): Root\Xiaosongshu->start_server(Array)
+#21 /usr/src/myapp/fasterphpweb/start.php(5): {closure}()
+#22 {main}
+2023-10-11 05:06:24 pid:22 Workerman[start.php] stopping ...
+2023-10-11 05:06:24 pid:22 worker[none:23] exit with status 64000
+2023-10-11 05:06:24 pid:22 Workerman[start.php] has been stopped
+2023-10-11 05:06:35 pid:24 Workerman[start.php] start in DEBUG mode
+2023-10-11 05:07:15 pid:25 DivisionByZeroError: Division by zero in /usr/src/myapp/fasterphpweb/src/Rtmp/RtmpStream.php:193
+Stack trace:
+#0 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Events/Event.php(167): MediaServer\Rtmp\RtmpStream->MediaServer\Rtmp\{closure}()
+#1 [internal function]: Workerman\Events\Event->timerCallback(-1, 1, Array)
+#2 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Events/Event.php(193): EventBase->loop()
+#3 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1629): Workerman\Events\Event->loop()
+#4 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1423): Workerman\Worker::forkOneWorkerForLinux(Object(Workerman\Worker))
+#5 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1397): Workerman\Worker::forkWorkersForLinux()
+#6 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(560): Workerman\Worker::forkWorkers()
+#7 /usr/src/myapp/fasterphpweb/app/command/Demo.php(52): Workerman\Worker::runAll()
+#8 /usr/src/myapp/fasterphpweb/root/Xiaosongshu.php(200): App\Command\Demo->handle()
+#9 /usr/src/myapp/fasterphpweb/root/Xiaosongshu.php(110): Root\Xiaosongshu->handleOwnCommand(Array)
+#10 /usr/src/myapp/fasterphpweb/start.php(4): Root\Xiaosongshu->start_server(Array)
+#11 /usr/src/myapp/fasterphpweb/start.php(5): {closure}()
+#12 {main}
+2023-10-11 05:07:15 pid:25 Error: Call to a member function close() on null in /usr/src/myapp/fasterphpweb/src/Rtmp/RtmpPlayerTrait.php:175
+Stack trace:
+#0 /usr/src/myapp/fasterphpweb/src/MediaServer.php(185): MediaServer\Rtmp\RtmpStream->playClose()
+#1 /usr/src/myapp/fasterphpweb/vendor/evenement/evenement/src/EventEmitterTrait.php(143): MediaServer\MediaServer::MediaServer\{closure}()
+#2 /usr/src/myapp/fasterphpweb/src/Rtmp/RtmpTrait.php(95): Evenement\EventEmitter->emit('on_close')
+#3 /usr/src/myapp/fasterphpweb/src/Rtmp/RtmpStream.php(241): MediaServer\Rtmp\RtmpStream->stop()
+#4 /usr/src/myapp/fasterphpweb/vendor/evenement/evenement/src/EventEmitterTrait.php(143): MediaServer\Rtmp\RtmpStream->onStreamClose()
+#5 /usr/src/myapp/fasterphpweb/src/Utils/WMBufferStream.php(38): MediaServer\Utils\WMBufferStream->emit('onClose')
+#6 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Connection/TcpConnection.php(928): MediaServer\Utils\WMBufferStream->_onClose(Object(Workerman\Connection\TcpConnection))
+#7 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Connection/TcpConnection.php(835): Workerman\Connection\TcpConnection->destroy()
+#8 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(2523): Workerman\Connection\TcpConnection->close()
+#9 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1961): Workerman\Worker->stop()
+#10 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Events/Event.php(171): Workerman\Worker::stopAll(250, Object(DivisionByZeroError))
+#11 [internal function]: Workerman\Events\Event->timerCallback(-1, 1, Array)
+#12 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Events/Event.php(193): EventBase->loop()
+#13 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1629): Workerman\Events\Event->loop()
+#14 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1423): Workerman\Worker::forkOneWorkerForLinux(Object(Workerman\Worker))
+#15 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1397): Workerman\Worker::forkWorkersForLinux()
+#16 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(560): Workerman\Worker::forkWorkers()
+#17 /usr/src/myapp/fasterphpweb/app/command/Demo.php(52): Workerman\Worker::runAll()
+#18 /usr/src/myapp/fasterphpweb/root/Xiaosongshu.php(200): App\Command\Demo->handle()
+#19 /usr/src/myapp/fasterphpweb/root/Xiaosongshu.php(110): Root\Xiaosongshu->handleOwnCommand(Array)
+#20 /usr/src/myapp/fasterphpweb/start.php(4): Root\Xiaosongshu->start_server(Array)
+#21 /usr/src/myapp/fasterphpweb/start.php(5): {closure}()
+#22 {main}
+2023-10-11 05:07:15 pid:24 worker[none:25] exit with status 64000
+2023-10-11 05:07:24 pid:24 Workerman[start.php] stopping ...
+2023-10-11 05:07:24 pid:24 Workerman[start.php] has been stopped
+2023-10-11 05:09:24 pid:34 Workerman[start.php] start in DEBUG mode
+2023-10-11 05:13:01 pid:34 Workerman[start.php] stopping ...
+2023-10-11 05:13:01 pid:34 Workerman[start.php] has been stopped
+2023-10-11 05:13:10 pid:36 Workerman[start.php] start in DEBUG mode
+2023-10-11 05:14:07 pid:36 Workerman[start.php] stopping ...
+2023-10-11 05:14:07 pid:36 Workerman[start.php] has been stopped
+2023-10-11 05:14:09 pid:38 Workerman[start.php] start in DEBUG mode
+2023-10-11 05:15:40 pid:38 Workerman[start.php] stopping ...
+2023-10-11 05:15:40 pid:38 Workerman[start.php] has been stopped
+2023-10-11 05:15:42 pid:40 Workerman[start.php] start in DEBUG mode
+2023-10-11 05:16:21 pid:41 DivisionByZeroError: Division by zero in /usr/src/myapp/fasterphpweb/src/Rtmp/RtmpStream.php:193
+Stack trace:
+#0 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Events/Event.php(167): MediaServer\Rtmp\RtmpStream->MediaServer\Rtmp\{closure}()
+#1 [internal function]: Workerman\Events\Event->timerCallback(-1, 1, Array)
+#2 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Events/Event.php(193): EventBase->loop()
+#3 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1629): Workerman\Events\Event->loop()
+#4 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1423): Workerman\Worker::forkOneWorkerForLinux(Object(Workerman\Worker))
+#5 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1397): Workerman\Worker::forkWorkersForLinux()
+#6 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(560): Workerman\Worker::forkWorkers()
+#7 /usr/src/myapp/fasterphpweb/app/command/Demo.php(52): Workerman\Worker::runAll()
+#8 /usr/src/myapp/fasterphpweb/root/Xiaosongshu.php(200): App\Command\Demo->handle()
+#9 /usr/src/myapp/fasterphpweb/root/Xiaosongshu.php(110): Root\Xiaosongshu->handleOwnCommand(Array)
+#10 /usr/src/myapp/fasterphpweb/start.php(4): Root\Xiaosongshu->start_server(Array)
+#11 /usr/src/myapp/fasterphpweb/start.php(5): {closure}()
+#12 {main}
+2023-10-11 05:16:21 pid:41 Error: Call to a member function close() on null in /usr/src/myapp/fasterphpweb/src/Rtmp/RtmpPlayerTrait.php:175
+Stack trace:
+#0 /usr/src/myapp/fasterphpweb/src/MediaServer.php(185): MediaServer\Rtmp\RtmpStream->playClose()
+#1 /usr/src/myapp/fasterphpweb/vendor/evenement/evenement/src/EventEmitterTrait.php(143): MediaServer\MediaServer::MediaServer\{closure}()
+#2 /usr/src/myapp/fasterphpweb/src/Rtmp/RtmpTrait.php(95): Evenement\EventEmitter->emit('on_close')
+#3 /usr/src/myapp/fasterphpweb/src/Rtmp/RtmpStream.php(241): MediaServer\Rtmp\RtmpStream->stop()
+#4 /usr/src/myapp/fasterphpweb/vendor/evenement/evenement/src/EventEmitterTrait.php(143): MediaServer\Rtmp\RtmpStream->onStreamClose()
+#5 /usr/src/myapp/fasterphpweb/src/Utils/WMBufferStream.php(38): MediaServer\Utils\WMBufferStream->emit('onClose')
+#6 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Connection/TcpConnection.php(928): MediaServer\Utils\WMBufferStream->_onClose(Object(Workerman\Connection\TcpConnection))
+#7 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Connection/TcpConnection.php(835): Workerman\Connection\TcpConnection->destroy()
+#8 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(2523): Workerman\Connection\TcpConnection->close()
+#9 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1961): Workerman\Worker->stop()
+#10 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Events/Event.php(171): Workerman\Worker::stopAll(250, Object(DivisionByZeroError))
+#11 [internal function]: Workerman\Events\Event->timerCallback(-1, 1, Array)
+#12 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Events/Event.php(193): EventBase->loop()
+#13 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1629): Workerman\Events\Event->loop()
+#14 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1423): Workerman\Worker::forkOneWorkerForLinux(Object(Workerman\Worker))
+#15 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(1397): Workerman\Worker::forkWorkersForLinux()
+#16 /usr/src/myapp/fasterphpweb/vendor/workerman/workerman/Worker.php(560): Workerman\Worker::forkWorkers()
+#17 /usr/src/myapp/fasterphpweb/app/command/Demo.php(52): Workerman\Worker::runAll()
+#18 /usr/src/myapp/fasterphpweb/root/Xiaosongshu.php(200): App\Command\Demo->handle()
+#19 /usr/src/myapp/fasterphpweb/root/Xiaosongshu.php(110): Root\Xiaosongshu->handleOwnCommand(Array)
+#20 /usr/src/myapp/fasterphpweb/start.php(4): Root\Xiaosongshu->start_server(Array)
+#21 /usr/src/myapp/fasterphpweb/start.php(5): {closure}()
+#22 {main}
+2023-10-11 05:16:21 pid:40 worker[none:41] exit with status 64000
+2023-10-11 05:16:28 pid:40 Workerman[start.php] stopping ...
+2023-10-11 05:16:28 pid:40 Workerman[start.php] has been stopped
+2023-10-11 05:20:45 pid:43 Workerman[start.php] start in DEBUG mode

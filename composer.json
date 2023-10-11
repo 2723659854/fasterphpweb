@@ -1,19 +1,16 @@
 {
   "name": "xiaosongshu/fasterphpweb",
-  "description": "一个常驻内存轻量级php框架",
+  "description": "一个常驻内存 php框架，提供http，rtmp，websocket服务",
   "type": "project",
   "license": "MIT",
   "keywords": [
-    "phpSocket",
-    "socketWeb",
-    "socket",
-    "faster php",
-    "php web",
-    "php framework"
+    "http service",
+    "rtmp service",
+    "websocket service"
   ],
   "autoload": {
     "psr-4": {
-      "Xiaosongshu\\Socketweb\\": "src/"
+      "MediaServer\\": "src"
     }
   },
   "authors": [
@@ -37,7 +34,11 @@
     "ext-mbstring": "*",
     "ext-posix": "*",
     "ext-sockets": "*",
-    "ext-mysqli": "*"
+    "ext-mysqli": "*",
+    "evenement/evenement": "^3.0",
+    "apix/log": "^1.2",
+    "workerman/workerman": "v4.1.9",
+    "react/promise": "^2.9"
   },
   "config": {
     "allow-plugins": {

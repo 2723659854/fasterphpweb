@@ -11,6 +11,7 @@ use Root\Queue\RabbitMqConsumer;
 use Root\Queue\RedisQueueConsumer;
 use Root\Queue\TimerConsumer;
 use Root\Queue\WsConsumer;
+use Workerman\Worker;
 
 /**
  * @purpose 应用启动处理器
@@ -47,6 +48,7 @@ class Xiaosongshu
         'avi'=>'video/x-msvideo; charset=UTF-8',
     ];
 
+
     /**
      * 启动服务
      * @param $param
@@ -55,6 +57,9 @@ class Xiaosongshu
      */
     public function start_server($param)
     {
+        /* Report all errors except E_NOTICE */
+        /** 关闭不影响功能的警告和提醒 ，看着太烦人了 */
+
         /** 环境监测 */
         $this->check_env();
         /** 是否守护模式 */
@@ -71,12 +76,7 @@ class Xiaosongshu
         /** 加载助手函数 */
         require_once __DIR__ . '/function.php';
         /** 加载根文件，常驻内存文件，应用目录文件 */
-        foreach (['root','process','ws','app'] as $name){
-            foreach (sortFiles(scan_dir(app_path() .'/'.$name,true)) as $val){
-                if (file_exists($val)&&(pathinfo($val)['extension'] == 'php')) {  require_once $val; }
-            }
-        }
-
+        $this->requireFile();
         /** 是否linux系统 */
         $_system = !(\DIRECTORY_SEPARATOR === '\\');
         /** 是否有epoll模型 */
@@ -115,6 +115,21 @@ class Xiaosongshu
             }
         } else {
             echo $_color_class->info("缺少必要参数，你可以输入start,start -d,stop,restart,queue\r\n");
+        }
+    }
+
+    /**
+     * 安装项目目录
+     * @return void
+     * @note 如果引入外部的包,即在composer.json里面设置了autoload，请使用composer dump-autoload 更新自动加载机制
+     */
+    public function requireFile(){
+        foreach (['root','process','ws','app'] as $name){
+            foreach (sortFiles(scan_dir(app_path() .'/'.$name,true)) as $val){
+                if (file_exists($val)&&(pathinfo($val)['extension'] == 'php')) {
+                    require_once $val;
+                }
+            }
         }
     }
 
