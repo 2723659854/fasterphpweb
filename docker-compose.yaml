@@ -84,11 +84,11 @@ services:
     # 挂载目录
     volumes:
       - /d/rabbitmq/:/var/log/rabbitmq/
-# 创建桥接网络
-#networks:
-#  bridge:
-#    driver: bridge
-#    ipam:
-#      driver: default
-#      config:
-#        - subnet: 172.28.0.0/16
+# 创建桥接网络 ,可以让容器通过ip访问宿主机 ，一般用于访问宿主机上配置的网站，可以配合Apache使用，设置网站在localhost下。参考：https://blog.csdn.net/u012516524/article/details/131978081
+networks:
+  bridge:
+    driver: host
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.28.0.0/16
