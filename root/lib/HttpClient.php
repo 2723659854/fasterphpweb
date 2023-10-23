@@ -81,10 +81,11 @@ class HttpClient
             /** 获取响应类容 */
             $response = "";
             while (!feof($socket)) {
-                $response .= fgets($socket, 1024);
+                $response .= fread($socket, 1024);
             }
             /** 关闭连接 */
             fclose($socket);
+
             /** 返回响应结果 */
             return self::makeResponse($response,$port,$target,$method,$params,$query,$header);
         }
@@ -125,7 +126,7 @@ class HttpClient
         /** 获取响应类容 */
         $response = "";
         while (!feof($socket)) {
-            $response .= fgets($socket, 1024);
+            $response .= fread($socket, 1024);
         }
         /** 关闭连接 */
         fclose($socket);
@@ -184,21 +185,15 @@ class HttpClient
         $makeIpAndDomain = self::makeUrlAndIp();
         $referer = $makeIpAndDomain['host'];
         $refererIp = $makeIpAndDomain['ip'];
-        $scheme = $port==443?'https':'http';
         /** 处理请query求参数 */
         if ($query){
             $target=$target.'?'.http_build_query($query);
         }
         $end = "\r\n";
         $request = "$method $target HTTP/1.1$end";
-        $request .= "Host: $host$end";
+        $request .= "Host: $host:$port$end";
         /** 设置客户端域名，即发起请求的页面地址 */
         $request .= "Referer: $referer$end";
-        /** 部分网站的https请求需要这些头部参数 */
-        $request .= ":authority: $host$end";
-        $request .= ":method: $method$end";
-        $request .= ":path: $target$end";
-        $request .= ":scheme: $scheme$end";
         /** 如果用户设置了header参数 */
         if ($header){
             foreach ($header as $k=>$v){
@@ -227,7 +222,7 @@ class HttpClient
         /** 设置客户端ip绕过nginx */
         $request .= "X-Forwarded-For: $refererIp\r\n";
         # 千万不要加这一行代码，加入这一行代码后，会压缩文件，不能正确解压文件
-        //$out .= "Accept-Encoding: gzip, deflate\r\n";
+        //$request .= "Accept-Encoding: gzip, deflate\r\n";
         /** 客户端支持的语言 */
         $request .= "Accept-Language: zh-CN,zh;q=0.9\r\n";
         /** 浏览器不缓存该资源 */
