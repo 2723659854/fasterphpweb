@@ -1,4 +1,5 @@
 框架简介
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;本框架旨在让用户了解和学习PHP实现web运行原理，涉及到了相对较多的底层基础知识。</p>
 <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;socketweb是一款常驻内存的轻量级的php框架，遵循常用的mvc架构。</p>
 <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;本框架对timer,redis,mysql,rabbitmq,websocket,elasticsearch,nacos,sqlite 进行了简单封装，并且保留了部分代码实例。</p>
 <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;本框架提供基本的http服务，可支持api接口或者web网页。</p>
@@ -1282,6 +1283,16 @@ ws-flv播放地址: ws://127.0.0.1:18080/a/b.flv<br>
 推流工具 ：obs,ffmpeg<br>
 拉流工具 ：vlc播放器，web拉流<br>
 本框架提供web拉流，详见示例：http://localhost:8000/video/play
+###  Http客户端
+####   支持 http/https协议
+使用方法如下
+```php 
+use Root\Lib\HttpClient;
+/** 请求百度 */
+$response = (HttpClient::request('www.baidu.com',  'GET',['lesson_id'=>201]));
+var_dump($response->header());
+```
+若该http客户端不满足你的需求，你可以使用第三方http客户端，比如Guzzle。或者使用curl函数自己构建请求。
 #### 命令行工具
 
 创建自定义命令行： php start.php make:command Test  <br>

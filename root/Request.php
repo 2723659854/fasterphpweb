@@ -291,4 +291,22 @@ class Request extends \Root\Lib\BaseRequest
         return false;
     }
 
+    /**
+     * 获取状态码
+     * @return int|mixed
+     */
+    public function getStatusCode(){
+        preg_match('/HTTP\/1\.1\s+(\d{3})/', $this->rawHead(), $matches);
+        return $matches[1]??400;
+    }
+
+
+    /**
+     * 获取响应内容
+     * @return string
+     */
+    public function getContents(){
+        return $this->rawBody();
+    }
+
 }
