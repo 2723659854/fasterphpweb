@@ -311,9 +311,9 @@ class Xiaosongshu
             }
         }
         /** 清理select连接 */
-        unset($httpServer->allSocket[(int)$socketAccept]);
+        unset(Selector::$allSocket[(int)$socketAccept]);
         /** 清理epoll连接 */
-        unset($httpServer->events[(int)$socketAccept]);
+        //unset($httpServer->events[(int)$socketAccept]);
         /** 释放客户端连接 */
         unset($socketAccept);
     }

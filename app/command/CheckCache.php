@@ -2,6 +2,7 @@
 
 namespace App\Command;
 
+use Root\Lib\AsyncHttpClient;
 use Root\Lib\BaseCommand;
 use Root\Cache;
 use Root\Lib\HttpClient;
@@ -35,8 +36,10 @@ class CheckCache extends BaseCommand
      */
     public function handle()
     {
-        $response = (HttpClient::request('www.baidu.com',  'GET',['lesson_id'=>201]));
-        var_dump($response->header());
+        //$response = (HttpClient::request('http://127.0.0.1:8000',  'GET',['lesson_id'=>201]));
+        //var_dump($response->header());
+
+        AsyncHttpClient::request();
     }
 
 

@@ -90,7 +90,7 @@ class HttpClient
         /** 设置参数 */
         $context = stream_context_create($contextOptions);
         /** 创建客户端 STREAM_CLIENT_CONNECT 同步请求，STREAM_CLIENT_ASYNC_CONNECT 异步请求*/
-        $socket = stream_socket_client("{$scheme}://{$host}:{$port}", $errno, $errstr, 1, STREAM_CLIENT_ASYNC_CONNECT, $context);
+        $socket = stream_socket_client("{$scheme}://{$host}:{$port}", $errno, $errstr, 1, STREAM_CLIENT_CONNECT, $context);
         /** 设置位非阻塞状态 */
         //$flg = stream_set_blocking($socket,false);
         /** 创建连接失败 */
@@ -156,7 +156,7 @@ class HttpClient
      * @param array $header 头部信息
      * @return string 请求体
      */
-    private static function makeRequest(string $host = '127.0.0.1', int $port = 443, string $target = '/',string $method='GET', array $params = [],array $query=[],array $header =[]):string{
+    public static function makeRequest(string $host = '127.0.0.1', int $port = 443, string $target = '/',string $method='GET', array $params = [],array $query=[],array $header =[]):string{
 
         /** 处理请query求参数 */
         if ($query){

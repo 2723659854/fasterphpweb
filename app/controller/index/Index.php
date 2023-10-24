@@ -9,6 +9,7 @@ use Root\Annotation\Mapping\Middlewares;
 use Root\Annotation\Mapping\RequestMapping;
 use Root\ESClient;
 use App\Middleware\MiddlewareA;
+use Root\Lib\AsyncHttpClient;
 use Root\Request;
 use Root\Cache;
 use App\Queue\Test;
@@ -22,6 +23,8 @@ class Index
     /** 默认首页,测试html */
     public function index(Request $request)
     {
+        /** 发送异步请求 */
+        AsyncHttpClient::request();
         //模板在根目录下的view目录里面
         return view('/index/index', ['time' => date('Y-m-d H:i:s')])->cookie('name','how are you !');
     }

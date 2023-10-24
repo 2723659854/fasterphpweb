@@ -15,7 +15,7 @@ class Selector
     public $onMessage = NULL;
 
     /** 存放所有socket */
-    public $allSocket;
+    public static $allSocket;
 
     /** @var string $host 监听的ip和协议 */
     public $host='0.0.0.0';
@@ -28,6 +28,13 @@ class Selector
     /** 所有的客户端ip */
     private $clientIp = [];
 
+    /** 异步http客户端 */
+    public static $success = [];
+    /** 需要发送的请求 */
+    public static $request =[];
+    /** 异步http客户端 */
+    public static $fail = [];
+
     /** 初始化 */
     public function __construct()
     {
@@ -35,9 +42,12 @@ class Selector
         $this->port=$_port?:'8000';
         /** @var string $listeningAddress 拼接监听地址 */
         $listeningAddress=$this->protocol.'://'.$this->host.':'.$this->port;
-
+        $contextOptions['ssl']=[
+            'verify_peer' => false,
+            'verify_peer_name' => false
+        ];
         /** 配置socket流参数 */
-        $context = stream_context_create();
+        $context = stream_context_create($contextOptions);
         /** 设置端口复用 */
         stream_context_set_option($context, 'socket', 'so_reuseport', 1);
         stream_context_set_option($context, 'socket', 'so_reuseaddr', 1);
@@ -48,7 +58,7 @@ class Selector
         /** 设置非阻塞，语法是关闭阻塞 */
         stream_set_blocking($this->socket, 0);
         /** 将服务端保存 */
-        $this->allSocket[(int)$this->socket] = $this->socket;
+        Selector::$allSocket[(int)$this->socket] = $this->socket;
     }
 
     /** 启动服务 */
@@ -56,15 +66,36 @@ class Selector
     {
         $this->accept();
     }
+
+    /**
+     * 异步request请求
+     * @param $socket
+     * @param $request
+     * @param $function
+     * @return void
+     * @note  异步request请求的关键就是 将客户端连接存入到allSocket中，并使用stream_select处理读写事件 ，另外最重要的一点是
+     * @note 只能在http服务里面调用异步客户端，就是异步请求必须和http服务是同一个进程，才能公用select模型。发送数据后，连接变成了异步请求，
+     * @note  由select模型接管接下来的操作
+     */
+    public static function addFunction($socket,$request,$function){
+
+        $id = (int)$socket;
+        Selector::$allSocket[$id]=$socket;
+        /** 保存回调 */
+        Selector::$success[$id]=$function;
+        /** 立刻发送数据给对方服务器，这里也许可以不立即发送，目前还没有想好怎么处理 */
+        //fwrite($socket,$request,strlen($request));
+        Selector::$request[$id]=$request;
+    }
     /** 接收客户端消息 */
     public function accept()
     {
         /** 创建多个子进程阻塞接收服务端socket 这个while死循环 会导致for循环被阻塞，不往下执行，创建了子进程也没有用，直接在第一个子进程哪里阻塞了 */
         while (true) {
             /** 初始化需要监测的可写入的客户端，需要排除的客户端都为空 */
-            $write = $except = [];
+             $except = [];
             /** 需要监听socket */
-            $read = $this->allSocket;
+            $write = $read = Selector::$allSocket;
             //状态谁改变
             /** 使用stream_select函数监测可读，可写的连接，如果某一个连接接收到数据，那么数据就会改变，select使用的foreach遍历所有的连接，查看是否可读，就是有消息的时候标记为可读 */
             /** 这里设置了阻塞60秒 */
@@ -85,7 +116,7 @@ class Selector
                         call_user_func($this->onConnect, $clientSocket,$remote_address);
                     }
                     /** 将这个客户端连接保存，目测这里如果不保存，应该是无法发送和接收消息的，就是要把所有的连接都保存在内存中 */
-                    $this->allSocket[(int)$clientSocket] = $clientSocket;
+                    Selector::$allSocket[(int)$clientSocket] = $clientSocket;
                     /** 单独用一个数组保存客户端ip地址和端口信息 */
                     $this->clientIp[(int)$clientSocket] = $remote_address;
                 } else {
@@ -99,9 +130,7 @@ class Selector
                         }
                         $buffer = $buffer. $_content;
                     }
-                    /** 如果是客户端连接可读 */
                     /** 从连接当中读取客户端的内容 */
-                    //$buffer = fread($val, 1024);
                     /** 如果数据为空，或者为false,不是资源类型 */
                     if (empty($buffer)) {
                         /** feof：如果检测已经到了文件末尾，就是客户端连接没有内容了，并且客户端连接不是资源类型 is_resource：检测打开的文件是否是资源类型 */
@@ -109,15 +138,36 @@ class Selector
                             /** 触发关闭事件，关闭这个客户端 */
                             fclose($val);
                             /** 移除这个连接 */
-                            unset($this->allSocket[(int)$val]);
+                            unset(Selector::$allSocket[(int)$val]);
                             continue;
                         }
                     }
                     /** 正常读取到数据,触发消息接收事件,响应内容，如果读取的内容不为空，并且设置了onMessage回调函数 */
-                    if (!empty($buffer) && is_callable($this->onMessage)) {
-                        /** 传入连接，接收的值到回调函数 */
-                        call_user_func($this->onMessage, $val, $buffer,$this->clientIp[(int)$val]??'');
+                    if (!empty($buffer)&&!empty(Selector::$success[(int)$val])){
+                        call_user_func(Selector::$success[(int)$val],$buffer);
+                        /** 关闭这个客户端 */
+                        fclose($val);
+                        /** 移除这个连接 */
+                        unset(Selector::$allSocket[(int)$val]);
+
+                    }else{
+                        if (!empty($buffer) && is_callable($this->onMessage)) {
+                            /** 传入连接，接收的值到回调函数 */
+                            call_user_func($this->onMessage, $val, $buffer,$this->clientIp[(int)$val]??'');
+                        }
                     }
+
+                }
+            }
+
+            foreach ($write as $val){
+                //var_dump("检查可写连接 ");
+                $id = (int)$val;
+                if (isset(Selector::$request[$id])){
+                    var_dump("找到了request，准备发送");
+                    fwrite($val,Selector::$request[$id],strlen(Selector::$request[$id]));
+                    //todo 删除这个request
+                    unset(Selector::$request[$id]);
                 }
             }
         }
