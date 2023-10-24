@@ -36,10 +36,10 @@ class CheckCache extends BaseCommand
      */
     public function handle()
     {
-        //$response = (HttpClient::request('http://127.0.0.1:8000',  'GET',['lesson_id'=>201]));
-        //var_dump($response->header());
+        $response = (HttpClient::request('http://192.168.4.97:8080',  'GET',['lesson_id'=>201]));
+        var_dump($response->rawBuffer());
 
-        AsyncHttpClient::request();
+        //AsyncHttpClient::request();
     }
 
 

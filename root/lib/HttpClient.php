@@ -1,6 +1,7 @@
 <?php
 
 namespace Root\Lib;
+use Root\Io\Selector;
 use Root\Request;
 
 /**
@@ -83,16 +84,11 @@ class HttpClient
             ];
             $scheme = 'ssl';
         }
-        /** 设置代理 貌似无效 */
-        //if (HttpClient::$httpProxy){ $contextOptions['http']=['proxy'=> HttpClient::$httpProxy]; }
-        //if (HttpClient::$httpsProxy){ $contextOptions['https'] =['proxy'=> HttpClient::$httpsProxy]; }
 
         /** 设置参数 */
         $context = stream_context_create($contextOptions);
         /** 创建客户端 STREAM_CLIENT_CONNECT 同步请求，STREAM_CLIENT_ASYNC_CONNECT 异步请求*/
         $socket = stream_socket_client("{$scheme}://{$host}:{$port}", $errno, $errstr, 1, STREAM_CLIENT_CONNECT, $context);
-        /** 设置位非阻塞状态 */
-        //$flg = stream_set_blocking($socket,false);
         /** 创建连接失败 */
         if ($errno){
             throw new \RuntimeException($errstr,$errno);
@@ -210,5 +206,81 @@ class HttpClient
         }
         $request .= "$end";
         return $request;
+    }
+
+    /**
+     * 发送异步请求
+     * @param string $host
+     * @param string $method
+     * @param array $params
+     * @param array $query
+     * @param array $header
+     * @param $success
+     * @param $fail
+     * @return Request
+     */
+    public static function requestAsync(string $host, string $method='GET',array $params = [],array $query=[],array $header=[],$success=null,$fail=null){
+        /** 用户会传入ip地址，所以不用正则检测 */
+        $parsUrl = parse_url($host);
+        if (empty($parsUrl['host'])){
+            $parsUrl = parse_Url('http://'.$host);
+        }
+        /** 请求的domain */
+        $_host =$parsUrl['host'];
+        /** 请求的路径 */
+        $_path = $parsUrl['path']??'/';
+        /** 协议类型 */
+        $_scheme = $parsUrl['scheme']??'http';
+        /** 请求方法 */
+        $_method = strtoupper($method)??'GET';
+        /** query 资源参数 */
+        $_query = $parsUrl['query']??[];
+        $query = array_merge($query,$_query);
+        /** 端口 */
+        $_port = $parsUrl['port']??80;
+        /** 如果是https则切换到443端口，否则使用原来的端口 */
+        $_port = ($_scheme=='https')?443:$_port;
+        if (!$_host){
+            throw new \RuntimeException("host错误");
+        }
+        if (!in_array($_scheme,['http','https'])) throw new \RuntimeException("不支持的协议类型【{$_scheme}】");
+        /** 这里要改成投递异步请求 */
+        return self::doAsyncRequest($_host,$_port,$_path,$_method,$params,$query,$header,$success,$fail);
+    }
+
+    /**
+     * 执行请求
+     * @param string $host
+     * @param int $port
+     * @param string $target
+     * @param string $method
+     * @param array $params
+     * @param array $query
+     * @param array $header
+     * @return Request
+     */
+    private static function doAsyncRequest(string $host, int $port = 80, string $target = '/', string $method='GET',array $params = [],array $query=[],array $header=[],$success=null,$fail=null){
+        /** 构建request */
+        $request = self::makeRequest($host,$port,$target,$method,$params,$query,$header);
+        /** 协议类型 */
+        $scheme = 'tcp';
+        /** 初始化客户端设置 */
+        $contextOptions = [];
+        if ($port==443){
+            /** 不校验ssl */
+            $contextOptions['ssl']=[
+                'verify_peer' => false,
+                'verify_peer_name' => false
+            ];
+            $scheme = 'ssl';
+        }
+        /** 设置参数 */
+        $context = stream_context_create($contextOptions);
+        /** 创建客户端 STREAM_CLIENT_CONNECT 同步请求，STREAM_CLIENT_ASYNC_CONNECT 异步请求*/
+        $socket = stream_socket_client("{$scheme}://{$host}:{$port}", $errno, $errstr, 1, STREAM_CLIENT_ASYNC_CONNECT, $context);
+        /** 设置位非阻塞状态 */
+        stream_set_blocking($socket,false);
+        /** 添加到异步模型 */
+        Selector::addFunction($socket,$request,$success,$fail);
     }
 }
