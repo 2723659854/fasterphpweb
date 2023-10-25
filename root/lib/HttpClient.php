@@ -221,6 +221,8 @@ class HttpClient
      * @return Request
      */
     public static function requestAsync(string $host, string $method='GET',array $params = [],array $query=[],array $header=[],$success=null,$fail=null){
+        /** 保存原始数据 */
+        $oldParams = [$host,$method,$params,$query,$header,$success,$fail];
         /** 用户会传入ip地址，所以不用正则检测 */
         $parsUrl = parse_url($host);
         if (empty($parsUrl['host'])){
@@ -246,7 +248,7 @@ class HttpClient
         }
         if (!in_array($_scheme,['http','https'])) throw new \RuntimeException("不支持的协议类型【{$_scheme}】");
         /** 这里要改成投递异步请求 */
-        return self::doAsyncRequest($_host,$_port,$_path,$_method,$params,$query,$header,$success,$fail);
+        return self::doAsyncRequest($_host,$_port,$_path,$_method,$params,$query,$header,$success,$fail,$oldParams);
     }
 
     /**
@@ -260,9 +262,10 @@ class HttpClient
      * @param array $header
      * @return Request
      */
-    private static function doAsyncRequest(string $host, int $port = 80, string $target = '/', string $method='GET',array $params = [],array $query=[],array $header=[],$success=null,$fail=null){
+    private static function doAsyncRequest(string $host, int $port = 80, string $target = '/', string $method='GET',array $params = [],array $query=[],array $header=[],callable $success=null,callable $fail=null,array $oldParams =[]){
         /** 构建request */
         $request = self::makeRequest($host,$port,$target,$method,$params,$query,$header);
+
         /** 协议类型 */
         $scheme = 'tcp';
         /** 初始化客户端设置 */
@@ -282,10 +285,10 @@ class HttpClient
         /** 设置位非阻塞状态 */
         stream_set_blocking($socket,false);
         /** 添加到异步模型 */
-        Selector::sendRequest($socket,$request,$success,$fail,$host.':'.$port);
+        Selector::sendRequest($socket,$request,$success,$fail,$host.':'.$port,$oldParams);
         /** 如果开启了epoll读写模型 */
         if (Epoll::$event_base){
-            Epoll::sendRequest($socket,$request,$success,$fail,$host.':'.$port);
+            Epoll::sendRequest($socket,$request,$success,$fail,$host.':'.$port,$oldParams);
         }
 
     }

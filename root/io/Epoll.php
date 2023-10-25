@@ -3,6 +3,7 @@
 namespace Root\Io;
 
 use Root\Lib\Container;
+use Root\Lib\HttpClient;
 use Root\Request;
 
 /**
@@ -38,6 +39,8 @@ class Epoll
 
     /** 标记异步客户端已发送请求 */
     private static $write = [];
+    /** 异步请求的 原始数据 */
+    public static $asyncRequestData = [];
 
     /** 初始化 */
     public function __construct()
@@ -109,11 +112,14 @@ class Epoll
      * @param callable|null $success 成功回调
      * @param callable|null $fail 失败回调
      * @param string $remoteAddress 服务器地址
+     * @param array $oldParams 原始数据
      * @return void
      * @note 要把write和read事件分成两个事件添加，分别处理对应的逻辑。分别添加到Event事件里面，最后还要添加到EventBase事件里面
      */
-    public static function sendRequest(mixed $cli, string $request, callable $success = null, callable $fail = null, string $remoteAddress = '')
+    public static function sendRequest(mixed $cli, string $request, callable $success = null, callable $fail = null, string $remoteAddress = '',array $oldParams=[])
     {
+        /** 首先保存原始数据 */
+        Epoll::$asyncRequestData[(int)$cli]=$oldParams;
         /** 创建一个可写事件 */
         Epoll::dealWriteEvent($cli, $request, $fail);
         /** 添加一个可读事件 */
@@ -176,25 +182,41 @@ class Epoll
             if (!$buffer || !is_resource($cli)) {
                 /** 释放资源 */
                 Epoll::unsetResource($cli);
+            }else{
+                /** 处理客户端异步http响应 */
+                Epoll::dealRequestResponse($cli,$buffer,$success,$remoteAddress);
             }
-            /** 怎么区分是客户端还是服务端 */
-            if ($success) {
-                call_user_func($success, Container::set(Request::class, [$buffer, $remoteAddress]));
-            }
-            /** 清理写事件 */
-            @Epoll::$events[(int)$cli]->del();
-            /** 清理写事件 */
-            @Epoll::$events[-((int)$cli)]->del();
-            /** 清理读事件 */
-            @Epoll::$events[ (int)$cli]->del();
             /** 释放资源 */
             Epoll::unsetResource($cli);
-
         }, $cli);
         /** 将事件添加到event */
         $client_event_read->add();
         /** 将所有的事件都保存到进程中 */
         Epoll::$events[ ((int)$cli)] = $client_event_read;
+    }
+
+    /**
+     * 处理http异步请求的响应
+     * @param mixed $val
+     * @param string $buffer
+     * @return void
+     */
+    private static function dealRequestResponse(mixed $val,string $buffer ,callable $success=null, string $remoteAddress='127.0.0.1:8000'){
+        /** 调用用户的回调 */
+        $request = Container::set(Request::class,[$buffer,$remoteAddress]);
+        if (($request->getStatusCode()>299)&&($request->getStatusCode()<400)){
+            /** 取出原始数据 */
+            $oldParams = Epoll::$asyncRequestData[(int)$val]??[];
+            /** 获取原始参数 */
+            list($host,$method,$params,$query,$header,$success,$fail)=$oldParams;
+            /** 获取新的域名 */
+            $host  = $request->header('location');
+            /** 发送新的请求 */
+            HttpClient::requestAsync($host,$method,$params,$query,$header,$success,$fail);
+        }else{
+            /** 调用用户的回调 */
+            call_user_func($success, $request);
+        }
     }
 
     /**
@@ -205,12 +227,21 @@ class Epoll
      */
     private static function unsetResource($cli)
     {
+        /** 清理写事件 */
+        @Epoll::$events[(int)$cli]->del();
+        /** 清理写事件 */
+        @Epoll::$events[-((int)$cli)]->del();
+        /** 清理读事件 */
+        @Epoll::$events[ (int)$cli]->del();
         /** 释放写事件 */
         unset(Epoll::$events[(int)$cli]);
         /** 释放读事件 */
         unset(Epoll::$events[(-1) * ((int)$cli)]);
         /** 释放读标记 */
         unset(Epoll::$write[(int)$cli]);
+        /** 释放原始数据 */
+        unset(Epoll::$asyncRequestData[(int)$cli]);
+        /** 关闭连接 */
         fclose($cli);
         /** 释放连接 */
         unset($cli);

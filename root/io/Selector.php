@@ -3,6 +3,7 @@
 namespace Root\Io;
 
 use Root\Lib\Container;
+use Root\Lib\HttpClient;
 use Root\Request;
 
 /**
@@ -41,8 +42,9 @@ class Selector
     private static $request = [];
     /** 异步http客户端 */
     private static $fail = [];
-    /** 处理读取的缓存 */
-    private static $buffer = [];
+
+    /** 异步请求的 原始数据 */
+    public static $asyncRequestData = [];
     /** 初始化 */
     public function __construct()
     {
@@ -82,7 +84,7 @@ class Selector
      * @return void
      * @note http客户端发送异步请求
      */
-    public static function sendRequest(mixed $socket, string $request, callable $success = null, callable $fail = null,string $remote_address='')
+    public static function sendRequest(mixed $socket, string $request, callable $success = null, callable $fail = null,string $remote_address='',array $oldParams=[])
     {
         $id = (int)$socket;
         /** 直接把客户端添加到全局socket当中，然后使用stream_select检测这个客户端，检测到可读可写事件后再执行对应发送数据和接收数据操作 */
@@ -95,6 +97,8 @@ class Selector
         Selector::$request[$id] = $request;
         /** 保存对端服务器地址 */
         Selector::$clientIp[$id] = $remote_address;
+        /** 保存原始数据 */
+        Selector::$asyncRequestData[$id]=$oldParams;
     }
 
     /** 接收客户端消息 */
@@ -144,13 +148,22 @@ class Selector
             } else {
                 /** selector 不能使用feof判断文件是否读取完成，否则进程卡死 */
                 $buffer = '';
-                $flag = true;
-                while ($flag) {
-                    $_content = fread($val, 1024);
-                    if (strlen($_content) < 1024) {
-                        $flag = false;
+                /** 根据连接的类型不同，读取数据的方式也不同，这里是一个坑，必须区别连接类型来读取数据，如果异步客户端也按照服务端的方式读取数据，就会出现数据不完整的情况，特别是没有告诉数据长度的情况 */
+                if (empty(Selector::$asyncRequestData[(int)$val])){
+                    /** 1，作为服务端的时候没有保存原始数据 使用长度判断是否接收完所有数据 */
+                    $flag = true;
+                    while ($flag) {
+                        $_content = fread($val, 1024);
+                        if (strlen($_content) < 1024) {
+                            $flag = false;
+                        }
+                        $buffer = $buffer . $_content;
                     }
-                    $buffer = $buffer . $_content;
+                }else{
+                    /** 2，作为客户端的时候 ，直接把服务端当成资源读取，使用feof判断是否接收完所有数据 */
+                    while (!feof($val)){
+                        $buffer .=fread($val,1024);
+                    }
                 }
                 /** 从连接当中读取客户端的内容 */
                 /** 如果数据为空，或者为false,不是资源类型 */
@@ -162,35 +175,13 @@ class Selector
                         continue;
                     }
                 }
-                /** 这一块的代码是用来处理异步客户端的读事件，因为接收的文件不完整，所以搞了这么大一块代码 */
+
                 /** 正常读取到数据,触发消息接收事件,响应内容，如果读取的内容不为空，并且设置了onMessage回调函数 */
                 if (!empty($buffer) && !empty(Selector::$success[(int)$val])) {
-                    $_length = strlen($buffer);
-                    $_end = stripos($buffer,"\r\n\r\n");
-                    /** 完整的数据 */
-                    if ($_end&&$_length&&($_length-$_end)>4){
-                        /** 清空缓存 */
-                        unset(Selector::$buffer[(int)$val]);
-                        /** 调用用户的回调 */
-                        call_user_func(Selector::$success[(int)$val], Container::set(Request::class,[$buffer,Selector::$clientIp[(int)$val] ?? '']));
-                        /** 关闭客户端 */
-                        Selector::unsetResource($val);
-                    }
-                    /** 开始 */
-                    if ($_end&&($_end+4==$_length)&&empty(Selector::$buffer[(int)$val])){
-                        Selector::$buffer[(int)$val] = $buffer;
-                    }
-                    /** 尾巴部分 */
-                    if (!$_end){
-                        $buffer = Selector::$buffer[(int)$val] . $buffer;
-                        /** 清空缓存 */
-                        unset(Selector::$buffer[(int)$val]);
-                        /** 调用用户的回调 */
-                        call_user_func(Selector::$success[(int)$val], Container::set(Request::class,[$buffer,Selector::$clientIp[(int)$val] ?? '']));
-                        /** 关闭客户端 */
-                        Selector::unsetResource($val);
-                    }
-
+                    /** 处理异步http客户端的响应 */
+                    Selector::dealRequestResponse($val,$buffer);
+                    /** 关闭客户端，释放资源 */
+                    Selector::unsetResource($val);
                     /** 存在一个问题bug 只是接收了头部，没有接收body ,导致数据不完整，原因是在header和body之间有一个换行符，导致接收终止了 */
                 } else {
                     /** 请求当前服务器的客户端，直接调用http服务的onMessage*/
@@ -201,6 +192,30 @@ class Selector
                 }
 
             }
+        }
+    }
+
+    /**
+     * 处理http异步请求的响应
+     * @param mixed $val
+     * @param string $buffer
+     * @return void
+     */
+    private static function dealRequestResponse(mixed $val,string $buffer){
+        /** 调用用户的回调 */
+        $request = Container::set(Request::class,[$buffer,Selector::$clientIp[(int)$val] ?? '']);
+        if (($request->getStatusCode()>299)&&($request->getStatusCode()<400)){
+            /** 取出原始数据 */
+            $oldParams = Selector::$asyncRequestData[(int)$val]??[];
+            /** 获取原始参数 */
+            list($host,$method,$params,$query,$header,$success,$fail)=$oldParams;
+            /** 获取新的域名 */
+            $host  = $request->header('location');
+            /** 发送新的请求 */
+            HttpClient::requestAsync($host,$method,$params,$query,$header,$success,$fail);
+        }else{
+            /** 调用用户的回调 */
+            call_user_func(Selector::$success[(int)$val], $request);
         }
     }
 
@@ -250,6 +265,9 @@ class Selector
         unset(Selector::$success[(int)$val]);
         /** 移除失败回调 */
         unset(Selector::$fail[(int)$val]);
+        /** 删除原始数据 */
+        unset(Selector::$asyncRequestData[(int)$val]);
+        unset($val);
     }
 
 }

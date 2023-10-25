@@ -1288,9 +1288,15 @@ ws-flv播放地址: ws://127.0.0.1:18080/a/b.flv<br>
 使用方法如下
 ```php 
 use Root\Lib\HttpClient;
-/** 请求百度 */
+/** 同步请求 请求百度 */
 $response = (HttpClient::request('www.baidu.com',  'GET',['lesson_id'=>201]));
 var_dump($response->header());
+/** 异步请求 请求百度 */
+HttpClient::requestAsync('www.baidu.com',  'GET',['lesson_id'=>201],[],[],function (Request $message){
+      var_dump("我是异步的吗？");
+      var_dump($message->rawBody());
+      var_dump('======================================================================================');
+});
 ```
 若该http客户端不满足你的需求，你可以使用第三方http客户端，比如Guzzle。或者使用curl函数自己构建请求。
 #### 命令行工具
