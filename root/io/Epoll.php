@@ -67,36 +67,8 @@ class Epoll
             if ($cli) {
                 /** 设置为异步 */
                 stream_set_blocking($cli, 0);
-                /** 将新的客户端连接投入到事件，构建客户端事件， */
-                $client_event = new \Event(Epoll::$event_base, $cli, \Event::READ | \Event::PERSIST, function ($cli)use($remote_address) {
-                    /** 客户端连接再添加监听可读事件，读取客户端连接的数据 */
-                    $buffer = '';
-                    $flag    = true;
-                    /** http服务进程必须用长度判断是否读取完整，否则一直死循环，进程卡死 */
-                    while ($flag) {
-                        $_content = fread($cli, 1024);
-                        if (strlen($_content) < 1024) {
-                            $flag = false;
-                        }
-                        $buffer = $buffer. $_content;
-                    }
-                    /** 如果用户输入为空或者输入不是资源 */
-                    if (!$buffer  || !is_resource($cli)) {
-                        /** 释放事件 */
-                        unset(Epoll::$events[(int)$cli]);
-                        unset($cli);
-                        return;
-                    }
-                    /** 正常读取到数据,触发消息接收事件,响应内容，如果读取的内容不为空，并且设置了onMessage回调函数 */
-                    if (!empty($buffer) && is_callable($this->onMessage)) {
-                        /** 传入连接，接收的值到回调函数 */
-                        call_user_func($this->onMessage, $cli, $buffer,$remote_address);
-                    }
-                }, $cli);
-                /** 将构建的客户端事件添加到epoll当中 */
-                $client_event->add();
-                /** 添加事件到全局数组,不然无法持久化连接,这是个大坑，这里是把每一个连接的事件都保存,这里必须持久化，否则无法回复消息，无法读取消息 */
-                Epoll::$events[(int)$cli] = $client_event;
+                /** 创建read处理事件 */
+                Epoll::dealReadEvent($cli,$this->onMessage,$remote_address);
             }
         }, Epoll::$serv);
         /** 添加事件 */
@@ -174,9 +146,24 @@ class Epoll
         /** 创建一个可读事件 */
         $client_event_read = new \Event(Epoll::$event_base, $cli, \Event::READ | \Event::PERSIST, function ($cli) use ($success, $remoteAddress) {
             /** 客户端连接再添加监听可读事件，读取客户端连接的数据，这里客户端可以用feof判断是否读取完成，这个feof是作为客户端读取文件， */
+            /** selector 不能使用feof判断文件是否读取完成，否则进程卡死 */
             $buffer = '';
-            while (!feof($cli)) {
-                $buffer .= fread($cli, 1024);
+            /** 根据连接的类型不同，读取数据的方式也不同，这里是一个坑，必须区别连接类型来读取数据，如果异步客户端也按照服务端的方式读取数据，就会出现数据不完整的情况，特别是没有告诉数据长度的情况 */
+            if (empty(Epoll::$asyncRequestData[(int)$cli])){
+                /** 1，作为服务端的时候没有保存原始数据 使用长度判断是否接收完所有数据 */
+                $flag = true;
+                while ($flag) {
+                    $_content = fread($cli, 1024);
+                    if (strlen($_content) < 1024) {
+                        $flag = false;
+                    }
+                    $buffer = $buffer . $_content;
+                }
+            }else{
+                /** 2，作为客户端的时候 ，直接把服务端当成资源读取，使用feof判断是否接收完所有数据 */
+                while (!feof($cli)){
+                    $buffer .=fread($cli,1024);
+                }
             }
             /** 如果用户输入为空或者输入不是资源 */
             if (!$buffer || !is_resource($cli)) {
@@ -186,8 +173,7 @@ class Epoll
                 /** 处理客户端异步http响应 */
                 Epoll::dealRequestResponse($cli,$buffer,$success,$remoteAddress);
             }
-            /** 释放资源 */
-            Epoll::unsetResource($cli);
+
         }, $cli);
         /** 将事件添加到event */
         $client_event_read->add();
@@ -202,20 +188,34 @@ class Epoll
      * @return void
      */
     private static function dealRequestResponse(mixed $val,string $buffer ,callable $success=null, string $remoteAddress='127.0.0.1:8000'){
-        /** 调用用户的回调 */
-        $request = Container::set(Request::class,[$buffer,$remoteAddress]);
-        if (($request->getStatusCode()>299)&&($request->getStatusCode()<400)){
-            /** 取出原始数据 */
-            $oldParams = Epoll::$asyncRequestData[(int)$val]??[];
-            /** 获取原始参数 */
-            list($host,$method,$params,$query,$header,$success,$fail)=$oldParams;
-            /** 获取新的域名 */
-            $host  = $request->header('location');
-            /** 发送新的请求 */
-            HttpClient::requestAsync($host,$method,$params,$query,$header,$success,$fail);
-        }else{
+        /** 异步客户端 */
+        if (!empty(Epoll::$asyncRequestData[(int)$val])){
             /** 调用用户的回调 */
-            call_user_func($success, $request);
+            $request = Container::set(Request::class,[$buffer,$remoteAddress]);
+            if (($request->getStatusCode()>299)&&($request->getStatusCode()<400)){
+                /** 取出原始数据 */
+                $oldParams = Epoll::$asyncRequestData[(int)$val]??[];
+                /** 获取原始参数 */
+                list($host,$method,$params,$query,$header,$success,$fail)=$oldParams;
+                /** 获取新的域名 */
+                $host  = $request->header('location');
+                /** 释放资源 */
+                Epoll::unsetResource($val);
+                /** 发送新的请求 */
+                HttpClient::requestAsync($host,$method,$params,$query,$header,$success,$fail);
+            }else{
+                /** 调用用户的回调 */
+                call_user_func($success, $request);
+                /** 释放资源 */
+                Epoll::unsetResource($val);
+            }
+        }else{
+            /** 作为http服务器的时候，走这一条路处理 */
+            /** 正常读取到数据,触发消息接收事件,响应内容，如果读取的内容不为空，并且设置了onMessage回调函数 */
+            if (!empty($buffer) && is_callable($success)) {
+                /** 传入连接，接收的值到回调函数 */
+                call_user_func($success, $val, $buffer,$remoteAddress);
+            }
         }
     }
 
@@ -228,11 +228,12 @@ class Epoll
     private static function unsetResource($cli)
     {
         /** 清理写事件 */
-        @Epoll::$events[(int)$cli]->del();
+
+        if (!empty(Epoll::$events[(int)$cli]))Epoll::$events[(int)$cli]->del();
         /** 清理写事件 */
-        @Epoll::$events[-((int)$cli)]->del();
+        if(!empty(Epoll::$events[-(int)$cli]))Epoll::$events[-(int)$cli]->del();
         /** 清理读事件 */
-        @Epoll::$events[ (int)$cli]->del();
+        if (!empty(Epoll::$events[ (int)$cli]))Epoll::$events[ (int)$cli]->del();
         /** 释放写事件 */
         unset(Epoll::$events[(int)$cli]);
         /** 释放读事件 */
@@ -243,8 +244,6 @@ class Epoll
         unset(Epoll::$asyncRequestData[(int)$cli]);
         /** 关闭连接 */
         fclose($cli);
-        /** 释放连接 */
-        unset($cli);
     }
 
     /** 启动http服务 */

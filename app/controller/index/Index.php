@@ -28,7 +28,7 @@ class Index
         /** 发送异步请求 */
         HttpClient::requestAsync('www.sz517.com',  'GET',['lesson_id'=>201],[],[],function (Request $message){
             var_dump("我是异步的吗？");
-            var_dump($message->rawBuffer());
+            //var_dump($message->rawBuffer());
             var_dump('======================================================================================');
         });
 
