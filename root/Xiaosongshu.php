@@ -236,6 +236,7 @@ class Xiaosongshu
     /** 异步IO之select轮询模式 */
     public function select()
     {
+        var_dump('selector');
         $httpServer = new Selector();
         /** 消息接收  */
         $httpServer->onMessage = function ($socketAccept, $message,$remote_address) use ($httpServer) {

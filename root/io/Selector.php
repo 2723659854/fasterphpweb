@@ -7,6 +7,8 @@ use Root\Request;
 
 /**
  * @purpose select的IO多路复用模型
+ * @note 提供http服务器服务
+ * @note 提供异步客户端服务
  */
 class Selector
 {
@@ -48,19 +50,16 @@ class Selector
         $this->port = $_port ?: '8000';
         /** @var string $listeningAddress 拼接监听地址 */
         $listeningAddress = $this->protocol . '://' . $this->host . ':' . $this->port;
-        $contextOptions['ssl'] = [
-            'verify_peer' => false,
-            'verify_peer_name' => false
-        ];
+        /** 不严重https证书 */
+        $contextOptions['ssl'] = [ 'verify_peer' => false, 'verify_peer_name' => false ];
         /** 配置socket流参数 */
         $context = stream_context_create($contextOptions);
         /** 设置端口复用 */
         stream_context_set_option($context, 'socket', 'so_reuseport', 1);
+        /** 设置ip复用 */
         stream_context_set_option($context, 'socket', 'so_reuseaddr', 1);
-
         /** 设置服务端：监听地址+端口 */
         $this->socket = stream_socket_server($listeningAddress, $errno, $errstr, STREAM_SERVER_BIND | STREAM_SERVER_LISTEN, $context);
-
         /** 设置非阻塞，语法是关闭阻塞 */
         stream_set_blocking($this->socket, 0);
         /** 将服务端保存 */
@@ -99,7 +98,7 @@ class Selector
     }
 
     /** 接收客户端消息 */
-    public function accept()
+    private function accept()
     {
         /** 创建多个子进程阻塞接收服务端socket 这个while死循环 会导致for循环被阻塞，不往下执行，创建了子进程也没有用，直接在第一个子进程哪里阻塞了 */
         while (true) {
@@ -123,7 +122,7 @@ class Selector
      * @param array $read
      * @return void
      */
-    public  function dealReadEvent(array $read){
+    private  function dealReadEvent(array $read){
         /** 遍历所有可读的连接 */
         foreach ($read as $val) {
             //当前发生改变的是服务端，有连接进入
@@ -211,7 +210,7 @@ class Selector
      * @return void
      * @note 实际处理的是异步客户端发送数据
      */
-    public  function dealWriteEvent(array $write){
+    private  function dealWriteEvent(array $write){
         /** 检查可写连接，这里是为了处理异步客户端的请求 */
         foreach ($write as $val) {
             $id = (int)$val;
@@ -238,7 +237,7 @@ class Selector
      * @return void
      * @note 防止内存溢出
      */
-    public static function unsetResource($val){
+    private static function unsetResource($val){
         /** 关闭这个客户端 */
         fclose($val);
         /** 移除请求内容 */

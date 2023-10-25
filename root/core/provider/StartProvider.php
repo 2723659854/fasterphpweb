@@ -39,8 +39,7 @@ class StartProvider implements IdentifyInterface
             /** 开启http调试模式 */
             if ($_system && $_has_epoll) {
                 /** linux系统使用epoll模型 */
-                $app->select();
-                //$app->epoll();
+                $app->epoll();
             } else {
                 /** windows系统使用select模型 */
                 $app->select();
