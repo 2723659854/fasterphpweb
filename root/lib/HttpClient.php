@@ -1,6 +1,7 @@
 <?php
 
 namespace Root\Lib;
+use Root\Io\Epoll;
 use Root\Io\Selector;
 use Root\Request;
 
@@ -281,6 +282,7 @@ class HttpClient
         /** 设置位非阻塞状态 */
         stream_set_blocking($socket,false);
         /** 添加到异步模型 */
-        Selector::addFunction($socket,$request,$success,$fail);
+        Selector::sendRequest($socket,$request,$success,$fail);
+        Epoll::sendRequest($socket,$request,$success,$fail);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace Root\Io;
 
+use Root\Lib\Container;
 use Root\Request;
 
 /**
@@ -84,7 +85,7 @@ class Selector
      * @note  异步request请求的关键就是：将连接和请求都保存到本模型中，然后有stream_select来负责监听这个连接
      * @note 如果可写就发送request请求，如果可读就发送
      */
-    public static function addFunction($socket, $request, $success = null, $fail = null)
+    public static function sendRequest($socket, $request, $success = null, $fail = null)
     {
         $id = (int)$socket;
         Selector::$allSocket[$id] = $socket;
@@ -151,6 +152,7 @@ class Selector
                             continue;
                         }
                     }
+                    /** 这一块的代码是用来处理异步客户端的读事件，因为接收的文件不完整，所以搞了这么大一块代码 */
                     /** 正常读取到数据,触发消息接收事件,响应内容，如果读取的内容不为空，并且设置了onMessage回调函数 */
                     if (!empty($buffer) && !empty(Selector::$success[(int)$val])) {
                         $_length = strlen($buffer);
@@ -160,7 +162,7 @@ class Selector
                             /** 清空缓存 */
                             unset(Selector::$buffer[(int)$val]);
                             /** 调用用户的回调 */
-                            call_user_func(Selector::$success[(int)$val], new Request($buffer));
+                            call_user_func(Selector::$success[(int)$val], Container::set(Request::class,[$buffer,$this->clientIp[(int)$val] ?? '']));
                             /** 关闭这个客户端 */
                             fclose($val);
                             /** 移除这个连接 */
@@ -176,7 +178,7 @@ class Selector
                                 /** 清空缓存 */
                                 unset(Selector::$buffer[(int)$val]);
                                 /** 调用用户的回调 */
-                                call_user_func(Selector::$success[(int)$val], new Request($buffer));
+                                call_user_func(Selector::$success[(int)$val], Container::set(Request::class,[$buffer,$this->clientIp[(int)$val] ?? '']));
                                 /** 关闭这个客户端 */
                                 fclose($val);
                                 /** 移除这个连接 */

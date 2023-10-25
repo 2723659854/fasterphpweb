@@ -3,6 +3,7 @@
 namespace Root\Io;
 
 use Root\Lib\HttpClient;
+use Root\Request;
 
 class Epoll
 {
@@ -10,33 +11,37 @@ class Epoll
     public static $events = [];
 
     /** @var \Event $serveEvent 整个服务的事件,必须单独保存在进程内，不保存进程直接退出，不单独保存，系统直接摆烂不工作 */
-    public static $serveEvent ;
+    private static $serveEvent ;
 
     /** @var \EventBase $event_base eventBase实例 使用的epoll模型 */
-    public static $event_base;
+    private static $event_base;
 
     /** @var false|resource tcp 服务 */
-    public static $serv;
+    private static $serv;
 
     /** @var callable $onMessage 消息处理事件 */
     public $onMessage;
 
     /** @var string $host 监听的ip和协议 */
-    public $host='0.0.0.0';
+    private $host='0.0.0.0';
 
     /** @var string $port 监听的端口 */
-    public $port='8000';
+    private $port='8000';
 
     /** @var string $protocol 通信协议 */
-    public $protocol='tcp';
+    private $protocol='tcp';
 
-    public static $write = [];
+    /** 标记异步客户端已发送请求 */
+    private static $write = [];
+
+    /** 缓存异步客户端的数据buffer */
+    private static $buffer = [];
     /**
      * 定义消息处理方法
      * @param $str
      * @return void
      */
-    public function message($str)
+    private function message($str)
     {
         /** 直接打印 */
         echo $str . "\r\n";
@@ -104,45 +109,52 @@ class Epoll
     }
 
     /**
-     * 底层逻辑是只需要使用eventBase就行了
+     * epoll的异步客户端处理程序
+     * @param mixed $cli 客户端
+     * @param string $request 请求体
+     * @param callable|null $success 成功回调
+     * @param callable|null $fail 失败回调
      * @return void
+     * @note 要把write和read事件分成两个事件添加，分别处理对应的逻辑。分别添加到Event事件里面，最后还要添加到EventBase事件里面
      */
-    public static function addWriteClient(){
-        $contextOptions['ssl']=[
-            'verify_peer' => false,
-            'verify_peer_name' => false
-        ];
-        $scheme = 'tcp';
-        $host = '192.168.4.128';
-        $port = 8080;
-        $request = HttpClient::makeRequest($host,$port);
-        /** 设置参数 */
-        $context = stream_context_create($contextOptions);
-        /** 创建客户端 STREAM_CLIENT_CONNECT 同步请求，STREAM_CLIENT_ASYNC_CONNECT 异步请求*/
-        $cli = stream_socket_client("{$scheme}://{$host}:{$port}", $errno, $errstr, 1, STREAM_CLIENT_ASYNC_CONNECT, $context);
-        /** 设置为异步 */
-        stream_set_blocking($cli, 0);
+    public static function sendRequest(mixed $cli,string $request,callable $success=null,callable $fail=null){
         /** 创建一个可写事件 */
-        $client_event_write = new \Event(Epoll::$event_base, $cli, \Event::WRITE | \Event::PERSIST, function ($cli)use($request) {
+        /** 语法 ：EventBase cli flag(write,read,persist) 回调，param */
+        $client_event_write = new \Event(Epoll::$event_base, $cli, \Event::WRITE | \Event::PERSIST, function ($cli)use($request,$fail) {
+            /** 如果没有发送数据则发送请求给对面服务端 */
             if (empty(Epoll::$write[(int)$cli])){
-                fwrite($cli,$request,strlen($request));
+                $res  =  fwrite($cli,$request,strlen($request));
+                /** 发送失败 */
+                if (!$res){
+                    /** 如果用户定义了失败请求回调 */
+                    if ($fail){
+                        call_user_func($fail,throw new \RuntimeException("请求接口失败"));
+                    }
+                }
+                /** 标记已发送过数据 */
                 Epoll::$write[(int)$cli]=1;
             }
         }, $cli);
-        /** 将构建的客户端事件添加到epoll当中 */
+        /** 将构建的客户端事件添加到Event当中 */
         $client_event_write->add();
         /** 创建一个可读事件 */
-        $client_event_read = new \Event(Epoll::$event_base, $cli, \Event::READ | \Event::PERSIST, function ($cli) {
+        $client_event_read = new \Event(Epoll::$event_base, $cli, \Event::READ | \Event::PERSIST, function ($cli)use($success) {
             /** 客户端连接再添加监听可读事件，读取客户端连接的数据 */
             $buffer = '';
-            $flag    = true;
-            while ($flag) {
-                $_content = fread($cli, 1024);
-                if (strlen($_content) < 1024) {
-                    $flag = false;
-                }
-                $buffer = $buffer. $_content;
+//            $flag    = true;
+//            /** 并不知道对面发送的数据长度，所以采用循环读取的方式 */
+//            while ($flag) {
+//                $_content = fread($cli, 1024);
+//                if (strlen($_content) < 1024) {
+//                    $flag = false;
+//                }
+//                $buffer = $buffer. $_content;
+//            }
+
+            while(!feof($cli)){
+                $buffer .= fread($cli,1024);
             }
+            var_dump($buffer);
             /** 如果用户输入为空或者输入不是资源 */
             if (!$buffer  || !is_resource($cli)) {
                 /** 释放写事件 */
@@ -156,7 +168,28 @@ class Epoll
                 unset($cli);
                 return;
             }
-            var_dump($buffer);
+            call_user_func($success, new Request($buffer));
+//            $_length = strlen($buffer);
+//            $_end = stripos($buffer,"\r\n\r\n");
+//            /** 完整的数据 */
+//            if ($_end&&$_length&&($_length-$_end)>4){
+//                /** 清空缓存 */
+//                unset(Epoll::$buffer[(int)$cli]);
+//                /** 调用用户的回调 */
+//                call_user_func($success, new Request($buffer));
+//            }
+//            /** 开始 不完整的数据 */
+//            if ($_end&&($_end+4==$_length)&&empty(Epoll::$buffer[(int)$cli])){
+//                Epoll::$buffer[(int)$cli] = $buffer;
+//            }
+//            /** 尾巴部分 */
+//            if (!$_end){
+//                $buffer = Epoll::$buffer[(int)$cli] . $buffer;
+//                /** 清空缓存 */
+//                unset(Epoll::$buffer[(int)$cli]);
+//                /** 调用用户的回调 */
+//                call_user_func($success, new Request($buffer));
+//            }
             Epoll::$events[(int)$cli]->del();
             Epoll::$events[(-1)*((int)$cli)]->del();
             /** 释放写事件 */
@@ -174,6 +207,7 @@ class Epoll
         /** 添加事件到全局数组,不然无法持久化连接,这是个大坑，这里是把每一个连接的事件都保存,这里必须持久化，否则无法回复消息，无法读取消息 */
         Epoll::$events[(int)$cli] = $client_event_write;
         Epoll::$events[(-1)*((int)$cli)] = $client_event_read;
+        /** 最后需要把时间添加到服务的event事件 */
         Epoll::$serveEvent->add();
     }
 
