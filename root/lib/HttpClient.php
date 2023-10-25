@@ -282,7 +282,11 @@ class HttpClient
         /** 设置位非阻塞状态 */
         stream_set_blocking($socket,false);
         /** 添加到异步模型 */
-        Selector::sendRequest($socket,$request,$success,$fail);
-        Epoll::sendRequest($socket,$request,$success,$fail);
+        Selector::sendRequest($socket,$request,$success,$fail,$host.':'.$port);
+        /** 如果开启了epoll读写模型 */
+        if (Epoll::$event_base){
+            Epoll::sendRequest($socket,$request,$success,$fail,$host.':'.$port);
+        }
+
     }
 }

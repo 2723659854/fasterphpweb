@@ -28,7 +28,8 @@ class Index
         /** 发送异步请求 */
         HttpClient::requestAsync('http://192.168.4.128:8080',  'GET',['lesson_id'=>201],[],[],function (Request $message){
             var_dump("我是异步的吗？");
-            //var_dump($message->rawBody());
+            var_dump($message->rawBody());
+            var_dump('======================================================================================');
         });
 
 

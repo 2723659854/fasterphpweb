@@ -14,7 +14,7 @@ class Epoll
     private static $serveEvent ;
 
     /** @var \EventBase $event_base eventBase实例 使用的epoll模型 */
-    private static $event_base;
+    public static $event_base;
 
     /** @var false|resource tcp 服务 */
     private static $serv;
@@ -34,8 +34,6 @@ class Epoll
     /** 标记异步客户端已发送请求 */
     private static $write = [];
 
-    /** 缓存异步客户端的数据buffer */
-    private static $buffer = [];
     /**
      * 定义消息处理方法
      * @param $str
@@ -141,20 +139,9 @@ class Epoll
         $client_event_read = new \Event(Epoll::$event_base, $cli, \Event::READ | \Event::PERSIST, function ($cli)use($success) {
             /** 客户端连接再添加监听可读事件，读取客户端连接的数据 */
             $buffer = '';
-//            $flag    = true;
-//            /** 并不知道对面发送的数据长度，所以采用循环读取的方式 */
-//            while ($flag) {
-//                $_content = fread($cli, 1024);
-//                if (strlen($_content) < 1024) {
-//                    $flag = false;
-//                }
-//                $buffer = $buffer. $_content;
-//            }
-
             while(!feof($cli)){
                 $buffer .= fread($cli,1024);
             }
-            var_dump($buffer);
             /** 如果用户输入为空或者输入不是资源 */
             if (!$buffer  || !is_resource($cli)) {
                 /** 释放写事件 */
@@ -168,28 +155,9 @@ class Epoll
                 unset($cli);
                 return;
             }
-            call_user_func($success, new Request($buffer));
-//            $_length = strlen($buffer);
-//            $_end = stripos($buffer,"\r\n\r\n");
-//            /** 完整的数据 */
-//            if ($_end&&$_length&&($_length-$_end)>4){
-//                /** 清空缓存 */
-//                unset(Epoll::$buffer[(int)$cli]);
-//                /** 调用用户的回调 */
-//                call_user_func($success, new Request($buffer));
-//            }
-//            /** 开始 不完整的数据 */
-//            if ($_end&&($_end+4==$_length)&&empty(Epoll::$buffer[(int)$cli])){
-//                Epoll::$buffer[(int)$cli] = $buffer;
-//            }
-//            /** 尾巴部分 */
-//            if (!$_end){
-//                $buffer = Epoll::$buffer[(int)$cli] . $buffer;
-//                /** 清空缓存 */
-//                unset(Epoll::$buffer[(int)$cli]);
-//                /** 调用用户的回调 */
-//                call_user_func($success, new Request($buffer));
-//            }
+            if ($success){
+                call_user_func($success, new Request($buffer));
+            }
             Epoll::$events[(int)$cli]->del();
             Epoll::$events[(-1)*((int)$cli)]->del();
             /** 释放写事件 */
