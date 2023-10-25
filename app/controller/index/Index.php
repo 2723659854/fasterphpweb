@@ -9,6 +9,7 @@ use Root\Annotation\Mapping\Middlewares;
 use Root\Annotation\Mapping\RequestMapping;
 use Root\ESClient;
 use App\Middleware\MiddlewareA;
+use Root\Io\Epoll;
 use Root\Lib\AsyncHttpClient;
 use Root\Lib\HttpClient;
 use Root\Request;
@@ -25,10 +26,12 @@ class Index
     public function index(Request $request)
     {
         /** 发送异步请求 */
-        HttpClient::requestAsync('http://192.168.4.97:8080',  'GET',['lesson_id'=>201],[],[],function (Request $message){
-            var_dump("我是异步的吗？");
-            var_dump($message->rawBody());
-        });
+//        HttpClient::requestAsync('http://192.168.4.97:8080',  'GET',['lesson_id'=>201],[],[],function (Request $message){
+//            var_dump("我是异步的吗？");
+//            var_dump($message->rawBody());
+//        });
+
+        Epoll::addWriteClient();
         //模板在根目录下的view目录里面
         return view('/index/index', ['time' => date('Y-m-d H:i:s')])->cookie('name','how are you !');
     }

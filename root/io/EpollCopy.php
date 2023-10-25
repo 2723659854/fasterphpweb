@@ -4,7 +4,7 @@ namespace Root\Io;
 
 use Root\Lib\HttpClient;
 
-class Epoll
+class EpollCopy
 {
     /** 存所有的客户端事件 */
     public static $events = [];
@@ -29,8 +29,6 @@ class Epoll
 
     /** @var string $protocol 通信协议 */
     public $protocol='tcp';
-
-    public static $write = [];
     /**
      * 定义消息处理方法
      * @param $str
@@ -122,17 +120,15 @@ class Epoll
         $cli = stream_socket_client("{$scheme}://{$host}:{$port}", $errno, $errstr, 1, STREAM_CLIENT_ASYNC_CONNECT, $context);
         /** 设置为异步 */
         stream_set_blocking($cli, 0);
-        /** 创建一个可写事件 */
-        $client_event_write = new \Event(Epoll::$event_base, $cli, \Event::WRITE | \Event::PERSIST, function ($cli)use($request) {
-            if (empty(Epoll::$write[(int)$cli])){
-                fwrite($cli,$request,strlen($request));
-                Epoll::$write[(int)$cli]=1;
-            }
+        //fwrite($cli,$request,strlen($request));
+        /** 创建一个可读事件 */
+        $client_event = new \Event(Epoll::$event_base, $cli,  \Event::WRITE|\Event::PERSIST, function ($cli)use($request) {
+            fwrite($cli,$request,strlen($request));
         }, $cli);
         /** 将构建的客户端事件添加到epoll当中 */
-        $client_event_write->add();
-        /** 创建一个可读事件 */
-        $client_event_read = new \Event(Epoll::$event_base, $cli, \Event::READ | \Event::PERSIST, function ($cli) {
+        $client_event->add();
+
+        $client_event1 = new \Event(Epoll::$event_base, $cli,  \Event::READ|\Event::PERSIST, function ($cli) {
             /** 客户端连接再添加监听可读事件，读取客户端连接的数据 */
             $buffer = '';
             $flag    = true;
@@ -143,38 +139,13 @@ class Epoll
                 }
                 $buffer = $buffer. $_content;
             }
-            /** 如果用户输入为空或者输入不是资源 */
-            if (!$buffer  || !is_resource($cli)) {
-                /** 释放写事件 */
-                unset(Epoll::$events[(int)$cli]);
-                /** 释放读事件 */
-                unset(Epoll::$events[(-1)*((int)$cli)]);
-                /** 释放读标记 */
-                unset(Epoll::$write[(int)$cli]);
-                fclose($cli);
-                /** 释放连接 */
-                unset($cli);
-                return;
-            }
-            var_dump($buffer);
-            Epoll::$events[(int)$cli]->del();
-            Epoll::$events[(-1)*((int)$cli)]->del();
-            /** 释放写事件 */
-            unset(Epoll::$events[(int)$cli]);
-            /** 释放读事件 */
-            unset(Epoll::$events[(-1)*((int)$cli)]);
-            /** 释放读标记 */
-            unset(Epoll::$write[(int)$cli]);
-            fclose($cli);
-            /** 释放连接 */
-            unset($cli);
-
         }, $cli);
-        $client_event_read->add();
+        /** 将构建的客户端事件添加到epoll当中 */
+        $client_event1->add();
+
         /** 添加事件到全局数组,不然无法持久化连接,这是个大坑，这里是把每一个连接的事件都保存,这里必须持久化，否则无法回复消息，无法读取消息 */
-        Epoll::$events[(int)$cli] = $client_event_write;
-        Epoll::$events[(-1)*((int)$cli)] = $client_event_read;
-        Epoll::$serveEvent->add();
+        //Epoll::$events[(int)$cli] = $client_event;
+        var_dump("添加写完成");
     }
 
     /** 启动http服务 */

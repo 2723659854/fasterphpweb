@@ -247,6 +247,7 @@ class Xiaosongshu
     /** 使用epoll异步io模型 */
     public function epoll()
     {
+        var_dump('epoll');
         /** @var object $httpServer 将对象加载到内存 */
         $httpServer = new Epoll();
         /** @var callable onMessage 设置消息处理函数 */
@@ -313,7 +314,7 @@ class Xiaosongshu
         /** 清理select连接 */
         unset(Selector::$allSocket[(int)$socketAccept]);
         /** 清理epoll连接 */
-        //unset($httpServer->events[(int)$socketAccept]);
+        unset(Epoll::$events[(int)$socketAccept]);
         /** 释放客户端连接 */
         unset($socketAccept);
     }
