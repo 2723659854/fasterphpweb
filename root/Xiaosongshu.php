@@ -7,12 +7,10 @@ use Root\Core\Provider\IdentifyInterface;
 use Root\Io\Epoll;
 use Root\Io\Selector;
 use Root\Lib\Container;
-use Root\Lib\PhpRtmpServer;
 use Root\Queue\RabbitMqConsumer;
 use Root\Queue\RedisQueueConsumer;
 use Root\Queue\TimerConsumer;
 use Root\Queue\WsConsumer;
-use Workerman\Worker;
 
 /**
  * @purpose 应用启动处理器
@@ -22,31 +20,31 @@ class Xiaosongshu
 {
 
     /** 定义文件类型请求返回数据 */
-    protected $backContenType =[
-        'html'=>'text/html; charset=UTF-8',
-        'js'=>'text/javascript; charset=UTF-8',
-        'css'=>'text/css; charset=UTF-8',
-        'svg'=>'image/svg+xml; charset=UTF-8',
-        'png'=>'image/jpeg; charset=UTF-8',
-        'jpg'=>'image/jpeg; charset=UTF-8',
-        'icon'=>'image/jpeg; charset=UTF-8',
-        'jpeg'=>'image/jpeg; charset=UTF-8',
-        'ico'=>'image/jpeg; charset=UTF-8',
-        'gif'=>'image/jpeg; charset=UTF-8',
-        "doc"=>'image/jpeg; charset=UTF-8',
-        "docx"=>'application/octet-stream; charset=UTF-8',
-        "ppt"=>'application/octet-stream; charset=UTF-8',
-        "pptx"=>'application/octet-stream; charset=UTF-8',
-        "xls"=>'application/octet-stream; charset=UTF-8',
-        "xlsx"=>'application/octet-stream; charset=UTF-8',
-        "zip"=>'application/octet-stream; charset=UTF-8',
-        "rar"=>'application/octet-stream; charset=UTF-8',
-        "txt"=>'application/octet-stream; charset=UTF-8',
-        'mp4'=>'video/mp4; charset=UTF-8',
-        'xml'=>'text/xml; charset=UTF-8',
-        'flv'=>'video/x-flv; charset=UTF-8',
-        'ttf'=>'font/ttf; charset=UTF-8',
-        'avi'=>'video/x-msvideo; charset=UTF-8',
+    protected $backContenType = [
+        'html' => 'text/html; charset=UTF-8',
+        'js' => 'text/javascript; charset=UTF-8',
+        'css' => 'text/css; charset=UTF-8',
+        'svg' => 'image/svg+xml; charset=UTF-8',
+        'png' => 'image/jpeg; charset=UTF-8',
+        'jpg' => 'image/jpeg; charset=UTF-8',
+        'icon' => 'image/jpeg; charset=UTF-8',
+        'jpeg' => 'image/jpeg; charset=UTF-8',
+        'ico' => 'image/jpeg; charset=UTF-8',
+        'gif' => 'image/jpeg; charset=UTF-8',
+        "doc" => 'image/jpeg; charset=UTF-8',
+        "docx" => 'application/octet-stream; charset=UTF-8',
+        "ppt" => 'application/octet-stream; charset=UTF-8',
+        "pptx" => 'application/octet-stream; charset=UTF-8',
+        "xls" => 'application/octet-stream; charset=UTF-8',
+        "xlsx" => 'application/octet-stream; charset=UTF-8',
+        "zip" => 'application/octet-stream; charset=UTF-8',
+        "rar" => 'application/octet-stream; charset=UTF-8',
+        "txt" => 'application/octet-stream; charset=UTF-8',
+        'mp4' => 'video/mp4; charset=UTF-8',
+        'xml' => 'text/xml; charset=UTF-8',
+        'flv' => 'video/x-flv; charset=UTF-8',
+        'ttf' => 'font/ttf; charset=UTF-8',
+        'avi' => 'video/x-msvideo; charset=UTF-8',
     ];
 
 
@@ -66,11 +64,11 @@ class Xiaosongshu
         /** 是否守护模式 */
         $daemonize = false;
         /** 是否运行 */
-        $flag      = true;
-        global $_pid_file, $_port, $_listen, $_server_num, $_system, $_lock_file, $_has_epoll, $_system_command, $_system_table, $_color_class,$_daemonize;
+        $flag = true;
+        global $_pid_file, $_port, $_listen, $_server_num, $_system, $_lock_file, $_has_epoll, $_system_command, $_system_table, $_color_class, $_daemonize;
         $_daemonize = false;
         /** 进程管理文件 */
-        $_pid_file  = __DIR__ . '/my_pid.txt';
+        $_pid_file = __DIR__ . '/my_pid.txt';
         /** 状态管理文件 */
         $_lock_file = __DIR__ . '/lock.txt';
         /** 加载必须的启动文件 */
@@ -83,12 +81,12 @@ class Xiaosongshu
         $_system = !(\DIRECTORY_SEPARATOR === '\\');
         /** 是否有epoll模型 */
         $_has_epoll = (new \EventBase())->getMethod() == 'epoll';
-        $_has_epoll = false;
+        //$_has_epoll = false;
         /** 读取服务器配置 */
-        $server     = config('server');
-        $_port = $server['port']??8000;
-        $_server_num = $server['num']??2;
-        $_listen    = "http://0.0.0.0:" . $_port;
+        $server = config('server');
+        $_port = $server['port'] ?? 8000;
+        $_server_num = $server['num'] ?? 2;
+        $_listen = "http://0.0.0.0:" . $_port;
         /** 安装用户的自定义命令 */
         $this->installUserCommand();
         /** 加载表格类工具 */
@@ -96,17 +94,20 @@ class Xiaosongshu
         /** 加载字体类工具 */
         $_color_class = G(\Xiaosongshu\ColorWord\Transfer::class);
         /** 支持持linux */
-        if ($_system) { /** 创建定时器数据库 */ @$this->makeTimeDatabase(); }
+        if ($_system) {
+            /** 创建定时器数据库 */
+            @$this->makeTimeDatabase();
+        }
         /** 分析用户输入的命令，执行业务逻辑 */
         if (count($param) > 1) {
             try {
                 $startAppAndCommandClass = G(AppFactory::class)->{$param[1]};
-            }catch (\Exception $exception){
+            } catch (\Exception $exception) {
                 $startAppAndCommandClass = null;
             }
-            if ($startAppAndCommandClass instanceof IdentifyInterface){
-                $startAppAndCommandClass->handle($this,$param);
-            }else{
+            if ($startAppAndCommandClass instanceof IdentifyInterface) {
+                $startAppAndCommandClass->handle($this, $param);
+            } else {
                 /** 如果是自定义命令，则执行用户的逻辑 */
                 if (isset($_system_command[$param[1]])) {
                     /** 处理用户自定义命令 */
@@ -126,10 +127,11 @@ class Xiaosongshu
      * @return void
      * @note 如果引入外部的包,即在composer.json里面设置了autoload，请使用composer dump-autoload 更新自动加载机制
      */
-    public function requireFile(){
-        foreach (['root','process','ws','app'] as $name){
-            foreach (sortFiles(scan_dir(app_path() .'/'.$name,true)) as $val){
-                if (file_exists($val)&&(pathinfo($val)['extension'] == 'php')) {
+    public function requireFile()
+    {
+        foreach (['root', 'process', 'ws', 'app'] as $name) {
+            foreach (sortFiles(scan_dir(app_path() . '/' . $name, true)) as $val) {
+                if (file_exists($val) && (pathinfo($val)['extension'] == 'php')) {
                     require_once $val;
                 }
             }
@@ -145,13 +147,14 @@ class Xiaosongshu
         TimerData::first();
     }
 
-     /**
+    /**
      * 处理用户自定义命令
      * @param $param
      * @return void
      */
-    public function handleOwnCommand($param){
-        global  $_system_command, $_system_table, $_color_class;
+    public function handleOwnCommand($param)
+    {
+        global $_system_command, $_system_table, $_color_class;
         $arguments = $param;
         unset($arguments[0]);
         unset($arguments[1]);
@@ -165,7 +168,7 @@ class Xiaosongshu
         foreach ($arguments as $item) {
             /** option 参数 */
             if (strpos($item, '=')) {
-                $value       = explode('=', $item);
+                $value = explode('=', $item);
                 $option_name = str_replace('--', '', $value[0] ?? '');
                 /** 丢弃help关键字 */
                 if ($option_name == 'help') {
@@ -216,14 +219,20 @@ class Xiaosongshu
         echo $_color_class->info("关闭进程中...\r\n");
         if (file_exists($_pid_file)) {
             $master_ids = file_get_contents($_pid_file);
-            $master_id  = explode('-', $master_ids);
-            foreach ($master_id as $k => $v) {
+            $master_id = explode('-', $master_ids);
+            rsort($master_id);
+            $master_id = array_unique($master_id);
+            foreach ($master_id as $v) {
                 if ($v > 0) {
+                    \posix_kill($v, SIGQUIT);
+                    \posix_kill($v, SIGINT);
                     \posix_kill($v, SIGKILL);
+                    \posix_kill($v, SIGTERM);
+                    \posix_kill($v, 0);
                 }
             }
-            file_put_contents($_pid_file, null);
             sleep(1);
+            file_put_contents($_pid_file, null);
         }
     }
 
@@ -240,8 +249,8 @@ class Xiaosongshu
     {
         $httpServer = new Selector();
         /** 消息接收  */
-        $httpServer->onMessage = function ($socketAccept, $message,$remote_address) use ($httpServer) {
-            $this->onMessage($socketAccept, $message, $httpServer,$remote_address);
+        $httpServer->onMessage = function ($socketAccept, $message, $remote_address) use ($httpServer) {
+            $this->onMessage($socketAccept, $message, $httpServer, $remote_address);
         };
         $httpServer->start();
     }
@@ -252,8 +261,8 @@ class Xiaosongshu
         /** @var object $httpServer 将对象加载到内存 */
         $httpServer = new Epoll();
         /** @var callable onMessage 设置消息处理函数 */
-        $httpServer->onMessage = function ($socketAccept, $message,$remote_address) use ($httpServer) {
-            $this->onMessage($socketAccept, $message, $httpServer,$remote_address);
+        $httpServer->onMessage = function ($socketAccept, $message, $remote_address) use ($httpServer) {
+            $this->onMessage($socketAccept, $message, $httpServer, $remote_address);
         };
         /** 启动服务 */
         $httpServer->start();
@@ -266,49 +275,49 @@ class Xiaosongshu
      * @param $httpServer
      * @return mixed
      */
-    public function onMessage($socketAccept, $message, &$httpServer,$remote_address)
+    public function onMessage($socketAccept, $message, &$httpServer, $remote_address)
     {
         /** 这里不能这么用request ，用法应该是使用set方法 */
-        $request = Container::set(Request::class,[$message,$remote_address]);
-        $method  = $request->method();
-        $uri     = $request->path();
-        $info           = explode('.', $request->path());
+        $request = Container::set(Request::class, [$message, $remote_address]);
+        $method = $request->method();
+        $uri = $request->path();
+        $info = explode('.', $request->path());
         $file_extension = end($info);
         /**  说明是资源类请求，直接返回资源 */
-        if (in_array($file_extension,array_keys($this->backContenType))) {
+        if (in_array($file_extension, array_keys($this->backContenType))) {
             $fileName = $request->path();
-            if ($file_extension=='html'){
-                $fileName= app_path().'/view'.$fileName;
-            }else{
-                $fileName = public_path().$fileName;
+            if ($file_extension == 'html') {
+                $fileName = app_path() . '/view' . $fileName;
+            } else {
+                $fileName = public_path() . $fileName;
             }
             /** 如果有这个文件 */
-            if (is_file($fileName)){
-                fwrite($socketAccept,response(file_get_contents($fileName),200,['Content-Type'=>$this->backContenType[$file_extension]]));
+            if (is_file($fileName)) {
+                fwrite($socketAccept, response(file_get_contents($fileName), 200, ['Content-Type' => $this->backContenType[$file_extension]]));
                 fclose($socketAccept);
-            }else{
+            } else {
                 /** 如果没有这个文件 */
-                fwrite($socketAccept,response('<h1>Not Found</h1>',404));
+                fwrite($socketAccept, response('<h1>Not Found</h1>', 404));
                 fclose($socketAccept);
             }
-        }else{
+        } else {
             /** 动态路由 */
             try {
                 $content = Route::dispatch($method, $uri, $request);
                 /** 用户返回的不是对象 */
-                if (!is_object($content)){
+                if (!is_object($content)) {
                     $content = response($content);
                 }
                 /** 用户返回的不是response对象 */
-                if (!($content instanceof Response)){
+                if (!($content instanceof Response)) {
                     $content = response($content);
                 }
-                fwrite($socketAccept,$content);
+                fwrite($socketAccept, $content);
                 fclose($socketAccept);
 
-            }catch (\Exception|\RuntimeException $exception){
+            } catch (\Exception|\RuntimeException $exception) {
                 /** 如果出现了异常 */
-                fwrite($socketAccept,response($exception->getMessage(),400));
+                fwrite($socketAccept, response($exception->getMessage(), 400));
                 fclose($socketAccept);
             }
         }
@@ -321,7 +330,6 @@ class Xiaosongshu
     }
 
 
-
     /** 守护进程模式 */
     public function daemon()
     {
@@ -329,61 +337,20 @@ class Xiaosongshu
         ini_set('display_errors', 'off');
         /** 设置文件权限掩码为0 就是最大权限 可读写 防止操作文件权限不够出错 */
         \umask(0);
-        global $_listen, $_color_class, $_system_table;
+
         /** @var int $pid 创建子进程 */
         $pid = \pcntl_fork();
+        writePid();
         if (-1 === $pid) {
             /** 创建子进程失败 */
             throw new \Exception('Fork fail');
         } elseif ($pid > 0) {
-            /** 主进程退出 */
-            $head    = ['名称', '状态', '进程数', '服务'];
-            $content = [];
-            /** http */
-            $http_count = config('server')['num'] ?? 4;
-            $content[]  = ['http', '正常', $http_count, $_listen];
-            /** rabbitmq */
-            $rabbitmq_config = config('rabbitmq');
-            if ($rabbitmq_config['enable']) {
-                $rabbitmq_count = 0;
-                foreach ((config('rabbitmqProcess')) as $item) {
-                    $rabbitmq_count += $item['count'];
-                }
-                $content[] = ['rabbitmq', '正常', $rabbitmq_count, $rabbitmq_config['port']];
-            }
-            /** 定时器 */
-            $content[] = ['定时任务', '正常', '1', 'timer'];
-            /** redis队列 */
-            $redis_config = config('redis');
-            if ($redis_config['enable']) {
-                $content[] = ['redis_queue', '正常', 1, $redis_config['port']];
-            }
-            /** ws 服务 */
-            $ws_count =0;
-            $ws_port = [];
-            foreach (config('ws') as $k=>$v){
-                if ($v['enable']){
-                    $ws_count++;
-                    $ws_port[] = $v['port'];
-                }
-            }
-            if ($ws_count){
-                $content[] = ['ws服务', '正常', $ws_count, implode(',',$ws_port)];
-            }
-            /** 直播服务 */
-//            $rtmp = config('rtmp');
-//            if ($rtmp['enable']){
-//                $content[] = ['rtmp', '正常', 1,  $rtmp['rtmp']];
-//                $content[] = ['flv', '正常', 1,  $rtmp['flv']];
-//            }
-            $_system_table->table($head, $content);
-            echo $_color_class->info("进程启动完成,你可以输入php start.php stop停止运行\r\n");
-            exit(0);
+            /** 打印当前服务 */
+           $this->displayServer();
         }
 
         /** 子进程开始工作 */
-        global $_pid_file; global $_has_epoll;
-        file_put_contents($_pid_file, '');
+        global $_has_epoll;
         /** @var int $master_pid 获取当前进程id */
         $master_pid = getmypid();
         /** 将当前进程升级为主进程 */
@@ -391,10 +358,10 @@ class Xiaosongshu
             throw new \Exception("Setsid fail");
         }
         /** select 是先创建进程，再开启服务 */
-        if (!$_has_epoll){
+        if (!$_has_epoll) {
             /** 创建子进程 */
-            $this->create_process();
-        }else{
+            $this->create_process($master_pid);
+        } else {
             /** epoll 是在自己的进程中开启服务，*/
             \pcntl_fork();
             writePid();
@@ -402,50 +369,9 @@ class Xiaosongshu
 
         /** @var int $_this_pid 获取当前进程id */
         $_this_pid = getmypid();
+        /** 一个主进程和6个子进程 ，6个子进程负责http，主进程负责 */
         /** 如果是主进程 */
-        if ($_this_pid == $master_pid) {
-            /** 在主进程里再创建一个子进程 */
-            \pcntl_fork();
-            if (getmypid() == $master_pid) {
-                /** 在主进程里面创建一个子进程负责处理rabbitmq的队列 */
-                $_small_son_id = \pcntl_fork();
-                if ($_small_son_id > 0) {
-                    $createWs = \pcntl_fork();
-                    if ($createWs>0){
-                        /** 处理可能的ws服务 */
-                        G(WsConsumer::class)->consume();
-                    }
-                    if ($createWs==0){
-                        /** 记录进程号 */
-                        writePid();
-                        /** 子进程 */
-                        G(RabbitMqConsumer::class)->consume();
-                    }
-
-                } elseif ($_small_son_id == 0) {
-                    /** 主进程 */
-                    $clear_task_id = \pcntl_fork();
-                    if ($clear_task_id>0) {
-                        /** 在主进程里启动定时器 */
-                        G(TimerConsumer::class)->consume();
-                    }
-                    /** 直播服务 */
-                    if ($clear_task_id ==0){
-                        //G(PhpRtmpServer::class)->consume();
-                    }
-
-                } else {
-                    echo $_color_class->info("在创建rabbitmq的管理进程的时候失败了\r\t");
-                    exit;
-                }
-
-            } else {
-                /** 在子进程里启动队列，并设置进程名称 */
-                cli_set_process_title("xiaosongshu_queue");
-                writePid();
-                G(RedisQueueConsumer::class)->consume();
-            }
-        } else {
+        if ($_this_pid != $master_pid) {
             /** 在子进程里启动队列，并设置进程名称 */
             cli_set_process_title("xiaosongshu_http");
             writePid();
@@ -458,8 +384,13 @@ class Xiaosongshu
                 $this->select();
             }
         }
+        if ($_this_pid == $master_pid) {
+            /** 开启其他常驻内存的服务进程 */
+            $this->makeConsumeProcess($master_pid);
+        }
         /** @var int $pid 再创建一个子进程，脱离主进程会话 */
         $pid = \pcntl_fork();
+        writePid();
         if (-1 === $pid) {
             throw new \Exception("Fork fail");
         } elseif (0 !== $pid) {
@@ -468,37 +399,95 @@ class Xiaosongshu
         }
     }
 
+    /**
+     * 打印当前提供的服务
+     * @return void
+     */
+    public function displayServer(){
+        global $_listen, $_color_class, $_system_table;
+        /** 主进程退出 */
+        $head = ['名称', '状态', '进程数', '服务'];
+        $content = [];
+        /** http */
+        $http_count = config('server')['num'] ?? 4;
+        $content[] = ['http', '正常', $http_count, $_listen];
+        /** rabbitmq */
+        $rabbitmq_config = config('rabbitmq');
+        if (in_array(true, array_column(config('rabbitmqProcess') ?? [], 'enable'))) {
+            $rabbitmq_count = 0;
+            foreach ((config('rabbitmqProcess')) as $item) {
+                $rabbitmq_count += $item['count'];
+            }
+            $content[] = ['rabbitmq', '正常', $rabbitmq_count, $rabbitmq_config['port']];
+        }
+        /** 定时器 */
+        $content[] = ['定时任务', '正常', '1', 'timer'];
+        /** redis队列 */
+        $redis_config = config('redis');
+        if ($redis_config['enable']) {
+            $content[] = ['redis_queue', '正常', 1, $redis_config['port']];
+        }
+        /** ws 服务 */
+        $ws_count = 0;
+        $ws_port = [];
+        foreach (config('ws') as $k => $v) {
+            if ($v['enable']) {
+                $ws_count++;
+                $ws_port[] = $v['port'];
+            }
+        }
+        if ($ws_count) {
+            $content[] = ['ws服务', '正常', $ws_count, implode(',', $ws_port)];
+        }
+
+        $_system_table->table($head, $content);
+        echo $_color_class->info("进程启动完成,你可以输入php start.php stop停止运行\r\n");
+        exit(0);
+    }
+
+    /**
+     * 主进程决定是否开启子进程
+     * @return void
+     */
+    public function makeConsumeProcess($master_pid)
+    {
+        $redis_enable = config('redis')['enable'] ?? false;
+        $rabbitmq_enable = in_array(true, array_column(config('rabbitmqProcess') ?? [], 'enable'));
+        $ws_enable = in_array(true, array_column(config('ws') ?? [], 'enable'));
+        /** 创建子进程负责处理 常驻内存的进程 */
+        if (getmypid()==$master_pid){
+            pcntl_fork();
+            writePid();
+        }
+
+        /** 开启redis队列 */
+        if ($redis_enable && (getmypid() != $master_pid)) {
+            G(RedisQueueConsumer::class)->consume();
+        }
+        /** 开启rabbitmq队列 */
+        if ($rabbitmq_enable && (getmypid() != $master_pid)) {
+            G(RabbitMqConsumer::class)->consume();
+        }
+        /** 开启ws服务 */
+        if ($ws_enable && (getmypid() != $master_pid)) {
+            G(WsConsumer::class)->consume();
+        }
+        /** 开启主进程，定时任务 */
+        if (getmypid() == $master_pid) {
+            G(TimerConsumer::class)->consume();
+        }
+    }
+
     /** 创建子进程 */
-    public function create_process()
+    public function create_process($master_pid)
     {
         /** 初始化工作进程数 */
-        global $_server_num, $_pid_file;
-        /** 至少要开启一个子进程才能开启http服务 */
-        if ($_server_num < 2) $_server_num = 2;
-        /** 创建子进程，因为是多进程，所以会有以下的操作 */
-        for ($i = 0; $i <= $_server_num; $i++) {
-            /** @var string $read_log_content 读取已经开启的进程 */
-            $read_log_content = file_get_contents($_pid_file);
-            $father           = explode('-', $read_log_content);
-            $mother           = [];
-            /** 读取已有的进程 */
-            foreach ($father as $k => $v) {
-                /** 将进程id复制到新的数组 */
-                if (!array_search($v, $mother)) {
-                    $mother[] = $v;
-                }
-            }
-            /** @var array $mother 进程id去重 */
-            $mother = array_unique($mother);
-            /** @var int $worker_num 统计当前已有的进程总数 */
-            $worker_num = count($mother);
-            /** 如果当前已开启的进程数大于设置的进程总数，则不再创建子进程，这里是多进程，所以会有反复的读写和比较操作，不能按单进程的思想理解 */
-            if ($worker_num > $_server_num) {
-                break;
-            } else {
-                /** 否则创建子进程 */
-                \pcntl_fork();
-                /** 将创建好的进程id存入文件 */
+        global $_server_num;
+        if ($_server_num<2) $_server_num =2;
+        for ($i = 0; $i < $_server_num; $i++) {
+            /** 只有主进程才可以创建子进程 */
+            if (getmypid()==$master_pid){
+                pcntl_fork();
                 writePid();
             }
         }
@@ -516,7 +505,7 @@ class Xiaosongshu
             if (file_exists($file)) {
                 require_once $file;
                 $php_code = file_get_contents($file);
-                $classes  = get_php_classes($php_code);
+                $classes = get_php_classes($php_code);
                 foreach ($classes as $class) {
                     /** @var string $_class_name 拼接完整的路径 */
                     $_class_name = 'App\Command\\' . $class;
@@ -535,4 +524,5 @@ class Xiaosongshu
         }
     }
 }
+
 return new Xiaosongshu();

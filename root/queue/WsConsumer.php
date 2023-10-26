@@ -15,10 +15,10 @@ class WsConsumer
                     throw new \Exception("{$value['handler']}不存在");
                 }
                 $create = pcntl_fork();
+                writePid();
                 if ($create>0){
                     usleep(1000);
-                    writePid();
-                    cli_set_process_title($name . '_' .rand(10000,99999));
+                    cli_set_process_title('xiaosongshu_ws_server');
                     $server = G($value['handler']);
                     $server->host = $value['host'];
                     $server->port = $value['port'];

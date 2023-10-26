@@ -6,12 +6,14 @@ return [
     'demoForOne'=>[
         /** 消费者名称 */
         'handler'=>Demo::class,
-        'count'=>2
+        'count'=>2,
+        'enable'=>false,
     ],
     /** 队列名称 */
     'demoForTwo'=>[
         /** 消费者名称 */
         'handler'=>Demo2::class,
-        'count'=>1
+        'count'=>1,
+        'enable'=>false,
     ]
 ];

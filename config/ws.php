@@ -2,7 +2,7 @@
 return [
     'ws1'=>[
         /** 是否开启 */
-        'enable'=>false,
+        'enable'=>true,
         /** 服务类 */
         'handler'=>\Ws\TestWs::class,
         /** 监听ip */

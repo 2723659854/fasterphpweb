@@ -10,8 +10,12 @@ class RedisQueueConsumer
     {
         $enable = config('redis')['enable'];
         if ($enable) {
-            \cli_set_process_title("xiaosongshu_queue");
-            $this->_queue_xiaosongshu();
+            $id = pcntl_fork();
+            writePid();
+            if ($id>0){
+                \cli_set_process_title("xiaosongshu_redis_queue");
+                $this->_queue_xiaosongshu();
+            }
         }
     }
 
