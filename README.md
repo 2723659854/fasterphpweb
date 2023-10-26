@@ -1292,12 +1292,20 @@ use Root\Lib\HttpClient;
 $response = (HttpClient::request('www.baidu.com',  'GET',['lesson_id'=>201]));
 var_dump($response->header());
 /** 异步请求 请求百度 */
-HttpClient::requestAsync('www.baidu.com',  'GET',['lesson_id'=>201],[],[],function (Request $message){
-      var_dump("我是异步的吗？");
-      var_dump($message->rawBody());
-      var_dump('======================================================================================');
+/** 发送异步请求 */
+HttpClient::requestAsync('127.0.0.1:9501', 'GET', ['lesson_id' => 201], [], [], function (Request $message) {
+    if ($message->rawBuffer()){
+        var_dump("成功回调方法有数据");
+    }
+    
+}, function (\RuntimeException $exception) {
+    var_dump($exception->getMessage());
+
 });
 ```
+注意：在使用http异步请求客户端的时候 ，不要在成功回调和失败回调函数中抛出任何异常，如果需要抛出异常，一定要手动捕获。因为
+在回调里面抛出异常，是没有其他服务来接管这个异常的，可能会导致进程摆烂。虽然本系统已经做了容错进行兜底，但是还是强烈建议，如果
+一定要抛出异常，请自行捕获并处理异常。<br>
 若该http客户端不满足你的需求，你可以使用第三方http客户端，比如Guzzle。或者使用curl函数自己构建请求。
 #### 命令行工具
 

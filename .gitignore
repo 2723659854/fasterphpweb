@@ -2,7 +2,7 @@
 log.txt
 my_pid.txt
 lock.txt
-
+/runtime
 /composer.lock
 /root/timerLog/*
 /sqlite

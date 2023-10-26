@@ -89,10 +89,10 @@ class HttpClient
         /** 设置参数 */
         $context = stream_context_create($contextOptions);
         /** 创建客户端 STREAM_CLIENT_CONNECT 同步请求，STREAM_CLIENT_ASYNC_CONNECT 异步请求*/
-        $socket = stream_socket_client("{$scheme}://{$host}:{$port}", $errno, $errstr, 1, STREAM_CLIENT_CONNECT, $context);
+        $socket = @stream_socket_client("{$scheme}://{$host}:{$port}", $errno, $errstr, 3, STREAM_CLIENT_CONNECT, $context);
         /** 创建连接失败 */
         if ($errno){
-            throw new \RuntimeException($errstr,$errno);
+            throw new \RuntimeException($errstr??"建立连接失败",500);
         }
         /** 发送http请求 */
         fwrite($socket, $request);
@@ -218,7 +218,7 @@ class HttpClient
      * @param array $header
      * @param $success
      * @param $fail
-     * @return Request
+     * @return void
      */
     public static function requestAsync(string $host, string $method='GET',array $params = [],array $query=[],array $header=[],$success=null,$fail=null){
         /** 保存原始数据 */
@@ -248,7 +248,7 @@ class HttpClient
         }
         if (!in_array($_scheme,['http','https'])) throw new \RuntimeException("不支持的协议类型【{$_scheme}】");
         /** 这里要改成投递异步请求 */
-        return self::doAsyncRequest($_host,$_port,$_path,$_method,$params,$query,$header,$success,$fail,$oldParams);
+        self::doAsyncRequest($_host,$_port,$_path,$_method,$params,$query,$header,$success,$fail,$oldParams);
     }
 
     /**
@@ -260,12 +260,12 @@ class HttpClient
      * @param array $params
      * @param array $query
      * @param array $header
-     * @return Request
+     * @return void
      */
     private static function doAsyncRequest(string $host, int $port = 80, string $target = '/', string $method='GET',array $params = [],array $query=[],array $header=[],callable $success=null,callable $fail=null,array $oldParams =[]){
+
         /** 构建request */
         $request = self::makeRequest($host,$port,$target,$method,$params,$query,$header);
-
         /** 协议类型 */
         $scheme = 'tcp';
         /** 初始化客户端设置 */
@@ -281,15 +281,26 @@ class HttpClient
         /** 设置参数 */
         $context = stream_context_create($contextOptions);
         /** 创建客户端 STREAM_CLIENT_CONNECT 同步请求，STREAM_CLIENT_ASYNC_CONNECT 异步请求*/
-        $socket = stream_socket_client("{$scheme}://{$host}:{$port}", $errno, $errstr, 1, STREAM_CLIENT_ASYNC_CONNECT, $context);
+        $socket = @stream_socket_client("{$scheme}://{$host}:{$port}", $errno, $errstr, 3, STREAM_CLIENT_ASYNC_CONNECT, $context);
+        /** 涉及到socket通信的地方，调用RuntimeException都会导致进程退出，抛出异常：Fatal error: Uncaught RuntimeException ，这是个很诡异的事情 */
+        if ($errno){
+            try {
+                if ($fail) call_user_func($fail,new \RuntimeException("建立连接{$scheme}失败",500));
+            }catch (\RuntimeException |\Exception $exception){
+                /** 记录日志 */
+                dump_error($exception);
+            }
+            return ;
+        }
         /** 设置位非阻塞状态 */
         stream_set_blocking($socket,false);
         /** 添加到异步模型 */
+        /** 投递到select异步请求 */
         Selector::sendRequest($socket,$request,$success,$fail,$host.':'.$port,$oldParams);
         /** 如果开启了epoll读写模型 */
         if (Epoll::$event_base){
+            /** 投递到epoll异步请求*/
             Epoll::sendRequest($socket,$request,$success,$fail,$host.':'.$port,$oldParams);
         }
-
     }
 }

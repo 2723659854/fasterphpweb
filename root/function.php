@@ -347,6 +347,33 @@ if (!function_exists('redirect')){
     }
 }
 
+if(!function_exists('dump_error')){
+    /**
+     * 记录日志
+     * @param Exception|RuntimeException $exception
+     * @return void
+     */
+    function dump_error(Exception|RuntimeException $exception){
+        global $_daemonize,$_color_class;
+        $string = "[error] ";
+        $string .="code: ".$exception->getCode().". ";
+        $string .="file: ".$exception->getFile().". ";
+        $string .="line: ".$exception->getLine().". ";
+        $string .="message: ".$exception->getMessage().". \r\n";
+        /** 调试模式打印错误 */
+        if (!$_daemonize){
+            echo $_color_class->info($string);
+        }
+        /** 写入到日志文件 */
+        if (!is_dir(app_path().'/runtime/log/')){
+            @mkdir(app_path().'/runtime/log/',0777);
+        }
+        $fp = fopen(app_path().'/runtime/log/'.date('Y-m-d',time()).'.log','a+');
+        fwrite($fp,$string);
+        fclose($fp);
+    }
+}
+
 
 
 

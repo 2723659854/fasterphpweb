@@ -12,7 +12,8 @@ class RestartProvider implements IdentifyInterface
 {
 
     public function handle(Xiaosongshu $app,array $param){
-        global $_system,$_color_class,$_lock_file,$_listen;
+        global $_system,$_color_class,$_lock_file,$_listen,$_daemonize;
+        $_daemonize = true;
         if ($_system) { $app->close();  echo $_color_class->info("服务重启中\r\n"); }
         else { echo $_color_class->info("当前环境是windows,只能在控制台运行\r\n"); }
         $fd  = fopen($_lock_file, 'w');

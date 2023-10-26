@@ -67,7 +67,8 @@ class Xiaosongshu
         $daemonize = false;
         /** 是否运行 */
         $flag      = true;
-        global $_pid_file, $_port, $_listen, $_server_num, $_system, $_lock_file, $_has_epoll, $_system_command, $_system_table, $_color_class;
+        global $_pid_file, $_port, $_listen, $_server_num, $_system, $_lock_file, $_has_epoll, $_system_command, $_system_table, $_color_class,$_daemonize;
+        $_daemonize = false;
         /** 进程管理文件 */
         $_pid_file  = __DIR__ . '/my_pid.txt';
         /** 状态管理文件 */
@@ -236,7 +237,6 @@ class Xiaosongshu
     /** 异步IO之select轮询模式 */
     public function select()
     {
-        var_dump('selector');
         $httpServer = new Selector();
         /** 消息接收  */
         $httpServer->onMessage = function ($socketAccept, $message,$remote_address) use ($httpServer) {
@@ -248,7 +248,6 @@ class Xiaosongshu
     /** 使用epoll异步io模型 */
     public function epoll()
     {
-        var_dump('epoll');
         /** @var object $httpServer 将对象加载到内存 */
         $httpServer = new Epoll();
         /** @var callable onMessage 设置消息处理函数 */

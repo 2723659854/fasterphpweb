@@ -25,16 +25,8 @@ class Index
     /** 默认首页,测试html */
     public function index(Request $request)
     {
-        /** 发送异步请求 */
-        HttpClient::requestAsync('www.sz517.com',  'GET',['lesson_id'=>201],[],[],function (Request $message){
-            var_dump("我是异步的吗？");
-            //var_dump($message->rawBuffer());
-            var_dump('======================================================================================');
-        });
-
-
         //模板在根目录下的view目录里面
-        return view('/index/index', ['time' => date('Y-m-d H:i:s')])->cookie('name','how are you !');
+        return view('/index/index', ['time' => date('Y-m-d H:i:s')])->cookie('name', 'how are you !');
     }
 
     /** 测试缓存 */
@@ -98,7 +90,7 @@ class Index
             $image = 'no file';
         }
         $teacher = $request->input('teacher');
-        return view('index/say', ['picture' => $image, 'teacher' => $teacher,'file'=>$image]);
+        return view('index/say', ['picture' => $image, 'teacher' => $teacher, 'file' => $image]);
     }
 
 
@@ -133,7 +125,7 @@ class Index
     {
         $queue = new Demo();
         $queue->send(['name' => '张三', 'age' => 23]);
-        (new Demo2())->send(['school'=>'no school']);
+        (new Demo2())->send(['school' => 'no school']);
         return \response(['msg' => 'ok', 'status' => 200]);
     }
 
@@ -141,10 +133,12 @@ class Index
     public function download()
     {
         /** 语法：download(文件路径) */
-        return response()->download(public_path().'/head.png');
+        return response()->download(public_path() . '/head.png');
     }
+
     /** 测试facade门面类 */
-    public function facade(){
+    public function facade()
+    {
         return response(\APP\Facade\Cache::get('test'));
     }
 
@@ -152,10 +146,11 @@ class Index
      * 测试es搜索
      * @return \Root\Response
      */
-    public function elasticsearch(){
+    public function elasticsearch()
+    {
 
         $client = new ESClient();
-        return response($client->all('index','_doc'));
+        return response($client->all('index', '_doc'));
 
     }
 
@@ -164,7 +159,8 @@ class Index
      * @param Request $request
      * @return \Root\Response
      */
-    public function middle(Request $request){
+    public function middle(Request $request)
+    {
         return response("我是中间件");
     }
 
@@ -173,9 +169,10 @@ class Index
      * @param Request $request
      * @return Response
      */
-    #[RequestMapping(methods:'get',path:'/login')]
-    public function login(Request $request):Response{
-        return  \response(['I am a RequestMapping !']);
+    #[RequestMapping(methods: 'get', path: '/login')]
+    public function login(Request $request): Response
+    {
+        return \response(['I am a RequestMapping !']);
     }
 
     /**
@@ -183,8 +180,9 @@ class Index
      * @param Request $request
      * @return Response
      */
-    #[RequestMapping(methods:'get,post',path:'/chat'),Middlewares(MiddlewareA::class,Auth::class)]
-    public function chat(Request $request):Response{
+    #[RequestMapping(methods: 'get,post', path: '/chat'), Middlewares(MiddlewareA::class, Auth::class)]
+    public function chat(Request $request): Response
+    {
 
         return \response('我是用的注解路由');
     }
@@ -194,8 +192,9 @@ class Index
      * @return array|false|Response|string|string[]
      * @throws \Exception
      */
-    #[RequestMapping(methods:'get',path:'/ws')]
-    public function ws(){
+    #[RequestMapping(methods: 'get', path: '/ws')]
+    public function ws()
+    {
         return view('/index/ws');
     }
 }

@@ -10,9 +10,9 @@ class StartProvider implements IdentifyInterface
 {
 
     public function handle(Xiaosongshu $app,array $param){
-        global $_system,$_color_class,$_listen,$_system_table,$_has_epoll,$_lock_file;
+        global $_system,$_color_class,$_listen,$_system_table,$_has_epoll,$_lock_file,$_daemonize;
         if (isset($param[2]) && ($param[2] == '-d')) {
-            if ($_system) { $daemonize = true; }
+            if ($_system) { $daemonize = true; $_daemonize = true;}
             else { echo $_color_class->info("当前环境是windows,只能在控制台运行\r\n"); echo "\r\n"; }
         }
         /** 运行加锁 */
@@ -39,6 +39,7 @@ class StartProvider implements IdentifyInterface
             /** 开启http调试模式 */
             if ($_system && $_has_epoll) {
                 /** linux系统使用epoll模型 */
+                //$app->select();
                 $app->epoll();
             } else {
                 /** windows系统使用select模型 */
