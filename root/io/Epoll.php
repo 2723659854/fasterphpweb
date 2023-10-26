@@ -314,8 +314,6 @@ class Epoll
             $pid = \pcntl_fork();
             if ($pid) {
                 cli_set_process_title("xiaosongshu_http");
-                writePid();
-                prepareMysqlAndRedis();
                 $this->run();
             }
         }

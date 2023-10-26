@@ -83,6 +83,7 @@ class Xiaosongshu
         $_system = !(\DIRECTORY_SEPARATOR === '\\');
         /** 是否有epoll模型 */
         $_has_epoll = (new \EventBase())->getMethod() == 'epoll';
+        $_has_epoll = false;
         /** 读取服务器配置 */
         $server     = config('server');
         $_port = $server['port']??8000;
@@ -381,17 +382,24 @@ class Xiaosongshu
         }
 
         /** 子进程开始工作 */
-        global $_pid_file;
+        global $_pid_file; global $_has_epoll;
         file_put_contents($_pid_file, '');
-
         /** @var int $master_pid 获取当前进程id */
         $master_pid = getmypid();
         /** 将当前进程升级为主进程 */
         if (-1 === \posix_setsid()) {
             throw new \Exception("Setsid fail");
         }
-        /** 创建子进程 */
-        $this->create_process();
+        /** select 是先创建进程，再开启服务 */
+        if (!$_has_epoll){
+            /** 创建子进程 */
+            $this->create_process();
+        }else{
+            /** epoll 是在自己的进程中开启服务，*/
+            \pcntl_fork();
+            writePid();
+        }
+
         /** @var int $_this_pid 获取当前进程id */
         $_this_pid = getmypid();
         /** 如果是主进程 */
@@ -441,7 +449,6 @@ class Xiaosongshu
             /** 在子进程里启动队列，并设置进程名称 */
             cli_set_process_title("xiaosongshu_http");
             writePid();
-            global $_has_epoll;
             /** 如果linux支持epoll模型则使用epoll */
             if ($_has_epoll) {
                 /** 使用epoll */
