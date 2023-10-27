@@ -98,30 +98,33 @@ class Xiaosongshu
             /** 创建定时器数据库 */
             @$this->makeTimeDatabase();
         }
-        /** 分析用户输入的命令，执行业务逻辑 */
-        if (count($param) > 1) {
-            try {
-                $startAppAndCommandClass = G(AppFactory::class)->{$param[1]};
-            } catch (\Exception $exception) {
-                $startAppAndCommandClass = null;
-            }
-            if ($startAppAndCommandClass instanceof IdentifyInterface) {
-                $startAppAndCommandClass->handle($this, $param);
-            } else {
-                /** 如果是自定义命令，则执行用户的逻辑 */
-                if (isset($_system_command[$param[1]])) {
-                    /** 处理用户自定义命令 */
-                    $this->handleOwnCommand($param);
-                } else {
-                    /** 查看是否是用户自定义的命令 */
-                    echo $_color_class->info("未识别的命令:{$param[1]}\r\n");
-                }
-            }
-        } else {
-            echo $_color_class->info("缺少必要参数，你可以输入start,start -d,stop,restart,queue\r\n");
-        }
+        /** 启动rtmp服务 */
+        $this->start_rtmp($param);
     }
 
+    public function start_rtmp($param){
+        /** 开启一个tcp服务，监听1935端口 */
+        $rtmpServer = new  \Workerman\Worker('tcp://0.0.0.0:1935');
+        /** 当客户端连接服务端的时候触发 */
+        $rtmpServer->onConnect = function (\Workerman\Connection\TcpConnection $connection) {
+            logger()->info("connection" . $connection->getRemoteAddress() . " connected . ");
+            new \MediaServer\Rtmp\RtmpStream(
+                new \MediaServer\Utils\WMBufferStream($connection)
+            );
+        };
+        /** 下面是提供flv播放资源的接口 */
+        $rtmpServer->onWorkerStart = function ($worker) {
+            logger()->info("rtmp server " . $worker->getSocketName() . " start . ");
+            \MediaServer\Http\HttpWMServer::$publicPath = __DIR__.'/public';
+            $httpServer = new \MediaServer\Http\HttpWMServer("\\MediaServer\\Http\\ExtHttpProtocol://0.0.0.0:18080");
+            $httpServer->listen();
+            logger()->info("rtmp推流地址：rtmp://0.0.0.0:1935/{your_app_name}/{your_live_room_name}");
+            logger()->info("rtmp拉流地址：rtmp://0.0.0.0/{your_app_name}/{your_live_room_name}");
+            logger()->info("http-flv地址：http://0.0.0.0:18080/{your_app_name}/{your_live_room_name}.flv");
+            logger()->info("ws-flv地址：ws://0.0.0.0:18080/{your_app_name}/{your_live_room_name}.flv");
+        };
+        \Workerman\Worker::runAll();
+    }
     /**
      * 安装项目目录
      * @return void

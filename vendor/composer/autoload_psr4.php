@@ -17,7 +17,7 @@ return array(
     'SuperClosure\\' => array($vendorDir . '/jeremeamia/superclosure/src'),
     'React\\Promise\\' => array($vendorDir . '/react/promise/src'),
     'Psr\\Log\\' => array($vendorDir . '/psr/log/Psr/Log'),
-    'Psr\\Http\\Message\\' => array($vendorDir . '/psr/http-message/src', $vendorDir . '/psr/http-factory/src'),
+    'Psr\\Http\\Message\\' => array($vendorDir . '/psr/http-factory/src', $vendorDir . '/psr/http-message/src'),
     'Psr\\Http\\Client\\' => array($vendorDir . '/psr/http-client/src'),
     'Psr\\EventDispatcher\\' => array($vendorDir . '/psr/event-dispatcher/src'),
     'PhpParser\\' => array($vendorDir . '/nikic/php-parser/lib/PhpParser'),
