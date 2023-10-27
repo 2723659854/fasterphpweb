@@ -8,6 +8,7 @@ use Root\Core\Provider\MakeSqliteProvider;
 use Root\Core\Provider\MakeWsProvider;
 use Root\Core\Provider\QueueProvider;
 use Root\Core\Provider\RestartProvider;
+use Root\Core\Provider\RtmpProvider;
 use Root\Core\Provider\StartProvider;
 use Root\Core\Provider\StartWsProvider;
 use Root\Core\Provider\StopProvider;
@@ -27,7 +28,8 @@ class AppFactory
         'make:sqlite'=>MakeSqliteProvider::class,
         'make:middleware'=>MakeMiddlewareProvider::class,
         'make:ws'=>MakeWsProvider::class,
-        'ws:start'=>StartWsProvider::class
+        'ws:start'=>StartWsProvider::class,
+        'rtmp'=>RtmpProvider::class
     ];
 
     /** @var array */

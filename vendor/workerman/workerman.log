@@ -561,3 +561,19 @@ Stack trace:
 2023-10-11 07:32:10 pid:220 Workerman[songshu] start in DEBUG mode
 2023-10-11 07:34:35 pid:220 Workerman[songshu] stopping ...
 2023-10-11 07:34:35 pid:220 Workerman[songshu] has been stopped
+2023-10-27 10:40:32 pid:788 Workerman[start.php] start in DEBUG mode
+2023-10-27 10:41:28 pid:788 Workerman[start.php] stopping ...
+2023-10-27 10:41:28 pid:788 Workerman[start.php] has been stopped
+2023-10-27 10:41:44 pid:791 Workerman[start.php] start in DAEMON mode
+2023-10-27 10:45:43 pid:796 Workerman[start.php] stop 
+2023-10-27 10:45:43 pid:796 Workerman[start.php] is stopping ...
+2023-10-27 10:45:43 pid:793 Workerman[start.php] stopping ...
+2023-10-27 10:45:43 pid:793 Workerman[start.php] has been stopped
+2023-10-27 10:45:48 pid:796 Workerman[start.php] stop fail
+2023-10-27 10:45:56 pid:797 Workerman[start.php] start in DEBUG mode
+2023-10-27 10:46:33 pid:797 Workerman[start.php] stopping ...
+2023-10-27 10:46:33 pid:797 Workerman[start.php] has been stopped
+2023-10-27 10:46:35 pid:799 Workerman[start.php] start in DEBUG mode
+2023-10-27 10:51:28 pid:799 Workerman[start.php] stopping ...
+2023-10-27 10:51:28 pid:799 Workerman[start.php] has been stopped
+2023-10-27 10:51:30 pid:801 Workerman[start.php] start in DEBUG mode

@@ -8,3 +8,4 @@ lock.txt
 /sqlite
 /public/upload
 /public/images
+/vendor/workerman/_usr_src_myapp_fasterphpweb_start.php.pid

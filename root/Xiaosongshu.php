@@ -122,6 +122,30 @@ class Xiaosongshu
         }
     }
 
+    public function start_rtmp($param){
+        /** 开启一个tcp服务，监听1935端口 */
+        $rtmpServer = new  \Workerman\Worker('tcp://0.0.0.0:1935');
+        /** 当客户端连接服务端的时候触发 */
+        $rtmpServer->onConnect = function (\Workerman\Connection\TcpConnection $connection) {
+            logger()->info("connection" . $connection->getRemoteAddress() . " connected . ");
+            new \MediaServer\Rtmp\RtmpStream(
+                new \MediaServer\Utils\WMBufferStream($connection)
+            );
+        };
+        /** 下面是提供flv播放资源的接口 */
+        $rtmpServer->onWorkerStart = function ($worker) {
+            logger()->info("rtmp server " . $worker->getSocketName() . " start . ");
+            \MediaServer\Http\HttpWMServer::$publicPath = __DIR__.'/public';
+            $httpServer = new \MediaServer\Http\HttpWMServer("\\MediaServer\\Http\\ExtHttpProtocol://0.0.0.0:18080");
+            $httpServer->listen();
+            logger()->info("rtmp推流地址：rtmp://0.0.0.0:1935/{your_app_name}/{your_live_room_name}");
+            logger()->info("rtmp拉流地址：rtmp://0.0.0.0/{your_app_name}/{your_live_room_name}");
+            logger()->info("http-flv地址：http://0.0.0.0:18080/{your_app_name}/{your_live_room_name}.flv");
+            logger()->info("ws-flv地址：ws://0.0.0.0:18080/{your_app_name}/{your_live_room_name}.flv");
+        };
+        \Workerman\Worker::runAll();
+    }
+
     /**
      * 安装项目目录
      * @return void
