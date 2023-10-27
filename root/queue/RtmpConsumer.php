@@ -2,6 +2,9 @@
 
 namespace Root\Queue;
 
+/**
+ * @purpose 以后台守护进程模式运行，统一管理
+ */
 class RtmpConsumer
 {
 
