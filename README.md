@@ -10,7 +10,7 @@
 ### 项目安装
 
 ```bash
-composer create-project xiaosongshu/fasterphpweb
+composer create-project xiaosongshu/xiaosongshu
 ```
 
 ### 启动项目

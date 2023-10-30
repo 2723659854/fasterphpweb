@@ -1,5 +1,5 @@
 {
-  "name": "xiaosongshu/fasterphpweb",
+  "name": "xiaosongshu/xiaosongshu",
   "description": "一个常驻内存 php框架，提供http，rtmp，websocket服务",
   "type": "project",
   "license": "MIT",
