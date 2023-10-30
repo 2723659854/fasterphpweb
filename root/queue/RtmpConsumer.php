@@ -10,7 +10,6 @@ class RtmpConsumer
 {
 
     public function consume($param){
-        return;
         global $argv;
         if ($param[0]=='restart'){
            $param = ['start','-d'];
