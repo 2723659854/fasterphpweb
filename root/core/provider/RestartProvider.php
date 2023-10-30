@@ -15,9 +15,13 @@ class RestartProvider implements IdentifyInterface
         global $_system,$_color_class,$_lock_file,$_listen,$_daemonize;
         $_daemonize = true;
         if ($_system) {
-            $app->close();  echo $_color_class->info("服务重启中\r\n");
+            $app->close();
+            echo $_color_class->info("服务重启中\r\n");
+            /** 等待2秒，因为关闭服务需要消耗一定时间 */
+            sleep(2);
+        } else {
+            echo $_color_class->info("当前环境是windows,只能在控制台运行\r\n");
         }
-        else { echo $_color_class->info("当前环境是windows,只能在控制台运行\r\n"); }
         $fd  = fopen($_lock_file, 'w');
         $res = flock($fd, LOCK_EX | LOCK_NB);
         if (!$res) {
