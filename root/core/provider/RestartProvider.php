@@ -21,7 +21,7 @@ class RestartProvider implements IdentifyInterface
         $fd  = fopen($_lock_file, 'w');
         $res = flock($fd, LOCK_EX | LOCK_NB);
         if (!$res) {
-            echo $_color_class->info($_listen . "\r\n");
+            //echo $_color_class->info($_listen . "\r\n");
             echo $_color_class->info("服务正在运行，请勿重复启动，你可以使用stop停止运行或者使用restart重启\r\n");
             exit(0);
         }

@@ -216,7 +216,7 @@ class Xiaosongshu
     /** 关闭进程 */
     public function close()
     {
-        global $_pid_file, $_color_class,$_lock_file;
+        global $_pid_file, $_color_class;
         echo $_color_class->info("关闭进程中...\r\n");
         if (file_exists($_pid_file)) {
             $master_ids = file_get_contents($_pid_file);
