@@ -592,3 +592,256 @@ Stack trace:
 2023-10-27 11:07:53 pid:834 Workerman[start.php] has been stopped
 2023-10-27 11:07:58 pid:836 Workerman[start.php] stop fail
 2023-10-27 11:08:01 pid:842 Workerman[start.php] start in DAEMON mode
+2023-10-30 02:54:13 pid:151 Workerman[start.php] stopping ...
+2023-10-30 02:54:14 pid:151 Workerman[start.php] has been stopped
+2023-10-30 02:54:23 pid:159 Workerman[start.php] start in DAEMON mode
+2023-10-30 02:54:41 pid:169 Workerman[start.php] restart 
+2023-10-30 02:54:42 pid:169 Workerman[start.php] is stopping ...
+2023-10-30 02:54:42 pid:166 Workerman[start.php] stopping ...
+2023-10-30 02:54:42 pid:166 Workerman[start.php] has been stopped
+2023-10-30 02:54:47 pid:169 Workerman[start.php] stop fail
+2023-10-30 02:54:57 pid:171 Workerman[start.php] restart 
+2023-10-30 02:54:57 pid:171 Workerman[start.php] is stopping ...
+2023-10-30 02:54:57 pid:171 Workerman[start.php] stop success
+2023-10-30 02:56:20 pid:178 Workerman[start.php] start in DAEMON mode
+2023-10-30 02:56:20 pid:178 Workerman[start.php] already running
+2023-10-30 02:56:35 pid:185 Workerman[start.php] stop 
+2023-10-30 02:56:35 pid:185 Workerman[start.php] is stopping ...
+2023-10-30 02:56:35 pid:171 Workerman[start.php] stopping ...
+2023-10-30 02:56:36 pid:171 Workerman[start.php] has been stopped
+2023-10-30 02:56:36 pid:185 Workerman[start.php] stop success
+2023-10-30 02:56:44 pid:187 Workerman[start.php] restart 
+2023-10-30 02:56:44 pid:187 Workerman[start.php] is stopping ...
+2023-10-30 02:56:44 pid:187 Workerman[start.php] stop success
+2023-10-30 02:58:54 pid:187 Workerman[start.php] stopping ...
+2023-10-30 02:58:54 pid:187 Workerman[start.php] has been stopped
+2023-10-30 02:59:00 pid:198 Workerman[start.php] start in DAEMON mode
+2023-10-30 02:59:00 pid:195 Workerman[start.php] start in DAEMON mode
+2023-10-30 02:59:07 pid:207 Workerman[start.php] stop 
+2023-10-30 02:59:07 pid:207 Workerman[start.php] is stopping ...
+2023-10-30 02:59:07 pid:203 Workerman[start.php] stopping ...
+2023-10-30 02:59:07 pid:203 Workerman[start.php] has been stopped
+2023-10-30 02:59:12 pid:207 Workerman[start.php] stop fail
+2023-10-30 02:59:29 pid:216 Workerman[start.php] start in DAEMON mode
+2023-10-30 02:59:29 pid:214 Workerman[start.php] start in DAEMON mode
+2023-10-30 03:01:10 pid:33 Workerman[start.php] start in DAEMON mode
+2023-10-30 03:02:46 pid:45 Workerman[start.php] stop 
+2023-10-30 03:02:46 pid:45 Workerman[start.php] is stopping ...
+2023-10-30 03:02:51 pid:45 Workerman[start.php] stop fail
+2023-10-30 03:02:56 pid:51 Workerman[start.php] start in DAEMON mode
+2023-10-30 03:02:56 pid:51 Workerman[start.php] already running
+2023-10-30 03:06:45 pid:65 Workerman[start.php] stop 
+2023-10-30 03:06:45 pid:65 Workerman[start.php] is stopping ...
+2023-10-30 03:06:50 pid:65 Workerman[start.php] stop fail
+2023-10-30 03:07:02 pid:72 Workerman[start.php] start in DAEMON mode
+2023-10-30 03:07:02 pid:72 Workerman[start.php] already running
+2023-10-30 03:08:18 pid:84 Workerman[start.php] stop 
+2023-10-30 03:08:18 pid:84 Workerman[start.php] is stopping ...
+2023-10-30 03:08:23 pid:84 Workerman[start.php] stop fail
+2023-10-30 03:08:30 pid:91 Workerman[start.php] start in DAEMON mode
+2023-10-30 03:08:30 pid:91 Workerman[start.php] already running
+2023-10-30 03:08:53 pid:103 Workerman[start.php] restart 
+2023-10-30 03:08:53 pid:103 Workerman[start.php] is stopping ...
+2023-10-30 03:08:58 pid:103 Workerman[start.php] stop fail
+2023-10-30 03:09:43 pid:105 Workerman[start.php] start in DEBUG mode
+2023-10-30 03:09:43 pid:105 Workerman[start.php] already running
+2023-10-30 03:10:19 pid:107 Workerman[start.php] start in DEBUG mode
+2023-10-30 03:10:19 pid:107 Workerman[start.php] already running
+2023-10-30 03:10:31 pid:108 Workerman[start.php] stop 
+2023-10-30 03:10:31 pid:108 Workerman[start.php] is stopping ...
+2023-10-30 03:10:36 pid:108 Workerman[start.php] stop fail
+2023-10-30 03:10:46 pid:110 Workerman[start.php] start in DEBUG mode
+2023-10-30 03:10:46 pid:110 Workerman[start.php] already running
+2023-10-30 03:11:23 pid:19 Workerman[start.php] start in DEBUG mode
+2023-10-30 03:11:29 pid:19 Workerman[start.php] stopping ...
+2023-10-30 03:11:29 pid:19 Workerman[start.php] has been stopped
+2023-10-30 03:11:36 pid:28 Workerman[start.php] start in DAEMON mode
+2023-10-30 03:11:48 pid:41 Workerman[start.php] stop 
+2023-10-30 03:11:48 pid:41 Workerman[start.php] is stopping ...
+2023-10-30 03:11:48 pid:38 Workerman[start.php] stopping ...
+2023-10-30 03:11:48 pid:38 Workerman[start.php] has been stopped
+2023-10-30 03:11:53 pid:41 Workerman[start.php] stop fail
+2023-10-30 03:12:03 pid:48 Workerman[start.php] start in DAEMON mode
+2023-10-30 03:12:34 pid:63 Workerman[start.php] stop 
+2023-10-30 03:12:34 pid:63 Workerman[start.php] is stopping ...
+2023-10-30 03:12:34 pid:60 Workerman[start.php] stopping ...
+2023-10-30 03:12:34 pid:60 Workerman[start.php] has been stopped
+2023-10-30 03:12:39 pid:63 Workerman[start.php] stop fail
+2023-10-30 03:12:49 pid:70 Workerman[start.php] start in DAEMON mode
+2023-10-30 03:12:59 pid:85 Workerman[start.php] stop 
+2023-10-30 03:12:59 pid:85 Workerman[start.php] is stopping ...
+2023-10-30 03:12:59 pid:82 Workerman[start.php] stopping ...
+2023-10-30 03:12:59 pid:82 Workerman[start.php] has been stopped
+2023-10-30 03:13:04 pid:85 Workerman[start.php] stop fail
+2023-10-30 03:13:21 pid:87 Workerman[start.php] restart 
+2023-10-30 03:13:21 pid:87 Workerman[start.php] is stopping ...
+2023-10-30 03:13:21 pid:87 Workerman[start.php] stop success
+2023-10-30 03:13:26 pid:87 Workerman[start.php] stopping ...
+2023-10-30 03:13:26 pid:87 Workerman[start.php] has been stopped
+2023-10-30 03:15:06 pid:90 Workerman[start.php] restart 
+2023-10-30 03:15:06 pid:90 Workerman[start.php] is stopping ...
+2023-10-30 03:15:06 pid:90 Workerman[start.php] stop success
+2023-10-30 03:15:18 pid:90 Workerman[start.php] stopping ...
+2023-10-30 03:15:18 pid:90 Workerman[start.php] has been stopped
+2023-10-30 03:15:30 pid:97 Workerman[start.php] start in DAEMON mode
+2023-10-30 03:16:20 pid:111 Workerman[start.php] stop 
+2023-10-30 03:16:20 pid:111 Workerman[start.php] is stopping ...
+2023-10-30 03:16:20 pid:109 Workerman[start.php] stopping ...
+2023-10-30 03:16:20 pid:109 Workerman[start.php] has been stopped
+2023-10-30 03:16:25 pid:111 Workerman[start.php] stop fail
+2023-10-30 03:16:34 pid:112 Workerman[start.php] restart 
+2023-10-30 03:16:34 pid:112 Workerman[start.php] is stopping ...
+2023-10-30 03:16:34 pid:112 Workerman[start.php] stop success
+2023-10-30 03:17:50 pid:112 Workerman[start.php] stopping ...
+2023-10-30 03:17:50 pid:112 Workerman[start.php] has been stopped
+2023-10-30 03:17:53 pid:114 Workerman[start.php] stop 
+2023-10-30 03:17:53 pid:114 Workerman[start.php] not run
+2023-10-30 03:17:59 pid:116 Workerman[start.php] stop 
+2023-10-30 03:17:59 pid:116 Workerman[start.php] not run
+2023-10-30 03:18:13 pid:124 Workerman[start.php] start in DAEMON mode
+2023-10-30 03:18:36 pid:138 Workerman[start.php] stop 
+2023-10-30 03:18:36 pid:138 Workerman[start.php] is stopping ...
+2023-10-30 03:18:36 pid:136 Workerman[start.php] stopping ...
+2023-10-30 03:18:36 pid:136 Workerman[start.php] has been stopped
+2023-10-30 03:18:41 pid:138 Workerman[start.php] stop fail
+2023-10-30 03:18:48 pid:140 Workerman[start.php] stop 
+2023-10-30 03:18:48 pid:140 Workerman[start.php] not run
+2023-10-30 03:31:31 pid:200 Workerman[start.php] start in DAEMON mode
+2023-10-30 03:32:42 pid:215 Workerman[start.php] reload 
+2023-10-30 03:32:42 pid:212 Workerman[start.php] reloading
+2023-10-30 03:32:54 pid:218 Workerman[start.php] reload 
+2023-10-30 03:32:54 pid:212 Workerman[start.php] reloading
+2023-10-30 03:33:08 pid:221 Workerman[start.php] stop 
+2023-10-30 03:33:08 pid:221 Workerman[start.php] is stopping ...
+2023-10-30 03:33:08 pid:212 Workerman[start.php] stopping ...
+2023-10-30 03:33:08 pid:212 Workerman[start.php] has been stopped
+2023-10-30 03:33:13 pid:221 Workerman[start.php] stop fail
+2023-10-30 03:35:15 pid:223 Workerman[start.php] stop 
+2023-10-30 03:35:15 pid:223 Workerman[start.php] not run
+2023-10-30 03:35:26 pid:230 Workerman[start.php] start in DAEMON mode
+2023-10-30 03:35:58 pid:245 Workerman[start.php] stop 
+2023-10-30 03:35:58 pid:245 Workerman[start.php] is stopping ...
+2023-10-30 03:35:58 pid:242 Workerman[start.php] stopping ...
+2023-10-30 03:35:58 pid:242 Workerman[start.php] has been stopped
+2023-10-30 03:36:03 pid:245 Workerman[start.php] stop fail
+2023-10-30 03:36:10 pid:247 Workerman[start.php] stop 
+2023-10-30 03:36:10 pid:247 Workerman[start.php] not run
+2023-10-30 03:36:49 pid:249 Workerman[start.php] stop 
+2023-10-30 03:36:49 pid:249 Workerman[start.php] not run
+2023-10-30 03:39:19 pid:250 Workerman[start.php] stop 
+2023-10-30 03:39:19 pid:250 Workerman[start.php] not run
+2023-10-30 03:39:30 pid:257 Workerman[start.php] start in DAEMON mode
+2023-10-30 03:39:38 pid:271 Workerman[start.php] stop 
+2023-10-30 03:39:38 pid:271 Workerman[start.php] is stopping ...
+2023-10-30 03:39:38 pid:269 Workerman[start.php] stopping ...
+2023-10-30 03:39:38 pid:269 Workerman[start.php] has been stopped
+2023-10-30 03:39:43 pid:271 Workerman[start.php] stop fail
+2023-10-30 03:39:45 pid:277 Workerman[start.php] start in DAEMON mode
+2023-10-30 03:39:56 pid:292 Workerman[start.php] stop 
+2023-10-30 03:39:56 pid:292 Workerman[start.php] is stopping ...
+2023-10-30 03:39:56 pid:289 Workerman[start.php] stopping ...
+2023-10-30 03:39:56 pid:289 Workerman[start.php] has been stopped
+2023-10-30 03:40:01 pid:292 Workerman[start.php] stop fail
+2023-10-30 03:41:27 pid:294 Workerman[start.php] stop 
+2023-10-30 03:41:27 pid:294 Workerman[start.php] not run
+2023-10-30 03:41:27 pid:300 Workerman[start.php] start in DAEMON mode
+2023-10-30 03:41:40 pid:315 Workerman[start.php] stop 
+2023-10-30 03:41:40 pid:315 Workerman[start.php] is stopping ...
+2023-10-30 03:41:40 pid:312 Workerman[start.php] stopping ...
+2023-10-30 03:41:40 pid:312 Workerman[start.php] has been stopped
+2023-10-30 03:41:45 pid:315 Workerman[start.php] stop fail
+2023-10-30 03:43:00 pid:318 Workerman[start.php] stop 
+2023-10-30 03:43:00 pid:318 Workerman[start.php] not run
+2023-10-30 03:43:00 pid:324 Workerman[start.php] start in DAEMON mode
+2023-10-30 03:43:09 pid:339 Workerman[start.php] stop 
+2023-10-30 03:43:09 pid:339 Workerman[start.php] is stopping ...
+2023-10-30 03:43:09 pid:336 Workerman[start.php] stopping ...
+2023-10-30 03:43:09 pid:336 Workerman[start.php] has been stopped
+2023-10-30 03:43:14 pid:339 Workerman[start.php] stop fail
+2023-10-30 03:44:23 pid:342 Workerman[start.php] stop 
+2023-10-30 03:44:23 pid:342 Workerman[start.php] not run
+2023-10-30 03:44:23 pid:348 Workerman[start.php] start in DAEMON mode
+2023-10-30 03:44:53 pid:363 Workerman[start.php] stop 
+2023-10-30 03:44:53 pid:363 Workerman[start.php] is stopping ...
+2023-10-30 03:44:53 pid:360 Workerman[start.php] stopping ...
+2023-10-30 03:44:53 pid:360 Workerman[start.php] has been stopped
+2023-10-30 03:44:58 pid:363 Workerman[start.php] stop fail
+2023-10-30 03:45:05 pid:370 Workerman[start.php] start in DAEMON mode
+2023-10-30 03:45:16 pid:385 Workerman[start.php] restart 
+2023-10-30 03:45:16 pid:385 Workerman[start.php] is stopping ...
+2023-10-30 03:45:16 pid:382 Workerman[start.php] stopping ...
+2023-10-30 03:45:16 pid:382 Workerman[start.php] has been stopped
+2023-10-30 03:45:21 pid:385 Workerman[start.php] stop fail
+2023-10-30 03:45:34 pid:388 Workerman[start.php] restart 
+2023-10-30 03:45:34 pid:388 Workerman[start.php] is stopping ...
+2023-10-30 03:45:34 pid:388 Workerman[start.php] stop success
+2023-10-30 03:45:34 pid:395 Workerman[start.php] restart 
+2023-10-30 03:45:34 pid:395 Workerman[start.php] is stopping ...
+2023-10-30 03:45:34 pid:388 Workerman[start.php] stopping ...
+2023-10-30 03:45:35 pid:388 Workerman[start.php] has been stopped
+2023-10-30 03:45:35 pid:395 Workerman[start.php] stop success
+2023-10-30 03:46:11 pid:408 Workerman[start.php] stop 
+2023-10-30 03:46:11 pid:408 Workerman[start.php] is stopping ...
+2023-10-30 03:46:17 pid:408 Workerman[start.php] stop fail
+2023-10-30 03:46:24 pid:411 Workerman[start.php] stop 
+2023-10-30 03:46:24 pid:411 Workerman[start.php] is stopping ...
+2023-10-30 03:46:29 pid:411 Workerman[start.php] stop fail
+2023-10-30 03:46:49 pid:419 Workerman[start.php] start in DAEMON mode
+2023-10-30 03:46:49 pid:419 Workerman[start.php] already running
+2023-10-30 03:47:18 pid:431 Workerman[start.php] stop 
+2023-10-30 03:47:18 pid:431 Workerman[start.php] is stopping ...
+2023-10-30 03:47:18 pid:436 Workerman[start.php] start in DAEMON mode
+2023-10-30 03:47:18 pid:436 Workerman[start.php] already running
+2023-10-30 03:47:23 pid:431 Workerman[start.php] stop fail
+2023-10-30 03:47:46 pid:19 Workerman[start.php] stop 
+2023-10-30 03:47:46 pid:19 Workerman[start.php] not run
+2023-10-30 03:47:46 pid:27 Workerman[start.php] start in DAEMON mode
+2023-10-30 03:48:04 pid:40 Workerman[start.php] stop 
+2023-10-30 03:48:04 pid:40 Workerman[start.php] is stopping ...
+2023-10-30 03:48:04 pid:37 Workerman[start.php] stopping ...
+2023-10-30 03:48:04 pid:37 Workerman[start.php] has been stopped
+2023-10-30 03:48:09 pid:40 Workerman[start.php] stop fail
+2023-10-30 03:48:18 pid:49 Workerman[start.php] start in DAEMON mode
+2023-10-30 03:48:27 pid:63 Workerman[start.php] stop 
+2023-10-30 03:48:27 pid:63 Workerman[start.php] is stopping ...
+2023-10-30 03:48:27 pid:60 Workerman[start.php] stopping ...
+2023-10-30 03:48:27 pid:60 Workerman[start.php] has been stopped
+2023-10-30 03:48:32 pid:63 Workerman[start.php] stop fail
+2023-10-30 03:50:59 pid:66 Workerman[start.php] stop 
+2023-10-30 03:50:59 pid:66 Workerman[start.php] not run
+2023-10-30 03:50:59 pid:72 Workerman[start.php] start in DAEMON mode
+2023-10-30 03:51:17 pid:86 Workerman[start.php] stop 
+2023-10-30 03:51:17 pid:86 Workerman[start.php] is stopping ...
+2023-10-30 03:51:17 pid:84 Workerman[start.php] stopping ...
+2023-10-30 03:51:17 pid:84 Workerman[start.php] has been stopped
+2023-10-30 03:51:22 pid:86 Workerman[start.php] stop fail
+2023-10-30 03:54:53 pid:100 Workerman[start.php] start in DAEMON mode
+2023-10-30 03:57:10 pid:119 Workerman[start.php] stop 
+2023-10-30 03:57:10 pid:119 Workerman[start.php] is stopping ...
+2023-10-30 03:57:10 pid:112 Workerman[start.php] stopping ...
+2023-10-30 03:57:10 pid:112 Workerman[start.php] has been stopped
+2023-10-30 03:57:15 pid:119 Workerman[start.php] stop fail
+2023-10-30 03:57:24 pid:122 Workerman[start.php] stop 
+2023-10-30 03:57:24 pid:122 Workerman[start.php] not run
+2023-10-30 03:57:24 pid:128 Workerman[start.php] start in DAEMON mode
+2023-10-30 03:57:31 pid:143 Workerman[start.php] stop 
+2023-10-30 03:57:31 pid:143 Workerman[start.php] is stopping ...
+2023-10-30 03:57:31 pid:140 Workerman[start.php] stopping ...
+2023-10-30 03:57:32 pid:140 Workerman[start.php] has been stopped
+2023-10-30 03:57:36 pid:143 Workerman[start.php] stop fail
+2023-10-30 03:59:14 pid:146 Workerman[start.php] stop 
+2023-10-30 03:59:14 pid:146 Workerman[start.php] not run
+2023-10-30 03:59:14 pid:152 Workerman[start.php] start in DAEMON mode
+2023-10-30 03:59:36 pid:167 Workerman[start.php] stop 
+2023-10-30 03:59:36 pid:167 Workerman[start.php] is stopping ...
+2023-10-30 03:59:36 pid:164 Workerman[start.php] stopping ...
+2023-10-30 03:59:36 pid:164 Workerman[start.php] has been stopped
+2023-10-30 03:59:41 pid:167 Workerman[start.php] stop fail
+2023-10-30 04:04:30 pid:170 Workerman[start.php] stop 
+2023-10-30 04:04:30 pid:170 Workerman[start.php] not run
+2023-10-30 04:04:30 pid:176 Workerman[start.php] start in DAEMON mode
+2023-10-30 04:04:52 pid:192 Workerman[start.php] stop 
+2023-10-30 04:04:52 pid:192 Workerman[start.php] is stopping ...
+2023-10-30 04:04:52 pid:188 Workerman[start.php] stopping ...
+2023-10-30 04:04:52 pid:188 Workerman[start.php] has been stopped
+2023-10-30 04:04:57 pid:192 Workerman[start.php] stop fail

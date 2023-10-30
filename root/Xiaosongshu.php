@@ -216,7 +216,7 @@ class Xiaosongshu
     /** 关闭进程 */
     public function close()
     {
-        global $_pid_file, $_color_class;
+        global $_pid_file, $_color_class,$_lock_file;
         echo $_color_class->info("关闭进程中...\r\n");
         if (file_exists($_pid_file)) {
             $master_ids = file_get_contents($_pid_file);
@@ -232,14 +232,26 @@ class Xiaosongshu
                     \posix_kill($v, 0);
                 }
             }
-            /** 关闭rtmp服务 */
-            $rtmp_enable = config('rtmp')['enable']??false;
-            if ($rtmp_enable){
-                G(RtmpConsumer::class)->consume($params=['stop']);
-            }
-
-            sleep(1);
             file_put_contents($_pid_file, null);
+            sleep(1);
+            //fclose($_lock_file);
+            $this->close_rtmp();
+        }
+    }
+
+    /**
+     * 关闭rtmp服务
+     * @return void
+     */
+    public function close_rtmp(){
+        /** 关闭rtmp服务 */
+        $rtmp_enable = config('rtmp')['enable']??false;
+        if ($rtmp_enable){
+            /** workman是单独的一个框架，需要单独开启一个进程处理业务 */
+            $rtmp_pid = pcntl_fork();
+            if ($rtmp_pid>0){
+                G(RtmpConsumer::class)->consume(['stop']);
+            }
         }
     }
 
@@ -446,6 +458,11 @@ class Xiaosongshu
         if ($ws_count) {
             $content[] = ['ws服务', '正常', $ws_count, implode(',', $ws_port)];
         }
+        /** rtmp服务 */
+        $rtmp_enable = config('rtmp')['enable']??false;
+        if($rtmp_enable){
+            $content[] = ['rtmp-flv', '正常', 1, config('rtmp')['rtmp'].','.config('rtmp')['flv']];
+        }
 
         $_system_table->table($head, $content);
         echo $_color_class->info("进程启动完成,你可以输入php start.php stop停止运行\r\n");
@@ -468,7 +485,12 @@ class Xiaosongshu
             writePid();
         }
         if ($rtmp_enable&& (getmypid() != $master_pid)){
-            G(RtmpConsumer::class)->consume($params=['start','-d']);
+            /** 这里开启的是workman的进程 ，必须单独开进程*/
+            $_rtmp_pid = pcntl_fork();
+            if ($_rtmp_pid>0){
+                writePid();
+                G(RtmpConsumer::class)->consume(['start','-d']);
+            }
         }
 
         /** 开启redis队列 */

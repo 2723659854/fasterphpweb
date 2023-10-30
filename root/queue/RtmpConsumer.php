@@ -1,7 +1,8 @@
 <?php
 
 namespace Root\Queue;
-
+//use Workerman\Worker;
+use Root\Lib\Worker;
 /**
  * @purpose 以后台守护进程模式运行，统一管理
  */
@@ -9,12 +10,17 @@ class RtmpConsumer
 {
 
     public function consume($param){
+        global $argv;
+        if ($param[0]=='restart'){
+           $param = ['start','-d'];
+        }
+        $argv = array_merge(['start.php'],$param);
         $safeEcho = G(\Xiaosongshu\ColorWord\Transfer::class);
         $rtmpConfig = config('rtmp')??[];
         $rtmpPort = $rtmpConfig['rtmp']??1935;
         $flvPort = $rtmpConfig['flv']??18080;
         /** 开启一个tcp服务，监听1935端口 */
-        $rtmpServer = new  \Workerman\Worker("tcp://0.0.0.0:{$rtmpPort}");
+        $rtmpServer = new  Worker("tcp://0.0.0.0:{$rtmpPort}");
         /** 当客户端连接服务端的时候触发 */
         $rtmpServer->onConnect = function (\Workerman\Connection\TcpConnection $connection)use($safeEcho) {
             echo $safeEcho->info("connection" . $connection->getRemoteAddress() . " connected . \r\n");
@@ -33,6 +39,6 @@ class RtmpConsumer
             echo $safeEcho->info("http-flv地址：http://0.0.0.0:{$flvPort}/{your_app_name}/{your_live_room_name}.flv\r\n");
             echo $safeEcho->info("ws-flv地址：ws://0.0.0.0:{$flvPort}/{your_app_name}/{your_live_room_name}.flv\r\n");
         };
-        \Workerman\Worker::runAll();
+        Worker::runAll();
     }
 }
