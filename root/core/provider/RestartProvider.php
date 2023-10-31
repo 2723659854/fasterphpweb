@@ -32,7 +32,7 @@ class RestartProvider implements IdentifyInterface
         }
         /** 加载路由 */
         G(\Root\Route::class)->loadRoute();
-        G(AnnotationRoute::class)->loadRoute();
+        AnnotationRoute::loadRoute();
         $app->daemon();
     }
 }
