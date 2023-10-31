@@ -669,11 +669,144 @@ or查询  多字段或者查询：orSearch
 索引是否存在：IndexExists
 根据id更新数据：updateById
 ```
+
 若不满足需求，可以使用插件
 ```bash 
 composer require xiaosongshu/elasticsearch
 ```
+一些例子：<br>
+```php 
+<?php
+require_once 'vendor/autoload.php';
 
+/** 实例化客户端 */
+$client = new \Xiaosongshu\Elasticsearch\ESClient([
+    /** 节点列表 */
+    'nodes' => ['192.168.4.128:9200'],
+    /** 用户名 */
+    'username' => '',
+    /** 密码 */
+    'password' => '',
+]);
+/** 删除索引 */
+$client->deleteIndex('index');
+/** 如果不存在index索引，则创建index索引 */
+if (!$client->IndexExists('index')) {
+    /** 创建索引 */
+    $client->createIndex('index', '_doc');
+}
+
+/** 创建表 */
+$result = $client->createMappings('index', '_doc', [
+    'id' => ['type' => 'long',],
+    'title' => ['type' => 'text', "fielddata" => true,],
+    'content' => ['type' => 'text', 'fielddata' => true],
+    'create_time' => ['type' => 'text'],
+    'test_a' => ["type" => "rank_feature"],
+    'test_b' => ["type" => "rank_feature", "positive_score_impact" => false],
+    'test_c' => ["type" => "rank_feature"],
+]);
+/** 获取数据库所有数据 */
+$result = $client->all('index','_doc',0,15);
+
+/** 写入单条数据 */
+$result = $client->create('index', '_doc', [
+    'id' => rand(1,99999),
+    'title' => '我只是一个测试呢',
+    'content' => '123456789',
+    'create_time' => date('Y-m-d H:i:s'),
+    'test_a' => 1,
+    'test_b' => 2,
+    'test_c' => 3,
+]);
+/** 批量写入数据 */
+$result = $client->insert('index','_doc',[
+    [
+        'id' => rand(1,99999),
+        'title' => '我只是一个测试呢',
+        'content' => '你说什么',
+        'create_time' => date('Y-m-d H:i:s'),
+        'test_a' => rand(1,10),
+        'test_b' => rand(1,10),
+        'test_c' => rand(1,10),
+    ],
+    [
+        'id' => rand(1,99999),
+        'title' => '我只是一个测试呢',
+        'content' => '你说什么',
+        'create_time' => date('Y-m-d H:i:s'),
+        'test_a' => rand(1,10),
+        'test_b' => rand(1,10),
+        'test_c' => rand(1,10),
+    ],
+    [
+        'id' => rand(1,99999),
+        'title' => '我只是一个测试呢',
+        'content' => '你说什么',
+        'create_time' => date('Y-m-d H:i:s'),
+        'test_a' => rand(1,10),
+        'test_b' => rand(1,10),
+        'test_c' => rand(1,10),
+    ],
+]);
+/** 使用关键字搜索 */
+$result = $client->search('index','_doc','title','测试')['hits']['hits'];
+
+/** 使用id更新数据 */
+$result1 = $client->updateById('index','_doc',$result[0]['_id'],['content'=>'今天你测试了吗']);
+/** 使用id 删除数据 */
+$result = $client->deleteById('index','_doc',$result[0]['_id']);
+/** 使用条件删除 */
+$client->deleteByQuery('index','_doc','title','测试');
+/** 使用关键字搜索 */
+$result = $client->search('index','_doc','title','测试')['hits']['hits'];
+/** 使用条件更新 */
+$result = $client->updateByQuery('index','_doc','title','测试',['content'=>'哇了个哇，这么大的种子，这么大的花']);
+/** 添加脚本 */
+$result = $client->addScript('update_content',"doc['content'].value+'_'+'谁不说按家乡好'");
+/** 添加脚本 */
+$result = $client->addScript('update_content2',"(doc['content'].value)+'_'+'abcdefg'");
+/** 获取脚本内容 */
+$result = $client->getScript('update_content');
+/** 使用脚本搜索 */
+$result = $client->searchByScript('index', '_doc', 'update_content', 'title', '测试');
+/** 删除脚本*/
+$result = $client->deleteScript('update_content2');
+/** 使用id查询 */
+$result = $client->find('index','_doc','7fitkYkBktWURd5Uqckg');
+/** 原生查询 */
+$result = $client->nativeQuerySearch('index',[
+    'query'=>[
+        'bool'=>[
+            'must'=>[
+                [
+                    'match_phrase'=>[
+                        'title'=>'测试'
+                    ],
+                ],
+                [
+                    'script'=>[
+                        'script'=>"doc['content'].value.length()>2"
+                    ]
+                ]
+            ]
+        ]
+    ]
+
+]);
+/** and并且查询 */
+$result = $client->andSearch('index','_doc',['title','content'],'测试');
+/** or或者查询 */
+$result = $client->orSearch('index','_doc',['title','content'],'今天');
+
+```
+你可能需要一键搭建elasticsearch服务，仅供参考：
+```bash 
+docker run -d --name my-es -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node"  elasticsearch:7.9.2
+```
+elasticsearch属于内存数据库，启动服务后会占用很大的系统内存(redis和sqlite这两个和elasticsearch不是一个数量级)，导致服务器卡顿，影响其他服务正常运行，所以将elasticsearch独立搭建服务。
+正式生成环境建议单独部署一台服务器用于部署elasticsearch，如果需要多个节点，那就需要多部署几台服务器。<br>
+如果有特殊的分词需求，建议安装扩展ik分词器，参照<a href="https://blog.csdn.net/weixin_44364444/article/details/125758975">Docker中的elasticsearch安装ik分词器</a>
 #### 加入容器
 
 解放双手，不需要每一次都去实例化需要调用的对象。使用容器简单方便。<br>
@@ -845,7 +978,12 @@ print_r($client->removeService($serviceName, $namespace));
 可以根据自己的需求，给项目添加配置检测，微服务管理。<br>
 配置检测：创建一个常驻内存进程，每隔30秒，读取一次nacos服务器上的配置，配置发生了变化，则修改配置，并重启服务。<br>
 微服务管理：创建一个常驻内存进程，进程启动的时候注册服务。
-
+<br>
+你可能需要一键搭建nacos服务，仅供参考：
+```bash 
+docker run --name nacos -e MODE=standalone --env NACOS_AUTH_ENABLE=true -p 8848:8848 31181:31181 -d nacos/nacos-server:1.3.1
+```
+nacos这种负责管理配置和服务，安全性要求很高，一般不会销毁和重建，故没有将nacos服务绑定到基础容器里面。
 ### ws服务（websocket）
 
 创建ws服务
