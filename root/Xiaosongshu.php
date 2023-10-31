@@ -435,7 +435,9 @@ class Xiaosongshu
         if (in_array(true, array_column(config('rabbitmqProcess') ?? [], 'enable'))) {
             $rabbitmq_count = 0;
             foreach ((config('rabbitmqProcess')) as $item) {
-                $rabbitmq_count += $item['count'];
+                if ($item['enable']??false){
+                    $rabbitmq_count += $item['count'];
+                }
             }
             $content[] = ['rabbitmq', '正常', $rabbitmq_count, $rabbitmq_config['port']];
         }
@@ -461,7 +463,7 @@ class Xiaosongshu
         /** rtmp服务 */
         $rtmp_enable = config('rtmp')['enable']??false;
         if($rtmp_enable){
-            $content[] = ['rtmp-flv', '正常', 1, config('rtmp')['rtmp'].','.config('rtmp')['flv']];
+            $content[] = ['rtmp-flv', '正常', 2, config('rtmp')['rtmp'].','.config('rtmp')['flv']];
         }
 
         $_system_table->table($head, $content);

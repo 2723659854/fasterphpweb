@@ -5,6 +5,8 @@ namespace App\Controller\Index;
 use App\Middleware\Auth;
 use App\Model\User;
 use App\Rabbitmq\Demo2;
+use App\Rabbitmq\DemoConsume;
+use App\Rabbitmq\Fuck;
 use Root\Annotation\Mapping\Middlewares;
 use Root\Annotation\Mapping\RequestMapping;
 use Root\ESClient;
@@ -102,17 +104,13 @@ class Index
     {
         //普通队列
         Test::dispatch(['name' => 'hanmeimei', 'age' => '58']);
-        Test::dispatch(['name' => 'hanmeimei', 'age' => '58']);
-        Test::dispatch(['name' => 'hanmeimei', 'age' => '58']);
-        Test::dispatch(['name' => 'hanmeimei', 'age' => '58']);
-        Test::dispatch(['name' => 'hanmeimei', 'age' => '58']);
         //延迟队列
         Test::dispatch(['name' => '李磊', 'age' => '32'], 5);
-        Test::dispatch(['name' => '李磊', 'age' => '32'], 3);
-        Test::dispatch(['name' => '李磊', 'age' => '32'], 4);
-        Test::dispatch(['name' => '李磊', 'age' => '32'], 15);
-        Test::dispatch(['name' => '李磊', 'age' => '32'], 10);
-        Test::dispatch(['name' => '李磊', 'age' => '32'], 8);
+        /** 普通队列消息 */
+        \App\Queue\Demo::dispatch(['name' => 'hanmeimei', 'age' => '58']);
+        /** 延迟队列消息 ，单位秒(s)*/
+        \App\Queue\Demo::dispatch(['name' => '李磊', 'age' => '32'], 3);
+
         return response('push message success!');
     }
 
@@ -124,8 +122,9 @@ class Index
     public function rabbitmq()
     {
         $queue = new Demo();
-        $queue->send(['name' => '张三', 'age' => 23]);
-        (new Demo2())->send(['school' => 'no school']);
+        $queue->publish(['name' => '张三', 'age' => 23]);
+        (new Demo2())->publish(['school' => 'no school']);
+        (new DemoConsume())->publish(['status'=>1,'msg'=>'ok']);
         return \response(['msg' => 'ok', 'status' => 200]);
     }
 

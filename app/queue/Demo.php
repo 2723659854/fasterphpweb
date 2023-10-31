@@ -2,14 +2,12 @@
 namespace App\Queue;
 use Root\Queue\Queue;
 
-//队列消费者  必须继承 Root\Queue\Queue类
-
 /**
  * @purpose redis消费者
  * @author administrator
- * @time $time
+ * @time 2023-10-31 03:44:50
  */
-class Test extends Queue
+class Demo extends Queue
 {
     public $param=null;
 

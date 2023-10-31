@@ -19,6 +19,15 @@ class RedisQueueConsumer
         }
     }
 
+    /** 执行队列 */
+    public function handle()
+    {
+        $enable = config('redis')['enable'];
+        if ($enable) {
+            echo "redis队列消费者已开启\r\n";
+            $this->_queue_xiaosongshu();
+        }
+    }
     /**
      * redis队列
      * @return void

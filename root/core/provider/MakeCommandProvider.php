@@ -2,7 +2,7 @@
 
 namespace Root\Core\Provider;
 
-use Root\Command;
+
 use Root\Xiaosongshu;
 
 /**
@@ -27,6 +27,7 @@ class MakeCommandProvider implements IdentifyInterface
                 }
             }
         }
+        $name= ucwords($name);
         $time    = date('Y-m-d H:i:s');
         $content = <<<EOF
 <?php

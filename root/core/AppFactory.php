@@ -4,6 +4,8 @@ use Root\Core\Provider\MakeCommandProvider;
 use Root\Core\Provider\MakeControllerProvider;
 use Root\Core\Provider\MakeMiddlewareProvider;
 use Root\Core\Provider\MakeModelProvider;
+use Root\Core\Provider\MakeQueueProvider;
+use Root\Core\Provider\MakeRabbitmqProvider;
 use Root\Core\Provider\MakeSqliteProvider;
 use Root\Core\Provider\MakeWsProvider;
 use Root\Core\Provider\QueueProvider;
@@ -29,7 +31,9 @@ class AppFactory
         'make:middleware'=>MakeMiddlewareProvider::class,
         'make:ws'=>MakeWsProvider::class,
         'ws:start'=>StartWsProvider::class,
-        'rtmp'=>RtmpProvider::class
+        'rtmp'=>RtmpProvider::class,
+        'make:queue'=>MakeQueueProvider::class,
+        'make:rabbitmq'=>MakeRabbitmqProvider::class
     ];
 
     /** @var array */

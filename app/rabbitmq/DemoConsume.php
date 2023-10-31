@@ -5,21 +5,21 @@ use Root\Queue\RabbitMQBase;
 /**
  * @purpose rabbitMq消费者
  * @author administrator
- * @time $time
+ * @time 2023-10-31 05:27:48
  */
-class Demo2 extends RabbitMQBase
+class DemoConsume extends RabbitMQBase
 {
 
     /**
      * 自定义队列名称
      * @var string
      */
-    public $queueName ="Demo2";
+    public $queueName ="DemoConsume";
 
     /** @var int $timeOut 普通队列 */
     public $timeOut=0;
 
-    /**
+   /**
      * 逻辑处理
      * @param array $param
      * @return void
@@ -27,16 +27,16 @@ class Demo2 extends RabbitMQBase
     public function handle(array $param)
     {
         var_dump($param);
-        var_dump($this->queueName);
+        // TODO: Implement handle() method.
     }
 
     /**
      * 异常处理
-     * @param \Exception|\RuntimeException \$exception
+     * @param \Exception|\RuntimeException $exception
      * @return mixed|void
      */
     public function error(\Exception|\RuntimeException $exception)
     {
-        var_dump($exception->getMessage());
+        // TODO: Implement error() method.
     }
 }

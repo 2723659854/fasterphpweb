@@ -18,7 +18,7 @@ class WsConsumer
                 writePid();
                 if ($create>0){
                     usleep(1000);
-                    cli_set_process_title('xiaosongshu_ws_server');
+                    cli_set_process_title('xiaosongshu.ws.server.'.$name);
                     $server = G($value['handler']);
                     $server->host = $value['host'];
                     $server->port = $value['port'];

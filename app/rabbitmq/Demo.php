@@ -15,7 +15,17 @@ class Demo extends RabbitMQBase
      */
     public function handle($param)
     {
-        var_dump("我是谁");
         var_dump($param);
+        var_dump($this->queueName);
+    }
+
+    /**
+     * 异常处理
+     * @param \Exception|\RuntimeException \$exception
+     * @return mixed|void
+     */
+    public function error(\Exception|\RuntimeException $exception)
+    {
+        // TODO: Implement error() method.
     }
 }

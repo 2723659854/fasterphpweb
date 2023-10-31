@@ -6,7 +6,7 @@ use PhpAmqpLib\Connection\AMQPStreamConnection;
 use PhpAmqpLib\Exchange\AMQPExchangeType;
 use PhpAmqpLib\Message\AMQPMessage;
 use PhpAmqpLib\Wire\AMQPTable;
-class RabbitMQBase
+abstract class RabbitMQBase
 {
     /**
      * https://www.jianshu.com/p/a6f21317722a
@@ -103,8 +103,6 @@ class RabbitMQBase
         $delayConfig = [
             /** 传递模式   消息持久化 ，这一个配置是消费确认发送ack的根本原因*/
             'delivery_mode' => AMQPMessage::DELIVERY_MODE_PERSISTENT,
-            /** 消息表头 设置延迟时间  延迟可以精确到毫秒 */
-            //'application_headers' => new AMQPTable(['x-delay' => $time * 1000])
         ];
         if ($time){
             /** 消息表头 设置延迟时间  延迟可以精确到毫秒 */
@@ -180,14 +178,11 @@ class RabbitMQBase
                     //var_dump("重新投递");
                     $this ->sendDelay(json_encode($params),5);
                 }else{
-                    //todo 数据写入数据库，方便后续操作，比如退钱什么的
-                    echo "超过了最大执行次数，数据写入数据库\r\n";
+                    $this->error($exception);
                 }
                 /** 确认接收到消息 */
                 $this->channel->basic_ack($msg->delivery_info['delivery_tag'], false);
             }
-
-
             /** 关闭消费者信息 */
             if ($msg->body=='quit'){
                 /** 这里使用的是通过消费者标签关闭通道 */
@@ -213,7 +208,7 @@ class RabbitMQBase
      * @return void
      * @throws \Exception
      */
-    public function send(array $msg){
+    public  function publish(array $msg){
         $this ->sendDelay(json_encode($msg));
     }
 
@@ -228,10 +223,16 @@ class RabbitMQBase
 
     /**
      * 业务逻辑
-     * @param $param
+     * @param array $param
      * @return void
      */
-    public function handle($param){
-        //var_dump($param);
-    }
+    public abstract function handle(array $param);
+
+    /**
+     * 抛出异常
+     * @param \Exception|\RuntimeException $exception
+     * @return mixed
+     */
+    public abstract function error(\Exception|\RuntimeException $exception);
+
 }

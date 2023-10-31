@@ -566,7 +566,69 @@ return [
 
 
 ```
+### redis 队列
+#### redis连接配置
+```php 
+<?php
+# /config/redis.php
+return [
+    /** 是否提前启动缓存连接 */
+    'preStart'=>false,
+    /** redis队列开关 */
+    'enable'=>true,
+    /** redis连接基本配置 */
+    'host'     => 'redis',
+    //'host'     => '192.168.4.105',
+    'password' => 'xT9=123456',
+    'port'     => '6379',
+    'database' => 0,
+];
+```
+创建消费者
+```bash 
+php songshu make:queue Demo
+```
+生成的消费者内容如下：
+```php 
+<?php
+namespace App\Queue;
+use Root\Queue\Queue;
 
+/**
+ * @purpose redis消费者
+ * @author administrator
+ * @time 2023-10-31 03:44:50
+ */
+class Demo extends Queue
+{
+    public $param=null;
+
+    /**
+     * Test constructor.
+     * @param array $param 根据业务需求，传递业务参数，必须以一个数组的形式传递
+     */
+    public function __construct(array $param)
+    {
+        $this->param=$param;
+    }
+
+    /**
+     * 消费者
+     * 具体的业务逻辑必须写在handle里面
+     */
+    public function handle(){
+        //todo 这里写你的具体的业务逻辑
+        var_dump($this->param);
+    }
+}
+```
+投递消息
+```php 
+  /** 普通队列消息 */
+  \App\Queue\Demo::dispatch(['name' => 'hanmeimei', 'age' => '58']);
+  /** 延迟队列消息 ，单位秒(s)*/
+  \App\Queue\Demo::dispatch(['name' => '李磊', 'age' => '32'], 3);
+```
 ### rabbitmq消息队列
 
 #### rabbitmq连接配置
@@ -574,8 +636,6 @@ return [
 ```php 
 <?php
 return [
-    /** rabbitmq队列开关 */
-    'enable'=>false,
     /** rabbitmq基本连接配置 */
     'host'=>'faster-rabbitmq',
     'port'=>'5672',
@@ -584,28 +644,51 @@ return [
 ];
 ```
 
-#### 定义消费者类
-
+#### 创建消费者类
+```bash 
+php start.php make:rabbitmq DemoConsume
+```
+生成的消费者内容如下：
 ```php 
 <?php
 namespace App\Rabbitmq;
 use Root\Queue\RabbitMQBase;
 
-class Demo extends RabbitMQBase
+/**
+ * @purpose rabbitMq消费者
+ * @author administrator
+ * @time 2023-10-31 05:27:48
+ */
+class DemoConsume extends RabbitMQBase
 {
 
-    /** @var int $timeOut 延迟时间 秒 0 则不延时，延时需要安装官方插件 */
-    public $timeOut = 5;
-
     /**
-     * 业务逻辑
-     * @param $param
+     * 自定义队列名称
+     * @var string
+     */
+    public $queueName ="DemoConsume";
+
+    /** @var int $timeOut 普通队列 */
+    public $timeOut=0;
+
+   /**
+     * 逻辑处理
+     * @param array $param
      * @return void
      */
-    public function handle($param)
+    public function handle(array $param)
     {
-        var_dump("我是谁");
-        var_dump($param);
+        // TODO: Implement handle() method.
+    }
+
+    /**
+     * 异常处理
+     * @param \Exception|\RuntimeException $exception
+     * @return mixed|void
+     */
+    public function error(\Exception|\RuntimeException $exception)
+    {
+        // TODO: Implement error() method.
     }
 }
 ```
@@ -613,16 +696,43 @@ class Demo extends RabbitMQBase
 #### 开启消费者任务
 
 ```php 
+# config/rabbitmqProcess.php
 <?php
-use App\Rabbitmq\Demo;
+
 return [
     /** 队列名称 */
     'demoForOne'=>[
         /** 消费者名称 */
-        'handler'=>Demo::class
+        'handler'=>App\Rabbitmq\Demo::class,
+        /** 进程数 */
+        'count'=>2,
+        /** 是否开启消费者 */
+        'enable'=>false,
     ],
+    /** 队列名称 */
+    'demoForTwo'=>[
+        /** 消费者名称 */
+        'handler'=>App\Rabbitmq\Demo2::class,
+        /** 进程数 */
+        'count'=>1,
+        /** 是否开启消费者 */
+        'enable'=>true,
+    ],
+    'DemoConsume'=>[
+        /** 消费者名称 */
+        'handler'=>App\Rabbitmq\DemoConsume::class,
+        /** 进程数 */
+        'count'=>1,
+        /** 是否开启消费者 */
+        'enable'=>true,
+    ]
 ];
 ```
+投递消息
+```php 
+(new DemoConsume())->publish(['status'=>1,'msg'=>'ok']);
+```
+
 若不满足需求，可以使用插件
 ```bash 
 composer require xiaosongshu/rabbitmq
