@@ -39,7 +39,8 @@
     "apix/log": "^1.2",
     "workerman/workerman": "v4.1.9",
     "react/promise": "^2.9",
-    "xiaosongshu/nacos": "dev-master"
+    "xiaosongshu/nacos": "dev-master",
+    "symfony/yaml": "5.4.*"
   },
   "config": {
     "allow-plugins": {

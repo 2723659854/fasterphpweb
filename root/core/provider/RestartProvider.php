@@ -12,7 +12,7 @@ class RestartProvider implements IdentifyInterface
 {
 
     public function handle(Xiaosongshu $app,array $param){
-        global $_system,$_color_class,$_lock_file,$_listen,$_daemonize;
+        global $_system,$_color_class,$_lock_file,$_listen,$_daemonize,$_start_server_file_lock;
         $_daemonize = true;
         if ($_system) {
             $app->close();
@@ -23,6 +23,7 @@ class RestartProvider implements IdentifyInterface
             echo $_color_class->info("当前环境是windows,只能在控制台运行\r\n");
         }
         $fd  = fopen($_lock_file, 'w');
+        $_start_server_file_lock = $fd;
         $res = flock($fd, LOCK_EX | LOCK_NB);
         if (!$res) {
             //echo $_color_class->info($_listen . "\r\n");

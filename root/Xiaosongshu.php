@@ -57,9 +57,6 @@ class Xiaosongshu
      */
     public function start_server($param)
     {
-        /* Report all errors except E_NOTICE */
-        /** 关闭不影响功能的警告和提醒 ，看着太烦人了 */
-
         /** 环境监测 */
         $this->check_env();
         /** 是否守护模式 */
@@ -235,15 +232,48 @@ class Xiaosongshu
             file_put_contents($_pid_file, null);
             sleep(1);
             //fclose($_lock_file);
-            $this->close_rtmp();
+            self::close_rtmp();
         }
+    }
+
+    /** 自动化重启项目 */
+    public static function restart(){
+        (function(){
+            global $_pid_file, $_color_class,$_start_server_file_lock,$argv,$daemonize;
+            if (file_exists($_pid_file)) {
+                $master_ids = file_get_contents($_pid_file);
+                $master_id = explode('-', $master_ids);
+                rsort($master_id);
+                $master_id = array_unique($master_id);
+                foreach ($master_id as $v) {
+                    if (($v > 0)&&(int)$v!=getmypid()) {
+                        \posix_kill($v, SIGQUIT);
+                        \posix_kill($v, SIGINT);
+                        \posix_kill($v, SIGKILL);
+                        \posix_kill($v, SIGTERM);
+                        \posix_kill($v, 0);
+                    }
+                }
+                file_put_contents($_pid_file, null);
+                sleep(1);
+            }
+            if ($_start_server_file_lock){
+                flock($_start_server_file_lock,LOCK_UN);
+                fclose($_start_server_file_lock);
+            }
+            self::close_rtmp();
+            sleep(3);
+            $argv = ['start.php','start','-d'];
+            $daemonize = true;
+            G(Xiaosongshu::class)->start_server($argv);
+        })();
     }
 
     /**
      * 关闭rtmp服务
      * @return void
      */
-    public function close_rtmp(){
+    public static function close_rtmp(){
         /** 关闭rtmp服务 */
         $rtmp_enable = config('rtmp')['enable']??false;
         if ($rtmp_enable){
@@ -355,8 +385,7 @@ class Xiaosongshu
         /** 关闭错误 */
         ini_set('display_errors', 'off');
         /** 设置文件权限掩码为0 就是最大权限 可读写 防止操作文件权限不够出错 */
-        \umask(0);
-
+        @\umask(0);
         /** @var int $pid 创建子进程 */
         $pid = \pcntl_fork();
         writePid();
@@ -511,6 +540,7 @@ class Xiaosongshu
         if (getmypid() == $master_pid) {
             G(TimerConsumer::class)->consume();
         }
+
     }
 
     /** 创建子进程 */

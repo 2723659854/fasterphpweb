@@ -10,13 +10,14 @@ class StartProvider implements IdentifyInterface
 {
 
     public function handle(Xiaosongshu $app,array $param){
-        global $_system,$_color_class,$_listen,$_system_table,$_has_epoll,$_lock_file,$_daemonize;
+        global $_system,$_color_class,$_listen,$_system_table,$_has_epoll,$_lock_file,$_daemonize,$_start_server_file_lock;
         if (isset($param[2]) && ($param[2] == '-d')) {
             if ($_system) { $daemonize = true; $_daemonize = true;}
             else { echo $_color_class->info("当前环境是windows,只能在控制台运行\r\n"); echo "\r\n"; }
         }
         /** 运行加锁 */
         $fd  = fopen($_lock_file, 'w');
+        $_start_server_file_lock = $fd;
         $res = flock($fd, LOCK_EX | LOCK_NB);
         if (!$res) {
             echo $_color_class->info($_listen . "\r\n");
@@ -26,7 +27,7 @@ class StartProvider implements IdentifyInterface
         echo $_color_class->info("进程启动中...\r\n");
         /** 加载路由 */
         G(\Root\Route::class)->loadRoute();
-        G(AnnotationRoute::class)->loadRoute();
+        AnnotationRoute::loadRoute();
         if (!empty($daemonize)){
             $app->daemon();
         }else{

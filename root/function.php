@@ -374,6 +374,111 @@ if(!function_exists('dump_error')){
     }
 }
 
+if (!function_exists('yaml_load')) {
+    /**
+     * 加载YAML配置文件
+     * @param string $path 待加载的路径
+     * @param bool $findLocal 是否额外寻找结尾为.local的本地配置文件
+     * @return array
+     */
+    function yaml_load(string $path, bool $findLocal = true): array
+    {
+        $files = [$path];
+        if ($findLocal) {
+            $files[] = $path . '.local';
+        }
+
+        $yaml = [];
+        foreach ($files as $file) {
+            if (!($file = realpath($file))) {
+                continue;
+            }
+            $yaml[] = \Symfony\Component\Yaml\Yaml::parseFile($file);
+        }
+
+        return array_deep_merge(...$yaml);
+    }
+}
+
+if (!function_exists('yaml')) {
+    /**
+     * 从YAML配置文件中读取数据
+     * @param string|null $key 配置键名，传null则返回整个配置文件的数据
+     * @param mixed|null $default 读取失败时的默认值
+     * @param string|null $path 配置文件路径（默认为根目录下config.yaml）
+     * @return mixed 配置值
+     */
+    function yaml(?string $key = null, mixed $default = null, ?string $path = null): mixed
+    {
+        $path = $path ?? app_path() . DIRECTORY_SEPARATOR . 'config.yaml';
+        $yaml = yaml_load($path);
+        if (is_null($key)) {
+            return $yaml;
+        }
+
+        $data = $yaml;
+        $keys = explode('.', $key);
+        foreach ($keys as $k) {
+            if (!is_array($data)) {
+                $data = $default;
+                break;
+            }
+            $data = $data[$k] ?? $default;
+        }
+        return $data;
+    }
+}
+
+if (!function_exists('array2yaml')) {
+    /**
+     * 将数组配置转换为YAML
+     * @param array $data 配置项列表
+     * @param string|null $path 待写入的配置文件路径，传null则不写入文件，直接返回YAML字符串
+     * @return false|int|string
+     */
+    function array2yaml(array $data, ?string $path = null): false|int|string
+    {
+        $yaml = \Symfony\Component\Yaml\Yaml::dump($data);
+        if ($path) {
+            return file_put_contents(app_path() . $path, $yaml, LOCK_EX);
+        }
+        return $yaml;
+    }
+}
+
+if (!function_exists('array_deep_merge')) {
+    /**
+     * 深度合并多个数组的内容，传入的非数组会被忽略
+     * @param mixed ...$args
+     * @return mixed
+     */
+    function array_deep_merge(mixed ...$args): array
+    {
+        $args = array_filter($args, fn($item) => is_array($item));
+        if (count($args) === 0) return [];
+        if (count($args) === 1) return $args[0];
+
+        return array_reduce($args, function (array $prev, array $current) {
+            //2个列表直接拼接合并
+            if (array_is_list($prev) && array_is_list($current)) {
+                return array_merge($prev, $current);
+            }
+
+            foreach ($current as $key => $value) {
+                //非同时为数组时，后面的覆盖前面的
+                if (!is_array($value) || !isset($prev[$key]) || !is_array($prev[$key])) {
+                    $prev[$key] = $value;
+                    continue;
+                }
+
+                $prev[$key] = array_deep_merge($prev[$key], $value);
+            }
+
+            return $prev;
+        }, []);
+    }
+}
+
 
 
 

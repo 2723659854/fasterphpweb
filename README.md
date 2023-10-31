@@ -1089,6 +1089,28 @@ print_r($client->removeService($serviceName, $namespace));
 配置检测：创建一个常驻内存进程，每隔30秒，读取一次nacos服务器上的配置，配置发生了变化，则修改配置，并重启服务。<br>
 微服务管理：创建一个常驻内存进程，进程启动的时候注册服务。
 <br>
+###  nacos配置管理
+
+#### 配置nacos服务器，以及开启配置管理
+
+```php 
+# config/nacos.php
+<?php
+return [
+    /** 使用nacos自动管理配置 */
+    /** 是否开启配置管理 */
+    'enable' => true,
+    /** nacos服务器ip */
+    'host'                  => '192.168.4.98',
+    /** nacos服务器端口 */
+    'port'                  => 8848,
+    /** nacos 服务器用户名 */
+    'username'              => 'nacos',
+    /** nacos服务器密码 */
+    'password'              => 'nacos',
+];
+```
+当nacos上的配置发生变化后，会自动拉取最新的配置，并重启项目<br>
 你可能需要一键搭建nacos服务，仅供参考：
 ```bash 
 docker run --name nacos -e MODE=standalone --env NACOS_AUTH_ENABLE=true -p 8848:8848 31181:31181 -d nacos/nacos-server:1.3.1

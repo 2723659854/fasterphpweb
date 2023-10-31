@@ -15,4 +15,11 @@ return [
         'port'=>'3306'
     ],
     //todo 其他类型请自己去实现
+    'mysql2'=>[
+        'host'=>yaml('mysql.host'),
+        'port'=>yaml('mysql.port'),
+        'username'=>yaml('mysql.username'),
+        'passwd'=>yaml('mysql.password'),
+        'dbname'=>yaml('mysql.dbname','go_gin_chat'),
+    ]
 ];

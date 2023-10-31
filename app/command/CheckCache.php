@@ -6,6 +6,7 @@ use Root\Lib\AsyncHttpClient;
 use Root\Lib\BaseCommand;
 use Root\Cache;
 use Root\Lib\HttpClient;
+use Root\Lib\NacosConfigManager;
 
 /**
  * @purpose 用户自定义命令
@@ -36,12 +37,10 @@ class CheckCache extends BaseCommand
      */
     public function handle()
     {
-        $response = (HttpClient::request('http://192.168.4.97:8080',  'GET',['lesson_id'=>201]));
-        var_dump($response->rawBuffer());
 
-        //AsyncHttpClient::request();
+      //var_dump(NacosConfigManager::publish());
+      //NacosConfigManager::sync();
+
     }
-
-
 
 }

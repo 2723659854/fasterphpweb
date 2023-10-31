@@ -106,8 +106,10 @@ class Route
                     $router->addGroup($routeFile['prefix'], function (RouteCollector $router) use ($routers, $routeFile) {
                         if ($routers) {
                             foreach ($routers as $routeItem) {
-                                $router->addRoute(strtoupper($routeItem[0]), $routeItem[1], $routeItem[2]);
-                                self::$middlewares[strtoupper($routeItem[0]) . '@@@' . $routeFile['prefix'] . $routeItem[1]] =  $routeItem[3] ?? [];
+                                try {
+                                    $router->addRoute(strtoupper($routeItem[0]), $routeItem[1], $routeItem[2]);
+                                    self::$middlewares[strtoupper($routeItem[0]) . '@@@' . $routeFile['prefix'] . $routeItem[1]] =  $routeItem[3] ?? [];
+                                }catch (\Exception|\RuntimeException $exception){ }
                             }
                             unset($routeItem);
                         }
@@ -115,9 +117,11 @@ class Route
                 } else {
                     if ($routeFile) {
                         foreach ($routeFile as $routeItem) {
-                            $router->addRoute(strtoupper($routeItem[0]), $routeItem[1], $routeItem[2]);
-                            /** 保存路由和中间件 */
-                            self::$middlewares[strtoupper($routeItem[0]) . '@@@' . $routeItem[1]] = $routeItem[3] ?? [];
+                            try {
+                                $router->addRoute(strtoupper($routeItem[0]), $routeItem[1], $routeItem[2]);
+                                /** 保存路由和中间件 */
+                                self::$middlewares[strtoupper($routeItem[0]) . '@@@' . $routeItem[1]] = $routeItem[3] ?? [];
+                            }catch (\Exception|\RuntimeException $exception){ }
                         }
                         unset($routeItem);
                     }
