@@ -59,7 +59,7 @@ php start.php start  或者 php songshu start
 4，守护进程模式: php start.php start -d<br>
 5，重启项目:  php start.php restart<br>
 6，停止项目:  php start.php stop<br>
-7，项目默认端口为：8080, 你可以自行修改<br>
+7，项目默认端口为：8000, 你可以自行修改<br>
 8，项目访问地址：localhost://127.0.0.1:8000<br>
 9，windows默认只开启一个http服务<br>
 10，windows若需要测试队列，请单独开启一个窗口执行 php start.php queue ，监听队列<br>
@@ -1516,25 +1516,63 @@ return [
 
 开启流媒体服务
 ```bash 
+# 调试模式
 php start.php rtmp start 
+# 守护模式
 php start.php rtmp start -d 
+# 重启服务（调试模式）
 php start.php rtmp restart
+# 关闭服务
+php start.php rtmp stop
 ```
-开启流媒体服务守护进程模式
-```bash
-php start.php check:rtmp start -d
-```
-关闭流媒体服务
-```bash 
-php start.php check:rtmp stop 
-```
+如果config/rtmp.php里面配置了'enable'=>true，在守护模式下rtmp会跟随项目一起启动。<br>
 直播推流地址：rtmp://127.0.0.1:1935/a/b<br>
 rtmp 拉流地址：rtmp://127.0.0.1:1935/a/b<br>
 http-flv播放地址: http://127.0.0.1:18080/a/b.flv<br>
 ws-flv播放地址: ws://127.0.0.1:18080/a/b.flv<br>
 推流工具 ：obs,ffmpeg<br>
 拉流工具 ：vlc播放器，web拉流<br>
-本框架提供web拉流，详见示例：http://localhost:8000/video/play
+本框架提供web拉流，详见示例：http://localhost:8000/video/play<br>
+播放页面如下：
+```html 
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no,minimal-ui">
+    <meta name="referrer" content="no-referrer">
+    <title>小松鼠直播间演示</title>
+    <style type="text/css">
+        html, body {width:100%;height:100%;margin:auto;overflow: hidden;}
+        body {display:flex;}
+        #mse {flex:auto;}
+    </style>
+    <script type="text/javascript">
+        window.addEventListener('resize',function(){document.getElementById('mse').style.height=window.innerHeight+'px';});
+    </script>
+</head>
+<body>
+<div id="mse" ></div>
+
+
+<script src="/js/xgplayer/player.js" charset="utf-8"></script>
+<script src="/js/xgplayer/player-flv.js" charset="utf-8"></script>
+<script type="text/javascript">
+    let player = new window.FlvJsPlayer({
+        id: 'mse',
+        isLive: true,
+        playsinline: true,
+        url: 'http://127.0.0.1:18080/a/b.flv',
+        autoplay: true,
+        height: window.innerHeight,
+        width: window.innerWidth,
+        volume: 0
+    });
+</script>
+</body>
+</html>
+```
+
 ###  Http客户端
 ####   支持 http/https协议
 使用方法如下
@@ -1566,8 +1604,12 @@ HttpClient::requestAsync('127.0.0.1:9501', 'GET', ['lesson_id' => 201], [], [], 
 创建mysql模型: php start.php make:model index/user <br>
 创建sqlite模型: php start.php make:sqlite Demo<br>
 创建中间件: php start.php make:middleware Auth<br>
-创建ws服务：php start.php make:ws Just<br>
+创建redis消费者：php start.php make:queue Demo<br>
+创建rabbitmq消费者：php start.php make:rabbitmq DemoConsumer<br>
 
+### 日志
+系统默认只记录运行的错误日志，按日记录，存放位置在 runtime/log/Y-m-d.log。提供记录日志函数dump_error(Exception|RuntimeException $exception),
+若不满足需求，可以自己编写一个日志记录类。
 #### 其他
 
 现在的网站都已经发展到前后端分离了，默认是无状态请求，cookie几乎没有用了。 所以没有编写cookie和session操作类了。 你可以使用token来识别用户，而不是cookie或者session。
