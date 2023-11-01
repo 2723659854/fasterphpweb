@@ -14,7 +14,6 @@ return [
         'dbname'=>'go_gin_chat',
         'port'=>'3306'
     ],
-    //todo 其他类型请自己去实现
     'mysql2'=>[
         'host'=>yaml('mysql.host'),
         'port'=>yaml('mysql.port'),
@@ -22,4 +21,5 @@ return [
         'passwd'=>yaml('mysql.password'),
         'dbname'=>yaml('mysql.dbname','go_gin_chat'),
     ]
+    //todo 其他类型请自己去实现
 ];

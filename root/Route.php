@@ -106,6 +106,7 @@ class Route
                     $router->addGroup($routeFile['prefix'], function (RouteCollector $router) use ($routers, $routeFile) {
                         if ($routers) {
                             foreach ($routers as $routeItem) {
+                                /** 因为存在路由文件注册路由和注解注册路由，这里会存在注册相同路由，会失败，导致服务无法启动 ，这里使用了事务屏蔽错误 */
                                 try {
                                     $router->addRoute(strtoupper($routeItem[0]), $routeItem[1], $routeItem[2]);
                                     self::$middlewares[strtoupper($routeItem[0]) . '@@@' . $routeFile['prefix'] . $routeItem[1]] =  $routeItem[3] ?? [];
@@ -117,6 +118,7 @@ class Route
                 } else {
                     if ($routeFile) {
                         foreach ($routeFile as $routeItem) {
+                            /** 因为存在路由文件注册路由和注解注册路由，这里会存在注册相同路由，会失败，导致服务无法启动 ，这里使用了事务屏蔽错误 */
                             try {
                                 $router->addRoute(strtoupper($routeItem[0]), $routeItem[1], $routeItem[2]);
                                 /** 保存路由和中间件 */

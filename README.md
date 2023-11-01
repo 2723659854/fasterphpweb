@@ -1110,7 +1110,47 @@ return [
     'password'              => 'nacos',
 ];
 ```
+而项目从nacos服务读取的配置会保存到项目根目录/config.yaml文件。文件内容如下，仅作为实例：
+```yaml 
+mysql:
+    host: 127.0.0.1
+    port: '3306'
+    username: root
+    password: root
+
+```
+
+你的项目其他的配置文件可以通过读取yaml配置， 例如config/database.php,文件内容如下：
+```php 
+<?php
+return [
+
+    /** 默认连接方式 */
+    'default'=>'mysql',
+    /** mysql配置 */
+    'mysql'=>[
+        /** 是否提前连接MySQL */
+        'preStart'=>false,
+        /** mysql基本配置 */
+        'host'=>'192.168.4.106',
+        'username'=>'root',
+        'passwd'=>'root',
+        'dbname'=>'go_gin_chat',
+        'port'=>'3306'
+    ],
+    'mysql2'=>[
+        'host'=>yaml('mysql.host'),
+        'port'=>yaml('mysql.port'),
+        'username'=>yaml('mysql.username'),
+        'passwd'=>yaml('mysql.password'),
+        'dbname'=>yaml('mysql.dbname','go_gin_chat'),
+    ]
+    //todo 其他类型请自己去实现
+];
+
+```
 当nacos上的配置发生变化后，会自动拉取最新的配置，并重启项目<br>
+你可以使用NacosConfigManager::sync()发布你的配置，该命令会把你的config.yaml的内容发布到nacos服务器上去。<br>
 你可能需要一键搭建nacos服务，仅供参考：
 ```bash 
 docker run --name nacos -e MODE=standalone --env NACOS_AUTH_ENABLE=true -p 8848:8848 31181:31181 -d nacos/nacos-server:1.3.1
