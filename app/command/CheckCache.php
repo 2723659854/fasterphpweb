@@ -7,6 +7,9 @@ use Root\Lib\BaseCommand;
 use Root\Cache;
 use Root\Lib\HttpClient;
 use Root\Lib\NacosConfigManager;
+use Root\Timer;
+use Root\Xiaosongshu;
+use Workerman\Worker;
 
 /**
  * @purpose 用户自定义命令
@@ -40,6 +43,8 @@ class CheckCache extends BaseCommand
 
       //var_dump(NacosConfigManager::publish());
       //NacosConfigManager::sync();
+        //Xiaosongshu::restart();
+        var_dump(Timer::getAll());
 
     }
 

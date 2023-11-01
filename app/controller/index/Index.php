@@ -19,6 +19,7 @@ use Root\Cache;
 use App\Queue\Test;
 use App\Rabbitmq\Demo;
 use Root\Response;
+use Root\Xiaosongshu;
 
 
 class Index
@@ -195,5 +196,10 @@ class Index
     public function ws()
     {
         return view('/index/ws');
+    }
+    #[RequestMapping(methods: 'get', path: '/restart')]
+    public function restart(){
+        Xiaosongshu::restart();
+        return 'ok';
     }
 }

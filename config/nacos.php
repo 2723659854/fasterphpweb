@@ -2,7 +2,7 @@
 return [
     /** 使用nacos自动管理配置 */
     /** 是否开启配置管理 */
-    'enable' => false,
+    'enable' => true,
     /** nacos服务器ip */
     'host'                  => '192.168.4.136',
     /** nacos服务器端口 */

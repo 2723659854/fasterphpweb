@@ -7,6 +7,7 @@ use Root\Core\Provider\IdentifyInterface;
 use Root\Io\Epoll;
 use Root\Io\Selector;
 use Root\Lib\Container;
+use Root\Lib\NacosConfigManager;
 use Root\Queue\RabbitMqConsumer;
 use Root\Queue\RedisQueueConsumer;
 use Root\Queue\RtmpConsumer;
@@ -222,17 +223,15 @@ class Xiaosongshu
             $master_id = array_unique($master_id);
             foreach ($master_id as $v) {
                 if ($v > 0) {
-                    \posix_kill($v, SIGQUIT);
-                    \posix_kill($v, SIGINT);
                     \posix_kill($v, SIGKILL);
-                    \posix_kill($v, SIGTERM);
-                    \posix_kill($v, 0);
                 }
             }
             file_put_contents($_pid_file, null);
             sleep(1);
             //fclose($_lock_file);
             self::close_rtmp();
+            sleep(3);
+            Xiaosongshu::closeWorker();
         }
     }
 
@@ -240,6 +239,9 @@ class Xiaosongshu
     public static function restart(){
         (function(){
             global $_pid_file, $_color_class,$_start_server_file_lock,$argv,$daemonize;
+            var_dump(" 杀死主进程 ");
+            $master_idd = file_get_contents(app_path().'/root/master_id.txt');
+            \posix_kill($master_idd, SIGKILL);
             if (file_exists($_pid_file)) {
                 $master_ids = file_get_contents($_pid_file);
                 $master_id = explode('-', $master_ids);
@@ -247,11 +249,7 @@ class Xiaosongshu
                 $master_id = array_unique($master_id);
                 foreach ($master_id as $v) {
                     if (($v > 0)&&(int)$v!=getmypid()) {
-                        \posix_kill($v, SIGQUIT);
-                        \posix_kill($v, SIGINT);
                         \posix_kill($v, SIGKILL);
-                        \posix_kill($v, SIGTERM);
-                        \posix_kill($v, 0);
                     }
                 }
                 file_put_contents($_pid_file, null);
@@ -261,12 +259,69 @@ class Xiaosongshu
                 flock($_start_server_file_lock,LOCK_UN);
                 fclose($_start_server_file_lock);
             }
-            self::close_rtmp();
+
+
+            Xiaosongshu::close_rtmp();
             sleep(3);
-            $argv = ['start.php','start','-d'];
-            $daemonize = true;
-            G(Xiaosongshu::class)->start_server($argv);
+            Xiaosongshu::closeWorker();
+            G(Xiaosongshu::class)->start_server(['start.php','start','-d']);
         })();
+    }
+
+    /**
+     * 强制关闭worker
+     * @return void
+     */
+    public static function closeWorker(){
+        $rtmpId = Xiaosongshu::getWorkerPid();
+        if ($rtmpId){
+            $pids = Xiaosongshu::getSubprocesses($rtmpId);
+            foreach ($pids as $id){
+                \posix_kill($id, SIGKILL);
+            }
+            sleep(1);
+        }
+    }
+
+    /**
+     * 获取rtmp masterId
+     * @return false|string|null
+     */
+    public static function getWorkerPid(){
+        $file =app_path().'/root/lib/worker.pid';
+        if (is_file($file)){
+            return file_get_contents($file);
+        }else{
+            return null;
+        }
+
+    }
+
+    /**
+     * 通过pid查询所有下级进程的pid
+     * @param $pid
+     * @return array
+     */
+    public static function getSubprocesses($pid) {
+        exec("pstree -p {$pid}", $result, $returnCode);
+        if ($returnCode!== 0) {
+            throw new \RuntimeException('Command failed with error code '.$returnCode);
+        }
+        $string  = $result[0];
+        $pid = [];
+        if ($string){
+            $count  = strlen($string);
+            $temp = '';
+            for ($i=0;$i<$count;$i++){
+                if (is_numeric($string[$i])){
+                    $temp .=$string[$i];
+                }else{
+                    $pid[] = $temp;
+                    $temp = '';
+                }
+            }
+        }
+        return array_filter($pid);
     }
 
     /**
@@ -436,15 +491,16 @@ class Xiaosongshu
             /** 开启其他常驻内存的服务进程 */
             $this->makeConsumeProcess($master_pid);
         }
-        /** @var int $pid 再创建一个子进程，脱离主进程会话 */
-        $pid = \pcntl_fork();
-        writePid();
-        if (-1 === $pid) {
-            throw new \Exception("Fork fail");
-        } elseif (0 !== $pid) {
-            /** 脱离会话控制 */
-            exit(0);
-        }
+        exit;
+//        /** @var int $pid 再创建一个子进程，脱离主进程会话 */
+//        $pid = \pcntl_fork();
+//        writePid();
+//        if (-1 === $pid) {
+//            throw new \Exception("Fork fail");
+//        } elseif (0 !== $pid) {
+//            /** 脱离会话控制 */
+//            exit(0);
+//        }
     }
 
     /**
@@ -538,6 +594,23 @@ class Xiaosongshu
         }
         /** 开启主进程，定时任务 */
         if (getmypid() == $master_pid) {
+
+            /** 这里存在问题，不同的进程先后执行问题 */
+            Timer::deleteAll();
+            /** 在这里添加定时任务 ，然后发送信号 */
+            foreach (config('timer') as $name => $value) {
+                if ($value['enable']) {
+                    Timer::add($value['time'], $value['function'], [], $value['persist']);
+                }
+            }
+            /** 主进程内加一个定时器负责处理 */
+            $nacos_enable = config('nacos')['enable']??false;/** 先清空所有的定时器 */
+
+            /** 如果开起了nacos配置管理，则添加到定时任务中 */
+            if ($nacos_enable){
+                $add  = Timer::add(3,[NacosConfigManager::class,'sync'],[],true);
+                var_dump("加入nacos配置管理服务结果",$add);
+            }
             G(TimerConsumer::class)->consume();
         }
 
