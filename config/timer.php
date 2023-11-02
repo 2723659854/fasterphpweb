@@ -25,6 +25,4 @@ return [
         'time'=>5,
         'persist'=>true,
     ],
-
-
 ];

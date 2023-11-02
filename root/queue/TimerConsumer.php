@@ -23,8 +23,11 @@ class TimerConsumer
             Timer::tick();
             /** 切换CPU */
             usleep(100);
-            if (time()%30==0){
-                NacosConfigManager::sync();
+            /** nacos 服务管理必须放这里，放定时器太耗时了，而且会导致定时器数据丢失  */
+            if (time()%30==0){/** 每隔30秒检查一次 */
+                if (config('nacos')['enable']){
+                    NacosConfigManager::sync();
+                }
             }
         }
     }

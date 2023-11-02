@@ -10,14 +10,13 @@ class RtmpConsumer
 {
 
     public function consume($param){
-        var_dump("进入到这个没有");
-
         global $argv;
+        /** 如果是重启 则直接后台守护模式运行 */
         if ($param[0]=='restart'){
            $param = ['start','-d'];
         }
+        /** 重构启动参数 */
         $argv = array_merge(['start.php'],$param);
-        var_dump($argv);
         $safeEcho = G(\Xiaosongshu\ColorWord\Transfer::class);
         $rtmpConfig = config('rtmp')??[];
         $rtmpPort = $rtmpConfig['rtmp']??1935;

@@ -215,7 +215,7 @@ class Xiaosongshu
     public function close()
     {
         global $_pid_file, $_color_class;
-        echo $_color_class->info("关闭进程中...\r\n");
+        echo $_color_class->info("服务关闭中...\r\n");
         if (file_exists($_pid_file)) {
             $master_ids = file_get_contents($_pid_file);
             $master_id = explode('-', $master_ids);
@@ -228,20 +228,18 @@ class Xiaosongshu
             }
             file_put_contents($_pid_file, null);
             sleep(1);
-            //fclose($_lock_file);
             self::close_rtmp();
-            sleep(3);
+            sleep(2);
             Xiaosongshu::closeWorker();
         }
+        echo $_color_class->info("服务已关闭\r\n");
     }
 
     /** 自动化重启项目 */
     public static function restart(){
         (function(){
             global $_pid_file, $_start_server_file_lock;
-            var_dump(" 杀死主进程 ");
-            //$master_idd = file_get_contents(app_path().'/root/master_id.txt');
-            //\posix_kill($master_idd, SIGKILL);
+            /** 关闭除主进程 以外的所有子进程 */
             if (file_exists($_pid_file)) {
                 $master_ids = file_get_contents($_pid_file);
                 $master_id = explode('-', $master_ids);
@@ -255,15 +253,14 @@ class Xiaosongshu
                 file_put_contents($_pid_file, null);
                 sleep(1);
             }
+            /** 释放文件锁 */
             if ($_start_server_file_lock){
                 flock($_start_server_file_lock,LOCK_UN);
                 fclose($_start_server_file_lock);
             }
-
-            //Xiaosongshu::close_rtmp();
-            //sleep(1);
+            /** 采用杀死进程的方式杀死worker以及所有子进程，因为普通的命令可能不能关闭worker服务 */
             Xiaosongshu::closeWorker();
-            var_dump("关闭worker完成，重启服务");
+            /** 重新启动服务，守护模式运行 */
             G(Xiaosongshu::class)->start_server(['start.php','start','-d']);
         })();
     }
@@ -271,6 +268,7 @@ class Xiaosongshu
     /**
      * 强制关闭worker
      * @return void
+     * @note 通过杀死进程的方式杀死worker
      */
     public static function closeWorker(){
         $rtmpId = Xiaosongshu::getWorkerPid();
@@ -279,6 +277,7 @@ class Xiaosongshu
             foreach ($pids as $id){
                 \posix_kill($id, SIGKILL);
             }
+            /** 清空pid 否则无法重启worker */
             file_put_contents($rtmpId['file'],null);
             sleep(1);
         }
@@ -287,6 +286,7 @@ class Xiaosongshu
     /**
      * 获取rtmp masterId
      * @return array
+     * @note 获取worker的主进程id
      */
     public static function getWorkerPid(){
         $path = explode('/',app_path());
@@ -308,12 +308,15 @@ class Xiaosongshu
      * 通过pid查询所有下级进程的pid
      * @param $pid
      * @return array
+     * @note 通过worker的主进程id获取所有子进程id
      */
     public static function getSubprocesses($pid) {
-        exec("pstree -p {$pid}", $result, $returnCode);
+        @exec("pstree -p {$pid}", $result, $returnCode);
+        /** 发生了错误 */
         if ($returnCode!== 0) {
-            throw new \RuntimeException('Command failed with error code '.$returnCode);
+            return [];
         }
+        /** 拼接pid */
         $string  = $result[0]??"";
         $pid = [];
         if ($string){
