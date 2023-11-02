@@ -1,4 +1,5 @@
 # 使用阿尔法版本，镜像体积更小，这里面不使用apt-get  而是使用apk命令安装包 参考地址：https://blog.51cto.com/zhangxueliang/4941632
+# 这里强制指定版本为 8.1.24-cli-alpine ，版本高了之后，PHP自带的函数有问题
 FROM php:8.1.24-cli-alpine
 # 使用sed命令修改镜像文件 这一句命令的意思是，搜索文件/etc/apk/repositories，找到s/dl-cdn.alpinelinux.org替换为mirrors.aliyun.com/g
 # 语法 RUN sed -i '/要匹配的内容/i修改后的内容' 文件路径 （参考地址：https://blog.csdn.net/qq_29229567/article/details/107684952）
