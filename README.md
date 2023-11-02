@@ -1,6 +1,6 @@
 框架简介
 <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;本框架旨在让用户了解和学习PHP实现web运行原理，涉及到了相对较多的底层基础知识。</p>
-<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;socketweb是一款常驻内存的轻量级的php框架，遵循常用的mvc架构。</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fasterphpweb是一款常驻内存的轻量级的php框架，遵循常用的mvc架构。</p>
 <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;本框架对timer,redis,mysql,rabbitmq,websocket,elasticsearch,nacos,sqlite 进行了简单封装，并且保留了部分代码实例。</p>
 <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;本框架提供基本的http服务，可支持api接口或者web网页。</p>
 <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;本框架提供基本的websocket服务，可支持长链接，适用于聊天等场景。</p>

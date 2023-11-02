@@ -50,10 +50,8 @@ class TimerBase
     public static function task()
     {
         $current = time();
-        /** 取出所有的需要执行的定时任务,这些任务可能耗时很高，会导致错过其他任务，那么这里容错时间差为30s,如果执行时间超过了30秒，
-         * 那他们是代码写的有问题了，如果进程阻塞时间超过了30秒，建议单独写一个脚本，而不是定时器
-         */
-        $task       = TimerData::where([['status', '>', 0],['time','>=',$current-30],['time','<',$current]])->get();
+        /** 定时任务只允许1秒的误差 ，如果执行时间超过1秒，建议使用其他方式 */
+        $task       = TimerData::where([['status', '>', 0],['time','>=',$current-1],['time','<=',$current]])->get();
         $serializer = new Serializer();
         foreach ($task as $v) {
             /** 解码定时任务 */
