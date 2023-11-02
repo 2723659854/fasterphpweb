@@ -238,10 +238,10 @@ class Xiaosongshu
     /** 自动化重启项目 */
     public static function restart(){
         (function(){
-            global $_pid_file, $_color_class,$_start_server_file_lock,$argv,$daemonize;
+            global $_pid_file, $_start_server_file_lock;
             var_dump(" 杀死主进程 ");
-            $master_idd = file_get_contents(app_path().'/root/master_id.txt');
-            \posix_kill($master_idd, SIGKILL);
+            //$master_idd = file_get_contents(app_path().'/root/master_id.txt');
+            //\posix_kill($master_idd, SIGKILL);
             if (file_exists($_pid_file)) {
                 $master_ids = file_get_contents($_pid_file);
                 $master_id = explode('-', $master_ids);
@@ -260,10 +260,10 @@ class Xiaosongshu
                 fclose($_start_server_file_lock);
             }
 
-
-            Xiaosongshu::close_rtmp();
-            sleep(3);
+            //Xiaosongshu::close_rtmp();
+            //sleep(1);
             Xiaosongshu::closeWorker();
+            var_dump("关闭worker完成，重启服务");
             G(Xiaosongshu::class)->start_server(['start.php','start','-d']);
         })();
     }
@@ -274,27 +274,34 @@ class Xiaosongshu
      */
     public static function closeWorker(){
         $rtmpId = Xiaosongshu::getWorkerPid();
-        if ($rtmpId){
-            $pids = Xiaosongshu::getSubprocesses($rtmpId);
+        if ($rtmpId['pid']){
+            $pids = Xiaosongshu::getSubprocesses($rtmpId['pid']);
             foreach ($pids as $id){
                 \posix_kill($id, SIGKILL);
             }
+            file_put_contents($rtmpId['file'],null);
             sleep(1);
         }
     }
 
     /**
      * 获取rtmp masterId
-     * @return false|string|null
+     * @return array
      */
     public static function getWorkerPid(){
-        $file =app_path().'/root/lib/worker.pid';
-        if (is_file($file)){
-            return file_get_contents($file);
-        }else{
-            return null;
+        $path = explode('/',app_path());
+        $file ='';
+        foreach ($path as $v){
+            if ($file){ $file .="_".$v; }else{ $file = $v; }
         }
+        $file='_'.$file."_start.php.pid";
+        $file = app_path().'/vendor/workerman/'.$file;
 
+        if (is_file($file)){
+            return ['pid'=>file_get_contents($file),'file'=>$file];
+        }else{
+            return ['pid'=>null,'file'=>$file];
+        }
     }
 
     /**
@@ -307,7 +314,7 @@ class Xiaosongshu
         if ($returnCode!== 0) {
             throw new \RuntimeException('Command failed with error code '.$returnCode);
         }
-        $string  = $result[0];
+        $string  = $result[0]??"";
         $pid = [];
         if ($string){
             $count  = strlen($string);
@@ -603,14 +610,14 @@ class Xiaosongshu
                     Timer::add($value['time'], $value['function'], [], $value['persist']);
                 }
             }
-            /** 主进程内加一个定时器负责处理 */
-            $nacos_enable = config('nacos')['enable']??false;/** 先清空所有的定时器 */
-
-            /** 如果开起了nacos配置管理，则添加到定时任务中 */
-            if ($nacos_enable){
-                $add  = Timer::add(3,[NacosConfigManager::class,'sync'],[],true);
-                var_dump("加入nacos配置管理服务结果",$add);
-            }
+//            /** 主进程内加一个定时器负责处理 */
+//            $nacos_enable = config('nacos')['enable']??false;/** 先清空所有的定时器 */
+//
+//            /** 如果开起了nacos配置管理，则添加到定时任务中 */
+//            if ($nacos_enable){
+//                $add  = Timer::add(30,[NacosConfigManager::class,'sync'],[],true);
+//                var_dump("加入nacos配置管理服务结果",$add);
+//            }
             G(TimerConsumer::class)->consume();
         }
 

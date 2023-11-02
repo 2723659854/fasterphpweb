@@ -44,6 +44,7 @@ class CheckCache extends BaseCommand
       //var_dump(NacosConfigManager::publish());
       //NacosConfigManager::sync();
         //Xiaosongshu::restart();
+        //$add  = Timer::add(3,function (){var_dump(date('Y-m-d H:i:s'));},[],true);
         var_dump(Timer::getAll());
 
     }

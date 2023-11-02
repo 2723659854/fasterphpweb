@@ -23,6 +23,9 @@ class TimerConsumer
             Timer::tick();
             /** 切换CPU */
             usleep(100);
+            if (time()%30==0){
+                NacosConfigManager::sync();
+            }
         }
     }
 

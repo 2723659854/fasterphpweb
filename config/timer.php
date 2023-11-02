@@ -19,7 +19,7 @@ return [
         'persist'=>true,
     ],
     'three'=>[
-        'enable'=>false,
+        'enable'=>true,
         /** 调用匿名函数 */
         'function'=>function(){$time=date('y-m-d H:i:s'); echo "\r\n {$time} 我是随手一敲的匿名函数！\r\n";},
         'time'=>5,
