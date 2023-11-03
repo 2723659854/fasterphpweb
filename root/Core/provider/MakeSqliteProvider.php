@@ -19,11 +19,11 @@ class MakeSqliteProvider implements IdentifyInterface
         }
 
         $name       = trim($name, '/');
-        $controller = strtolower(app_path() . '/app/sqliteModel/' . $name . '.php');
+        $controller = strtolower(app_path() . '/app/SqliteModel/' . $name . '.php');
         /**
          * 检查是否存在相同的文件
          */
-        foreach (scan_dir(app_path() . '/app/sqliteModel', true) as $file) {
+        foreach (scan_dir(app_path() . '/app/SqliteModel', true) as $file) {
             if (file_exists($file)) {
                 $fileName = strtolower($file);
                 if ($fileName == $controller) {
@@ -42,7 +42,7 @@ class MakeSqliteProvider implements IdentifyInterface
                 $nameSpace = $nameSpace . "\\" . $dir;
             }
         }
-        $filePath = app_path() . '/app/sqliteModel';
+        $filePath = app_path() . '/app/SqliteModel';
         foreach ($name as $dir) {
             $filePath = $filePath . '/' . strtolower($dir);
         }

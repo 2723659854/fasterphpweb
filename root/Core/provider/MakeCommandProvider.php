@@ -70,7 +70,7 @@ class $name extends BaseCommand
     }
 }
 EOF;
-        @file_put_contents(app_path() . '/app/command/' . $name . '.php', $content);
+        @file_put_contents(app_path() . '/app/Command/' . $name . '.php', $content);
         echo "创建命令行工具完成\r\n";
         exit;
     }

@@ -20,11 +20,11 @@ class MakeControllerProvider implements IdentifyInterface
         $time = date('Y-m-d H:i:s');
 
         $name       = trim($name, '/');
-        $controller = strtolower(app_path() . '/app/controller/' . $name . '.php');
+        $controller = strtolower(app_path() . '/app/Controller/' . $name . '.php');
         /**
          * 检查是否存在相同的文件
          */
-        foreach (scan_dir(app_path() . '/app/controller', true) as $key => $file) {
+        foreach (scan_dir(app_path() . '/app/Controller', true) as $key => $file) {
             if (file_exists($file)) {
                 $fileName = strtolower($file);
                 if ($fileName == $controller) {
@@ -46,7 +46,7 @@ class MakeControllerProvider implements IdentifyInterface
                 $nameSpace = $nameSpace . "\\" . $dir;
             }
         }
-        $filePath = app_path() . '/app/controller';
+        $filePath = app_path() . '/app/Controller';
         foreach ($name as $dir) {
             $filePath = $filePath . '/' . strtolower($dir);
         }

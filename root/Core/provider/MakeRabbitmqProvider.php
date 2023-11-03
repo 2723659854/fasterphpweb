@@ -17,7 +17,7 @@ class MakeRabbitmqProvider implements IdentifyInterface
             echo "请输入要创建的rabbitmq消费者文件名称\r\n";
             exit;
         }
-        foreach (scan_dir(app_path().'/app/rabbitmq', true) as $key => $file) {
+        foreach (scan_dir(app_path().'/app/Rabbitmq', true) as $key => $file) {
             if (file_exists($file)) {
                 $fileName = basename($file);
                 if ($fileName == $name . '.php') {
@@ -73,7 +73,7 @@ class $name extends RabbitMQBase
     }
 }
 EOF;
-        @file_put_contents(app_path() . '/app/rabbitmq/' . $name . '.php', $content);
+        @file_put_contents(app_path() . '/app/Rabbitmq/' . $name . '.php', $content);
         echo "创建rabbitmq队列完成\r\n";
         exit;
     }

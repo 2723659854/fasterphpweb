@@ -42,7 +42,7 @@ if (!function_exists('command_path')){
      */
     function command_path()
     {
-        return dirname(__DIR__) . '/app/command';
+        return dirname(__DIR__) . '/app/Command';
     }
 }
 

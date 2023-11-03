@@ -19,11 +19,11 @@ class MakeModelProvider implements IdentifyInterface
         }
 
         $name       = trim($name, '/');
-        $controller = strtolower(app_path() . '/app/model/' . $name . '.php');
+        $controller = strtolower(app_path() . '/app/Model/' . $name . '.php');
         /**
          * 检查是否存在相同的文件
          */
-        foreach (scan_dir(app_path() . '/app/model', true) as $file) {
+        foreach (scan_dir(app_path() . '/app/Model', true) as $file) {
             if (file_exists($file)) {
                 $fileName = strtolower($file);
                 if ($fileName == $controller) {
@@ -42,7 +42,7 @@ class MakeModelProvider implements IdentifyInterface
                 $nameSpace = $nameSpace . "\\" . $dir;
             }
         }
-        $filePath = app_path() . '/app/model';
+        $filePath = app_path() . '/app/Model';
         foreach ($name as $dir) {
             $filePath = $filePath . '/' . strtolower($dir);
         }

@@ -17,7 +17,7 @@ class MakeQueueProvider implements IdentifyInterface
             echo "请输入要创建的redis消费者文件名称\r\n";
             exit;
         }
-        foreach (scan_dir(app_path().'/app/queue', true) as $key => $file) {
+        foreach (scan_dir(app_path().'/app/Queue', true) as $key => $file) {
             if (file_exists($file)) {
                 $fileName = basename($file);
                 if ($fileName == $name . '.php') {
@@ -61,7 +61,7 @@ class $name extends Queue
     }
 }
 EOF;
-        @file_put_contents(app_path() . '/app/queue/' . $name . '.php', $content);
+        @file_put_contents(app_path() . '/app/Queue/' . $name . '.php', $content);
         echo "创建redis队列完成\r\n";
         exit;
     }

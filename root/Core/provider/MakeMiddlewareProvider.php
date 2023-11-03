@@ -26,7 +26,7 @@ class MakeMiddlewareProvider implements IdentifyInterface
         /**
          * 检查是否存在相同的文件
          */
-        foreach (scan_dir(app_path() . '/app/middleware', true) as $file) {
+        foreach (scan_dir(app_path() . '/app/Middleware', true) as $file) {
             if (file_exists($file)) {
                 $fileName = strtolower($file);
                 if ($fileName == $controller) {
@@ -45,7 +45,7 @@ class MakeMiddlewareProvider implements IdentifyInterface
                 $nameSpace = $nameSpace . "\\" . $dir;
             }
         }
-        $filePath = app_path() . '/app/middleware';
+        $filePath = app_path() . '/app/Middleware';
         foreach ($name as $dir) {
             $filePath = $filePath . '/' . strtolower($dir);
         }
