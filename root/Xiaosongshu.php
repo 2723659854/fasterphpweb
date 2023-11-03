@@ -74,8 +74,8 @@ class Xiaosongshu
         require_once dirname(__DIR__) . '/vendor/autoload.php';
         /** 加载助手函数 */
         require_once __DIR__ . '/function.php';
-        /** 加载根文件，常驻内存文件，应用目录文件 */
-        //$this->requireFile();
+        /** 加载根文件，常驻内存文件，应用目录文件，这个必须要手动加载一次，不然有些功能无法正常使用呢 */
+        $this->requireFile();
         /** 是否linux系统 */
         $_system = !(\DIRECTORY_SEPARATOR === '\\');
         /** 是否有epoll模型 */
