@@ -75,7 +75,7 @@ class Xiaosongshu
         /** 加载助手函数 */
         require_once __DIR__ . '/function.php';
         /** 加载根文件，常驻内存文件，应用目录文件 */
-        $this->requireFile();
+        //$this->requireFile();
         /** 是否linux系统 */
         $_system = !(\DIRECTORY_SEPARATOR === '\\');
         /** 是否有epoll模型 */

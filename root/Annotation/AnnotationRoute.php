@@ -16,7 +16,7 @@ Class AnnotationRoute{
      */
     public static function loadRoute(){
         /** @var  $dir_iterator *递归遍历目录查找控制器自动设置路由 */
-        $dir_iterator = new \RecursiveDirectoryIterator(app_path().'/app/controller');
+        $dir_iterator = new \RecursiveDirectoryIterator(app_path().'/app/Controller');
         $iterator = new \RecursiveIteratorIterator($dir_iterator);
 
         foreach ($iterator as $file) {
