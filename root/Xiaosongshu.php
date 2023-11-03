@@ -124,16 +124,43 @@ class Xiaosongshu
     /**
      * 安装项目目录
      * @return void
-     * @note 如果引入外部的包,即在composer.json里面设置了autoload，请使用composer dump-autoload 更新自动加载机制
+     * @note 如果引入外部的包,即在composer.json里面设置了autoload，请使用composer dump-autoload 更新自动加载机制composer dump-autoload -o
      */
     public function requireFile()
     {
+        /** 这里为啥要写这个东西呢，因为某些环境下，psr0和psr4也解救不了文件的加载顺序问题，composer表示无能为力，所以只能先composer尝试加载自定义目录，然后再手动加载 */
+        $interface = [];
+        $abstract = [];
+        $others = [];
         foreach (['root', 'process', 'ws', 'app'] as $name) {
             foreach (sortFiles(scan_dir(app_path() . '/' . $name, true)) as $val) {
                 if (file_exists($val) && (pathinfo($val)['extension'] == 'php')) {
-                    require_once $val;
+                    /** 读取文件代码 */
+                    $code = file_get_contents($val);
+                    /** 首先找到所有的接口类 */
+                    if (stripos($code,'interface')){
+                        $interface[]=$val;
+                        /** 然后找到抽象类 */
+                    }elseif(stripos($code,'abstract')){
+                        $abstract[]=$val;
+                    }else{
+                        /** 最后其他类 */
+                        $others[]=$val;
+                    }
                 }
             }
+        }
+        /** 先加载接口类 */
+        foreach ($interface as $file){
+            require_once $file;
+        }
+        /** 加载抽象类 */
+        foreach ($abstract as $file){
+            require_once $file;
+        }
+        /** 加载其他类 */
+        foreach ($others as $file){
+            require_once $file;
         }
     }
 

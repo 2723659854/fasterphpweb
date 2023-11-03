@@ -10,7 +10,11 @@
   ],
   "autoload": {
     "psr-4": {
-      "MediaServer\\": "src"
+      "MediaServer\\": "src",
+      "Root\\": "root",
+      "Process\\": "process",
+      "Ws\\": "ws",
+      "App\\": "app"
     }
   },
   "authors": [
