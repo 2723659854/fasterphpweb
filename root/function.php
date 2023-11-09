@@ -363,6 +363,8 @@ if(!function_exists('dump_error')){
         /** 调试模式打印错误 */
         if (!$_daemonize){
             echo $_color_class->info($string);
+            /** 打印栈调用信息 ，方便调试的时候，知道程序执行的流程，否则会抓瞎的 ，还有一个xdebug_debug_zval() 不过需要安装debug扩展 */
+            debug_print_backtrace();
         }
         /** 写入到日志文件 */
         if (!is_dir(app_path().'/runtime/log/')){
