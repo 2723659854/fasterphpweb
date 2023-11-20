@@ -15,7 +15,10 @@
       "Process\\": "process",
       "Ws\\": "ws",
       "App\\": "app"
-    }
+    },
+    "files": [
+      "./app/functions.php"
+    ]
   },
   "authors": [
     {

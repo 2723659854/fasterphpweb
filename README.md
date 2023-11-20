@@ -1612,5 +1612,11 @@ HttpClient::requestAsync('127.0.0.1:9501', 'GET', ['lesson_id' => 201], [], [], 
 若不满足需求，可以自己编写一个日志记录类。
 #### 其他
 
-现在的网站都已经发展到前后端分离了，默认是无状态请求，cookie几乎没有用了。 所以没有编写cookie和session操作类了。 你可以使用token来识别用户，而不是cookie或者session。
+1,现在的网站都已经发展到前后端分离了，默认是无状态请求，cookie几乎没有用了。 
+所以没有编写cookie和session操作类了。 你可以使用token来识别用户，而不是cookie或者session。<br>
+2, 如果你在项目的根目录创建了自定义的目录，那么建议你使用require_once 方法手动
+加载这些文件，当然你也可以使用composer的自动加载配置，编辑项目根目录的composer.json 文件，编辑字段psr4规范，
+里面添加你需要加载的目录的名称，当然了，你的自定义目录必须符合Psr4规范，编辑完成后保存composer.json文件。最后执行
+composer dump-autoload -o 命令，让composer刷新文件和对象的映射关系。做完以上的操作过后，你就可以使用use引入
+你需要使用的类了。
 

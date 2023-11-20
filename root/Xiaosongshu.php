@@ -434,7 +434,8 @@ class Xiaosongshu
             }
             /** 如果有这个文件 */
             if (is_file($fileName)) {
-                fwrite($socketAccept, response(file_get_contents($fileName), 200, ['Content-Type' => $this->backContenType[$file_extension]]));
+                /** 存在某个版本的浏览器无法正常显示尺寸比较大的图片的问题，报错提示是，资源的大小不匹配 */
+                fwrite($socketAccept, $response =response(file_get_contents($fileName), 200, ['Content-Type' => $this->backContenType[$file_extension]]) ,strlen($response));
                 fclose($socketAccept);
             } else {
                 /** 如果没有这个文件 */
