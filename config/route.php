@@ -3,6 +3,8 @@ return [
 
     /** 首页 */
     ['GET', '/', [App\Controller\Index\Index::class, 'index']],
+    ['POST', '/test', [App\Controller\Index\Index::class, 'json']],
+    //['POST', '/', [App\Controller\Index\Index::class, 'index']],
     /** 路由测试 */
     ['GET', '/index/demo/index', [\App\Controller\Admin\Index::class, 'index']],
     ['GET', '/just1', [\App\Controller\Admin\Index::class, 'index']],
@@ -35,6 +37,7 @@ return [
     /** 测试es搜索 */
     ['get', '/es', [\App\Controller\Index\Index::class, 'elasticsearch']],
     /** 测试中间件 */
-    ['GET','/middle',[\App\Controller\Index\Index::class,'middle'],[\App\Middleware\MiddlewareA::class,\App\Middleware\MiddlewareB::class]]
+    ['GET','/middle',[\App\Controller\Index\Index::class,'middle'],[\App\Middleware\MiddlewareA::class,\App\Middleware\MiddlewareB::class]],
+
 
 ];

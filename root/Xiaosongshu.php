@@ -422,47 +422,66 @@ class Xiaosongshu
         $request = Container::set(Request::class, [$message, $remote_address]);
         $method = $request->method();
         $uri = $request->path();
-        $info = explode('.', $request->path());
-        $file_extension = end($info);
-        /**  说明是资源类请求，直接返回资源 */
-        if (in_array($file_extension, array_keys($this->backContenType))) {
-            $fileName = $request->path();
-            if ($file_extension == 'html') {
-                $fileName = app_path() . '/view' . $fileName;
-            } else {
-                $fileName = public_path() . $fileName;
-            }
-            /** 如果有这个文件 */
-            if (is_file($fileName)) {
-                /** 存在某个版本的浏览器无法正常显示尺寸比较大的图片的问题，报错提示是，资源的大小不匹配 */
-                fwrite($socketAccept, $response =response(file_get_contents($fileName), 200, ['Content-Type' => $this->backContenType[$file_extension]]) ,strlen($response));
-                fclose($socketAccept);
-            } else {
-                /** 如果没有这个文件 */
-                fwrite($socketAccept, response('<h1>Not Found</h1>', 404));
-                fclose($socketAccept);
-            }
-        } else {
-            /** 动态路由 */
-            try {
-                $content = Route::dispatch($method, $uri, $request);
-                /** 用户返回的不是对象 */
-                if (!is_object($content)) {
-                    $content = response($content);
+        /** 允许跨域 */
+        $withHeader = [
+            'Access-Control-Allow-Credentials'=>'true',
+            'Access-Control-Allow-Origin'=>$request->header('origin'),
+            'Access-Control-Allow-Methods'=>'*',
+            'Access-Control-Allow-Headers'=>'*'
+        ];
+        /** 谷歌浏览器会直接发送option请求，用于探测服务是否正常 ，这个需要直接返回200响应，并告知允许跨域。当使用本框架编写后端接口的时候，前端使用vue，前端会提示跨域问题，这里就要设置允许跨域 */
+        if ($method=='OPTIONS'){
+            fwrite($socketAccept, response('<h1>OK</h1>', 200,$withHeader));
+            fclose($socketAccept);
+        }else{
+            $info = explode('.', $request->path());
+            $file_extension = end($info);
+            /**  说明是资源类请求，直接返回资源 */
+            if (in_array($file_extension, array_keys($this->backContenType))) {
+                $fileName = $request->path();
+                if ($file_extension == 'html') {
+                    $fileName = app_path() . '/view' . $fileName;
+                } else {
+                    $fileName = public_path() . $fileName;
                 }
-                /** 用户返回的不是response对象 */
-                if (!($content instanceof Response)) {
-                    $content = response($content);
+                /** 如果有这个文件 */
+                if (is_file($fileName)) {
+                    /** 存在某个版本的浏览器无法正常显示尺寸比较大的图片的问题，报错提示是，资源的大小不匹配 */
+                    fwrite($socketAccept, $response =response(file_get_contents($fileName), 200, array_merge(['Content-Type' => $this->backContenType[$file_extension]],$withHeader)) ,strlen($response));
+                    fclose($socketAccept);
+                } else {
+                    /** 如果没有这个文件 */
+                    fwrite($socketAccept, response('<h1>Not Found</h1>', 404,$withHeader));
+                    fclose($socketAccept);
                 }
-                fwrite($socketAccept, $content);
-                fclose($socketAccept);
-
-            } catch (\Exception|\RuntimeException $exception) {
-                /** 如果出现了异常 */
-                fwrite($socketAccept, response($exception->getMessage(), 400));
-                fclose($socketAccept);
+            } else {
+                /** 动态路由 */
+                try {
+                    $content = Route::dispatch($method, $uri, $request);
+                    /** 用户返回的不是对象 */
+                    if (!is_object($content)) {
+                        $content = response($content);
+                    }
+                    /** 用户返回的不是response对象 */
+                    if (!($content instanceof Response)) {
+                        $content = response($content);
+                    }
+                    /** 允许跨域，前端谷歌浏览器会检查响应头，如果没有下面的四个信息，及时检测到返回的状态码是200，但是还是会提示cors跨域错误 */
+                    $content->withHeader('Access-Control-Allow-Credentials','true');
+                    $content->withHeader('Access-Control-Allow-Origin',$request->header('origin'));
+                    $content->withHeader('Access-Control-Allow-Methods','*');
+                    $content->withHeader('Access-Control-Allow-Headers','*');
+                    fwrite($socketAccept, $content);
+                    fclose($socketAccept);
+                } catch (\Exception|\RuntimeException $exception) {
+                    /** 如果出现了异常 */
+                    fwrite($socketAccept, response($exception->getMessage(), 400,$withHeader));
+                    fclose($socketAccept);
+                }
             }
         }
+
+
         /** 清理select连接 */
         unset(Selector::$allSocket[(int)$socketAccept]);
         /** 清理epoll连接 */
