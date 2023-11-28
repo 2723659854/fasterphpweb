@@ -58,6 +58,8 @@ class Xiaosongshu
      */
     public function start_server($param)
     {
+        /** 首先申请足够的内存  */
+        ini_set('memory_limit','128M');
         /** 环境监测 */
         $this->check_env();
         /** 是否守护模式 */
@@ -480,7 +482,6 @@ class Xiaosongshu
                 }
             }
         }
-
 
         /** 清理select连接 */
         unset(Selector::$allSocket[(int)$socketAccept]);

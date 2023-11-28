@@ -165,6 +165,7 @@ class Epoll
             if (empty(Epoll::$asyncRequestData[(int)$cli])) {
                 /** 1，作为服务端的时候没有保存原始数据 使用长度判断是否接收完所有数据 */
                 $flag = true;
+                /** 这个方法读物的数据长度不对 */
                 while ($flag) {
                     $_content = fread($cli, 1024);
                     if (strlen($_content) < 1024) {
@@ -180,6 +181,7 @@ class Epoll
             }
             /** 如果用户输入为空或者输入不是资源 */
             if (!$buffer) {
+                //var_dump($buffer);
                 /** 如果是异步客户端，还需要通知用户 */
                 if (isset(Epoll::$asyncRequestData[(int)$cli])) {
                     if ($fail) {
@@ -195,6 +197,7 @@ class Epoll
                 Epoll::unsetResource($cli);
 
             } else {
+                //var_dump($buffer);
                 /** 处理http响应 */
                 Epoll::dealRequestResponse($cli, $buffer, $success, $remoteAddress,$fail);
             }
