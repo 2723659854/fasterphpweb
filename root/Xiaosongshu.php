@@ -249,10 +249,11 @@ class Xiaosongshu
             $master_ids = file_get_contents($_pid_file);
             $master_id = explode('-', $master_ids);
             rsort($master_id);
+            array_pop($master_id);
             $master_id = array_unique($master_id);
             foreach ($master_id as $v) {
                 if ($v > 0) {
-                    \posix_kill($v, SIGKILL);
+                    @exec("kill -9 {$v}");
                 }
             }
             file_put_contents($_pid_file, null);
@@ -276,7 +277,7 @@ class Xiaosongshu
                 $master_id = array_unique($master_id);
                 foreach ($master_id as $v) {
                     if (($v > 0)&&(int)$v!=getmypid()) {
-                        \posix_kill($v, SIGKILL);
+                        @exec("kill -9 {$v}");
                     }
                 }
                 file_put_contents($_pid_file, null);
@@ -304,7 +305,7 @@ class Xiaosongshu
         if ($rtmpId['pid']){
             $pids = Xiaosongshu::getSubprocesses($rtmpId['pid']);
             foreach ($pids as $id){
-                \posix_kill($id, SIGKILL);
+                @exec("kill -9 {$id}");
             }
             /** 清空pid 否则无法重启worker */
             file_put_contents($rtmpId['file'],null);
