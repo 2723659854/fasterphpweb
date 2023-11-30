@@ -1608,7 +1608,7 @@ HttpClient::requestAsync('127.0.0.1:9501', 'GET', ['lesson_id' => 201], [], [], 
 创建rabbitmq消费者：php start.php make:rabbitmq DemoConsumer<br>
 项目打包：php -d phar.readonly=0 songshu make:phar<br>
 
-# 项目打包部署
+###  项目打包部署
 
 为了方便部署服务，可以将整个项目打包上传到服务器，不再需要安装其它扩展，我们提供了一键
 打包服务。项目将会被打包成phar格式文件，这个需要修改你的php.ini配置phar.readonly = Off，
@@ -1617,9 +1617,22 @@ HttpClient::requestAsync('127.0.0.1:9501', 'GET', ['lesson_id' => 201], [], [], 
 ```bash 
 php -d phar.readonly=0 songshu make:phar
 ```
-打包后的项目，服务管理和原来一样的，只是将start.php或者songshu 换成了 songshu.phar 文件即可
+打包后的项目，服务管理和原来一样的，只是将start.php或者songshu 换成了 songshu.phar 文件即可，在songshu.phar所在目录执行
 ```bash 
 php -d phar.readonly=0 songshu.phar start/restart/stop [-d]
+```
+###  项目打包成二进制文件
+有可能你不想安装php环境，想直接运行项目，那么我们也提供了一键打包成二进制文件的方法，打包命令
+```bash 
+php -d phar.readonly=0 songshu make:bin
+```
+打包完成后直接上传至服务器，进入到项目根目录，执行命令管理服务
+```bash 
+./songshu.bin  start/stop/restart [-d]
+```
+```ps 
+ps:不论是打包成phar文件，还是打包成bin文件，都需要在打包之前调整好生产环境的数据库，缓存等需要用到的服务配置。而且如果需要更新
+配置文件，那么需要你重新打包。另外记得给项目根目录分配读写权限。
 ```
 ### 日志
 系统默认只记录运行的错误日志，按日记录，存放位置在 runtime/log/Y-m-d.log。提供记录日志函数dump_error(Exception|RuntimeException $exception),

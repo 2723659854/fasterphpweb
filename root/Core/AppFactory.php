@@ -1,5 +1,6 @@
 <?php
 namespace Root\Core;
+use Root\Core\Provider\MakeBinProvider;
 use Root\Core\Provider\MakeCommandProvider;
 use Root\Core\Provider\MakeControllerProvider;
 use Root\Core\Provider\MakeMiddlewareProvider;
@@ -36,6 +37,7 @@ class AppFactory
         'make:queue'=>MakeQueueProvider::class,
         'make:rabbitmq'=>MakeRabbitmqProvider::class,
         'make:phar'=>MakePharProvider::class,
+        'make:bin'=>MakeBinProvider::class
     ];
 
     /** @var array */

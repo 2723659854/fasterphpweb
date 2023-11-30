@@ -21,7 +21,9 @@ if (!function_exists('phar_app_path')){
     {
         $path = dirname(__DIR__);
         $rootPath = str_replace('phar://','',$path);
-        return str_replace('/songshu.phar','',$rootPath);
+        $rootPath = str_replace('/songshu.phar','',$rootPath);
+        $rootPath = str_replace('/songshu.bin','',$rootPath);
+        return $rootPath;
     }
 }
 

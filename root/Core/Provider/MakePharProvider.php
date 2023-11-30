@@ -2,7 +2,6 @@
 
 namespace Root\Core\Provider;
 
-use Root\Queue\RedisQueueConsumer;
 use Root\Xiaosongshu;
 use Phar;
 /**

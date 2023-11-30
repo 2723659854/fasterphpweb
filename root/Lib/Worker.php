@@ -27,7 +27,6 @@ class Worker extends \Workerman\Worker
      */
     protected static function init()
     {
-        /* /usr/src/myapp/fasterphpweb/vendor/workerman/workerman */
         \set_error_handler(function($code, $msg, $file, $line){
             Worker::safeEcho("$msg in file $file on line $line\n");
         });
