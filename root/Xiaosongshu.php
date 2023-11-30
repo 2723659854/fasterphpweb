@@ -21,10 +21,6 @@ use Root\Queue\WsConsumer;
 if (!class_exists('Xiaosongshu')){
     class Xiaosongshu
     {
-        public function __construct(){
-            var_dump("被实例化");
-        }
-
         /** 定义文件类型请求返回数据 */
         protected $backContenType = [
             'html' => 'text/html; charset=UTF-8',
@@ -66,10 +62,6 @@ if (!class_exists('Xiaosongshu')){
             ini_set('memory_limit','128M');
             /** 环境监测 */
             $this->check_env();
-            /** 是否守护模式 */
-            $daemonize = false;
-            /** 是否运行 */
-            $flag = true;
             global $_pid_file, $_port, $_listen, $_server_num, $_system, $_lock_file, $_has_epoll, $_system_command, $_system_table, $_color_class, $_daemonize;
             $_daemonize = false;
             $rootPath = str_replace('phar://','',app_path());
