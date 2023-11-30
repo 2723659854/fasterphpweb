@@ -1621,9 +1621,9 @@ php -d phar.readonly=0 songshu make:phar
 ```bash 
 php -d phar.readonly=0 songshu.phar start/restart/stop [-d]
 ```
-###  项目打包成二进制文件 
+###  编译二进制文件 
 ####   仅支持linux运行环境
-项目可以在任意平台打包，但是打包后的二进制文件仅支持linux环境，不兼容windows，mac。你也可以下载对应平台的PHP静态文件生成windows或者mac的可执行文件。<br>
+项目可以在任意平台打包编译，但是打包编译后的二进制文件仅支持linux环境，不兼容windows，mac。你也可以下载对应平台的PHP静态文件生成windows或者mac的可执行文件。<br>
 有可能你不想安装php环境，想直接运行项目，那么我们也提供了一键打包成二进制文件的方法，打包命令
 ```bash 
 php -d phar.readonly=0 songshu make:bin
@@ -1634,7 +1634,7 @@ php -d phar.readonly=0 songshu make:bin
 ```
 ```ps 
 ps:不论是打包成phar文件，还是打包成bin文件，都需要在打包之前调整好生产环境的数据库，缓存等需要用到的服务配置。而且如果需要更新
-配置文件，那么需要你重新打包。另外记得给项目根目录分配读写权限。
+配置文件，那么需要你重新打包。另外记得给项目根目录分配读写权限。理论上来说，这个不属于编译，只是把php文件和项目进行了拼接。
 ```
 ### 日志
 系统默认只记录运行的错误日志，按日记录，存放位置在 runtime/log/Y-m-d.log。提供记录日志函数dump_error(Exception|RuntimeException $exception),
