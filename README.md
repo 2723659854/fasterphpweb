@@ -1606,7 +1606,21 @@ HttpClient::requestAsync('127.0.0.1:9501', 'GET', ['lesson_id' => 201], [], [], 
 创建中间件: php start.php make:middleware Auth<br>
 创建redis消费者：php start.php make:queue Demo<br>
 创建rabbitmq消费者：php start.php make:rabbitmq DemoConsumer<br>
+项目打包：php -d phar.readonly=0 songshu make:phar<br>
 
+# 项目打包部署
+
+为了方便部署服务，可以将整个项目打包上传到服务器，不再需要安装其它扩展，我们提供了一键
+打包服务。项目将会被打包成phar格式文件，这个需要修改你的php.ini配置phar.readonly = Off，
+当然了，如果觉得麻烦，那就直接在命令当中设置临时的phar.readonly = Off也是可以的。
+打包命令：
+```bash 
+php -d phar.readonly=0 songshu make:phar
+```
+打包后的项目，服务管理和原来一样的，只是将start.php或者songshu 换成了 songshu.phar 文件即可
+```bash 
+php -d phar.readonly=0 songshu.phar start/restart/stop [-d]
+```
 ### 日志
 系统默认只记录运行的错误日志，按日记录，存放位置在 runtime/log/Y-m-d.log。提供记录日志函数dump_error(Exception|RuntimeException $exception),
 若不满足需求，可以自己编写一个日志记录类。

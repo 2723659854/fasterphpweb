@@ -39,14 +39,15 @@ class Worker extends \Workerman\Worker
 
         $unique_prefix = \str_replace('/', '_', static::$_startFile);
 
+        is_dir(phar_app_path() . "/vendor/workerman/")||mkdir(phar_app_path() . "/vendor/workerman/",0777,true);
         // Pid file.
         if (empty(static::$pidFile)) {
-            static::$pidFile = app_path() . "/vendor/workerman/$unique_prefix.pid";
+            static::$pidFile = phar_app_path() . "/vendor/workerman/$unique_prefix.pid";
         }
 
         // Log file.
         if (empty(static::$logFile)) {
-            static::$logFile = app_path() . '/vendor/workerman/workerman.log';
+            static::$logFile = phar_app_path() . '/vendor/workerman/workerman.log';
         }
         $log_file = (string)static::$logFile;
         if (!\is_file($log_file)) {

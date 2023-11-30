@@ -8,9 +8,20 @@ if (!function_exists('app_path')){
      */
     function app_path()
     {
+        return  dirname(__DIR__);
+    }
+}
+
+if (!function_exists('phar_app_path')){
+    /**
+     * phar环境的文件目录
+     * @return string
+     */
+    function phar_app_path()
+    {
         $path = dirname(__DIR__);
         $rootPath = str_replace('phar://','',$path);
-        return str_replace('/build/songshu.phar','',$rootPath);
+        return str_replace('/songshu.phar','',$rootPath);
     }
 }
 

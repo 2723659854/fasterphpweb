@@ -65,10 +65,14 @@ if (!class_exists('Xiaosongshu')){
             global $_pid_file, $_port, $_listen, $_server_num, $_system, $_lock_file, $_has_epoll, $_system_command, $_system_table, $_color_class, $_daemonize;
             $_daemonize = false;
             /** 进程管理文件 */
-            $_pid_file = app_path() . '/root/my_pid.txt';
+            $_pid_file = phar_app_path() . '/root/my_pid.txt';
+            /** 创建保存pid的目录 */
+            is_dir(phar_app_path() .'/root')||mkdir(phar_app_path() .'/root');
+            /** pid 管理文件 */
+            if (!file_exists($_pid_file)) touch($_pid_file);\chmod($_pid_file, 0622);
             /** 状态管理文件 */
-            $_lock_file = app_path() . '/root/lock.txt';
-
+            $_lock_file = phar_app_path() . '/root/lock.txt';
+            if (!file_exists($_lock_file)) \touch($_lock_file);\chmod($_lock_file, 0622);
             /** 是否linux系统 */
             $_system = !(\DIRECTORY_SEPARATOR === '\\');
             /** 是否有epoll模型 */
