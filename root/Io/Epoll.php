@@ -42,6 +42,8 @@ class Epoll
     private static $write = [];
     /** 异步请求的 原始数据 */
     public static $asyncRequestData = [];
+    /** 客户端上传数据最大请求时间 ，如果超过这个时间就断开这个连接 默认6分钟 */
+    private static $maxRequestTime = 360;
 
     /** 初始化 */
     public function __construct()
@@ -171,6 +173,8 @@ class Epoll
                 $post = false;
                 /** 初始化头部的长度 */
                 $headerLength = 0;
+                /** 标记接收数据的开始时间 */
+                $startTime = time();
                 while ($flag) {
                     $_content = fread($cli, 10240);
                     /** 这里涉及到tcp通信的问题，当数据包很大的时候，tcp会自动分包，那么一个文件会被分隔成多个数据包传输，所以这里需要验证数据包的大小 */
@@ -204,6 +208,13 @@ class Epoll
                         if ((strlen($buffer)-$headerLength)>=$length){
                             /** 如果body的长度达到了header中的content-length 则说明已经接收完毕了 */
                             $flag = false;
+                        }else{
+                            if ((time()-$startTime)>self::$maxRequestTime){
+                                /** 如果超过最大等待时间，还没有发送完数据，那么直接通知客户端请求超时，并清空已接收到的数据 */
+                                fwrite($cli, response('<h1>Time Out</h1>', 408));
+                                $flag = false;
+                                $buffer = '';
+                            }
                         }
                     }elseif (strlen($_content) < 10240) {
                         /** 如果不是传输文件，那么只要接收的数据长度小于规定长度，则说明数据接受完成了 */

@@ -33,7 +33,8 @@ class MakeBinProvider implements IdentifyInterface
         // 添加执行权限
         chmod($binFile, 0755);
         echo date('Y-m-d H:i:s')."\r\n";
-        echo "^-^打包二进制文件完成\r\n";
+        echo "打包二进制文件完成 ^-^\r\n";
+        echo "文件位置：{$binFile}\r\n";
     }
 
     /**
