@@ -1621,7 +1621,9 @@ php -d phar.readonly=0 songshu make:phar
 ```bash 
 php -d phar.readonly=0 songshu.phar start/restart/stop [-d]
 ```
-###  项目打包成二进制文件
+###  项目打包成二进制文件 
+####   仅支持linux运行环境
+项目可以在任意平台打包，但是打包后的二进制文件仅支持linux环境，不兼容windows，mac。你也可以下载对应平台的PHP静态文件生成windows或者mac的可执行文件。<br>
 有可能你不想安装php环境，想直接运行项目，那么我们也提供了一键打包成二进制文件的方法，打包命令
 ```bash 
 php -d phar.readonly=0 songshu make:bin
