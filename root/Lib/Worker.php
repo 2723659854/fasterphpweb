@@ -27,9 +27,6 @@ class Worker extends \Workerman\Worker
      */
     protected static function init()
     {
-        $rootPath = str_replace('phar://','',app_path());
-        $rootPath = str_replace('/build/songshu.phar','',$rootPath);
-
         /* /usr/src/myapp/fasterphpweb/vendor/workerman/workerman */
         \set_error_handler(function($code, $msg, $file, $line){
             Worker::safeEcho("$msg in file $file on line $line\n");
@@ -44,12 +41,12 @@ class Worker extends \Workerman\Worker
 
         // Pid file.
         if (empty(static::$pidFile)) {
-            static::$pidFile = $rootPath . "/vendor/workerman/$unique_prefix.pid";
+            static::$pidFile = app_path() . "/vendor/workerman/$unique_prefix.pid";
         }
 
         // Log file.
         if (empty(static::$logFile)) {
-            static::$logFile = $rootPath . '/vendor/workerman/workerman.log';
+            static::$logFile = app_path() . '/vendor/workerman/workerman.log';
         }
         $log_file = (string)static::$logFile;
         if (!\is_file($log_file)) {

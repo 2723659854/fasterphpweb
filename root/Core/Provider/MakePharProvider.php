@@ -23,6 +23,7 @@ class MakePharProvider implements IdentifyInterface
 
         echo date('Y-m-d H:i:s')."\r\n";
         echo "开始打包\r\n";
+        is_dir(app_path().'/build')||mkdir(app_path().'/build',0777,true);
         $phar = new Phar(app_path().'/build/songshu.phar',0,'songshu');
         echo "开始缓冲Phar写入操作，不要修改磁盘上的Phar对象\r\n";
         $phar->startBuffering();

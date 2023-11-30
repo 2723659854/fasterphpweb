@@ -64,13 +64,10 @@ if (!class_exists('Xiaosongshu')){
             $this->check_env();
             global $_pid_file, $_port, $_listen, $_server_num, $_system, $_lock_file, $_has_epoll, $_system_command, $_system_table, $_color_class, $_daemonize;
             $_daemonize = false;
-            $rootPath = str_replace('phar://','',app_path());
-            $rootPath = str_replace('/build/songshu.phar','',$rootPath);
             /** 进程管理文件 */
-
-            $_pid_file = $rootPath . '/root/my_pid.txt';
+            $_pid_file = app_path() . '/root/my_pid.txt';
             /** 状态管理文件 */
-            $_lock_file = $rootPath . '/root/lock.txt';
+            $_lock_file = app_path() . '/root/lock.txt';
 
             /** 是否linux系统 */
             $_system = !(\DIRECTORY_SEPARATOR === '\\');

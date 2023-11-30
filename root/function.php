@@ -8,7 +8,9 @@ if (!function_exists('app_path')){
      */
     function app_path()
     {
-        return dirname(__DIR__);
+        $path = dirname(__DIR__);
+        $rootPath = str_replace('phar://','',$path);
+        return str_replace('/build/songshu.phar','',$rootPath);
     }
 }
 
