@@ -7,7 +7,7 @@ use Phar;
 /**
  * @purpose 项目打包成二进制
  * @note 打包命令 php -d phar.readonly=0 songshu make:bin
- * @note 管理服务 songshu.bin -d phar.readonly=0  start/restart/stop [-d]
+ * @note 管理服务 songshu.bin start/restart/stop [-d]
  */
 class MakeBinProvider implements IdentifyInterface
 {
