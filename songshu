@@ -1,7 +1,12 @@
 #!/usr/bin/env php
 <?php
 (
-function()use($argv){
-    (require_once __DIR__ . '/root/Xiaosongshu.php')->start_server($argv);
+function () use ($argv) {
+    /** 加载索引文件 */
+    require_once __DIR__ . '/vendor/autoload.php';
+    /** 加载助手函数 */
+    require_once __DIR__ . '/root/function.php';
+    /** 启动服务 */
+    (new \Root\Xiaosongshu())->start_server($argv);
 }
 )();

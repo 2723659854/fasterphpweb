@@ -585,6 +585,7 @@ class Worker
      */
     protected static function init()
     {
+        var_dump('workman初始化',__DIR__);
         \set_error_handler(function($code, $msg, $file, $line){
             Worker::safeEcho("$msg in file $file on line $line\n");
         });
