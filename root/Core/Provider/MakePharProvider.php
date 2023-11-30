@@ -24,12 +24,12 @@ class MakePharProvider implements IdentifyInterface
         echo "开始打包\r\n";
         is_dir(app_path().'/build')||mkdir(app_path().'/build',0777,true);
         $phar = new Phar(app_path().'/build/songshu.phar',0,'songshu');
-        echo "开始缓冲Phar写入操作，不要修改磁盘上的Phar对象\r\n";
+        //echo "开始缓冲Phar写入操作，不要修改磁盘上的Phar对象\r\n";
         $phar->startBuffering();
-        echo "为phar设置签名算法并应用它。\r\n";
+        //echo "为phar设置签名算法并应用它。\r\n";
         $phar->setSignatureAlgorithm(Phar::SHA256);
-        echo "开始打包...\r\n";
-        $phar->buildFromDirectory(app_path(),'#^(?!.*(composer.json|/.github/|/.idea/|/.git/|/.setting/|/runtime/|/vendor-bin/|/build/))(.*)$#');
+        //echo "开始打包...\r\n";
+        $phar->buildFromDirectory(app_path(),'#^(?!.*(composer.json|/.github/|/.idea/|/.git/|/.setting/|/runtime/|/vendor-bin/|/build/|/public/upload/))(.*)$#');
         /** 设置引导文件 */
         $phar->setStub("#!/usr/bin/env php
 <?php
@@ -38,11 +38,11 @@ Phar::mapPhar('songshu');
 require_once 'phar://songshu/songshu';
 __HALT_COMPILER();
 ");
-        echo "保存打包文件...\r\n";
+        //echo "保存打包文件...\r\n";
         $phar->stopBuffering();
         unset($phar);
         echo "文件位置：".app_path()."/build/songshu.phar\r\n";
-        echo "管理服务：php -d phar.readonly=0 songshu.phar start/restart/stop [-d]\r\n";
+        //echo "管理服务：php -d phar.readonly=0 songshu.phar start/restart/stop [-d]\r\n";
         echo date('Y-m-d H:i:s')."\r\n";
         echo "^-^打包完成!\r\n";
     }

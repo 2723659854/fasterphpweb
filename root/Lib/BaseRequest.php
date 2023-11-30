@@ -545,13 +545,16 @@ class BaseRequest
                         $tmp_file = '';
                         $file_name = $match[2];
                         $size = \strlen($boundary_value);
-                        $tmp_upload_dir = app_path().'/public';
+
+                        $tmp_upload_dir = phar_app_path().'/public';
+                        is_dir($tmp_upload_dir)||mkdir($tmp_upload_dir,0777,true);
                         if (!$tmp_upload_dir) {
                             $error = UPLOAD_ERR_NO_TMP_DIR;
                         } else if ($boundary_value === '' && $file_name === '') {
                             $error = UPLOAD_ERR_NO_FILE;
                         } else {
-                            $tmp_file = \tempnam($tmp_upload_dir, 'xiaosongshu');
+                            //$tmp_file = \tempnam($tmp_upload_dir, 'xiaosongshu');
+                            $tmp_file = $tmp_upload_dir.'/'.md5(time().rand(1000,9999));
                             if ($tmp_file === false || false === \file_put_contents($tmp_file, $boundary_value)) {
                                 $error = UPLOAD_ERR_CANT_WRITE;
                             }

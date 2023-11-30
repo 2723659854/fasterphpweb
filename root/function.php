@@ -46,7 +46,7 @@ if (!function_exists('public_path')){
      */
     function public_path()
     {
-        return app_path() . '/public';
+        return phar_app_path() . '/public';
     }
 }
 

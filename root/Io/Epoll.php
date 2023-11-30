@@ -166,12 +166,49 @@ class Epoll
                 /** 1，作为服务端的时候没有保存原始数据 使用长度判断是否接收完所有数据 */
                 $flag = true;
                 /** 这个方法读物的数据长度不对 */
+                $length = 10240;
+                /** 是否上传文件 */
+                $post = false;
+                /** 初始化头部的长度 */
+                $headerLength = 0;
                 while ($flag) {
-                    $_content = fread($cli, 1024);
-                    if (strlen($_content) < 1024) {
+                    $_content = fread($cli, 10240);
+                    /** 这里涉及到tcp通信的问题，当数据包很大的时候，tcp会自动分包，那么一个文件会被分隔成多个数据包传输，所以这里需要验证数据包的大小 */
+                    if (stripos($_content,'multipart/form-data; boundary=')){
+                        /** 说明是传输文件过来 */
+                        $post = true;
+                        preg_match("/Content-Length: (?<content_length>\d+)/", $_content, $matches);
+                        $length = $matches["content_length"];
+                        /** 处理数据获取头部的长度 */
+                        $small_request = explode("\r\n\r\n",$_content);
+                        $headerRaw = $small_request[0];
+                        $headerLength = strlen($headerRaw);
+
+                        /** 以下这一段代码是查询boundary的，不过这里不需要了 */
+//                        $array = explode("\r\n",$small_request[0]);
+//                        foreach ($array as  $header_content){
+//                            $pattern = '/Content-Type: (.*)$/';
+//                            preg_match($pattern, $header_content, $matches);
+//                            if (isset($matches[1])){
+//                                $contentTypeArray = explode('boundary=',$matches[1]);
+//                                $boundary = end($contentTypeArray);
+//                            }
+//                        }
+                    }
+
+                    $buffer = $buffer . $_content;
+
+                    /** 如果是传输文件过来 */
+                    if ($post){
+                        /** 这里是验证body的长度 */
+                        if ((strlen($buffer)-$headerLength)>=$length){
+                            /** 如果body的长度达到了header中的content-length 则说明已经接收完毕了 */
+                            $flag = false;
+                        }
+                    }elseif (strlen($_content) < 10240) {
+                        /** 如果不是传输文件，那么只要接收的数据长度小于规定长度，则说明数据接受完成了 */
                         $flag = false;
                     }
-                    $buffer = $buffer . $_content;
                 }
             } else {
                 /** 2，作为客户端的时候 ，直接把服务端当成资源读取，使用feof判断是否接收完所有数据 */

@@ -59,7 +59,9 @@ if (!class_exists('Xiaosongshu')){
         public function start_server($param)
         {
             /** 首先申请足够的内存  */
-            ini_set('memory_limit','128M');
+            ini_set('memory_limit','1024M');
+            ini_set('post_max_size','500M');
+            ini_set('upload_max_filesize','500M');
             /** 环境监测 */
             $this->check_env();
             global $_pid_file, $_port, $_listen, $_server_num, $_system, $_lock_file, $_has_epoll, $_system_command, $_system_table, $_color_class, $_daemonize;
