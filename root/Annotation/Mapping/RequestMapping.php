@@ -33,11 +33,21 @@ class RequestMapping extends AbstractAnnotation
         if (isset($formattedValue['methods'])) {
             if (is_string($formattedValue['methods'])) {
                 // Explode a string to a array
-                $this->methods = explode(',', mb_strtoupper(str_replace(' ', '', $formattedValue['methods'])  , 'UTF-8'));
+                if (function_exists('mb_strtoupper')){
+                    $this->methods = explode(',', mb_strtoupper(str_replace(' ', '', $formattedValue['methods'])  , 'UTF-8'));
+                }else{
+                    $this->methods = explode(',', (str_replace(' ', '', $formattedValue['methods'])  ));
+                }
+
             } else {
                 $methods = [];
                 foreach ($formattedValue['methods'] as $method) {
-                    $methods[] = mb_strtoupper(str_replace(' ', '', $method) , 'UTF-8');
+                    if (function_exists('mb_strtoupper')){
+                        $methods[] = mb_strtoupper(str_replace(' ', '', $method) , 'UTF-8');
+                    }else{
+                        $methods[] = (str_replace(' ', '', $method));
+                    }
+
                 }
                 $this->methods = $methods;
             }

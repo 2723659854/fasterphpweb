@@ -123,6 +123,9 @@ if (!function_exists('writePid')){
     function writePid()
     {
         global $_pid_file;
+        if (!$_pid_file){
+            $_pid_file = phar_app_path() . '/root/my_pid.txt';
+        }
         /** 记录进程号 */
         $fp = fopen($_pid_file, 'a+');
         fwrite($fp, getmypid() . '-');

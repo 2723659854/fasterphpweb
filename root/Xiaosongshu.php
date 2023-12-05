@@ -63,7 +63,7 @@ if (!class_exists('Xiaosongshu')){
             ini_set('post_max_size','500M');
             ini_set('upload_max_filesize','500M');
             /** 环境监测 */
-            $this->check_env();
+            //$this->check_env();
             global $_pid_file, $_port, $_listen, $_server_num, $_system, $_lock_file, $_has_epoll, $_system_command, $_system_table, $_color_class, $_daemonize;
             $_daemonize = false;
             /** 进程管理文件 */
@@ -78,7 +78,12 @@ if (!class_exists('Xiaosongshu')){
             /** 是否linux系统 */
             $_system = !(\DIRECTORY_SEPARATOR === '\\');
             /** 是否有epoll模型 */
-            $_has_epoll = (new \EventBase())->getMethod() == 'epoll';
+            if(class_exists('\EventBase')){
+                $_has_epoll = (new \EventBase())->getMethod() == 'epoll';
+            }else{
+                $_has_epoll = false;
+            }
+
             /** 读取服务器配置 */
             $server = config('server');
             $_port = $server['port'] ?? 8000;
@@ -388,6 +393,7 @@ if (!class_exists('Xiaosongshu')){
         /** 异步IO之select轮询模式 */
         public function select()
         {
+            var_dump("我是select");
             $httpServer = new Selector();
             /** 消息接收  */
             $httpServer->onMessage = function ($socketAccept, $message, $remote_address) use ($httpServer) {
@@ -505,7 +511,7 @@ if (!class_exists('Xiaosongshu')){
                 throw new \Exception('Fork fail');
             } elseif ($pid > 0) {
                 /** 打印当前服务 */
-                $this->displayServer();
+                $this->displayServer();exit;
             }
 
             /** 子进程开始工作 */
@@ -609,7 +615,6 @@ if (!class_exists('Xiaosongshu')){
 
             $_system_table->table($head, $content);
             echo $_color_class->info("进程启动完成,你可以输入php start.php stop停止运行\r\n");
-            exit(0);
         }
 
         /**

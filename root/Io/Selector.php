@@ -173,6 +173,8 @@ class Selector
                     /** 标记接收数据的开始时间 */
                     $startTime = time();
                     while ($flag) {
+                        /** 这里拿到是经过tcp处理过的header数据，可以直接读取，但是也是分成多次发送过来的，这里是从缓冲区读取数据，应为缓冲区可能会满，所以会多次写入缓冲区，那么也就需要多次读取缓冲区
+                         才能读取完整的http报文，tcp底层在处理数据的时候，使用了启发式算法，不会读取到两个连在一起的http报文 */
                         $_content = fread($val, 10240);
                         /** 这里涉及到tcp通信的问题，当数据包很大的时候，tcp会自动分包，那么一个文件会被分隔成多个数据包传输，所以这里需要验证数据包的大小 */
                         if (stripos($_content,'multipart/form-data; boundary=')){
