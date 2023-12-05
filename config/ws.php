@@ -2,7 +2,7 @@
 return [
     'ws1'=>[
         /** 是否开启 */
-        'enable'=>true,
+        'enable'=>false,
         /** 服务类 */
         'handler'=>\Ws\TestWs::class,
         /** 监听ip */
@@ -11,7 +11,7 @@ return [
         'port'=>'9502'
     ],
     'ws2'=>[
-        'enable'=>true,
+        'enable'=>false,
         'handler'=>\Ws\TestWs2::class,
         'host'=>'0.0.0.0',
         'port'=>'9504'
@@ -20,6 +20,6 @@ return [
         'enable'=>true,
         'handler'=>\Ws\Just::class,
         'host'=>'0.0.0.0',
-        'port'=>'9503'
+        'port'=>'9501'
     ],
 ];

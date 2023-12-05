@@ -393,7 +393,6 @@ if (!class_exists('Xiaosongshu')){
         /** 异步IO之select轮询模式 */
         public function select()
         {
-            var_dump("我是select");
             $httpServer = new Selector();
             /** 消息接收  */
             $httpServer->onMessage = function ($socketAccept, $message, $remote_address) use ($httpServer) {

@@ -20,30 +20,38 @@ abstract class WsSelectorService
     /** 所有的连接 */
     private array $sockets = [];
 
+    public function handle($param){
+
+        $this->host = $param['host']??'0.0.0.0';
+        $this->port = $param['port']??9501;
+        $this->start();
+    }
+
     /**
      * 启动服务
      * @return mixed
      */
     public function start()
     {
+
         /** 首先开启服务端监听 */
         $master = $this->WebSocket($this->host, $this->port);
+
         /** 保存服务端连接 ，必须保存保存到内存中，否则后面的连接马上就销毁，无法建立连接 */
         $this->sockets = array($master);
         while (true) {
             /** 将所有的连接复制给change */
-            $changed = $this->sockets;
+            $read = $write = $this->sockets;
             /** 这里使用了select模型监听io读写事件 */
             /** 客户端连接写入数据后select需要手动遍历连接， */
-
-            stream_select($changed, $write, $except, 60);
-
-
+            //todo 在windows环境下，这个stream_select读取不到连接
+            stream_select($read, $write, $except, 1);
             /** 遍历每一个连接 */
-            foreach ($changed as $socket) {
+            foreach ($read as $socket) {
 
                 /** 如果是服务端连接 */
                 if ($socket == $master) {
+                    var_dump('11111');
                     /** 读取服务端连接的数据 socket_accept需要配合socket_create， socket_bind，socket_listen,socket_recv， socket_write，socket_close使用*/
                     //$client = socket_accept($master);
                     /** 改版后 ，stream_socket_accept 配合fread,fwrite，fclose使用*/
@@ -58,6 +66,7 @@ abstract class WsSelectorService
                     }
                 } else {
 
+                    var_dump('222222');
                     /** 如果是客户端，则读取连接中的数据 */
                     //$bytes = @socket_recv($socket, $buffer, 2048, 0);
                     $buffer = '';
@@ -109,7 +118,7 @@ abstract class WsSelectorService
         $decoded = null;
         /** 获取消息长度：返回buffer的第一个asc码 ，然后和127 进行补码运算 */
         /** "&" 按位与运算：只有对应的两个二进位均为1时，结果位才为1，否则为0。 参考地址：https://blog.csdn.net/alashan007/article/details/89885879 */
-        $len = ord($buffer[1]) & 127;
+        $len = @ord($buffer[1]) & 127;
         /** 长度为126 */
         if ($len === 126) {
             /** 获取masks，就是密码 */

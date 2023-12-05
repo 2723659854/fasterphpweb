@@ -10,7 +10,7 @@ use Root\Lib\WsEpollService;
  * @time 2023-09-28 10:47:59
  * @note 这是一个websocket服务端示例
  */
-class Just extends WsEpollService
+class Just extends WsSelectorService
 {
     /** ws 监听ip */
     public string $host= '0.0.0.0';
@@ -49,7 +49,7 @@ class Just extends WsEpollService
 
         /** 消息格式 */
         # type:[ping,message,getAllClients],content:[string,array,json],to:[uid,all]
-        $message = json_decode($message,true);
+        $message = @json_decode($message,true);
         /** 消息类型 */
         $type = $message['type']??null;
         /** 消息体 */
