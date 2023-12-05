@@ -31,12 +31,16 @@ class StartProvider implements IdentifyInterface
         if (!empty($daemonize)){
             $app->daemon();
         }else{
-            /** 只开启http服务 */
-            $open = [
-                ['http', '正常', '1', $_listen]
-            ];
-            $_system_table->table(['名称', '状态', '进程数', '服务'], $open);
-            echo $_color_class->info("进程启动完成,你可以按ctrl+c停止运行\r\n");
+
+            if ($_system){
+                /** 只开启http服务 */
+                $open = [
+                    ['http', '正常', '1', $_listen]
+                ];
+                $_system_table->table(['名称', '状态', '进程数', '服务'], $open);
+                echo $_color_class->info("进程启动完成,你可以按ctrl+c停止运行\r\n");
+            }
+
             /** 开启http调试模式 */
             if ($_system && $_has_epoll) {
                 /** linux系统使用epoll模型 */
@@ -46,6 +50,5 @@ class StartProvider implements IdentifyInterface
                 $app->select();
             }
         }
-
     }
 }
