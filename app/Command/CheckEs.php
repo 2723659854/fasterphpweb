@@ -30,7 +30,7 @@ class CheckEs extends BaseCommand
     {
         $this->info("请在这里编写你的业务逻辑");
 
-        $client = new ESClient();
-        $client->andSearch();
+        //$client = new ESClient();
+        //$client->andSearch();
     }
 }

@@ -31,7 +31,7 @@ class CheckWsClient extends BaseCommand
     {
         $this->info("请在这里编写你的业务逻辑");
         /** 设置需要连接的ws服务器 */
-        WsClient::setUp('127.0.0.1',9503);
+        WsClient::setUp('127.0.0.1',9501);
         /** 发送一条数据 */
         WsClient::send(['type'=>'ping']);
         /** 读取一条数据 */

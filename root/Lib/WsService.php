@@ -40,13 +40,14 @@ abstract class WsService
      * 启动服务
      * @param $param
      * @return void
-     * @note 用于windows
+     * @note 用于windows启动
      */
     public function handle($param)
     {
-
+        /** 根据传入的配置 设置需要监听的ip和端口 */
         $this->host = $param['host'] ?? '0.0.0.0';
         $this->port = $param['port'] ?? 9501;
+        /** 启动服务*/
         $this->start();
     }
 
@@ -76,7 +77,6 @@ abstract class WsService
      */
     public function startEpollWebsockets()
     {
-        var_dump("我是epoll服务器");
         /** 首先创建ws服务 */
         $this->makeEpollWebSocket();
         /** 添加事件 */
@@ -91,7 +91,6 @@ abstract class WsService
      */
     public function startSelectWebsockets()
     {
-        var_dump("我是select服务器");
         /** 首先开启服务端监听 */
         $master = $this->makeSelectWebSocket($this->host, $this->port);
         /** 保存服务端连接 ，必须保存保存到内存中，否则后面的连接马上就销毁，无法建立连接 */
@@ -167,7 +166,7 @@ abstract class WsService
         /** @var string $listeningAddress 拼接监听地址 */
         $listeningAddress = $this->protocol . '://' . $this->host . ':' . $this->port;
         /** 创建tcp服务器套接字 */
-        $this->serv = stream_socket_server($listeningAddress, $errno, $error); //
+        $this->serv = stream_socket_server($listeningAddress, $errno, $error);
         /** 如果有错误则直接退出 */
         $errno && exit($error);
         /** 设置为异步，不然fread,stream_socket_acceptd等会堵塞 */
@@ -491,7 +490,12 @@ abstract class WsService
         if ($index >= 0) {
             array_splice($this->sockets, $index, 1);
         }
-        //todo 如果是epoll模型，还需要从event里面删除这个连接的读写事件
+        /** 如果这是epoll，则需要清理这个连接的读事件 */
+        if (isset($this->events[(int)$socket])){
+            $this->events[(int)$socket]->del();
+            /** 释放内存 */
+            unset($this->events[(int)$socket]);
+        }
     }
 
     /**
@@ -508,7 +512,7 @@ abstract class WsService
         list($resource, $host, $upgrade, $connection, $key, $protocol, $version, $origin, $data) = $this->getheaders($buffer);
         /** 将获取到的key和常量258EAFA5-E914-47DA-95CA-C5AB0DC85B11拼接后加密，这个常量是文档约定俗成的，是一个常量 */
         $acceptkey = base64_encode(sha1($key . "258EAFA5-E914-47DA-95CA-C5AB0DC85B11", true));
-        /** 握手需要返回给客户端的数据，并允许跨域 */
+        /** 握手需要返回给客户端的数据，并允许跨域,这个http报文不允许有多余的空格换行符，需要特别注意的，否则无法完成握手 */
         $upgrade = "HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Accept: $acceptkey\r\nAccess-Control-Allow-Credentials: true\r\nAccess-Control-Allow-Origin: $origin\r\nAccess-Control-Allow-Methods: *\r\nAccess-Control-Allow-Headers: *\r\n\r\n";
         /** 将消息返回给客户端 */
         @fwrite($user->socket, $upgrade, strlen($upgrade));
