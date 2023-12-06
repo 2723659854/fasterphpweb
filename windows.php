@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__.'/vendor/autoload.php';
 require_once __DIR__ . '/root/function.php';
+require_once __DIR__ . '/vendor/xiaosongshu/colorword/src/Transfer.php';
 /** pid 保存文件位置 */
 global $_pid_file;
 if (!$_pid_file){
@@ -90,6 +91,14 @@ if ($method=='stop'){
             $content[] = ['ws', '正常', 1, $config['port']];
         }
     }
+
+    /** rtmp服务 Root\Queue\RtmpConsumer*/
+    if (config('rtmp')['enable']??false){
+        $handler = \Root\Queue\RtmpConsumer::class.'::class';
+        $processFiles[] = write_process_file($runtimeProcessPath, 'rtmp', $handler,'rtmp');
+        $content[] = ['rtmp/flv', '正常', 2, (config('rtmp')['rtmp']??'1935').','.(config('rtmp')['flv']??'18080')];
+    }
+
     $head = ['名称', '状态', '进程数', '服务'];
     G(\Xiaosongshu\Table\Table::class)->table($head, $content);
     echo "你可以输入 php windows.php stop关闭所有服务\r\n";
@@ -114,10 +123,20 @@ if ($method=='stop'){
  */
 function write_process_file($runtimeProcessPath, $processName, $handle, $type): string
 {
-    if ($type=='rabbitmqProcess'){
+    if ($type=='rtmp'){
         $fileContent = <<<EOF
 <?php
 require_once __DIR__ . '/../../vendor/autoload.php';
+require_once __DIR__ . '/../../vendor/xiaosongshu/colorword/src/Transfer.php';
+require_once __DIR__ . '/../../root/function.php';
+G($handle)->consume(['start','-d']);
+EOF;
+    }
+    elseif ($type=='rabbitmqProcess'){
+        $fileContent = <<<EOF
+<?php
+require_once __DIR__ . '/../../vendor/autoload.php';
+require_once __DIR__ . '/../../vendor/xiaosongshu/colorword/src/Transfer.php';
 require_once __DIR__ . '/../../root/function.php';
 G($handle)->consume();
 EOF;
@@ -125,6 +144,7 @@ EOF;
         $fileContent = <<<EOF
 <?php
 require_once __DIR__ . '/../../vendor/autoload.php';
+require_once __DIR__ . '/../../vendor/xiaosongshu/colorword/src/Transfer.php';
 require_once __DIR__ . '/../../root/function.php';
 G($handle)->handle(config('$type')['$processName']??[]);
 EOF;
