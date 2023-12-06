@@ -14,9 +14,13 @@ composer create-project xiaosongshu/fasterphpweb
 ```
 
 ### 启动项目
-
+linux环境
 ```bash 
-php start.php start  或者 php songshu start 
+开启 php start.php start -d  关闭 php start.php stop
+```
+windows环境
+```bash 
+开启 php windows.php 关闭 php windows.php stop
 ```
 
 ### 目录结构
