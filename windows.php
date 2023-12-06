@@ -18,7 +18,6 @@ if($_system){
     echo "检测到当前非windows环境，请使用php start.php start/restart/stop [-d] 管理服务\r\n";
     exit(1);
 }
-echo "windows环境不支持定时任务，若需要用到定时任务，请使用自定义进程来处理，或者采用其他的办法\r\n";
 
 /** 要执行的方法 */
 $method = $argv[1]??'';
@@ -116,6 +115,12 @@ if ($method=='stop'){
         $processFiles[] = write_process_file($runtimeProcessPath, 'rtmp', $handler,'rtmp');
         $content[] = ['rtmp/flv', '正常', 2, (config('rtmp')['rtmp']??'1935').','.(config('rtmp')['flv']??'18080')];
     }
+
+    /** 单独开一个进程，用来处理定时任务 */
+
+    $handler = \Root\Queue\WindowsTimerConsumer::class.'::class';
+    $processFiles[] = write_process_file($runtimeProcessPath, 'timer', $handler,'timer');
+    $content[] = ['timer', '正常', 1, '无'];
 
     $head = ['名称', '状态', '进程数', '服务'];
     G(\Xiaosongshu\Table\Table::class)->table($head, $content);

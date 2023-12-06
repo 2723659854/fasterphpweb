@@ -1599,7 +1599,7 @@ HttpClient::requestAsync('127.0.0.1:9501', 'GET', ['lesson_id' => 201], [], [], 
 若该http客户端不满足你的需求，你可以使用第三方http客户端，比如Guzzle。或者使用curl函数自己构建请求。
 ###  windows环境支持
 如果需要在windows正式环境上线运行项目，执行php windows.php，如果需要关闭服务php windows.php stop即可。<br>
-需要注意：windows环境不支持定时任务。
+
 
 #### 命令行工具
 

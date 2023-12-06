@@ -100,7 +100,7 @@ class TimerBase
         /** 用户设置的回调函数，如果是数组则说明投递的是对象，不需要序列化 */
         if (is_callable($func)&&!is_array($func)) {
             $serializer = new Serializer();
-            $func       = $serializer->serialize($func);
+            $func       = @$serializer->serialize($func);
         }
         $params = ['func' => $func, 'argv' => $argv, 'interval' => $interval, 'persist' => $persist];
         $data = base64_encode(json_encode($params));

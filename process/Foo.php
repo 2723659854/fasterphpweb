@@ -8,7 +8,7 @@ class Foo
     public function handle($config){
         while (1){
             //var_dump($config);
-            var_dump(date('Y-m-d H:i:s'));
+            var_dump("自定义进程");
             sleep(8);
         }
     }
