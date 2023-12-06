@@ -1,5 +1,7 @@
 <?php
 namespace App\Command;
+use App\Rabbitmq\Demo;
+use App\Rabbitmq\Demo2;
 use phpseclib3\Net\SSH2;
 use Root\Lib\BaseCommand;
 class Test  extends BaseCommand
@@ -13,6 +15,8 @@ class Test  extends BaseCommand
     {
         /** 助手函数 */
         $message = 'hello ,you are a student !';
+        (new Demo2())->publish(['status'=>1,'msg'=>'ok']);
+        var_dump("投递消息完成");
     }
 
     /**

@@ -27,7 +27,7 @@ class Demo2 extends RabbitMQBase
     public function handle(array $param)
     {
         var_dump($param);
-        var_dump($this->queueName);
+        //var_dump($this->queueName);
     }
 
     /**

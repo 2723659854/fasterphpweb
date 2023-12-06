@@ -15,7 +15,7 @@ return [
         /** 消费者名称 */
         'handler'=>App\Rabbitmq\Demo2::class,
         /** 进程数 */
-        'count'=>1,
+        'count'=>2,
         /** 是否开启消费者 */
         'enable'=>true,
     ],
@@ -25,6 +25,6 @@ return [
         /** 进程数 */
         'count'=>1,
         /** 是否开启消费者 */
-        'enable'=>true,
+        'enable'=>false,
     ]
 ];

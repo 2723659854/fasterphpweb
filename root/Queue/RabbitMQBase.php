@@ -60,9 +60,9 @@ abstract class RabbitMQBase
     /** 交换机类型有：direct，fanout，topic，header，x-delayed-message */
     /**
      * 初始化rabbitmq连接
-     * @param $type
+     * @param string $type
      */
-    public function __construct(string $type='')
+    public function __construct( $type='')
     {
         $config=config('rabbitmq');
         $this->host=$config['host'];

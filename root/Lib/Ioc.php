@@ -12,7 +12,6 @@ class Ioc
     protected static function getInstance($className)
     {
         $paramArr = self::getMethodParams($className);
-
         return (new \ReflectionClass($className))->newInstanceArgs($paramArr);
     }
 

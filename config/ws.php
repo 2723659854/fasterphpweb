@@ -11,7 +11,7 @@ return [
         'port'=>'9502'
     ],
     'ws2'=>[
-        'enable'=>true,
+        'enable'=>false,
         'handler'=>\Ws\TestWs2::class,
         'host'=>'0.0.0.0',
         'port'=>'9503'
@@ -23,7 +23,7 @@ return [
         'port'=>'9501'
     ],
     'demo'=>[
-        'enable'=>true,
+        'enable'=>false,
         'handler'=>\Ws\Demo::class,
         'host'=>'0.0.0.0',
         'port'=>'8080'

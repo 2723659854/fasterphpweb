@@ -1,4 +1,5 @@
 <?php
+/** todo linux环境处理常驻内存 */
 return [
     'abc'=>[
         'enable'=>false,

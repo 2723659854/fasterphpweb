@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__.'/vendor/autoload.php';
 require_once __DIR__ . '/root/function.php';
-
+/** pid 保存文件位置 */
 global $_pid_file;
 if (!$_pid_file){
     $_pid_file = phar_app_path() . '/root/my_pid.txt';
@@ -11,18 +11,24 @@ if (!$_pid_file){
 $method = $argv[1]??'';
 if ($method=='stop'){
     $pids = file_get_contents($_pid_file);
+    /** 判断当前的系统环境 */
+    $_system = !(\DIRECTORY_SEPARATOR === '\\');
     foreach (explode('-',$pids) as $taskId){
-        $cmd = "taskkill /F /T /PID {$taskId}";
-        $descriptorspec = [STDIN, STDOUT, STDOUT];
-        $resource = proc_open($cmd, $descriptorspec, $pipes, null, null, ['bypass_shell' => true]);
-        $status = proc_get_status($resource);
-        //print_r($status);
+        if ($_system){
+            /** linux系统 */
+            @\exec("kill -9 {$taskId}");
+        }else{
+            /** windows系统 */
+            $cmd = "taskkill /F /T /PID {$taskId}";
+            $descriptorspec = [STDIN, STDOUT, STDOUT];
+            @\proc_open($cmd, $descriptorspec, $pipes, null, null, ['bypass_shell' => true]);
+        }
     }
     file_put_contents($_pid_file,null);
     sleep(1);
     echo "已关闭所有进程\r\n";
 }else{
-
+    /** 运行路劲 */
     $runtimeProcessPath = app_path() .'/runtime/windows';
     if (!is_dir($runtimeProcessPath)) {
         mkdir($runtimeProcessPath,0777,true);
@@ -33,18 +39,44 @@ if ($method=='stop'){
     ];
     /** 启动自定义进程 */
     foreach (config('process', []) as $processName => $config) {
+
         if ($config['enable']){
             $handler = $config['handler'].'::class';
-            $processFiles[] = write_process_file($runtimeProcessPath, $processName, $handler,'process');
-        }
+            if ($count = $config['count']??1){
+                /** 创建多进程 */
+                while ($count){
+                    $processFiles[] = write_process_file($runtimeProcessPath, $processName.'_'.$count, $handler,'process');
+                    $count--;
+                }
+            }
 
+        }
     }
     /** 启动rabbitmq服务 */
+    foreach (config('rabbitmqProcess') as $processName=>$config){
+        if ($config['enable']){
+            $handler = $config['handler'].'::class';
+            if ($count = $config['count']??1){
+                /** 创建多进程 */
+                while ($count){
+                    $processFiles[] = write_process_file($runtimeProcessPath, $processName.'_'.$count, $handler,'rabbitmqProcess');
+                    $count--;
+                }
+            }
+        }
+    }
 
     /** 启动redis队列服务 */
+    if (config('redis')['enable']??false){
+        $handler = \Root\Queue\RedisQueueConsumer::class.'::class';
+        if (!extension_loaded('redis')) {
+            print_r("系统检测到你尚未安装redis扩展，无法启动redis队列");
+        }else{
+            $processFiles[] = write_process_file($runtimeProcessPath, 'redis', $handler,'redis');
+        }
+    }
 
     /** 启动ws服务 php start.php ws:start Ws.Just */
-    //todo 这里 存在问题，端口接收不到消息
     foreach (config('ws') as $processName=>$config){
         if ($config['enable']){
             $handler = $config['handler'].'::class';
@@ -67,22 +99,37 @@ if ($method=='stop'){
  * @param $runtimeProcessPath
  * @param $processName
  * @param $handle
- * @param $param
+ * @param $type
  * @return string
  */
 function write_process_file($runtimeProcessPath, $processName, $handle, $type): string
 {
-    $fileContent = <<<EOF
+    if ($type=='rabbitmqProcess'){
+        $fileContent = <<<EOF
 <?php
 require_once __DIR__ . '/../../vendor/autoload.php';
 require_once __DIR__ . '/../../root/function.php';
-G($handle)->handle(config('$type')['$processName']);
+G($handle)->consume();
 EOF;
+    }else{
+        $fileContent = <<<EOF
+<?php
+require_once __DIR__ . '/../../vendor/autoload.php';
+require_once __DIR__ . '/../../root/function.php';
+G($handle)->handle(config('$type')['$processName']??[]);
+EOF;
+    }
+
     $processFile = $runtimeProcessPath . DIRECTORY_SEPARATOR . "start_$processName.php";
     file_put_contents($processFile, $fileContent);
     return $processFile;
 }
 
+/**
+ * 运行PHP命令
+ * @param $processFiles
+ * @return resource|void
+ */
 function popen_processes($processFiles)
 {
     $cmd = '"' . PHP_BINARY . '" ' . implode(' ', $processFiles);
@@ -94,6 +141,11 @@ function popen_processes($processFiles)
     return $resource;
 }
 
+/**
+ * 记录进程id
+ * @param $pid
+ * @return void
+ */
 function writeWindowsPid($pid)
 {
     global $_pid_file;
