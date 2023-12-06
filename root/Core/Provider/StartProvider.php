@@ -24,7 +24,7 @@ class StartProvider implements IdentifyInterface
             echo $_color_class->info("服务正在运行，请勿重复启动，你可以使用stop停止运行或者使用restart重启\r\n");
             exit(0);
         }
-        echo $_color_class->info("进程启动中...\r\n");
+        //echo $_color_class->info("进程启动中...\r\n");
         /** 加载路由 */
         G(\Root\Route::class)->loadRoute();
         AnnotationRoute::loadRoute();

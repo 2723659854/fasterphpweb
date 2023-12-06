@@ -6,13 +6,14 @@ global $_pid_file;
 if (!$_pid_file){
     $_pid_file = phar_app_path() . '/root/my_pid.txt';
 }
+/** 判断当前的系统环境 */
+$_system = !(\DIRECTORY_SEPARATOR === '\\');
 
 /** 要执行的方法 */
 $method = $argv[1]??'';
 if ($method=='stop'){
     $pids = file_get_contents($_pid_file);
-    /** 判断当前的系统环境 */
-    $_system = !(\DIRECTORY_SEPARATOR === '\\');
+
     foreach (explode('-',$pids) as $taskId){
         if ($_system){
             /** linux系统 */
@@ -33,16 +34,19 @@ if ($method=='stop'){
     if (!is_dir($runtimeProcessPath)) {
         mkdir($runtimeProcessPath,0777,true);
     }
+    $content = [];
     /** 启动http服务 */
     $processFiles = [
         __DIR__ . DIRECTORY_SEPARATOR . 'start.php start'
     ];
+    $content[] = ['http', '正常', $_system?config('server')['num']??1:1, config('server')['port']??'未设置'];
     /** 启动自定义进程 */
     foreach (config('process', []) as $processName => $config) {
 
         if ($config['enable']){
             $handler = $config['handler'].'::class';
             if ($count = $config['count']??1){
+                $content[] = [$processName, '正常', $config['count']??1, $config['port']??''];
                 /** 创建多进程 */
                 while ($count){
                     $processFiles[] = write_process_file($runtimeProcessPath, $processName.'_'.$count, $handler,'process');
@@ -57,6 +61,7 @@ if ($method=='stop'){
         if ($config['enable']){
             $handler = $config['handler'].'::class';
             if ($count = $config['count']??1){
+                $content[] = ['rabbitmq', '正常', $config['count']??1, config('rabbitmq')['port']];
                 /** 创建多进程 */
                 while ($count){
                     $processFiles[] = write_process_file($runtimeProcessPath, $processName.'_'.$count, $handler,'rabbitmqProcess');
@@ -73,6 +78,7 @@ if ($method=='stop'){
             print_r("系统检测到你尚未安装redis扩展，无法启动redis队列");
         }else{
             $processFiles[] = write_process_file($runtimeProcessPath, 'redis', $handler,'redis');
+            $content[] = ['ws', '正常', 1, config('redis')['port']];
         }
     }
 
@@ -81,8 +87,12 @@ if ($method=='stop'){
         if ($config['enable']){
             $handler = $config['handler'].'::class';
             $processFiles[] = write_process_file($runtimeProcessPath, $processName, $handler,'ws');
+            $content[] = ['ws', '正常', 1, $config['port']];
         }
     }
+    $head = ['名称', '状态', '进程数', '服务'];
+    G(\Xiaosongshu\Table\Table::class)->table($head, $content);
+    echo "你可以输入 php windows.php stop关闭所有服务\r\n";
 
     /** 逐个启动服务 */
     foreach ($processFiles as $file){
