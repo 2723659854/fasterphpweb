@@ -17,7 +17,7 @@ return [
         /** 进程数 */
         'count'=>2,
         /** 是否开启消费者 */
-        'enable'=>true,
+        'enable'=>false,
     ],
     'DemoConsume'=>[
         /** 消费者名称 */

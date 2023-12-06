@@ -8,6 +8,7 @@ use Root\Io\Epoll;
 use Root\Io\Selector;
 use Root\Lib\Container;
 use Root\Lib\NacosConfigManager;
+use Root\Queue\ProcessConsumer;
 use Root\Queue\RabbitMqConsumer;
 use Root\Queue\RedisQueueConsumer;
 use Root\Queue\RtmpConsumer;
@@ -604,14 +605,19 @@ if (!class_exists('Xiaosongshu')){
                 }
             }
             if ($ws_count) {
-                $content[] = ['ws服务', '正常', $ws_count, implode(',', $ws_port)];
+                $content[] = ['websocket', '正常', $ws_count, implode(',', $ws_port)];
             }
             /** rtmp服务 */
             $rtmp_enable = config('rtmp')['enable']??false;
             if($rtmp_enable){
                 $content[] = ['rtmp-flv', '正常', 2, config('rtmp')['rtmp'].','.config('rtmp')['flv']];
             }
-
+            /** 自定义进程 */
+            foreach (config('process')??[] as $name=>$config){
+                if ($config['enable']??false){
+                    $content[] = ['custom_process_'.$name, '正常', $config['count']??1, $config['port']];
+                }
+            }
             $_system_table->table($head, $content);
             echo $_color_class->info("进程启动完成,你可以输入php start.php stop停止运行\r\n");
         }
@@ -626,6 +632,7 @@ if (!class_exists('Xiaosongshu')){
             $rabbitmq_enable = in_array(true, array_column(config('rabbitmqProcess') ?? [], 'enable'));
             $ws_enable = in_array(true, array_column(config('ws') ?? [], 'enable'));
             $rtmp_enable = config('rtmp')['enable']??false;
+            $process_enable = in_array(true, array_column(config('process') ?? [], 'enable'));
             /** 创建子进程负责处理 常驻内存的进程 */
             if (getmypid()==$master_pid){
                 pcntl_fork();
@@ -651,6 +658,10 @@ if (!class_exists('Xiaosongshu')){
             /** 开启ws服务 */
             if ($ws_enable && (getmypid() != $master_pid)) {
                 G(WsConsumer::class)->consume();
+            }
+            /** 开启用户自定义的进程 */
+            if ($process_enable && (getmypid() != $master_pid)) {
+                G(ProcessConsumer::class)->consume();
             }
             /** 开启主进程，定时任务 */
             if (getmypid() == $master_pid) {
