@@ -1,4 +1,9 @@
 <?php
+/**
+ * @purpose windows环境启动文件
+ * @note 为了能够兼容windows运行环境，所以编写了这一个启动文件。
+ * @date 2023年12月6日16:19:03
+ */
 require_once __DIR__.'/vendor/autoload.php';
 require_once __DIR__ . '/root/function.php';
 require_once __DIR__ . '/vendor/xiaosongshu/colorword/src/Transfer.php';
@@ -13,6 +18,7 @@ if($_system){
     echo "检测到当前非windows环境，请使用php start.php start/restart/stop [-d] 管理服务\r\n";
     exit(1);
 }
+echo "windows环境不支持定时任务，若需要用到定时任务，请使用自定义进程来处理，或者采用其他的办法\r\n";
 
 /** 要执行的方法 */
 $method = $argv[1]??'';
@@ -34,19 +40,32 @@ if ($method=='stop'){
     if (!is_dir($runtimeProcessPath)) {
         mkdir($runtimeProcessPath,0777,true);
     }
+    /** 初始化需要打印的内容 */
     $content = [];
-    /** 启动http服务 */
+    /** 初始化需要启动的服务 */
     $processFiles = [
-        __DIR__ . DIRECTORY_SEPARATOR . 'start.php start'
+        //__DIR__ . DIRECTORY_SEPARATOR . 'start.php start'
     ];
-    $content[] = ['http', '正常', 1, config('server')['port']??'未设置'];
+
+    /** 启动http服务 */
+    $httpConfig = config('server');
+    /** http 进程数 */
+    $httpCount = $httpConfig['num']??1;
+    while($httpCount){
+        $handler = \Root\Queue\HttpConsumer::class.'::class';
+        $processFiles[] = write_process_file($runtimeProcessPath, 'http'.'_'.$httpCount, $handler,'server');
+        $httpCount--;
+    }
+    $content[] = ['http', '正常', $httpConfig['num'], config('server')['port']??'未设置'];
+
+
     /** 启动自定义进程 */
     foreach (config('process', []) as $processName => $config) {
 
         if ($config['enable']){
             $handler = $config['handler'].'::class';
             if ($count = $config['count']??1){
-                $content[] = [$processName, '正常', $config['count']??1, $config['port']??''];
+                $content[] = [$processName, '正常', $config['count']??1, $config['port']??'未设置'];
                 /** 创建多进程 */
                 while ($count){
                     $processFiles[] = write_process_file($runtimeProcessPath, $processName.'_'.$count, $handler,'process');
@@ -61,7 +80,7 @@ if ($method=='stop'){
         if ($config['enable']){
             $handler = $config['handler'].'::class';
             if ($count = $config['count']??1){
-                $content[] = ['rabbitmq', '正常', $config['count']??1, config('rabbitmq')['port']];
+                $content[] = ['rabbitmq', '正常', $config['count']??1, config('rabbitmq')['port']??'未设置'];
                 /** 创建多进程 */
                 while ($count){
                     $processFiles[] = write_process_file($runtimeProcessPath, $processName.'_'.$count, $handler,'rabbitmqProcess');
@@ -78,7 +97,7 @@ if ($method=='stop'){
             print_r("系统检测到你尚未安装redis扩展，无法启动redis队列");
         }else{
             $processFiles[] = write_process_file($runtimeProcessPath, 'redis', $handler,'redis');
-            $content[] = ['ws', '正常', 1, config('redis')['port']];
+            $content[] = ['ws', '正常', 1, config('redis')['port']??'未设置'];
         }
     }
 
@@ -87,7 +106,7 @@ if ($method=='stop'){
         if ($config['enable']){
             $handler = $config['handler'].'::class';
             $processFiles[] = write_process_file($runtimeProcessPath, $processName, $handler,'ws');
-            $content[] = ['ws', '正常', 1, $config['port']];
+            $content[] = ['ws', '正常', 1, $config['port']??'未设置'];
         }
     }
 
