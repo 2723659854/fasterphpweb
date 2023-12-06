@@ -37,8 +37,8 @@ class StartProvider implements IdentifyInterface
                 $open = [
                     ['http', '正常', '1', $_listen]
                 ];
-                $_system_table->table(['名称', '状态', '进程数', '服务'], $open);
-                echo $_color_class->info("进程启动完成,你可以按ctrl+c停止运行\r\n");
+                //$_system_table->table(['名称', '状态', '进程数', '服务'], $open);
+                echo $_color_class->info("进程启动完成,你可以按ctrl+c关闭当前窗口\r\n");
             }
 
             /** 开启http调试模式 */

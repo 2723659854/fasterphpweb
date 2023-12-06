@@ -9,6 +9,10 @@ if (!$_pid_file){
 }
 /** 判断当前的系统环境 */
 $_system = !(\DIRECTORY_SEPARATOR === '\\');
+if($_system){
+    echo "检测到当前非windows环境，请使用php start.php start/restart/stop [-d] 管理服务\r\n";
+    exit(1);
+}
 
 /** 要执行的方法 */
 $method = $argv[1]??'';
@@ -16,15 +20,10 @@ if ($method=='stop'){
     $pids = file_get_contents($_pid_file);
 
     foreach (explode('-',$pids) as $taskId){
-        if ($_system){
-            /** linux系统 */
-            @\exec("kill -9 {$taskId}");
-        }else{
-            /** windows系统 */
-            $cmd = "taskkill /F /T /PID {$taskId}";
-            $descriptorspec = [STDIN, STDOUT, STDOUT];
-            @\proc_open($cmd, $descriptorspec, $pipes, null, null, ['bypass_shell' => true]);
-        }
+        /** windows系统 */
+        $cmd = "taskkill /F /T /PID {$taskId}";
+        $descriptorspec = [STDIN, STDOUT, STDOUT];
+        @\proc_open($cmd, $descriptorspec, $pipes, null, null, ['bypass_shell' => true]);
     }
     file_put_contents($_pid_file,null);
     sleep(1);
@@ -40,7 +39,7 @@ if ($method=='stop'){
     $processFiles = [
         __DIR__ . DIRECTORY_SEPARATOR . 'start.php start'
     ];
-    $content[] = ['http', '正常', $_system?config('server')['num']??1:1, config('server')['port']??'未设置'];
+    $content[] = ['http', '正常', 1, config('server')['port']??'未设置'];
     /** 启动自定义进程 */
     foreach (config('process', []) as $processName => $config) {
 
