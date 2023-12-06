@@ -2,39 +2,167 @@
 
 namespace Root\Lib;
 
-abstract class WsEpollService
+/**
+ * @purpose ws连接
+ * @note 心跳检测，需要使用定时器每隔5秒检测一次客户端是否发送了心跳，若没有发送心跳，则断开连接，
+ * 这里定时器需要单独开一个进程，同时客户端心跳信息单独保存到一个静态数组中，直接使用一个while循环就行了
+ * @note 客户端分组，需要用户自己创建一个数组保存给个分组的用户
+ */
+abstract class WsService
 {
-    /** 存所有的客户端事件 */
-    public $events = [];
 
-    /** @var \Event $event 整个服务的事件 */
-    public $event;
-
-    /** @var \EventBase $event_base eventBase实例 使用的epoll模型 */
-    public $event_base;
-
-    /** @var false|resource tcp 服务 */
-    public $serv;
-
-    /** @var string $host 监听的ip和协议 */
+    /** 监听地址 */
     public string $host = '0.0.0.0';
-
-    /** @var string $port 监听的端口 */
+    /** 监听端口 */
     public int $port = 9501;
-
-    /** @var string $protocol 通信协议 */
-    public $protocol = 'tcp';
-
     /** 所有的用户*/
     private array $users = [];
     /** 所有的连接 */
     private array $sockets = [];
 
+    /** 存所有的客户端事件 */
+    public array $events = [];
+
+    /**  整个服务的事件 */
+    public  $event;
+
+    /**  $event_base eventBase实例 使用的epoll模型 */
+    public  $event_base;
+
+    /**  tcp 服务 */
+    public  $serv;
+
+    /** @var string $protocol 通信协议 */
+    public string $protocol = 'tcp';
+
+
     /**
-     * 构建ws服务
+     * 启动服务
+     * @param $param
+     * @return void
+     * @note 用于windows
+     */
+    public function handle($param)
+    {
+
+        $this->host = $param['host'] ?? '0.0.0.0';
+        $this->port = $param['port'] ?? 9501;
+        $this->start();
+    }
+
+    /**
+     * 启动服务
+     * @return mixed
+     */
+    public function start()
+    {
+        if (class_exists('\EventBase')) {
+            $_has_epoll = (new \EventBase())->getMethod() == 'epoll';
+        } else {
+            $_has_epoll = false;
+        }
+        /** 如果当前环境支持Events事件 */
+        if ($_has_epoll) {
+            $this->startEpollWebsockets();
+        } else {
+            /** 当前环境不支持events事件 */
+            $this->startSelectWebsockets();
+        }
+    }
+
+    /**
+     * 启动epoll服务
      * @return void
      */
-    public function WebSocket()
+    public function startEpollWebsockets()
+    {
+        var_dump("我是epoll服务器");
+        /** 首先创建ws服务 */
+        $this->makeEpollWebSocket();
+        /** 添加事件 */
+        $this->event->add();
+        /** 执行事件循环 */
+        $this->event_base->loop();
+    }
+
+    /**
+     * 构建selectWs服务
+     * @return void
+     */
+    public function startSelectWebsockets()
+    {
+        var_dump("我是select服务器");
+        /** 首先开启服务端监听 */
+        $master = $this->makeSelectWebSocket($this->host, $this->port);
+        /** 保存服务端连接 ，必须保存保存到内存中，否则后面的连接马上就销毁，无法建立连接 */
+        $this->sockets = array($master);
+        while (true) {
+            /** 将所有的连接复制给change */
+            $read = $write = $this->sockets;
+            /** 这里使用了select模型监听io读写事件 */
+            /** 客户端连接写入数据后select需要手动遍历连接， */
+            stream_select($read, $write, $except, 1);
+            /** 遍历每一个连接 */
+            foreach ($read as $socket) {
+
+                /** 如果是服务端连接 */
+                if ($socket == $master) {
+                    /** 读取服务端连接的数据 socket_accept需要配合socket_create， socket_bind，socket_listen,socket_recv， socket_write，socket_close使用*/
+                    //$client = socket_accept($master);
+                    /** 改版后 ，stream_socket_accept 配合fread,fwrite，fclose使用*/
+                    $client = stream_socket_accept($master, 0, $remote_address); //阻塞监听 设置超时0，并获取客户端地址
+                    /** 没有数据，说明没有新的客户端发起连接请求 */
+                    if ($client < 0) {
+                        continue;
+                    } else {
+                        /** 保存客户端到内存 */
+                        $this->connect($client, $remote_address);
+                    }
+                } else {
+                    /** 如果是客户端，则读取连接中的数据 */
+                    //$bytes = @socket_recv($socket, $buffer, 2048, 0);
+                    $buffer = '';
+                    $flag = true;
+                    while ($flag) {
+                        $_content = fread($socket, 1024);
+                        if (strlen($_content) < 1024) {
+                            $flag = false;
+                        }
+                        $buffer = $buffer . $_content;
+                    }
+                    $bytes = $buffer;
+
+                    if ($bytes == 0) {
+                        /** 如果客户端没有数据，则断开客户端连接 */
+                        $this->disconnect($socket);
+                    } else {
+                        /** 通过socket获取用户信息 */
+                        $user = $this->getuserbysocket($socket);
+
+                        if (!$user->handshake) {
+                            /** 如果没有握手，则先握手 */
+                            $this->dohandshake($user, $buffer);
+                            /** 调用用户自定义的onConnect方法 */
+                            try {
+                                $this->onConnect($socket);
+                            } catch (\Exception|\RuntimeException $exception) {
+                                $this->onError($socket, $exception);
+                            }
+                        } else {
+                            /** 处理客户端发送的数据 */
+                            $this->process($user, $buffer);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * 构建epollWs服务
+     * @return void
+     */
+    public function makeEpollWebSocket()
     {
         /** @var string $listeningAddress 拼接监听地址 */
         $listeningAddress = $this->protocol . '://' . $this->host . ':' . $this->port;
@@ -48,7 +176,7 @@ abstract class WsEpollService
         $this->event_base = new \EventBase();
         /** 建立事件监听服务器socket可读事件， 获取event实例，这个是获取php的event扩展的基类 */
         /** 在react中，SyntheticEvent在调用事件回调之后该对象将被重用，并且其所有属性都将无效。如果要以异步方 式访问事件属性，则应调用event.persist()事件，这将从池中删除事件，并允许用户代码保留对该事件的引用。 */
-        $event = new \Event($this->event_base, $this->serv, \Event::READ | \Event::PERSIST, function ($serv) {
+        $this->event = new \Event($this->event_base, $this->serv, \Event::READ | \Event::PERSIST, function ($serv) {
             /** 获取新的连接 stream_socket_accept语法：socket连接，超时，客户端地址 */
             $cli = @stream_socket_accept($serv, 0, $remote_address);
 
@@ -57,7 +185,7 @@ abstract class WsEpollService
                 /** 设置为异步 */
                 stream_set_blocking($cli, 0);
                 /** 保存客户端连接和ip */
-                $this->connect($cli,$remote_address);
+                $this->connect($cli, $remote_address);
                 /** 将新的客户端连接投入到事件，构建客户端事件， */
                 $client_event = new \Event($this->event_base, $cli, \Event::READ | \Event::PERSIST, function ($cli) use ($remote_address) {
                     /** 客户端连接再添加监听可读事件，读取客户端连接的数据 */
@@ -80,19 +208,19 @@ abstract class WsEpollService
                         return;
                     }
                     /** 正常读取到数据,触发消息接收事件,响应内容，如果读取的内容不为空，并且设置了onMessage回调函数 */
-                    if (!empty($buffer) ) {
+                    if (!empty($buffer)) {
                         /** 传入连接，接收的值到回调函数 */
                         $user = $this->getuserbysocket($cli);
-                        if (!$user->handshake){
+                        if (!$user->handshake) {
                             /** 握手 */
-                            $this->dohandshake($user,$buffer);
+                            $this->dohandshake($user, $buffer);
                             /** 调用用户自定义的onConnect方法 */
                             try {
                                 $this->onConnect($cli);
-                            }catch (\Exception|\RuntimeException $exception){
-                                $this->onError($cli,$exception);
+                            } catch (\Exception|\RuntimeException $exception) {
+                                $this->onError($cli, $exception);
                             }
-                        }else{
+                        } else {
                             /** 处理用户信息 */
                             $this->process($user, $buffer);
                         }
@@ -104,56 +232,6 @@ abstract class WsEpollService
                 $this->events[(int)$cli] = $client_event;
             }
         }, $this->serv);
-        $this->event = $event;
-    }
-
-    public function start()
-    {
-        /** 首先创建ws服务 */
-        $this->WebSocket();
-        /** 添加事件 */
-        $this->event->add();
-        /** 执行事件循环 */
-        $this->event_base->loop();
-    }
-
-
-    /**
-     * 连接客户端
-     * @param $socket
-     * @return void
-     * @note 保存客户端连接
-     */
-    private function connect($socket,$remote_address)
-    {
-        $user            = new \stdClass();
-        $user->id        = uniqid();
-        $user->socket    = $socket;
-        $user->handshake = false;
-        $user->remote_address = $remote_address;
-        /** 保存客户端 */
-        array_push($this->users, $user);
-        /** 保存连接 */
-        array_push($this->sockets, $socket);
-    }
-
-    /**
-     * 处理客户端消息
-     * @param $user
-     * @param $msg
-     * @return void
-     */
-    private function process($user, $msg)
-    {
-        /** 首先 将二进制数据转化为明文数据 */
-        $action = $this->decode($msg);
-        /** 调用用户定义的message方法处理业务逻辑 */
-        try {
-            $this->onMessage($user->socket, $action);
-        }catch (\Exception|\RuntimeException $exception){
-            $this->onError($user->socket, $exception);
-        }
-
     }
 
     /**
@@ -168,23 +246,23 @@ abstract class WsEpollService
         $decoded = null;
         /** 获取消息长度：返回buffer的第一个asc码 ，然后和127 进行补码运算 */
         /** "&" 按位与运算：只有对应的两个二进位均为1时，结果位才为1，否则为0。 参考地址：https://blog.csdn.net/alashan007/article/details/89885879 */
-        $len     = ord($buffer[1]) & 127;
+        $len = @ord($buffer[1]) & 127;
         /** 长度为126 */
         if ($len === 126) {
             /** 获取masks，就是密码 */
             $masks = substr($buffer, 4, 4);
             /** 获取data，加密后的数据 */
-            $data  = substr($buffer, 8);
+            $data = substr($buffer, 8);
         } else if ($len === 127) {
             /** 获取masks */
             $masks = substr($buffer, 10, 4);
             /** 获取data */
-            $data  = substr($buffer, 14);
+            $data = substr($buffer, 14);
         } else {
             /** 获取masks */
             $masks = substr($buffer, 2, 4);
             /** 获取data */
-            $data  = substr($buffer, 6);
+            $data = substr($buffer, 6);
         }
         /** 逐个字节解码 */
         for ($index = 0; $index < strlen($data); $index++) {
@@ -218,6 +296,25 @@ abstract class WsEpollService
     }
 
     /**
+     * 处理客户端消息
+     * @param $user
+     * @param $msg
+     * @return void
+     */
+    private function process($user, $msg)
+    {
+        /** 首先 将二进制数据转化为明文数据 */
+        $action = $this->decode($msg);
+        /** 调用用户定义的message方法处理业务逻辑 */
+        try {
+            $this->onMessage($user->socket, $action);
+        } catch (\Exception|\RuntimeException $exception) {
+            $this->onError($user->socket, $exception);
+        }
+
+    }
+
+    /**
      * 发送消息
      * @param $socket
      * @param $msg
@@ -237,12 +334,13 @@ abstract class WsEpollService
      * @param $msg
      * @return void
      */
-    protected function sendToAll($msg){
+    protected function sendToAll($msg)
+    {
         if (!is_string($msg)) {
             $msg = json_encode($msg);
         }
-        foreach ($this->users as $user){
-            $this->send($user->socket,$msg);
+        foreach ($this->users as $user) {
+            $this->send($user->socket, $msg);
         }
     }
 
@@ -259,7 +357,68 @@ abstract class WsEpollService
         $msg = $this->encode($msg);
         /** 发送消息  */
         //socket_write($client, $msg, strlen($msg));
-        fwrite($client, $msg, strlen($msg));
+        @fwrite($client, $msg, strlen($msg));
+    }
+
+    /**
+     * 构建websocket服务
+     * @param $address
+     * @param $port
+     * @return resource|\Socket|void
+     * @note 这个是select模型
+     */
+    private function WebSocket1($address, $port)
+    {
+        /** 创建一个通讯节点，套字节语法： IPv4 网络协议，流式套接字。使用全双工协议tcp协议 参考：https://blog.csdn.net/sn_qmzm521/article/details/80756771 */
+        $master = socket_create(AF_INET, SOCK_STREAM, SOL_TCP) or die("socket_create() failed");
+        /** 设置节点信息，语法：socket节点，socket协议号，端口复用，同步，参考地址:https://www.kancloud.cn/a173512/php_note/2399141 */
+        socket_set_option($master, SOL_SOCKET, SO_REUSEADDR, 1) or die("socket_option() failed");
+        /** 套字节绑定本地的ip和端口 */
+        socket_bind($master, $address, $port) or die("socket_bind() failed");
+        /** 开始监听端口 语法：套字节，队列长度（tcp连接可以排队的长度，因为建立连接不是一瞬间就成功，是有三次握手的一个过程，在上一个连接握手的时候，下一个请求发起握手，这个时候
+         * 就需要排队，这里就需要设置排队的长度，参考地址：https://blog.csdn.net/kety2001/article/details/7953921）
+         */
+        socket_listen($master, 20) or die("socket_listen() failed");
+        return $master;
+    }
+
+    /**
+     * 创建socket服务
+     * @param $address
+     * @param $port
+     * @return false|resource
+     */
+    public function makeSelectWebSocket($address, $port)
+    {
+        /** 配置socket流参数 */
+        $context = stream_context_create();
+        /** 设置端口复用 */
+        stream_context_set_option($context, 'socket', 'so_reuseport', 1);
+        stream_context_set_option($context, 'socket', 'so_reuseaddr', 1);
+        /** 设置服务端：监听地址+端口 */
+        $socket = stream_socket_server('tcp://' . $address . ':' . $port, $errno, $errstr, STREAM_SERVER_BIND | STREAM_SERVER_LISTEN, $context);
+        /** 设置非阻塞，语法是关闭阻塞 */
+        stream_set_blocking($socket, 0);
+        return $socket;
+    }
+
+    /**
+     * 连接客户端
+     * @param $socket
+     * @return void
+     * @note 保存客户端连接
+     */
+    private function connect($socket, $remote_address)
+    {
+        $user = new \stdClass();
+        $user->id = uniqid();
+        $user->socket = $socket;
+        $user->handshake = false;
+        $user->remote_address = $remote_address;
+        /** 保存客户端 */
+        array_push($this->users, $user);
+        /** 保存连接 */
+        array_push($this->sockets, $socket);
     }
 
     /**
@@ -267,7 +426,8 @@ abstract class WsEpollService
      * @param $socket
      * @return mixed|null
      */
-    protected function getUserInfoBySocket($socket){
+    protected function getUserInfoBySocket($socket)
+    {
         return $this->getuserbysocket($socket);
     }
 
@@ -276,7 +436,8 @@ abstract class WsEpollService
      * @param $uid
      * @return mixed|null
      */
-    protected function getUserInfoByUid($uid){
+    protected function getUserInfoByUid($uid)
+    {
         $found = null;
         foreach ($this->users as $user) {
             if ($user->id == $uid) {
@@ -288,19 +449,12 @@ abstract class WsEpollService
     }
 
     /**
-     * 获取所有的用户
-     * @return array
-     */
-    protected function getAllUser(){
-        return $this->users;
-    }
-
-    /**
      * 关闭客户端连接
      * @param $socket
      * @return void
      */
-    protected function close($socket){
+    protected function close($socket)
+    {
         $this->disconnect($socket);
     }
 
@@ -308,17 +462,18 @@ abstract class WsEpollService
      * 关闭客户端连接
      * @param $socket
      * @return void
+     *
      */
     private function disconnect($socket)
     {
         /** 吊起用户自定义 的onClose方法 */
         try {
             $this->onClose($socket);
-        }catch (\Exception|\RuntimeException $exception){
-            $this->onError($socket,$exception);
+        } catch (\Exception|\RuntimeException $exception) {
+            $this->onError($socket, $exception);
         }
         $found = null;
-        $n     = count($this->users);
+        $n = count($this->users);
         for ($i = 0; $i < $n; $i++) {
             if ($this->users[$i]->socket == $socket) {
                 $found = $i;
@@ -336,6 +491,7 @@ abstract class WsEpollService
         if ($index >= 0) {
             array_splice($this->sockets, $index, 1);
         }
+        //todo 如果是epoll模型，还需要从event里面删除这个连接的读写事件
     }
 
     /**
@@ -352,10 +508,10 @@ abstract class WsEpollService
         list($resource, $host, $upgrade, $connection, $key, $protocol, $version, $origin, $data) = $this->getheaders($buffer);
         /** 将获取到的key和常量258EAFA5-E914-47DA-95CA-C5AB0DC85B11拼接后加密，这个常量是文档约定俗成的，是一个常量 */
         $acceptkey = base64_encode(sha1($key . "258EAFA5-E914-47DA-95CA-C5AB0DC85B11", true));
-        /** 握手需要返回给客户端的数据 */
-        $upgrade   = "HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Accept: $acceptkey\r\n\r\n";
+        /** 握手需要返回给客户端的数据，并允许跨域 */
+        $upgrade = "HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Accept: $acceptkey\r\nAccess-Control-Allow-Credentials: true\r\nAccess-Control-Allow-Origin: $origin\r\nAccess-Control-Allow-Methods: *\r\nAccess-Control-Allow-Headers: *\r\n\r\n";
         /** 将消息返回给客户端 */
-        fwrite($user->socket, $upgrade, strlen($upgrade));
+        @fwrite($user->socket, $upgrade, strlen($upgrade));
         /** 标记为已完成握手 */
         $user->handshake = true;
         return true;
@@ -417,6 +573,14 @@ abstract class WsEpollService
         return $found;
     }
 
+    /**
+     * 获取所有的用户
+     * @return array
+     */
+    protected function getAllUser()
+    {
+        return $this->users;
+    }
 
     /**
      * 连接成功事件
@@ -447,5 +611,6 @@ abstract class WsEpollService
      * @param \Exception $exception
      * @return mixed
      */
-    public abstract function onError($socket,\Exception $exception);
+    public abstract function onError($socket, \Exception $exception);
 }
+

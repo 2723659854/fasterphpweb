@@ -58,18 +58,14 @@ class MakeWsProvider implements IdentifyInterface
 <?php
 namespace Ws;
 
-/** 最大连接数1240，默认支持selector模型 */
-use Root\Lib\WsSelectorService;
-/** 最大连接无上限，需系统支持epoll模型 */
-use Root\Lib\WsEpollService;
+use Root\Lib\WsService;
 
 /**
  * @purpose ws服务
  * @author administrator
  * @time $time
- * @note 默认使用WsSelectorService，若系统支持event事件，支持epoll模型，则可以继承WsEpollService
  */
-class $className extends WsSelectorService
+class $className extends WsService
 {
     /** ws 监听ip */
     public string \$host= '0.0.0.0';

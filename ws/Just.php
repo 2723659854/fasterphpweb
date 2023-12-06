@@ -1,8 +1,7 @@
 <?php
 namespace Ws;
 use RuntimeException;
-use Root\Lib\WsSelectorService;
-use Root\Lib\WsEpollService;
+use Root\Lib\WsService;
 
 /**
  * @purpose ws服务
@@ -10,7 +9,7 @@ use Root\Lib\WsEpollService;
  * @time 2023-09-28 10:47:59
  * @note 这是一个websocket服务端示例
  */
-class Just extends WsSelectorService
+class Just extends WsService
 {
     /** ws 监听ip */
     public string $host= '0.0.0.0';

@@ -1,13 +1,14 @@
 <?php
 namespace Ws;
+
 use Root\Lib\WsService;
 
 /**
  * @purpose ws服务
  * @author administrator
- * @time 2023年9月28日17:56:05
+ * @time 2023-12-06 03:24:42
  */
-class TestWs extends WsService
+class Demo extends WsService
 {
     /** ws 监听ip */
     public string $host= '0.0.0.0';
@@ -55,17 +56,15 @@ class TestWs extends WsService
     {
         // TODO: Implement onClose() method.
     }
-
+    
     /**
-     * 发生了错误
+     * 异常处理
      * @param $socket
      * @param \Exception $exception
-     * @return mixed|void
-     * @note 此处仅仅作为举例，实际应用请根据自己的业务需求处理报错信息
+     * @return mixed|void 
      */
     public function onError($socket, \Exception $exception)
     {
-        $this->sendTo($socket,$exception->getMessage());
-        $this->close($socket);
+        // TODO: Implement onError() method.
     }
 }

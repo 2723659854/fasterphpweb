@@ -1,18 +1,18 @@
 <?php
 namespace Ws;
-use Root\Lib\WsSelectorService;
+use Root\Lib\WsService;
 
 /**
  * @purpose ws服务
  * @author administrator
  * @time 2023年9月28日17:56:05
  */
-class TestWs2 extends WsSelectorService
+class TestWs2 extends WsService
 {
     /** ws 监听ip */
     public string $host= '0.0.0.0';
     /** 监听端口 */
-    public int $port = 9502;
+    public int $port = 9503;
 
     public function __construct(){
         //todo 编写可能需要的逻辑
