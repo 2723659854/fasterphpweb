@@ -2,7 +2,7 @@
 /** 这里配置你的自定义进程 */
 return [
     'abc'=>[
-        'enable'=>true,
+        'enable'=>false,
         'handler'=>\Process\Demo::class,
         'count'=>2,
         'host'=>'0.0.0.0',

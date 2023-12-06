@@ -65,10 +65,10 @@ if ($method=='stop'){
         if ($config['enable']){
             $handler = $config['handler'].'::class';
             if ($count = $config['count']??1){
-                $content[] = [$processName, '正常', $config['count']??1, $config['port']??'未设置'];
+                $content[] = ['custom_process_'.$processName, '正常', $config['count']??1, $config['port']??'未设置'];
                 /** 创建多进程 */
                 while ($count){
-                    $processFiles[] = write_process_file($runtimeProcessPath, $processName.'_'.$count, $handler,'process');
+                    $processFiles[] = write_process_file($runtimeProcessPath, $processName.'_'.$count, $handler,'process',$processName);
                     $count--;
                 }
             }
@@ -80,10 +80,10 @@ if ($method=='stop'){
         if ($config['enable']){
             $handler = $config['handler'].'::class';
             if ($count = $config['count']??1){
-                $content[] = ['rabbitmq', '正常', $config['count']??1, config('rabbitmq')['port']??'未设置'];
+                $content[] = ['rabbitmq_'.$processName, '正常', $config['count']??1, config('rabbitmq')['port']??'未设置'];
                 /** 创建多进程 */
                 while ($count){
-                    $processFiles[] = write_process_file($runtimeProcessPath, $processName.'_'.$count, $handler,'rabbitmqProcess');
+                    $processFiles[] = write_process_file($runtimeProcessPath, $processName.'_'.$count, $handler,'rabbitmqProcess',$processName);
                     $count--;
                 }
             }
@@ -97,7 +97,7 @@ if ($method=='stop'){
             print_r("系统检测到你尚未安装redis扩展，无法启动redis队列");
         }else{
             $processFiles[] = write_process_file($runtimeProcessPath, 'redis', $handler,'redis');
-            $content[] = ['ws', '正常', 1, config('redis')['port']??'未设置'];
+            $content[] = ['redis_queue', '正常', 1, config('redis')['port']??'未设置'];
         }
     }
 
@@ -105,8 +105,8 @@ if ($method=='stop'){
     foreach (config('ws') as $processName=>$config){
         if ($config['enable']){
             $handler = $config['handler'].'::class';
-            $processFiles[] = write_process_file($runtimeProcessPath, $processName, $handler,'ws');
-            $content[] = ['ws', '正常', 1, $config['port']??'未设置'];
+            $processFiles[] = write_process_file($runtimeProcessPath, $processName, $handler,'ws',$processName);
+            $content[] = ['websocket_'.$processName, '正常', 1, $config['port']??'未设置'];
         }
     }
 
@@ -139,7 +139,7 @@ if ($method=='stop'){
  * @param $type
  * @return string
  */
-function write_process_file($runtimeProcessPath, $processName, $handle, $type): string
+function write_process_file($runtimeProcessPath, $processName, $handle, $type,$config=""): string
 {
     if ($type=='rtmp'){
         $fileContent = <<<EOF
@@ -164,7 +164,7 @@ EOF;
 require_once __DIR__ . '/../../vendor/autoload.php';
 require_once __DIR__ . '/../../vendor/xiaosongshu/colorword/src/Transfer.php';
 require_once __DIR__ . '/../../root/function.php';
-G($handle)->handle(config('$type')['$processName']??[]);
+G($handle)->handle(config('$type')['$config']??config('$type'));
 EOF;
     }
 

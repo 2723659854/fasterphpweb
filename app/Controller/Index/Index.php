@@ -3,17 +3,12 @@
 namespace App\Controller\Index;
 
 use App\Middleware\Auth;
-use App\Model\User;
 use App\Rabbitmq\Demo2;
 use App\Rabbitmq\DemoConsume;
-use App\Rabbitmq\Fuck;
 use Root\Annotation\Mapping\Middlewares;
 use Root\Annotation\Mapping\RequestMapping;
 use Root\ESClient;
 use App\Middleware\MiddlewareA;
-use Root\Io\Epoll;
-use Root\Lib\AsyncHttpClient;
-use Root\Lib\HttpClient;
 use Root\Request;
 use Root\Cache;
 use App\Queue\Test;
