@@ -47,7 +47,10 @@
     "workerman/workerman": "v4.1.9",
     "react/promise": "^2.9",
     "xiaosongshu/nacos": "dev-master",
-    "symfony/yaml": "5.4.*"
+    "symfony/yaml": "5.4.*",
+    "psr/container": "^1.1.1",
+    "php-di/php-di": "^6",
+    "doctrine/annotations": "^1.14"
   },
   "config": {
     "allow-plugins": {

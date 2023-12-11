@@ -148,7 +148,7 @@ function forwardRtmpPacket($packetData, $rtmpServer, $streamKey) {
     $message .= $packetData; // Packet data
 
     // 使用 fsockopen 或类似函数打开到目标 RTMP 服务器的连接，并发送消息数据
-    $socket = fsockopen($rtmpServer, $rtmpPort);
+    $socket = fsockopen($rtmpServer, $rtmpPort=1935);
     if ($socket === false) {
         die("无法连接到 RTMP 服务器: $rtmpServer");
     }

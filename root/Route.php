@@ -4,9 +4,10 @@ namespace Root;
 
 use FastRoute\Dispatcher;
 use FastRoute\RouteCollector;
+use Root\Lib\Builder;
 use Root\Lib\MiddlewareInterface;
 use function FastRoute\simpleDispatcher;
-
+//require_once __DIR__.'../vendor/autoload.php';
 /**
  * @purpose 路由调度器
  */
@@ -71,7 +72,9 @@ class Route
                 /** 将控制器和方法封装成为一个闭包回调函数 */
                 $next = function ($request) use ($class, $method) {
                     /** 里面正常执行控制器的方法，并返回结果 */
-                    return G($class)->{$method}($request);
+                    //return G($class)->{$method}($request);
+                    /** 使用注解 */
+                    return G(Builder::class)->container()->get($class)->{$method}($request);
                 };
                 /** 处理这个路由的中间件 */
                 $middlewares = self::$middlewares[strtoupper($httpMethod) . '@@@' . $uri] ?? [];

@@ -513,6 +513,44 @@ class Auth implements MiddlewareInterface
     }
 ```
 
+###  依赖自动注入
+本框架提供依赖自动注入，不需要每一次都手动实例化依赖。使用关键字@Inject，系统根据关键字自动注入依赖，详见下面的方法。
+```php 
+<?php
+
+namespace App\Controller\Index;
+
+use App\Service\HahaService;
+use Root\Annotation\Mapping\RequestMapping;
+use Root\Request;
+use Root\Response;
+/**
+ * @purpose 控制器
+ * @author administrator
+ * @time 2023-10-11 07:02:03
+ */
+class Video
+{
+
+    /**
+     * @Inject 
+     * @var HahaService 测试服务注解
+     */
+    public HahaService $hahaService;
+
+    /**
+     * 测试注解
+     * @param Request $request
+     * @return Response
+     */
+    #[RequestMapping(methods:'get',path:'/video/inject')]
+    public function testInject(Request $request):Response{
+        return \response($this->hahaService->back());
+    }
+}
+```
+这里使用了注解，系统自动注入依赖App\Service\HahaService，不需要手动注入（使用__construct()方法注入依赖）。
+
 ### 定时器
 
 只能在linux系统中使用定时器，或者使用docker环境。

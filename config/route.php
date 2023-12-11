@@ -39,5 +39,7 @@ return [
     /** 测试中间件 */
     ['GET','/middle',[\App\Controller\Index\Index::class,'middle'],[\App\Middleware\MiddlewareA::class,\App\Middleware\MiddlewareB::class]],
     /** 直播测试页面*/
-    ['GET','/play',[\App\Controller\Index\Video::class,'index']]
+    ['GET','/play',[\App\Controller\Index\Video::class,'index']],
+    /** 测试注解 */
+    ['GET','/inject',[\App\Controller\Index\Fuck::class,'index']],
 ];
