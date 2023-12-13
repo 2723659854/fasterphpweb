@@ -12,14 +12,14 @@ return [
         'persist'=>true,
     ],
     'two'=>[
-        'enable'=>true,
+        'enable'=>false,
         /** 调用动态方法 */
         'function'=>[Process\CornTask::class,'say'],
         'time'=>5,
         'persist'=>true,
     ],
     'three'=>[
-        'enable'=>true,
+        'enable'=>false,
         /** 调用匿名函数 */
         'function'=>function(){$time=date('y-m-d H:i:s'); echo "\r\n {$time} 我是随手一敲的匿名函数！\r\n";},
         'time'=>5,

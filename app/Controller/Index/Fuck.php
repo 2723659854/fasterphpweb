@@ -20,6 +20,10 @@ class Fuck
      */
     public HahaService $hahaService;
 
+    public function __construct(){
+        var_dump("我是fuck，被实例化了",getmypid());
+    }
+
     /**
      * index方法
      * @param Request $request 请求类

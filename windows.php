@@ -7,6 +7,7 @@
 require_once __DIR__.'/vendor/autoload.php';
 require_once __DIR__ . '/root/function.php';
 require_once __DIR__ . '/vendor/xiaosongshu/colorword/src/Transfer.php';
+require_once __DIR__ . '/vendor/xiaosongshu/table/src/Table.php';
 /** pid 保存文件位置 */
 global $_pid_file;
 if (!$_pid_file){
@@ -28,7 +29,7 @@ if ($method=='stop'){
         /** windows系统 */
         $cmd = "taskkill /F /T /PID {$taskId}";
         $descriptorspec = [STDIN, STDOUT, STDOUT];
-        @\proc_open($cmd, $descriptorspec, $pipes, null, null, ['bypass_shell' => true]);
+        $close = proc_open($cmd, $descriptorspec, $pipes, null, null, ['bypass_shell' => true]);
     }
     file_put_contents($_pid_file,null);
     sleep(1);
@@ -133,6 +134,13 @@ if ($method=='stop'){
         $pid = $status['pid'];
         writeWindowsPid($pid);
     }
+
+//    /** 第二种启动方法 */
+//    $cmd =  PHP_BINARY.' ';
+//    foreach ($processFiles as $file){
+//        $cmd .=' '.$file;
+//    }
+//    echo system($cmd);
 
 }
 

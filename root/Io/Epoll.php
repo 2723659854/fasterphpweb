@@ -359,15 +359,23 @@ class Epoll
     /** 创建子进程 */
     private function fork()
     {
-        global $_server_num;
-        for ($i = 1; $i <= $_server_num; $i++) {
-            /** @var int $pid 创建子进程 ,必须在loop之前创建子进程，否则loop会阻塞其他子进程 */
-            $pid = \pcntl_fork();
-            writePid();
-            if ($pid) {
-                cli_set_process_title("xiaosongshu_http");
-                $this->run();
+        /** 配置和运行模式  */
+        global $_server_num,$daemonize;
+        /** 后台守护进程模式 */
+        if ($daemonize){
+            for ($i = 1; $i <= $_server_num; $i++) {
+                /** @var int $pid 创建子进程 ,必须在loop之前创建子进程，否则loop会阻塞其他子进程 */
+                $pid = \pcntl_fork();
+                writePid();
+                if ($pid) {
+                    cli_set_process_title("xiaosongshu_http");
+                    $this->run();
+                }
             }
+        }else{
+            /** 调试模式 */
+            $this->run();
         }
+
     }
 }

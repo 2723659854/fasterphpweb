@@ -9,7 +9,7 @@ return [
         'port'=>8503
     ],
     'def'=>[
-        'enable'=>true,
+        'enable'=>false,
         'handler'=>\Process\Foo::class,
         'count'=>2,
         'host'=>'0.0.0.0',

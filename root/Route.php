@@ -73,6 +73,7 @@ class Route
                 $next = function ($request) use ($class, $method) {
                     /** 里面正常执行控制器的方法，并返回结果 */
                     //return G($class)->{$method}($request);
+
                     /** 使用注解 */
                     return G(Builder::class)->container()->get($class)->{$method}($request);
                 };

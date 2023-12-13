@@ -24,7 +24,7 @@ class StartProvider implements IdentifyInterface
             echo $_color_class->info("服务正在运行，请勿重复启动，你可以使用stop停止运行或者使用restart重启\r\n");
             exit(0);
         }
-        //echo $_color_class->info("进程启动中...\r\n");
+        echo $_color_class->info("进程启动中...\r\n");
         /** 加载路由 */
         G(\Root\Route::class)->loadRoute();
         AnnotationRoute::loadRoute();
@@ -32,14 +32,12 @@ class StartProvider implements IdentifyInterface
             $app->daemon();
         }else{
 
-            if ($_system){
-                /** 只开启http服务 */
-                $open = [
-                    ['http', '正常', '1', $_listen]
-                ];
-                $_system_table->table(['名称', '状态', '进程数', '服务'], $open);
-                echo $_color_class->info("进程启动完成,你可以按ctrl+c关闭当前窗口\r\n");
-            }
+            /** 只开启http服务 */
+            $open = [
+                ['http', '正常', '1', $_listen]
+            ];
+            $_system_table->table(['名称', '状态', '进程数', '服务'], $open);
+            echo $_color_class->info("进程启动完成,你可以按ctrl+c关闭当前窗口\r\n");
 
             /** 开启http调试模式 */
             if ($_system && $_has_epoll) {
