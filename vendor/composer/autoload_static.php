@@ -29,6 +29,7 @@ class ComposerStaticInitcbb973351035d2749c2ce7735e220087
             'Xiaosongshu\\Table\\' => 18,
             'Xiaosongshu\\Progress\\' => 21,
             'Xiaosongshu\\Nacos\\' => 18,
+            'Xiaosongshu\\Mail\\' => 17,
             'Xiaosongshu\\Colorword\\' => 22,
         ),
         'W' => 
@@ -122,6 +123,10 @@ class ComposerStaticInitcbb973351035d2749c2ce7735e220087
         'Xiaosongshu\\Nacos\\' => 
         array (
             0 => __DIR__ . '/..' . '/xiaosongshu/nacos/src',
+        ),
+        'Xiaosongshu\\Mail\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/xiaosongshu/mail/src',
         ),
         'Xiaosongshu\\Colorword\\' => 
         array (

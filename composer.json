@@ -50,7 +50,8 @@
     "symfony/yaml": "5.4.*",
     "psr/container": "^1.1.1",
     "php-di/php-di": "^6",
-    "doctrine/annotations": "^1.14"
+    "doctrine/annotations": "^1.14",
+    "xiaosongshu/mail": "dev-master"
   },
   "config": {
     "allow-plugins": {

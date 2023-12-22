@@ -482,6 +482,17 @@
             'aliases' => array(),
             'dev_requirement' => false,
         ),
+        'xiaosongshu/mail' => array(
+            'pretty_version' => 'dev-master',
+            'version' => 'dev-master',
+            'reference' => '94d51f34c51cabcde2e942c4edf0cac5d4321751',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../xiaosongshu/mail',
+            'aliases' => array(
+                0 => '9999999-dev',
+            ),
+            'dev_requirement' => false,
+        ),
         'xiaosongshu/nacos' => array(
             'pretty_version' => 'dev-master',
             'version' => 'dev-master',

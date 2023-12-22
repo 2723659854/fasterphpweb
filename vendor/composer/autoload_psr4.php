@@ -10,6 +10,7 @@ return array(
     'Xiaosongshu\\Table\\' => array($vendorDir . '/xiaosongshu/table/src'),
     'Xiaosongshu\\Progress\\' => array($vendorDir . '/xiaosongshu/progress/src'),
     'Xiaosongshu\\Nacos\\' => array($vendorDir . '/xiaosongshu/nacos/src'),
+    'Xiaosongshu\\Mail\\' => array($vendorDir . '/xiaosongshu/mail/src'),
     'Xiaosongshu\\Colorword\\' => array($vendorDir . '/xiaosongshu/colorword/src'),
     'Ws\\' => array($baseDir . '/ws'),
     'Workerman\\' => array($vendorDir . '/workerman/workerman'),

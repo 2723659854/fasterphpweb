@@ -1,0 +1,21 @@
+{
+    "name": "xiaosongshu/mail",
+    "description": "发送邮件客户端",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Xiaosongshu\\Mail\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "xiaosongshu",
+            "email": "2723659854@qq.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {
+        "php": ">=7.0"
+    }
+}

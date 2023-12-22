@@ -2930,6 +2930,50 @@
             "install-path": "../xiaosongshu/colorword"
         },
         {
+            "name": "xiaosongshu/mail",
+            "version": "dev-master",
+            "version_normalized": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/2723659854/mail.git",
+                "reference": "94d51f34c51cabcde2e942c4edf0cac5d4321751"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/2723659854/mail/zipball/94d51f34c51cabcde2e942c4edf0cac5d4321751",
+                "reference": "94d51f34c51cabcde2e942c4edf0cac5d4321751",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.0"
+            },
+            "time": "2023-12-21T14:18:06+00:00",
+            "default-branch": true,
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "Xiaosongshu\\Mail\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "xiaosongshu",
+                    "email": "2723659854@qq.com"
+                }
+            ],
+            "description": "发送邮件客户端",
+            "support": {
+                "issues": "https://github.com/2723659854/mail/issues",
+                "source": "https://github.com/2723659854/mail/tree/v1.0.21"
+            },
+            "install-path": "../xiaosongshu/mail"
+        },
+        {
             "name": "xiaosongshu/nacos",
             "version": "dev-master",
             "version_normalized": "dev-master",

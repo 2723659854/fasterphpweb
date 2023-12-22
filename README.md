@@ -1639,6 +1639,45 @@ HttpClient::requestAsync('127.0.0.1:9501', 'GET', ['lesson_id' => 201], [], [], 
 在回调里面抛出异常，是没有其他服务来接管这个异常的，可能会导致进程摆烂。虽然本系统已经做了容错进行兜底，但是还是强烈建议，如果
 一定要抛出异常，请自行捕获并处理异常。<br>
 若该http客户端不满足你的需求，你可以使用第三方http客户端，比如Guzzle。或者使用curl函数自己构建请求。
+###  发送邮件
+####   开启smtp服务 并获取授权码
+登录到你的邮箱，设置开启smtp服务。一般在邮箱的设置，账户，smtp里面。
+```html
+<ol>
+    <li>QQ邮箱：https://service.mail.qq.com/detail/0/75</li>
+    <li>网易163邮箱：https://help.mail.163.com/faq.do?m=list&categoryID=90</li>
+    <li>新浪邮箱：https://help.sina.com.cn/comquestiondetail/view/1566/</li>
+    <li>其他...</li>
+</ol>
+```
+####   发送邮件
+
+```php 
+/** 发件人 你的邮箱地址 */
+$user = 'xxxxxxx@qq.com';
+/** 发件人授权码 在邮箱的设置，账户，smtp里面  */
+$password = 'xxxxxxxx';
+/** 邮箱服务器地址 */
+$url = 'smtp.qq.com:25';
+
+try {
+    /** 实例化客户端 */
+    $client = new \Xiaosongshu\Mail\Client();
+    /** 配置服务器地址 ，发件人信息 */
+    $client->config($url, $user, $password);
+    /** 发送邮件 语法：[收件人邮箱] ,邮件主题, 邮件正文,[附件]  */
+    $res = $client->send( ['xxxx@qq.com'],'标题', '正文呢',[__DIR__.'/favicon.ico',__DIR__.'/favicon2.ico',]);
+    print_r($res);
+} catch (Exception $exception) {
+    print_r("发送邮件失败");
+    print_r($exception->getMessage());
+}
+
+```
+也可以修改自定义命令文件app/command/Email.php 文件的配置，测试发送邮件。
+```bash 
+php start.php check:email 
+```
 ###  windows环境支持
 如果需要在windows正式环境上线运行项目，执行php windows.php，如果需要关闭服务php windows.php stop即可。<br>
 
