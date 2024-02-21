@@ -11,3 +11,5 @@ lock.txt
 /vendor/workerman/_usr_src_myapp_fasterphpweb_start.php.pid
 /vendor/workerman/workerman.log
 /build
+/images
+/copy
