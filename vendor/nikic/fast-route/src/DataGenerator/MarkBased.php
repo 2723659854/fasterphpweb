@@ -5,6 +5,7 @@ namespace FastRoute\DataGenerator;
 
 use function implode;
 
+/** @final */
 class MarkBased extends RegexBasedAbstract
 {
     protected function getApproxChunkSize(): int
@@ -21,7 +22,7 @@ class MarkBased extends RegexBasedAbstract
 
         foreach ($regexToRoutesMap as $regex => $route) {
             $regexes[] = $regex . '(*MARK:' . $markName . ')';
-            $routeMap[$markName] = [$route->handler, $route->variables];
+            $routeMap[$markName] = [$route->handler, $route->variables, $route->extraParameters];
 
             ++$markName;
         }

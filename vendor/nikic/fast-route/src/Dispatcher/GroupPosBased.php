@@ -3,15 +3,19 @@ declare(strict_types=1);
 
 namespace FastRoute\Dispatcher;
 
+use FastRoute\Dispatcher\Result\Matched;
+
+use function assert;
 use function preg_match;
 
+/** @final */
 class GroupPosBased extends RegexBasedAbstract
 {
     /** @inheritDoc */
-    protected function dispatchVariableRoute(array $routeData, string $uri): ?array
+    protected function dispatchVariableRoute(array $routeData, string $uri): ?Matched
     {
         foreach ($routeData as $data) {
-            if (! preg_match($data['regex'], $uri, $matches)) {
+            if (preg_match($data['regex'], $uri, $matches) !== 1) {
                 continue;
             }
 
@@ -20,14 +24,21 @@ class GroupPosBased extends RegexBasedAbstract
             for ($i = 1; $matches[$i] === ''; ++$i) {
             }
 
-            [$handler, $varNames] = $data['routeMap'][$i];
+            assert(isset($i));
+
+            [$handler, $varNames, $extraParameters] = $data['routeMap'][$i];
 
             $vars = [];
             foreach ($varNames as $varName) {
                 $vars[$varName] = $matches[$i++];
             }
 
-            return [self::FOUND, $handler, $vars];
+            $result = new Matched();
+            $result->handler = $handler;
+            $result->variables = $vars;
+            $result->extraParameters = $extraParameters;
+
+            return $result;
         }
 
         return null;

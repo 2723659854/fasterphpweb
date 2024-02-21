@@ -3,6 +3,10 @@ declare(strict_types=1);
 
 namespace FastRoute;
 
+use FastRoute\Dispatcher\Result\Matched;
+use FastRoute\Dispatcher\Result\MethodNotAllowed;
+use FastRoute\Dispatcher\Result\NotMatched;
+
 interface Dispatcher
 {
     public const NOT_FOUND = 0;
@@ -12,13 +16,11 @@ interface Dispatcher
     /**
      * Dispatches against the provided HTTP method verb and URI.
      *
-     * Returns array with one of the following formats:
+     * Returns an object that also has an array shape with one of the following formats:
      *
      *     [self::NOT_FOUND]
      *     [self::METHOD_NOT_ALLOWED, ['GET', 'OTHER_ALLOWED_METHODS']]
      *     [self::FOUND, $handler, ['varName' => 'value', ...]]
-     *
-     * @return array{0: int, 1?: list<string>|mixed, 2?: array<string, string>}
      */
-    public function dispatch(string $httpMethod, string $uri): array;
+    public function dispatch(string $httpMethod, string $uri): Matched|NotMatched|MethodNotAllowed;
 }

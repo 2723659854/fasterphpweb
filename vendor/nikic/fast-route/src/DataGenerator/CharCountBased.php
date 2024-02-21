@@ -6,6 +6,7 @@ namespace FastRoute\DataGenerator;
 use function count;
 use function implode;
 
+/** @final */
 class CharCountBased extends RegexBasedAbstract
 {
     protected function getApproxChunkSize(): int
@@ -27,7 +28,7 @@ class CharCountBased extends RegexBasedAbstract
             $suffix .= "\t";
 
             $regexes[] = '(?:' . $regex . '/(\t{' . $suffixLen . '})\t{' . ($count - $suffixLen) . '})';
-            $routeMap[$suffix] = [$route->handler, $route->variables];
+            $routeMap[$suffix] = [$route->handler, $route->variables, $route->extraParameters];
         }
 
         $regex = '~^(?|' . implode('|', $regexes) . ')$~';

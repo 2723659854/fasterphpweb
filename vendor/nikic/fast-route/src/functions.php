@@ -6,13 +6,19 @@ namespace FastRoute;
 use FastRoute\Cache\FileCache;
 use LogicException;
 
-use function array_key_exists;
-use function assert;
 use function function_exists;
 use function is_string;
 
 if (! function_exists('FastRoute\simpleDispatcher')) {
-    /** @param array{routeParser?: string, dataGenerator?: string, dispatcher?: string, routeCollector?: string, cacheDisabled?: bool, cacheKey?: string, cacheDriver?: string|Cache} $options */
+    /**
+     * @deprecated since v2.0 and will be removed in v3.0
+     *
+     * @see FastRoute::recommendedSettings()
+     * @see FastRoute::disableCache()
+     *
+     * @param callable(ConfigureRoutes):void                                                                                                                                                                                                                                                           $routeDefinitionCallback
+     * @param array{routeParser?: class-string<RouteParser>, dataGenerator?: class-string<DataGenerator>, dispatcher?: class-string<Dispatcher>, routeCollector?: class-string<ConfigureRoutes>, cacheDisabled?: bool, cacheKey?: string, cacheFile?: string, cacheDriver?: class-string<Cache>|Cache} $options
+     */
     function simpleDispatcher(callable $routeDefinitionCallback, array $options = []): Dispatcher
     {
         return \FastRoute\cachedDispatcher(
@@ -21,7 +27,14 @@ if (! function_exists('FastRoute\simpleDispatcher')) {
         );
     }
 
-    /** @param array{routeParser?: string, dataGenerator?: string, dispatcher?: string, routeCollector?: string, cacheDisabled?: bool, cacheKey?: string, cacheDriver?: string|Cache} $options */
+    /**
+     * @deprecated since v2.0 and will be removed in v3.0
+     *
+     * @see FastRoute::recommendedSettings()
+     *
+     * @param callable(ConfigureRoutes):void                                                                                                                                                                                                                                                           $routeDefinitionCallback
+     * @param array{routeParser?: class-string<RouteParser>, dataGenerator?: class-string<DataGenerator>, dispatcher?: class-string<Dispatcher>, routeCollector?: class-string<ConfigureRoutes>, cacheDisabled?: bool, cacheKey?: string, cacheFile?: string, cacheDriver?: class-string<Cache>|Cache} $options
+     */
     function cachedDispatcher(callable $routeDefinitionCallback, array $options = []): Dispatcher
     {
         $options += [
@@ -38,17 +51,19 @@ if (! function_exists('FastRoute\simpleDispatcher')) {
                 new $options['routeParser'](),
                 new $options['dataGenerator']()
             );
-            assert($routeCollector instanceof RouteCollector);
+
             $routeDefinitionCallback($routeCollector);
 
-            return $routeCollector->getData();
+            return $routeCollector->processedRoutes();
         };
 
         if ($options['cacheDisabled'] === true) {
             return new $options['dispatcher']($loader());
         }
 
-        if (! array_key_exists('cacheKey', $options)) {
+        $cacheKey = $options['cacheKey'] ?? $options['cacheFile'] ?? null;
+
+        if ($cacheKey === null) {
             throw new LogicException('Must specify "cacheKey" option');
         }
 
@@ -58,8 +73,6 @@ if (! function_exists('FastRoute\simpleDispatcher')) {
             $cache = new $cache();
         }
 
-        assert($cache instanceof Cache);
-
-        return new $options['dispatcher']($cache->get($options['cacheKey'], $loader));
+        return new $options['dispatcher']($cache->get($cacheKey, $loader));
     }
 }

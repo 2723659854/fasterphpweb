@@ -8,6 +8,7 @@ use function implode;
 use function max;
 use function str_repeat;
 
+/** @final */
 class GroupCountBased extends RegexBasedAbstract
 {
     protected function getApproxChunkSize(): int
@@ -26,7 +27,7 @@ class GroupCountBased extends RegexBasedAbstract
             $numGroups = max($numGroups, $numVariables);
 
             $regexes[] = $regex . str_repeat('()', $numGroups - $numVariables);
-            $routeMap[$numGroups + 1] = [$route->handler, $route->variables];
+            $routeMap[$numGroups + 1] = [$route->handler, $route->variables, $route->extraParameters];
 
             ++$numGroups;
         }

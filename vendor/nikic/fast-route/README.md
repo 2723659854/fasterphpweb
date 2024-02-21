@@ -15,7 +15,7 @@ To install with composer:
 composer require nikic/fast-route
 ```
 
-Requires PHP 7.4 or newer.
+Requires PHP 8.1 or newer.
 
 Usage
 -----
@@ -27,7 +27,7 @@ Here's a basic usage example:
 
 require '/path/to/vendor/autoload.php';
 
-$dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
+$dispatcher = FastRoute\simpleDispatcher(function(FastRoute\ConfigureRoutes $r) {
     $r->addRoute('GET', '/users', 'get_all_users_handler');
     // {id} must be a number (\d+)
     $r->addRoute('GET', '/user/{id:\d+}', 'get_user_handler');
@@ -65,7 +65,7 @@ switch ($routeInfo[0]) {
 ### Defining routes
 
 The routes are defined by calling the `FastRoute\simpleDispatcher()` function, which accepts
-a callable taking a `FastRoute\RouteCollector` instance. The routes are added by calling
+a callable taking a `FastRoute\ConfigureRoutes` instance. The routes are added by calling
 `addRoute()` on the collector instance:
 
 ```php
@@ -83,7 +83,7 @@ $r->addRoute('POST', '/test', 'handler');
 $r->addRoute(['GET', 'POST'], '/test', 'handler');
 ```
 
-By default the `$routePattern` uses a syntax where `{foo}` specifies a placeholder with name `foo`
+By default, the `$routePattern` uses a syntax where `{foo}` specifies a placeholder with name `foo`
 and matching the regex `[^/]+`. To adjust the pattern the placeholder matches, you can specify
 a custom pattern by writing `{bar:[0-9]+}`. Some examples:
 
@@ -102,7 +102,7 @@ Custom patterns for route placeholders cannot use capturing groups. For example 
 is not a valid placeholder, because `()` is a capturing group. Instead you can use either
 `{lang:en|de}` or `{lang:(?:en|de)}`.
 
-Furthermore parts of the route enclosed in `[...]` are considered optional, so that `/foo[bar]`
+Furthermore, parts of the route enclosed in `[...]` are considered optional, so that `/foo[bar]`
 will match both `/foo` and `/foobar`. Optional parts are only supported in a trailing position,
 not in the middle of a route.
 
@@ -142,12 +142,12 @@ $r->addRoute('POST', '/post-route', 'post_handler');
 
 #### Route Groups
 
-Additionally, you can specify routes inside of a group. All routes defined inside a group will have a common prefix.
+Additionally, you can specify routes inside a group. All routes defined inside a group will have a common prefix.
 
 For example, defining your routes as:
 
 ```php
-$r->addGroup('/admin', function (RouteCollector $r) {
+$r->addGroup('/admin', function (FastRoute\ConfigureRoutes $r) {
     $r->addRoute('GET', '/do-something', 'handler');
     $r->addRoute('GET', '/do-another-thing', 'handler');
     $r->addRoute('GET', '/do-something-else', 'handler');
@@ -173,18 +173,20 @@ routing data and construct the dispatcher from the cached information:
 ```php
 <?php
 
-$dispatcher = FastRoute\cachedDispatcher(function(FastRoute\RouteCollector $r) {
+$dispatcher = FastRoute\cachedDispatcher(function(FastRoute\ConfigureRoutes $r) {
     $r->addRoute('GET', '/user/{name}/{id:[0-9]+}', 'handler0');
     $r->addRoute('GET', '/user/{id:[0-9]+}', 'handler1');
     $r->addRoute('GET', '/user/{name}', 'handler2');
 }, [
-    'cacheFile' => __DIR__ . '/route.cache', /* required */
+    'cacheKey' => __DIR__ . '/route.cache', /* required */
+    // 'cacheFile' => __DIR__ . '/route.cache', /* will still work for v1 compatibility */
     'cacheDisabled' => IS_DEBUG_ENABLED,     /* optional, enabled by default */
+    'cacheDriver' => FastRoute\Cache\FileCache::class, /* optional, class name or instance of the cache driver - defaults to file cache */
 ]);
 ```
 
 The second parameter to the function is an options array, which can be used to specify the cache
-file location, among other things.
+key (e.g. file location when using files for caching), caching driver, among other things.
 
 ### Dispatching a URI
 
@@ -237,7 +239,7 @@ interface Dispatcher {
 ```
 
 The route parser takes a route pattern string and converts it into an array of route infos, where
-each route info is again an array of it's parts. The structure is best understood using an example:
+each route info is again an array of its parts. The structure is best understood using an example:
 
     /* The route /user/{id:\d+}[/{name}] converts to the following array: */
     [
@@ -273,7 +275,7 @@ through the options array:
 ```php
 <?php
 
-$dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
+$dispatcher = FastRoute\simpleDispatcher(function(FastRoute\ConfigureRoutes $r) {
     /* ... */
 }, [
     'routeParser' => 'FastRoute\\RouteParser\\Std',

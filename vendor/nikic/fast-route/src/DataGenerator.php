@@ -3,6 +3,14 @@ declare(strict_types=1);
 
 namespace FastRoute;
 
+/**
+ * @phpstan-type ExtraParameters array<string, string|int|bool|float>
+ * @phpstan-type StaticRoutes array<string, array<string, array{mixed, ExtraParameters}>>
+ * @phpstan-type DynamicRouteChunk array{regex: string, suffix?: string, routeMap: array<int|string, array{mixed, array<string, string>, ExtraParameters}>}
+ * @phpstan-type DynamicRouteChunks list<DynamicRouteChunk>
+ * @phpstan-type DynamicRoutes array<string, DynamicRouteChunks>
+ * @phpstan-type RouteData array{StaticRoutes, DynamicRoutes}
+ */
 interface DataGenerator
 {
     /**
@@ -14,14 +22,15 @@ interface DataGenerator
      * matches.
      *
      * @param array<string|array{0: string, 1:string}> $routeData
+     * @param ExtraParameters                          $extraParameters
      */
-    public function addRoute(string $httpMethod, array $routeData, mixed $handler): void;
+    public function addRoute(string $httpMethod, array $routeData, mixed $handler, array $extraParameters = []): void;
 
     /**
      * Returns dispatcher data in some unspecified format, which
      * depends on the used method of dispatch.
      *
-     * @return array{0: array<string, array<string, mixed>>, 1: array<string, array<array{regex: string, suffix?: string, routeMap: array<int|string, array{0: mixed, 1: array<string, string>}>}>>}
+     * @return RouteData
      */
     public function getData(): array;
 }

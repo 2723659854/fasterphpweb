@@ -3,42 +3,50 @@ declare(strict_types=1);
 
 namespace FastRoute\Dispatcher;
 
+use FastRoute\DataGenerator;
 use FastRoute\Dispatcher;
+use FastRoute\Dispatcher\Result\Matched;
+use FastRoute\Dispatcher\Result\MethodNotAllowed;
+use FastRoute\Dispatcher\Result\NotMatched;
 
-// phpcs:ignore SlevomatCodingStandard.Classes.SuperfluousAbstractClassNaming.SuperfluousSuffix
+/**
+ * @internal
+ *
+ * @phpstan-import-type StaticRoutes from DataGenerator
+ * @phpstan-import-type DynamicRouteChunk from DataGenerator
+ * @phpstan-import-type DynamicRouteChunks from DataGenerator
+ * @phpstan-import-type DynamicRoutes from DataGenerator
+ * @phpstan-import-type RouteData from DataGenerator
+ */
 abstract class RegexBasedAbstract implements Dispatcher
 {
-    /** @var array<string, array<string, mixed>> */
+    /** @var StaticRoutes */
     protected array $staticRouteMap = [];
 
-    /** @var array<string, array<array{regex: string, suffix?: string, routeMap: array<int|string, array{0: mixed, 1: array<string, string>}>}>> */
+    /** @var DynamicRoutes */
     protected array $variableRouteData = [];
 
-    /** @param array{0: array<string, array<string, mixed>>, 1: array<string, array<array{regex: string, suffix?: string, routeMap: array<int|string, array{0: mixed, 1: array<string, string>}>}>>} $data */
+    /** @param RouteData $data */
     public function __construct(array $data)
     {
         [$this->staticRouteMap, $this->variableRouteData] = $data;
     }
 
-    /**
-     * @param mixed[] $routeData
-     *
-     * @return array{0: int, 1?: list<string>|mixed, 2?: array<string, string>}|null
-     */
-    abstract protected function dispatchVariableRoute(array $routeData, string $uri): ?array;
+    /** @param DynamicRouteChunks $routeData */
+    abstract protected function dispatchVariableRoute(array $routeData, string $uri): ?Matched;
 
-    /** @inheritDoc */
-    public function dispatch(string $httpMethod, string $uri): array
+    public function dispatch(string $httpMethod, string $uri): Matched|NotMatched|MethodNotAllowed
     {
         if (isset($this->staticRouteMap[$httpMethod][$uri])) {
-            $handler = $this->staticRouteMap[$httpMethod][$uri];
+            $result = new Matched();
+            $result->handler = $this->staticRouteMap[$httpMethod][$uri][0];
+            $result->extraParameters = $this->staticRouteMap[$httpMethod][$uri][1];
 
-            return [self::FOUND, $handler, []];
+            return $result;
         }
 
-        $varRouteData = $this->variableRouteData;
-        if (isset($varRouteData[$httpMethod])) {
-            $result = $this->dispatchVariableRoute($varRouteData[$httpMethod], $uri);
+        if (isset($this->variableRouteData[$httpMethod])) {
+            $result = $this->dispatchVariableRoute($this->variableRouteData[$httpMethod], $uri);
             if ($result !== null) {
                 return $result;
             }
@@ -47,13 +55,15 @@ abstract class RegexBasedAbstract implements Dispatcher
         // For HEAD requests, attempt fallback to GET
         if ($httpMethod === 'HEAD') {
             if (isset($this->staticRouteMap['GET'][$uri])) {
-                $handler = $this->staticRouteMap['GET'][$uri];
+                $result = new Matched();
+                $result->handler = $this->staticRouteMap['GET'][$uri][0];
+                $result->extraParameters = $this->staticRouteMap['GET'][$uri][1];
 
-                return [self::FOUND, $handler, []];
+                return $result;
             }
 
-            if (isset($varRouteData['GET'])) {
-                $result = $this->dispatchVariableRoute($varRouteData['GET'], $uri);
+            if (isset($this->variableRouteData['GET'])) {
+                $result = $this->dispatchVariableRoute($this->variableRouteData['GET'], $uri);
                 if ($result !== null) {
                     return $result;
                 }
@@ -62,13 +72,15 @@ abstract class RegexBasedAbstract implements Dispatcher
 
         // If nothing else matches, try fallback routes
         if (isset($this->staticRouteMap['*'][$uri])) {
-            $handler = $this->staticRouteMap['*'][$uri];
+            $result = new Matched();
+            $result->handler = $this->staticRouteMap['*'][$uri][0];
+            $result->extraParameters = $this->staticRouteMap['*'][$uri][1];
 
-            return [self::FOUND, $handler, []];
+            return $result;
         }
 
-        if (isset($varRouteData['*'])) {
-            $result = $this->dispatchVariableRoute($varRouteData['*'], $uri);
+        if (isset($this->variableRouteData['*'])) {
+            $result = $this->dispatchVariableRoute($this->variableRouteData['*'], $uri);
             if ($result !== null) {
                 return $result;
             }
@@ -85,7 +97,7 @@ abstract class RegexBasedAbstract implements Dispatcher
             $allowedMethods[] = $method;
         }
 
-        foreach ($varRouteData as $method => $routeData) {
+        foreach ($this->variableRouteData as $method => $routeData) {
             if ($method === $httpMethod) {
                 continue;
             }
@@ -100,9 +112,12 @@ abstract class RegexBasedAbstract implements Dispatcher
 
         // If there are no allowed methods the route simply does not exist
         if ($allowedMethods !== []) {
-            return [self::METHOD_NOT_ALLOWED, $allowedMethods];
+            $result = new MethodNotAllowed();
+            $result->allowedMethods = $allowedMethods;
+
+            return $result;
         }
 
-        return [self::NOT_FOUND];
+        return new NotMatched();
     }
 }
