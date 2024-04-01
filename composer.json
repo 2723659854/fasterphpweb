@@ -52,7 +52,8 @@
     "php-di/php-di": "^6",
     "doctrine/annotations": "^1.14",
     "xiaosongshu/mail": "dev-master",
-    "ext-gd": "*"
+    "ext-gd": "*",
+    "ext-memcache": "*"
   },
   "config": {
     "allow-plugins": {

@@ -1,4 +1,6 @@
 <?php
+
+require_once __DIR__.'/vendor/autoload.php';
 if (!function_exists('scan_dir')){
     /**
      * 扫描目录的文件
@@ -68,11 +70,16 @@ if (!function_exists("webpToJpg")){
     }
 }
 
-$path = __DIR__.'/images';
+//$path = __DIR__.'/images';
+//
+///** 读取目录下面的所有文件 */
+//$files = scan_dir($path);
+//foreach ($files as $key=>$file){
+//   webpToJpg($file);
+//}
 
-/** 读取目录下面的所有文件 */
-$files = scan_dir($path);
-foreach ($files as $key=>$file){
-   webpToJpg($file);
-}
+$memcache  = new Memcache();
+$memcache ->connect('localhost',11211);
+$memcache->set('name','zhangsan');
+echo $memcache->get('name');
 

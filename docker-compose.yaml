@@ -35,7 +35,7 @@ services:
     # 目录挂载 这里是把宿主机的目录/e/yanglong/webman  挂载到容器的 /var/www 目录
     # 这里使用了目录挂载，可以实现代码实时更新
     volumes:
-      - /e/yanglong:/usr/src/myapp
+      - /d/project:/usr/src/myapp
     # 需要连接的容器名称，这里指定要连接redis容器
     links:
        - redis
@@ -85,6 +85,18 @@ services:
     # 挂载目录
     volumes:
       - /d/rabbitmq/:/var/log/rabbitmq/
+  # memcached 服务
+  memcached:
+    # 是否自动重启
+    restart: always
+    # 镜像名称
+    container_name: memcached
+    # 镜像源
+    image: memcached:latest
+    # 端口映射
+    ports:
+      - "11211:11211"
+
 # 创建桥接网络 ,可以让容器通过ip访问宿主机 ，一般用于访问宿主机上配置的网站，可以配合Apache使用，设置网站在localhost下。参考：https://blog.csdn.net/u012516524/article/details/131978081
 networks:
   bridge:
