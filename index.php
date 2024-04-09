@@ -79,7 +79,7 @@ if (!function_exists("webpToJpg")){
 //}
 
 $memcache  = new Memcache();
-$memcache ->connect('localhost',11211);
+$memcache ->connect('memcached',11211);
 $memcache->set('name','zhangsan');
 echo $memcache->get('name');
 

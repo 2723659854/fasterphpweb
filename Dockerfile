@@ -30,6 +30,8 @@ RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
     libpng-dev \
     # 安装webp图像处理扩展
     libwebp-dev \
+    # memcache扩展
+    # libmemcached-dev \
     # 安装一个jpg格式图像处理扩展
     libjpeg-turbo-dev \
     # 安装一个免费的字体库 freetype
@@ -41,7 +43,7 @@ RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
     # gd 使用的字体扩展
     --with-freetype=/usr/include/ && \
     # 安装php扩展 bcmath：数学函数扩展
-    docker-php-ext-install sockets pcntl pdo_mysql mysqli pdo_pgsql bcmath zip gd && \
+    docker-php-ext-install sockets pcntl pdo_mysql mysqli pdo_pgsql bcmath zip gd  && \
     # 安装pecl扩展 这里安装了apcu内存缓存扩展
     pecl install redis mongodb uuid amqp event apcu&& \
     # 启用pecl扩展 开启扩展
@@ -50,6 +52,16 @@ RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
     docker-php-ext-enable --ini-name event.ini event && \
     # 安装composer 这里使用的curl -o 保存路径  下载地址  意思是：将文件从这里下载后保存到指定目录 ，后面的命令是给这个目录添加可执行权限
     curl -o /usr/local/bin/composer https://mirrors.aliyun.com/composer/composer.phar && chmod +x /usr/local/bin/composer
+
+# 安装git
+RUN apk add git
+
+# 下载memcache源代码
+RUN git clone https://github.com/websupport-sk/pecl-memcache.git /usr/src/php/ext/memcache
+
+# 安装PHP扩展
+RUN docker-php-ext-install /usr/src/php/ext/memcache
+
 # 将当前的文件复制到指定目录，如果使用了任务编排，这个copy代码是无效的
 # COPY . /usr/src/myapp
 # 指定工作目录
