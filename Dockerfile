@@ -61,6 +61,13 @@ RUN git clone https://github.com/websupport-sk/pecl-memcache.git /usr/src/php/ex
 
 # 安装PHP扩展
 RUN docker-php-ext-install /usr/src/php/ext/memcache
+# 安装libmemcached依赖
+RUN apk add --no-cache libmemcached libmemcached-dev
+
+#下载memcached源代码
+RUN git clone https://github.com/php-memcached-dev/php-memcached.git /usr/src/php/ext/memcached
+# 安装memcached扩展
+RUN docker-php-ext-install /usr/src/php/ext/memcached
 
 # 将当前的文件复制到指定目录，如果使用了任务编排，这个copy代码是无效的
 # COPY . /usr/src/myapp
