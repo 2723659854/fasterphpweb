@@ -1,6 +1,6 @@
 # 使用阿尔法版本，镜像体积更小，这里面不使用apt-get  而是使用apk命令安装包 参考地址：https://blog.51cto.com/zhangxueliang/4941632
 # 这里强制指定版本为 8.1.24-cli-alpine ，版本高了之后，PHP自带的函数有问题
-FROM php:8.1.24-cli-alpine
+FROM php:8.3-cli-alpine
 # 使用sed命令修改镜像文件 这一句命令的意思是，搜索文件/etc/apk/repositories，找到s/dl-cdn.alpinelinux.org替换为mirrors.aliyun.com/g
 # 语法 RUN sed -i '/要匹配的内容/i修改后的内容' 文件路径 （参考地址：https://blog.csdn.net/qq_29229567/article/details/107684952）
 RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories && apk update && \
@@ -11,8 +11,6 @@ RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
     autoconf \
     # 创建一个base的基本镜像文件
     build-base \
-    # 安装一个php的event扩展
-    libevent-dev \
     # 安装mysqli扩展
     # 安装一个UUID扩展
     libuuid \
@@ -43,13 +41,11 @@ RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
     # gd 使用的字体扩展
     --with-freetype=/usr/include/ && \
     # 安装php扩展 bcmath：数学函数扩展
-    docker-php-ext-install sockets pcntl pdo_mysql mysqli pdo_pgsql bcmath zip gd  && \
+    docker-php-ext-install  pcntl pdo_mysql mysqli pdo_pgsql bcmath zip gd  && \
     # 安装pecl扩展 这里安装了apcu内存缓存扩展
-    pecl install redis mongodb uuid amqp event apcu&& \
+    pecl install redis mongodb uuid amqp  apcu&& \
     # 启用pecl扩展 开启扩展
     docker-php-ext-enable redis mongodb uuid amqp apcu&& \
-    # 启用event
-    docker-php-ext-enable --ini-name event.ini event && \
     # 安装composer 这里使用的curl -o 保存路径  下载地址  意思是：将文件从这里下载后保存到指定目录 ，后面的命令是给这个目录添加可执行权限
     curl -o /usr/local/bin/composer https://mirrors.aliyun.com/composer/composer.phar && chmod +x /usr/local/bin/composer
 
