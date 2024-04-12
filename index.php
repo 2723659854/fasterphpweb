@@ -83,3 +83,10 @@ $memcache ->connect('memcached',11211);
 $memcache->set('name','zhangsan');
 echo $memcache->get('name');
 
+try {
+    echo 123;
+    throw new Exception("发生了错误");
+}catch (Exception $exception){
+    var_dump($exception->getMessage());
+}
+
