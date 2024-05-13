@@ -35,7 +35,7 @@ class Demo extends BaseCommand
      */
     public function handle()
     {
-        $this->sendTcp('127.0.0.1:8000','GET');
+        $this->sendTcp('www.baidu.com','GET',50,10000);
     }
 
     /**
@@ -50,19 +50,30 @@ class Demo extends BaseCommand
     public function sendTcp(string $host,string $method = 'GET', int $forkNumber = 3,int $requestNumber = 100)
     {
         $this->info("本次高并发请求开始");
+        /** 记录所有的子进程 */
+        $pids = [];
         for ($i = 0; $i < $forkNumber; $i++) {
             $pid = pcntl_fork();
             if ($pid == -1) {
                 die("无法创建子进程");
             } elseif ($pid == 0) {
+                $myPid = getmypid();
                 // 子进程逻辑
                 for ($i = 1; $i <= $requestNumber; $i++) {
                     $response = (HttpClient::request($host, $method, ['lesson_id' => 201]));
-                    echo $response->getStatusCode();echo "\r\n";
+                    $statusCode = $response->getStatusCode();
+                    echo "\r\n-----进程号：{$myPid},第{$i}次请求完成,statusCode:{$statusCode}-----\r\n";
                 }
                 /** 每一个子进程任务执行完成后，必须exit退出，否则子进程会接着执行for循环，导致创建多个子进程 */
                 exit;
+            } else {
+                /** 记录子进程的pid */
+                $pids[] = $pid;
             }
+        }
+        /** 父进程等待所有子进程结束 */
+        foreach ($pids as $pid) {
+            pcntl_waitpid($pid, $status);
         }
         $this->info("本次高并发请求结束");
     }
