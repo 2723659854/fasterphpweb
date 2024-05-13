@@ -1,6 +1,7 @@
 <?php
 
 namespace Root\Lib;
+
 use Root\Io\Epoll;
 use Root\Io\Selector;
 use Root\Request;
@@ -32,33 +33,34 @@ class HttpClient
      * @param array $header
      * @return Request
      */
-    public static function request(string $host, string $method='GET',array $params = [],array $query=[],array $header=[]):Request{
+    public static function request(string $host, string $method = 'GET', array $params = [], array $query = [], array $header = []): Request
+    {
         /** 用户会传入ip地址，所以不用正则检测 */
         $parsUrl = parse_url($host);
-        if (empty($parsUrl['host'])){
-            $parsUrl = parse_Url('http://'.$host);
+        if (empty($parsUrl['host'])) {
+            $parsUrl = parse_Url('http://' . $host);
         }
         /** 请求的domain */
-        $_host =$parsUrl['host'];
+        $_host = $parsUrl['host'];
         /** 请求的路径 */
-        $_path = $parsUrl['path']??'/';
+        $_path = $parsUrl['path'] ?? '/';
         /** 协议类型 */
-        $_scheme = $parsUrl['scheme']??'http';
+        $_scheme = $parsUrl['scheme'] ?? 'http';
         /** 请求方法 */
-        $_method = strtoupper($method)??'GET';
+        $_method = strtoupper($method) ?? 'GET';
         /** query 资源参数 */
-        $_query = $parsUrl['query']??[];
-        $query = array_merge($query,$_query);
+        $_query = $parsUrl['query'] ?? [];
+        $query = array_merge($query, $_query);
         /** 端口 */
-        $_port = $parsUrl['port']??80;
+        $_port = $parsUrl['port'] ?? 80;
         /** 如果是https则切换到443端口，否则使用原来的端口 */
-        $_port = ($_scheme=='https')?443:$_port;
-        if (!$_host){
+        $_port = ($_scheme == 'https') ? 443 : $_port;
+        if (!$_host) {
             throw new \RuntimeException("host错误");
         }
-        if (!in_array($_scheme,['http','https'])) throw new \RuntimeException("不支持的协议类型【{$_scheme}】");
+        if (!in_array($_scheme, ['http', 'https'])) throw new \RuntimeException("不支持的协议类型【{$_scheme}】");
         /** 处理请求 */
-        return self::doRequest($_host,$_port,$_path,$_method,$params,$query,$header);
+        return self::doRequest($_host, $_port, $_path, $_method, $params, $query, $header);
     }
 
     /**
@@ -72,16 +74,17 @@ class HttpClient
      * @param array $header
      * @return Request
      */
-    private static function doRequest(string $host, int $port = 80, string $target = '/', string $method='GET',array $params = [],array $query=[],array $header=[]){
+    private static function doRequest(string $host, int $port = 80, string $target = '/', string $method = 'GET', array $params = [], array $query = [], array $header = [])
+    {
         /** 构建request */
-        $request = self::makeRequest($host,$port,$target,$method,$params,$query,$header);
+        $request = self::makeRequest($host, $port, $target, $method, $params, $query, $header);
         /** 协议类型 */
         $scheme = 'tcp';
         /** 初始化客户端设置 */
         $contextOptions = [];
-        if ($port==443){
+        if ($port == 443) {
             /** 不校验ssl */
-            $contextOptions['ssl']=[
+            $contextOptions['ssl'] = [
                 'verify_peer' => false,
                 'verify_peer_name' => false
             ];
@@ -93,29 +96,24 @@ class HttpClient
         /** 创建客户端 STREAM_CLIENT_CONNECT 同步请求，STREAM_CLIENT_ASYNC_CONNECT 异步请求*/
         $socket = @stream_socket_client("{$scheme}://{$host}:{$port}", $errno, $errstr, 1, STREAM_CLIENT_CONNECT, $context);
         /** 创建连接失败 */
-        if ($errno){
-            if (!static::$debug){
+        if ($errno) {
+            if (!static::$debug) {
                 throw new \RuntimeException($errstr??"建立连接失败",500);
             }
         }
         /** 获取响应类容 */
         $response = "";
         /** 发送http请求 */
-        if (is_resource($socket)){
+        if (is_resource($socket)) {
             @fwrite($socket, $request);
-            if (!static::$debug){
-                while (!feof($socket)) {
-                    $response .= fread($socket, 1024);
-                }
+            while (!feof($socket)) {
+                $response .= fread($socket, 1024);
             }
+            /** 关闭连接 */
             @fclose($socket);
         }
-
-
-        /** 关闭连接 */
-
         /** 返回响应结果 */
-        return self::makeResponse($response,$port,$target,$method,$params,$query,$header);
+        return self::makeResponse($response, $port, $target, $method, $params, $query, $header);
     }
 
     /**
@@ -129,11 +127,12 @@ class HttpClient
      * @param array $header
      * @return Request
      */
-    private static function makeResponse(string $response,int $port=80, string $target = '/',string $method='GET', array $params = [],array $query=[],array $header =[]):Request{
+    private static function makeResponse(string $response, int $port = 80, string $target = '/', string $method = 'GET', array $params = [], array $query = [], array $header = []): Request
+    {
         /** 处理响应内容 */
         $response = new Request($response);
         /** 可能对面的域名需要重定向 */
-        if (($response->getStatusCode()>299)&&($response->getStatusCode()<400)){
+        if (($response->getStatusCode() > 299) && ($response->getStatusCode() < 400)) {
             /** 获取重定向的地址 */
             $location = $response->header('location');
             /** 解析域名 */
@@ -143,11 +142,11 @@ class HttpClient
             /** 对方domain域名发生变化 */
             $host = $temporary['host'];
             /** 可能对面端口也会发生变化 */
-            $port = $temporary['port']??$port;
+            $port = $temporary['port'] ?? $port;
             /** 判断协议类型确定端口 */
-            $port = ($scheme=='https')?443:$port;
-            return self::doRequest($host,$port,$target,$method,$params,$query,$header);
-        }else{
+            $port = ($scheme == 'https') ? 443 : $port;
+            return self::doRequest($host, $port, $target, $method, $params, $query, $header);
+        } else {
             /** 返回响应 */
             return $response;
         }
@@ -164,20 +163,21 @@ class HttpClient
      * @param array $header 头部信息
      * @return string 请求体
      */
-    public static function makeRequest(string $host = '127.0.0.1', int $port = 443, string $target = '/',string $method='GET', array $params = [],array $query=[],array $header =[]):string{
+    public static function makeRequest(string $host = '127.0.0.1', int $port = 443, string $target = '/', string $method = 'GET', array $params = [], array $query = [], array $header = []): string
+    {
 
         /** 处理请query求参数 */
-        if ($query){
-            $target=$target.'?'.http_build_query($query);
+        if ($query) {
+            $target = $target . '?' . http_build_query($query);
         }
         $end = "\r\n";
         /** 定义请求头 */
         $request = "$method $target HTTP/1.1$end";
         $request .= "Host: $host:$port$end";
         /** 如果用户设置了header参数 */
-        if ($header){
-            foreach ($header as $k=>$v){
-                $request .="{$k}: {$v}{$end}";
+        if ($header) {
+            foreach ($header as $k => $v) {
+                $request .= "{$k}: {$v}{$end}";
             }
         }
         /** 以下都是绕过nginx的配置，模拟正常的谷歌浏览器发送请求 */
@@ -210,23 +210,22 @@ class HttpClient
         $request .= "Connection: Close$end";
 
         /** 如果有post要传输数据 ，则将数据装载到body */
-        if ($method=='POST'){
-            $data = empty($params)?json_encode(new \stdClass()):json_encode($params);
+        if ($method == 'POST') {
+            $data = empty($params) ? json_encode(new \stdClass()) : json_encode($params);
             $request .= "Content-Type:application/json;charset=utf-8\r\n";
-            $request .= "Content-Length: ".strlen($data)."\r\n";
-            $request .= $data."\r\n";
+            $request .= "Content-Length: " . strlen($data) . "\r\n";
+            $request .= $data . "\r\n";
         }
-        if (static::$debug){
-            $refererIp = '17.563.824.'.rand(1,255);
-            $request .= "Client-IP: $refererIp\r\n";
-            $request .= "X-Forwarded-For: $refererIp\r\n";
-            $request .= "x-real-ip: $refererIp\r\n";
-            $request .= "x-client-ip: $refererIp\r\n";
-            $request .= "via: $refererIp\r\n";
-            $request .= "Proxy_Add_X_Forwarded_For: $refererIp\r\n";
-        }else{
-            $request .= "$end";
-        }
+
+        $refererIp = '17.563.824.' . rand(1, 255);
+        $request .= "Client-IP: $refererIp\r\n";
+        $request .= "X-Forwarded-For: $refererIp\r\n";
+        $request .= "x-real-ip: $refererIp\r\n";
+        $request .= "x-client-ip: $refererIp\r\n";
+        $request .= "via: $refererIp\r\n";
+        $request .= "Proxy_Add_X_Forwarded_For: $refererIp\r\n";
+        $request .= "$end";
+
         return $request;
     }
 
@@ -241,35 +240,36 @@ class HttpClient
      * @param $fail
      * @return void
      */
-    public static function requestAsync(string $host, string $method='GET',array $params = [],array $query=[],array $header=[],$success=null,$fail=null){
+    public static function requestAsync(string $host, string $method = 'GET', array $params = [], array $query = [], array $header = [], $success = null, $fail = null)
+    {
         /** 保存原始数据 */
-        $oldParams = [$host,$method,$params,$query,$header,$success,$fail];
+        $oldParams = [$host, $method, $params, $query, $header, $success, $fail];
         /** 用户会传入ip地址，所以不用正则检测 */
         $parsUrl = parse_url($host);
-        if (empty($parsUrl['host'])){
-            $parsUrl = parse_Url('http://'.$host);
+        if (empty($parsUrl['host'])) {
+            $parsUrl = parse_Url('http://' . $host);
         }
         /** 请求的domain */
-        $_host =$parsUrl['host'];
+        $_host = $parsUrl['host'];
         /** 请求的路径 */
-        $_path = $parsUrl['path']??'/';
+        $_path = $parsUrl['path'] ?? '/';
         /** 协议类型 */
-        $_scheme = $parsUrl['scheme']??'http';
+        $_scheme = $parsUrl['scheme'] ?? 'http';
         /** 请求方法 */
-        $_method = strtoupper($method)??'GET';
+        $_method = strtoupper($method) ?? 'GET';
         /** query 资源参数 */
-        $_query = $parsUrl['query']??[];
-        $query = array_merge($query,$_query);
+        $_query = $parsUrl['query'] ?? [];
+        $query = array_merge($query, $_query);
         /** 端口 */
-        $_port = $parsUrl['port']??80;
+        $_port = $parsUrl['port'] ?? 80;
         /** 如果是https则切换到443端口，否则使用原来的端口 */
-        $_port = ($_scheme=='https')?443:$_port;
-        if (!$_host){
+        $_port = ($_scheme == 'https') ? 443 : $_port;
+        if (!$_host) {
             throw new \RuntimeException("host错误");
         }
-        if (!in_array($_scheme,['http','https'])) throw new \RuntimeException("不支持的协议类型【{$_scheme}】");
+        if (!in_array($_scheme, ['http', 'https'])) throw new \RuntimeException("不支持的协议类型【{$_scheme}】");
         /** 这里要改成投递异步请求 */
-        self::doAsyncRequest($_host,$_port,$_path,$_method,$params,$query,$header,$success,$fail,$oldParams);
+        self::doAsyncRequest($_host, $_port, $_path, $_method, $params, $query, $header, $success, $fail, $oldParams);
     }
 
     /**
@@ -283,17 +283,18 @@ class HttpClient
      * @param array $header
      * @return void
      */
-    private static function doAsyncRequest(string $host, int $port = 80, string $target = '/', string $method='GET',array $params = [],array $query=[],array $header=[],callable $success=null,callable $fail=null,array $oldParams =[]){
+    private static function doAsyncRequest(string $host, int $port = 80, string $target = '/', string $method = 'GET', array $params = [], array $query = [], array $header = [], callable $success = null, callable $fail = null, array $oldParams = [])
+    {
 
         /** 构建request */
-        $request = self::makeRequest($host,$port,$target,$method,$params,$query,$header);
+        $request = self::makeRequest($host, $port, $target, $method, $params, $query, $header);
         /** 协议类型 */
         $scheme = 'tcp';
         /** 初始化客户端设置 */
         $contextOptions = [];
-        if ($port==443){
+        if ($port == 443) {
             /** 不校验ssl */
-            $contextOptions['ssl']=[
+            $contextOptions['ssl'] = [
                 'verify_peer' => false,
                 'verify_peer_name' => false
             ];
@@ -304,24 +305,24 @@ class HttpClient
         /** 创建客户端 STREAM_CLIENT_CONNECT 同步请求，STREAM_CLIENT_ASYNC_CONNECT 异步请求*/
         $socket = @stream_socket_client("{$scheme}://{$host}:{$port}", $errno, $errstr, 3, STREAM_CLIENT_ASYNC_CONNECT, $context);
         /** 涉及到socket通信的地方，调用RuntimeException都会导致进程退出，抛出异常：Fatal error: Uncaught RuntimeException ，这是个很诡异的事情 */
-        if ($errno){
+        if ($errno) {
             try {
-                if ($fail) call_user_func($fail,new \RuntimeException("建立连接{$scheme}失败",500));
-            }catch (\RuntimeException |\Exception $exception){
+                if ($fail) call_user_func($fail, new \RuntimeException("建立连接{$scheme}失败", 500));
+            } catch (\RuntimeException|\Exception $exception) {
                 /** 记录日志 */
                 dump_error($exception);
             }
-            return ;
+            return;
         }
         /** 设置位非阻塞状态 */
-        stream_set_blocking($socket,false);
+        stream_set_blocking($socket, false);
         /** 添加到异步模型 */
         /** 投递到select异步请求 */
-        Selector::sendRequest($socket,$request,$success,$fail,$host.':'.$port,$oldParams);
+        Selector::sendRequest($socket, $request, $success, $fail, $host . ':' . $port, $oldParams);
         /** 如果开启了epoll读写模型 */
-        if (Epoll::$event_base){
+        if (Epoll::$event_base) {
             /** 投递到epoll异步请求*/
-            Epoll::sendRequest($socket,$request,$success,$fail,$host.':'.$port,$oldParams);
+            Epoll::sendRequest($socket, $request, $success, $fail, $host . ':' . $port, $oldParams);
         }
     }
 }

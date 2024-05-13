@@ -35,7 +35,7 @@ class Demo extends BaseCommand
      */
     public function handle()
     {
-        $this->sendTcp('www.baidu.com','GET',50,10000);
+        $this->sendTcp('www.cqddzx.com','GET',100,100000);
     }
 
     /**
