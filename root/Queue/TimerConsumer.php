@@ -12,22 +12,25 @@ class TimerConsumer
     public function consume()
     {
         /** 如果是主进程，则设置进程名称为master，管理定时器 */
-        cli_set_process_title("xiaosongshu_master");
-        writePid();
-        $my_process_id = posix_getpid();
-        file_put_contents(app_path().'/root/master_id.txt',$my_process_id);
-        /** 启动定时器 */
-        Timer::run();
-        while (true) {
-            /** 拦截闹钟信号*/
-            Timer::tick();
-            /** 切换CPU */
-            usleep(100);
-            /** nacos 服务管理必须放这里，放定时器太耗时了，而且会导致定时器数据丢失  */
-            if (time()%30==0){/** 每隔30秒检查一次 */
-                if (config('nacos')['enable']){
-                    NacosConfigManager::sync();
+        $create = pcntl_fork();
+        
+        if ($create) {
+            cli_set_process_title("xiaosongshu_timer");
+            /** 这里存在问题，不同的进程先后执行问题 */
+            Timer::deleteAll();
+            /** 在这里添加定时任务 ，然后发送信号 */
+            foreach (config('timer') as $value) {
+                if ($value['enable']) {
+                    Timer::add($value['time'], $value['function'], [], $value['persist']);
                 }
+            }
+            /** 启动定时器 */
+            Timer::run();
+            while (true) {
+                /** 拦截闹钟信号*/
+                Timer::tick();
+                /** 切换CPU */
+                usleep(100);
             }
         }
     }

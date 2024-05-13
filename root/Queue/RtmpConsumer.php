@@ -9,7 +9,27 @@ use Root\Lib\Worker;
 class RtmpConsumer
 {
 
-    public function consume($param){
+    /**
+     * 推流服务
+     * @param $param
+     * @return void
+     */
+    public function consume($param)
+    {
+        $_rtmp_pid = pcntl_fork();
+        if ($_rtmp_pid == 0) {
+            $this->push($param);
+        }else{
+            exit;
+        }
+    }
+
+    /**
+     * 业务逻辑
+     * @param $param
+     * @return void
+     */
+    public function push($param){
         global $argv;
         /** 如果是重启 则直接后台守护模式运行 */
         if ($param[0]=='restart'){

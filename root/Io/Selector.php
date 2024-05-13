@@ -75,7 +75,23 @@ class Selector
     /** 启动服务 */
     public function start()
     {
-        $this->accept();
+        /** 配置和运行模式  */
+        global $_server_num,$_daemonize;
+        /** 后台守护进程模式 */
+        if ($_daemonize){
+            for ($i = 1; $i <= $_server_num; $i++) {
+                /** @var int $pid 创建子进程 ,必须在loop之前创建子进程，否则loop会阻塞其他子进程 */
+                $pid = \pcntl_fork();
+                if ($pid==0) {
+                    cli_set_process_title("xiaosongshu_http");
+                    $this->accept();exit;
+                }
+            }
+        }else{
+            /** 调试模式 */
+            $this->accept();
+        }
+
     }
 
     /**

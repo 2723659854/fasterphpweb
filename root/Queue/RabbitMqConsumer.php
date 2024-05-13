@@ -21,10 +21,8 @@ class RabbitMqConsumer
                 if ($enable){
                     for ($i = 0; $i < $count; $i++) {
                         $rabbitmq_pid = \pcntl_fork();
-                        writePid();
                         if ($rabbitmq_pid > 0) {
                             /** 记录进程号 */
-                            writePid();
                             cli_set_process_title('xiaosongshu.rabbitmq.queue.'.$name);
                             if (class_exists($value['handler'])) {
                                 /** 切换CPU */

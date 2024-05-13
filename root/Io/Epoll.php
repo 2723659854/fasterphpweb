@@ -360,16 +360,15 @@ class Epoll
     private function fork()
     {
         /** 配置和运行模式  */
-        global $_server_num,$daemonize;
+        global $_server_num,$_daemonize;
         /** 后台守护进程模式 */
-        if ($daemonize){
+        if ($_daemonize){
             for ($i = 1; $i <= $_server_num; $i++) {
                 /** @var int $pid 创建子进程 ,必须在loop之前创建子进程，否则loop会阻塞其他子进程 */
                 $pid = \pcntl_fork();
-                writePid();
-                if ($pid) {
+                if ($pid==0) {
                     cli_set_process_title("xiaosongshu_http");
-                    $this->run();
+                    $this->run();exit;
                 }
             }
         }else{

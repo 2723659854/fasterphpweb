@@ -11,7 +11,6 @@ class ProcessConsumer
     public function consume(){
 
         foreach (config('process') as $name => $value){
-
             if ($value['enable']){
                 if (!class_exists($value['handler'])){
                     throw new \Exception("{$value['handler']}不存在");
@@ -19,7 +18,6 @@ class ProcessConsumer
                 $count = $value['count']??1;
                 while($count){
                     $create = pcntl_fork();
-                    writePid();
                     if ($create>0){
                         usleep(1000);
                         cli_set_process_title('xiaosongshu_process_.'.$name.'_'.$count);

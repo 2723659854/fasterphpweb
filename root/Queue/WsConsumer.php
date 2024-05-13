@@ -15,7 +15,6 @@ class WsConsumer
                     throw new \Exception("{$value['handler']}不存在");
                 }
                 $create = pcntl_fork();
-                writePid();
                 if ($create>0){
                     usleep(1000);
                     cli_set_process_title('xiaosongshu.ws.server.'.$name);
