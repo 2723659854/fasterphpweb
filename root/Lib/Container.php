@@ -7,7 +7,7 @@ namespace Root\Lib;
 class Container
 {
     /** @var array */
-    protected static $providers = [];
+    public static array $providers = [];
 
     /**
      * 获取一个已存储的对象

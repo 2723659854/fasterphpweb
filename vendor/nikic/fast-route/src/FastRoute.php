@@ -6,17 +6,24 @@ namespace FastRoute;
 use Closure;
 use FastRoute\Cache\FileCache;
 
+use function assert;
 use function is_string;
 
+/** @phpstan-import-type ProcessedData from ConfigureRoutes */
 final class FastRoute
 {
+    /** @var ProcessedData|null */
+    private ?array $processedConfiguration = null;
+
     /**
      * @param Closure(ConfigureRoutes):void  $routeDefinitionCallback
      * @param class-string<RouteParser>      $routeParser
      * @param class-string<DataGenerator>    $dataGenerator
      * @param class-string<Dispatcher>       $dispatcher
      * @param class-string<ConfigureRoutes>  $routesConfiguration
+     * @param class-string<GenerateUri>      $uriGenerator
      * @param Cache|class-string<Cache>|null $cacheDriver
+     * @param non-empty-string|null          $cacheKey
      */
     private function __construct(
         private readonly Closure $routeDefinitionCallback,
@@ -24,12 +31,17 @@ final class FastRoute
         private readonly string $dataGenerator,
         private readonly string $dispatcher,
         private readonly string $routesConfiguration,
+        private readonly string $uriGenerator,
         private readonly Cache|string|null $cacheDriver,
+        private readonly ?string $cacheKey,
     ) {
     }
 
-    /** @param Closure(ConfigureRoutes):void $routeDefinitionCallback */
-    public static function recommendedSettings(Closure $routeDefinitionCallback): self
+    /**
+     * @param Closure(ConfigureRoutes):void $routeDefinitionCallback
+     * @param non-empty-string              $cacheKey
+     */
+    public static function recommendedSettings(Closure $routeDefinitionCallback, string $cacheKey): self
     {
         return new self(
             $routeDefinitionCallback,
@@ -37,7 +49,9 @@ final class FastRoute
             DataGenerator\MarkBased::class,
             Dispatcher\MarkBased::class,
             RouteCollector::class,
+            GenerateUri\FromProcessedConfiguration::class,
             FileCache::class,
+            $cacheKey,
         );
     }
 
@@ -49,12 +63,17 @@ final class FastRoute
             $this->dataGenerator,
             $this->dispatcher,
             $this->routesConfiguration,
+            $this->uriGenerator,
+            null,
             null,
         );
     }
 
-    /** @param Cache|class-string<Cache> $driver */
-    public function withCache(Cache|string $driver): self
+    /**
+     * @param Cache|class-string<Cache> $driver
+     * @param non-empty-string          $cacheKey
+     */
+    public function withCache(Cache|string $driver, string $cacheKey): self
     {
         return new self(
             $this->routeDefinitionCallback,
@@ -62,7 +81,9 @@ final class FastRoute
             $this->dataGenerator,
             $this->dispatcher,
             $this->routesConfiguration,
+            $this->uriGenerator,
             $driver,
+            $cacheKey,
         );
     }
 
@@ -98,12 +119,34 @@ final class FastRoute
             $dataGenerator,
             $dispatcher,
             $this->routesConfiguration,
+            $this->uriGenerator,
             $this->cacheDriver,
+            $this->cacheKey,
         );
     }
 
-    public function dispatcher(string $cacheKey): Dispatcher
+    /** @param class-string<GenerateUri> $uriGenerator */
+    public function withUriGenerator(string $uriGenerator): self
     {
+        return new self(
+            $this->routeDefinitionCallback,
+            $this->routeParser,
+            $this->dataGenerator,
+            $this->dispatcher,
+            $this->routesConfiguration,
+            $uriGenerator,
+            $this->cacheDriver,
+            $this->cacheKey,
+        );
+    }
+
+    /** @return ProcessedData */
+    private function buildConfiguration(): array
+    {
+        if ($this->processedConfiguration !== null) {
+            return $this->processedConfiguration;
+        }
+
         $loader = function (): array {
             $configuredRoutes = new $this->routesConfiguration(
                 new $this->routeParser(),
@@ -116,13 +159,25 @@ final class FastRoute
         };
 
         if ($this->cacheDriver === null) {
-            return new $this->dispatcher($loader());
+            return $this->processedConfiguration = $loader();
         }
+
+        assert(is_string($this->cacheKey));
 
         $cache = is_string($this->cacheDriver)
             ? new $this->cacheDriver()
             : $this->cacheDriver;
 
-        return new $this->dispatcher($cache->get($cacheKey, $loader));
+        return $this->processedConfiguration = $cache->get($this->cacheKey, $loader);
+    }
+
+    public function dispatcher(): Dispatcher
+    {
+        return new $this->dispatcher($this->buildConfiguration());
+    }
+
+    public function uriGenerator(): GenerateUri
+    {
+        return new $this->uriGenerator($this->buildConfiguration()[2]);
     }
 }

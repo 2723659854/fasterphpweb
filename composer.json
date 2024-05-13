@@ -53,7 +53,8 @@
     "doctrine/annotations": "^1.14",
     "xiaosongshu/mail": "dev-master",
     "ext-gd": "*",
-    "ext-memcache": "*"
+    "ext-memcache": "*",
+    "nikic/php-parser": "^4.19"
   },
   "config": {
     "allow-plugins": {

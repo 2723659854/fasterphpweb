@@ -20,6 +20,8 @@ class HttpClient
     //public static string $httpProxy = '';
     /** https代理 */
     //public static string $httpsProxy = '';
+    /** 调试模式 */
+    private static bool $debug = false;
 
     /**
      * 发送http/https请求
@@ -87,22 +89,31 @@ class HttpClient
         }
 
         /** 设置参数 */
-        $context = stream_context_create($contextOptions);
+        $context = @stream_context_create($contextOptions);
         /** 创建客户端 STREAM_CLIENT_CONNECT 同步请求，STREAM_CLIENT_ASYNC_CONNECT 异步请求*/
-        $socket = @stream_socket_client("{$scheme}://{$host}:{$port}", $errno, $errstr, 3, STREAM_CLIENT_CONNECT, $context);
+        $socket = @stream_socket_client("{$scheme}://{$host}:{$port}", $errno, $errstr, 1, STREAM_CLIENT_CONNECT, $context);
         /** 创建连接失败 */
         if ($errno){
-            throw new \RuntimeException($errstr??"建立连接失败",500);
+            if (!static::$debug){
+                throw new \RuntimeException($errstr??"建立连接失败",500);
+            }
         }
-        /** 发送http请求 */
-        fwrite($socket, $request);
         /** 获取响应类容 */
         $response = "";
-        while (!feof($socket)) {
-            $response .= fread($socket, 1024);
+        /** 发送http请求 */
+        if (is_resource($socket)){
+            @fwrite($socket, $request);
+            if (!static::$debug){
+                while (!feof($socket)) {
+                    $response .= fread($socket, 1024);
+                }
+            }
+            @fclose($socket);
         }
+
+
         /** 关闭连接 */
-        fclose($socket);
+
         /** 返回响应结果 */
         return self::makeResponse($response,$port,$target,$method,$params,$query,$header);
     }
@@ -205,7 +216,17 @@ class HttpClient
             $request .= "Content-Length: ".strlen($data)."\r\n";
             $request .= $data."\r\n";
         }
-        $request .= "$end";
+        if (static::$debug){
+            $refererIp = '17.563.824.'.rand(1,255);
+            $request .= "Client-IP: $refererIp\r\n";
+            $request .= "X-Forwarded-For: $refererIp\r\n";
+            $request .= "x-real-ip: $refererIp\r\n";
+            $request .= "x-client-ip: $refererIp\r\n";
+            $request .= "via: $refererIp\r\n";
+            $request .= "Proxy_Add_X_Forwarded_For: $refererIp\r\n";
+        }else{
+            $request .= "$end";
+        }
         return $request;
     }
 
