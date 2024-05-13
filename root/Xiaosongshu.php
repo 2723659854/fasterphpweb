@@ -258,16 +258,12 @@ if (!class_exists('Xiaosongshu')) {
                     $masterId = file_get_contents($masterIdFile);
                     $allProcessIds = Xiaosongshu::getSubprocesses($masterId);
                     foreach ($allProcessIds as $v) {
-                        if ($v > 0) {
-                            // @exec("kill -9 {$v}");
-                            @posix_kill($v, SIGTERM);
-                        }
+                        @posix_kill($v, SIGTERM);
                     }
                     file_put_contents($masterIdFile, null);
                 }
                 /** 关闭rtmp推流服务 */
                 self::closeRtmp();
-                sleep(2);
                 /** 释放文件锁 */
                 if ($_start_server_file_lock) {
                     flock($_start_server_file_lock, LOCK_UN);
@@ -593,7 +589,6 @@ if (!class_exists('Xiaosongshu')) {
             /** 创建子进程负责处理 其他常驻内存的进程 */
             if (getmypid() == $master_pid) {
                 pcntl_fork();
-                
             }
             /** rtmp进程 */
             if ($rtmp_enable && (getmypid() != $master_pid)) {

@@ -16,11 +16,13 @@ class RtmpConsumer
      */
     public function consume($param)
     {
-        $_rtmp_pid = pcntl_fork();
-        if ($_rtmp_pid == 0) {
-            $this->push($param);
+        if ($param[0]!='stop'){
+            $_rtmp_pid = pcntl_fork();
+            if ($_rtmp_pid == 0) {
+                $this->push($param);exit;
+            }
         }else{
-            exit;
+            $this->push($param);exit;
         }
     }
 
