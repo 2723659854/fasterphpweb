@@ -38,12 +38,21 @@ class Demo extends BaseCommand
         $server->port = 1935 ;
         $server->onConnect = function (\Root\rtmp\TcpConnection $connection){
             /** 将传递进来的数据解码 */
-            //$buffer = \MediaServer\Utils\WMBufferStream::input($buffer,$socket);
             new \MediaServer\Rtmp\RtmpStream(
                 new \MediaServer\Utils\WMBufferStream($connection)
             );
-            //fwrite($socket, response('<h1>OK</h1>', 200));
         };
+        /** 下面是提供flv播放资源的接口 */
+        $server->onWorkerStart = function ($worker) {
+            logger()->info("rtmp server " . $worker->getSocketName() . " start . ");
+            \MediaServer\Http\HttpWMServer::$publicPath = __DIR__.'/public';
+            $httpServer = new \MediaServer\Http\HttpWMServer("\\MediaServer\\Http\\ExtHttpProtocol://0.0.0.0:18080");
+            $httpServer->listen();
+            logger()->info("http server " . $httpServer->getSocketName() . " start . ");
+            var_dump("http server start");
+        };
+        /** 这个http好像要单独开一个进程 */
+
         $server->start();
     }
 

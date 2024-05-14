@@ -10,20 +10,21 @@ use MediaServer\Utils\WMHttpChunkStream;
 use MediaServer\Utils\WMWsChunkStream;
 use Psr\Http\Message\StreamInterface;
 use React\Promise\Promise;
+use Root\Io\RtmpDemo;
 use Workerman\Connection\TcpConnection;
 use Workerman\Protocols\Http\Request;
 use Workerman\Protocols\Http\Response;
 use Workerman\Protocols\Websocket;
-use Workerman\Worker;
 
-
-class HttpWMServer extends Worker
+class HttpWMServer extends RtmpDemo
 {
     static $publicPath = '';
 
     public  function __construct($socket_name = '', array $context_option = array())
     {
-        parent::__construct($socket_name, $context_option);
+        parent::init($socket_name, $context_option);
+        $this->listeningAddress = $this->parseSocketAddress();
+        parent::__construct();
         //使用扩展的协议
         /** 绑定ws请求响应事件 */
         $this->onWebSocketConnect = [$this,'onWebsocketRequest'];
