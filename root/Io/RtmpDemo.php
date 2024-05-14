@@ -5,6 +5,7 @@ namespace Root\Io;
 use Root\Lib\Container;
 use Root\Lib\HttpClient;
 use Root\Request;
+use Root\rtmp\EventInterface;
 use Root\rtmp\TcpConnection;
 use Workerman\Autoloader;
 
@@ -113,7 +114,8 @@ class RtmpDemo
      *
      * @throws \Exception
      */
-    protected function parseSocketAddress() {
+    protected function parseSocketAddress()
+    {
         if (!$this->_socketName) {
             return;
         }
@@ -121,8 +123,8 @@ class RtmpDemo
         list($scheme, $address) = \explode(':', $this->_socketName, 2);
         // Check application layer protocol class.
         if (!isset(static::$_builtinTransports[$scheme])) {
-            $scheme         = \ucfirst($scheme);
-            $this->protocol = \substr($scheme,0,1)==='\\' ? $scheme : 'Protocols\\' . $scheme;
+            $scheme = \ucfirst($scheme);
+            $this->protocol = \substr($scheme, 0, 1) === '\\' ? $scheme : 'Protocols\\' . $scheme;
             if (!isset(static::$_builtinTransports[$this->transport])) {
                 throw new \Exception('Bad worker->transport ' . \var_export($this->transport, true));
             }
@@ -133,20 +135,15 @@ class RtmpDemo
         return static::$_builtinTransports[$this->transport] . ":" . $address;
     }
 
-    /**
-     * Listen.
-     *
-     * @throws \Exception
-     */
     public function listen()
     {
         if (!$this->_socketName) {
             return;
         }
 
+
         if (!$this->_mainSocket) {
 
-            var_dump(123123);
             $local_socket = $this->parseSocketAddress();
 
             // Flag.
@@ -177,23 +174,41 @@ class RtmpDemo
             }
 
             // Try to open keepalive for tcp and disable Nagle algorithm.
-//            if (\function_exists('socket_import_stream') && static::$_builtinTransports[$this->transport] === 'tcp') {
-//                \set_error_handler(function(){});
-//                $socket = \socket_import_stream($this->_mainSocket);
-//                \socket_set_option($socket, \SOL_SOCKET, \SO_KEEPALIVE, 1);
-//                \socket_set_option($socket, \SOL_TCP, \TCP_NODELAY, 1);
-//                \restore_error_handler();
-//            }
+            if (\function_exists('socket_import_stream') && static::$_builtinTransports[$this->transport] === 'tcp') {
+                \set_error_handler(function () {
+                });
+                $socket = \socket_import_stream($this->_mainSocket);
+                \socket_set_option($socket, \SOL_SOCKET, \SO_KEEPALIVE, 1);
+                \socket_set_option($socket, \SOL_TCP, \TCP_NODELAY, 1);
+                \restore_error_handler();
+            }
 
             // Non blocking.
             \stream_set_blocking($this->_mainSocket, false);
         }
+        $this->resumeAccept();
+    }
 
+    public function resumeAccept()
+    {
+        // Register a listener to be notified when server socket is ready to read.
         //static::$globalEvent->add($this->_mainSocket, EventInterface::EV_READ, array($this, 'acceptConnection'));
+        self::add($this->_mainSocket, EventInterface::EV_READ, array($this, 'acceptConnection'));
+    }
+
+    /**
+     * Accept a connection.
+     *
+     * @param resource $socket
+     * @return void
+     */
+    public function acceptConnection($socket)
+    {
         // Accept a connection on server socket.
-        \set_error_handler(function(){});
-        //$new_socket = \stream_socket_accept($socket, 0, $remote_address);
-        $new_socket = \stream_socket_accept($this->_mainSocket, 0, $remote_address);
+        \set_error_handler(function () {
+        });
+        var_dump(12312);
+        $new_socket = \stream_socket_accept($socket, 0, $remote_address);
         \restore_error_handler();
 
         // Thundering herd.
@@ -202,8 +217,15 @@ class RtmpDemo
         }
 
         // TcpConnection.
-        $connection                         = new TcpConnection($new_socket, $remote_address);
-        call_user_func($this->onConnect, $connection);
+        $connection = new TcpConnection($new_socket, $remote_address);
+        // Try to emit onConnect callback.
+        if ($this->onConnect) {
+            try {
+                \call_user_func($this->onConnect, $connection);
+            } catch (\Exception $e) {
+                var_dump($e->getMessage());
+            }
+        }
     }
 
     /**
@@ -212,10 +234,10 @@ class RtmpDemo
      * @var array
      */
     protected static $_builtinTransports = array(
-        'tcp'   => 'tcp',
-        'udp'   => 'udp',
-        'unix'  => 'unix',
-        'ssl'   => 'tcp'
+        'tcp' => 'tcp',
+        'udp' => 'udp',
+        'unix' => 'unix',
+        'ssl' => 'tcp'
     );
 
     public $transport = 'tcp';
@@ -282,7 +304,9 @@ class RtmpDemo
     {
         return RtmpDemo::instance()->{$name}(...$arguments);
     }
+
     const DEFAULT_BACKLOG = 102400;
+
     public function init($socket_name = '', array $context_option = array())
     {
         // Context for socket.
@@ -307,18 +331,20 @@ class RtmpDemo
 
     /** 监听地址 */
     public string $listeningAddress = '';
+
+    //todo 改造 是一个进程能够监听两个端口
     /** 初始化 */
     public function __construct()
     {
         /** @var string $listeningAddress 拼接监听地址 */
-        if ($this->listeningAddress){
+        if ($this->listeningAddress) {
             $listeningAddress = $this->listeningAddress;
-        }else{
+        } else {
             $listeningAddress = $this->protocol . '://' . $this->host . ':' . $this->port;
         }
 
         echo "开始监听{$listeningAddress}\r\n";
-        /** 不严重https证书 */
+        /** 不验证https证书 */
         $contextOptions['ssl'] = ['verify_peer' => false, 'verify_peer_name' => false];
         /** 配置socket流参数 */
         $context = stream_context_create($contextOptions);
@@ -331,7 +357,8 @@ class RtmpDemo
         /** 设置非阻塞，语法是关闭阻塞 */
         stream_set_blocking($this->socket, 0);
         /** 将服务端保存 */
-        RtmpDemo::$allSocket[(int)$this->socket] = $this->socket;
+        // 这里会保存
+        self::$allSocket[(int)$this->socket] = $this->socket;
     }
 
     /**
@@ -349,13 +376,9 @@ class RtmpDemo
     /** 启动服务 */
     public function start()
     {
-        if ($this->onWorkerStart){
-            call_user_func($this->onWorkerStart,$this);
-        }
         /** 调试模式 */
         $this->accept();
     }
-
 
 
     /** 接收客户端消息 */
@@ -366,8 +389,8 @@ class RtmpDemo
             /** 初始化需要监测的可写入的客户端，需要排除的客户端都为空 */
             $except = [];
             /** 需要监听socket，自动清理已报废的链接 */
-            foreach (RtmpDemo::$allSocket as $key => $value){
-                if (!is_resource($value)){
+            foreach (RtmpDemo::$allSocket as $key => $value) {
+                if (!is_resource($value)) {
                     unset(RtmpDemo::$allSocket[$key]);
                 }
             }
@@ -376,7 +399,7 @@ class RtmpDemo
             /** 这里设置了阻塞60秒 */
             try {
                 stream_select($read, $write, $except, 60);
-            }catch (\Exception $exception){
+            } catch (\Exception $exception) {
                 var_dump($exception->getMessage());
                 debug_print_backtrace();
             }
