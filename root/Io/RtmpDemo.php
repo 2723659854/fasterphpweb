@@ -135,98 +135,8 @@ class RtmpDemo
         return static::$_builtinTransports[$this->transport] . ":" . $address;
     }
 
-    public function listen()
-    {
-        if (!$this->_socketName) {
-            return;
-        }
 
 
-        if (!$this->_mainSocket) {
-
-            $local_socket = $this->parseSocketAddress();
-
-            // Flag.
-            $flags = $this->transport === 'udp' ? \STREAM_SERVER_BIND : \STREAM_SERVER_BIND | \STREAM_SERVER_LISTEN;
-            $errno = 0;
-            $errmsg = '';
-            // SO_REUSEPORT.
-            if ($this->reusePort) {
-                \stream_context_set_option($this->_context, 'socket', 'so_reuseport', 1);
-            }
-
-            // Create an Internet or Unix domain server socket.
-            $this->_mainSocket = \stream_socket_server($local_socket, $errno, $errmsg, $flags, $this->_context);
-            if (!$this->_mainSocket) {
-                throw new \Exception($errmsg);
-            }
-
-            if ($this->transport === 'ssl') {
-                \stream_socket_enable_crypto($this->_mainSocket, false);
-            } elseif ($this->transport === 'unix') {
-                $socket_file = \substr($local_socket, 7);
-                if ($this->user) {
-                    \chown($socket_file, $this->user);
-                }
-                if ($this->group) {
-                    \chgrp($socket_file, $this->group);
-                }
-            }
-
-            // Try to open keepalive for tcp and disable Nagle algorithm.
-            if (\function_exists('socket_import_stream') && static::$_builtinTransports[$this->transport] === 'tcp') {
-                \set_error_handler(function () {
-                });
-                $socket = \socket_import_stream($this->_mainSocket);
-                \socket_set_option($socket, \SOL_SOCKET, \SO_KEEPALIVE, 1);
-                \socket_set_option($socket, \SOL_TCP, \TCP_NODELAY, 1);
-                \restore_error_handler();
-            }
-
-            // Non blocking.
-            \stream_set_blocking($this->_mainSocket, false);
-        }
-        $this->resumeAccept();
-    }
-
-    public function resumeAccept()
-    {
-        // Register a listener to be notified when server socket is ready to read.
-        //static::$globalEvent->add($this->_mainSocket, EventInterface::EV_READ, array($this, 'acceptConnection'));
-        self::add($this->_mainSocket, EventInterface::EV_READ, array($this, 'acceptConnection'));
-    }
-
-    /**
-     * Accept a connection.
-     *
-     * @param resource $socket
-     * @return void
-     */
-    public function acceptConnection($socket)
-    {
-        // Accept a connection on server socket.
-        \set_error_handler(function () {
-        });
-        var_dump(12312);
-        $new_socket = \stream_socket_accept($socket, 0, $remote_address);
-        \restore_error_handler();
-
-        // Thundering herd.
-        if (!$new_socket) {
-            return;
-        }
-
-        // TcpConnection.
-        $connection = new TcpConnection($new_socket, $remote_address);
-        // Try to emit onConnect callback.
-        if ($this->onConnect) {
-            try {
-                \call_user_func($this->onConnect, $connection);
-            } catch (\Exception $e) {
-                var_dump($e->getMessage());
-            }
-        }
-    }
 
     /**
      * PHP built-in protocols.
@@ -332,6 +242,8 @@ class RtmpDemo
     /** 监听地址 */
     public string $listeningAddress = '';
 
+    /** 服务端socket */
+    public array $serverSocket = [];
     //todo 改造 是一个进程能够监听两个端口
     /** 初始化 */
     public function __construct()
@@ -353,12 +265,13 @@ class RtmpDemo
         /** 设置ip复用 */
         stream_context_set_option($context, 'socket', 'so_reuseaddr', 1);
         /** 设置服务端：监听地址+端口 */
-        $this->socket = stream_socket_server($listeningAddress, $errno, $errstr, STREAM_SERVER_BIND | STREAM_SERVER_LISTEN, $context);
+        $socket = stream_socket_server($listeningAddress, $errno, $errstr, STREAM_SERVER_BIND | STREAM_SERVER_LISTEN, $context);
         /** 设置非阻塞，语法是关闭阻塞 */
-        stream_set_blocking($this->socket, 0);
-        /** 将服务端保存 */
-        // 这里会保存
-        self::$allSocket[(int)$this->socket] = $this->socket;
+        stream_set_blocking($socket, 0);
+        /** 将服务端保存所有socket列表  */
+        self::$allSocket[(int)$socket] = $socket;
+        /** 单独保存服务端 */
+        $this->serverSocket[(int)$socket] = $socket;
     }
 
     /**
@@ -376,6 +289,9 @@ class RtmpDemo
     /** 启动服务 */
     public function start()
     {
+        if ($this->onWorkerStart){
+            call_user_func($this->onWorkerStart,$this);
+        }
         /** 调试模式 */
         $this->accept();
     }
@@ -389,12 +305,12 @@ class RtmpDemo
             /** 初始化需要监测的可写入的客户端，需要排除的客户端都为空 */
             $except = [];
             /** 需要监听socket，自动清理已报废的链接 */
-            foreach (RtmpDemo::$allSocket as $key => $value) {
+            foreach (self::$allSocket as $key => $value) {
                 if (!is_resource($value)) {
-                    unset(RtmpDemo::$allSocket[$key]);
+                    unset(self::$allSocket[$key]);
                 }
             }
-            $write = $read = RtmpDemo::$allSocket;
+            $write = $read = self::$allSocket;
             /** 使用stream_select函数监测可读，可写的连接，如果某一个连接接收到数据，那么数据就会改变，select使用的foreach遍历所有的连接，查看是否可读，就是有消息的时候标记为可读 */
             /** 这里设置了阻塞60秒 */
             try {
@@ -408,10 +324,10 @@ class RtmpDemo
             if ($read) {
                 foreach ($read as $fd) {
                     $fd_key = (int)$fd;
-                    if ($fd === $this->socket) {
+                    /** 处理多个服务端的链接 */
+                    if (in_array($fd,$this->serverSocket)) {
                         /** 读取服务端接收到的 消息，这个消息的内容是客户端连接 ，stream_socket_accept方法负责接收客户端连接 */
-                        $clientSocket = stream_socket_accept($this->socket, 0, $remote_address); //阻塞监听 设置超时0，并获取客户端地址
-
+                        $clientSocket = stream_socket_accept($fd, 0, $remote_address); //阻塞监听 设置超时0，并获取客户端地址
                         //触发事件的连接的回调
                         /** 如果这个客户端连接不为空，并且本服务的onConnect是回调函数 */
                         if (!empty($clientSocket) && is_callable($this->onConnect)) {

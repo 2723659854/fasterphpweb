@@ -47,7 +47,7 @@ class Demo extends BaseCommand
             logger()->info("rtmp server " . $worker->getSocketName() . " start . ");
             \MediaServer\Http\HttpWMServer::$publicPath = __DIR__.'/public';
             $httpServer = new \MediaServer\Http\HttpWMServer("\\MediaServer\\Http\\ExtHttpProtocol://0.0.0.0:18080");
-            $httpServer->listen();
+            //$httpServer->listen();
             logger()->info("http server " . $httpServer->getSocketName() . " start . ");
             var_dump("http server start");
         };
