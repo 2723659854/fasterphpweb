@@ -113,10 +113,10 @@ trait RtmpInvokeHandlerTrait
         /** 记录连接时间 */
         $this->startTimestamp = timestamp();
         /** 添加一个定时器 */
-        $this->pingTimer = Timer::add($this->pingTime,function(){
-            /** 心跳检测 */
-            $this->sendPingRequest();
-        });
+//        $this->pingTimer = Timer::add($this->pingTime,function(){
+//            /** 心跳检测 */
+//            $this->sendPingRequest();
+//        });
         /** 返回ack */
         $this->sendWindowACK(5000000);
         /** 设置宽带 */

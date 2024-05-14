@@ -34,11 +34,11 @@ trait RtmpVideoHandlerTrait
             //当前帧为第0
             if ($this->videoCount++ === 0) {
                 /** 添加一个定时器，统计5秒的fps  */
-                $this->videoFpsCountTimer = Timer::add(5,function(){
-                    $this->videoFps = ceil($this->videoCount / 5);
-                    /** 删除定时器  */
-                    $this->videoFpsCountTimer = null;
-                },[],false);
+//                $this->videoFpsCountTimer = Timer::add(5,function(){
+//                    $this->videoFps = ceil($this->videoCount / 5);
+//                    /** 删除定时器  */
+//                    $this->videoFpsCountTimer = null;
+//                },[],false);
             }
         }
         /** 获取视频编码 通过分片id判断 */

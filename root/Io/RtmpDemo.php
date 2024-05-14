@@ -83,7 +83,8 @@ class RtmpDemo
             case self::EV_WRITE:
                 $count = $flag === self::EV_READ ? \count($this->_readFds) : \count($this->_writeFds);
                 if ($count >= 1024) {
-                    echo "Warning: system call select exceeded the maximum number of connections 1024, please install event/libevent extension for more connections.\n";
+                    //echo "Warning: system call select exceeded the maximum number of connections 1024, please install event/libevent extension for more connections.\n";
+                    echo "系统最大支持1024个链接\n";
                 } else if (\DIRECTORY_SEPARATOR !== '/' && $count >= 256) {
                     echo "Warning: system call select exceeded the maximum number of connections 256.\n";
                 }
@@ -204,8 +205,7 @@ class RtmpDemo
         while (true) {
             /** 初始化需要监测的可写入的客户端，需要排除的客户端都为空 */
             $except = [];
-            /** 需要监听socket */
-            //todo 需要自动处理，如果不是可用链接，直接删除，否则会导致报错
+            /** 需要监听socket，自动清理已报废的链接 */
             foreach (RtmpDemo::$allSocket as $key => $value){
                 if (!is_resource($value)){
                     unset(RtmpDemo::$allSocket[$key]);

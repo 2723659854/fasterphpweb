@@ -264,10 +264,10 @@ class FlvPublisherStream extends EventEmitter implements PublishStreamInterface
                     //当前帧为第0
                     if ($this->videoCount++ === 0) {
                         /** 计算帧率 */
-                        $this->videoFpsCountTimer = Timer::add(5, function () {
-                            $this->videoFps = ceil($this->videoCount / 5);
-                            $this->videoFpsCountTimer = null;
-                        }, [], false);
+//                        $this->videoFpsCountTimer = Timer::add(5, function () {
+//                            $this->videoFps = ceil($this->videoCount / 5);
+//                            $this->videoFpsCountTimer = null;
+//                        }, [], false);
                     }
                 }
                 /** h264解码 */
@@ -378,10 +378,10 @@ class FlvPublisherStream extends EventEmitter implements PublishStreamInterface
         $this->gopCacheQueue = [];
         $this->input->close();
 
-        if ($this->videoFpsCountTimer) {
-            Timer::del($this->videoFpsCountTimer);
-            $this->videoFpsCountTimer = null;
-        }
+//        if ($this->videoFpsCountTimer) {
+//            Timer::del($this->videoFpsCountTimer);
+//            $this->videoFpsCountTimer = null;
+//        }
 
 
         $this->emit('on_close');

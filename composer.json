@@ -54,7 +54,8 @@
     "xiaosongshu/mail": "dev-master",
     "ext-gd": "*",
     "ext-memcache": "*",
-    "nikic/php-parser": "^4.19"
+    "nikic/php-parser": "^4.19",
+    "ext-zlib": "*"
   },
   "config": {
     "allow-plugins": {

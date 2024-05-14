@@ -100,21 +100,21 @@ trait RtmpTrait
                 $this->onDeleteStream(['streamId' => $this->publishStreamId]);
             }
             /** 删除心跳定时器 */
-            if ($this->pingTimer) {
-                Timer::del($this->pingTimer);
-                $this->pingTimer = null;
-            }
+//            if ($this->pingTimer) {
+//                Timer::del($this->pingTimer);
+//                $this->pingTimer = null;
+//            }
             /** 删除视频帧率计数定时器 */
-            if($this->videoFpsCountTimer){
-                Timer::del($this->videoFpsCountTimer);
-                $this->videoFpsCountTimer = null;
-            }
+//            if($this->videoFpsCountTimer){
+//                Timer::del($this->videoFpsCountTimer);
+//                $this->videoFpsCountTimer = null;
+//            }
 
             /** 删除数据计数定时器 */
-            if($this->dataCountTimer){
-                Timer::del($this->dataCountTimer);
-                $this->dataCountTimer = null;
-            }
+//            if($this->dataCountTimer){
+//                Timer::del($this->dataCountTimer);
+//                $this->dataCountTimer = null;
+//            }
         }
         /** 触发关闭事件  */
         $this->emit('on_close');

@@ -12,7 +12,7 @@ use MediaServer\MediaReader\VideoFrame;
 use MediaServer\PushServer\DuplexMediaStreamInterface;
 use MediaServer\PushServer\VerifyAuthStreamInterface;
 use MediaServer\Utils\WMBufferStream;
-use Workerman\Timer;
+//use Workerman\Timer;
 
 
 /**
