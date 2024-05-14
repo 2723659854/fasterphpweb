@@ -114,7 +114,7 @@ class RtmpDemo
      *
      * @throws \Exception
      */
-    protected function parseSocketAddress()
+    public function parseSocketAddress()
     {
         if (!$this->_socketName) {
             return;
@@ -255,6 +255,33 @@ class RtmpDemo
             $listeningAddress = $this->protocol . '://' . $this->host . ':' . $this->port;
         }
 
+        echo "开始监听{$listeningAddress}\r\n";
+        /** 不验证https证书 */
+        $contextOptions['ssl'] = ['verify_peer' => false, 'verify_peer_name' => false];
+        /** 配置socket流参数 */
+        $context = stream_context_create($contextOptions);
+        /** 设置端口复用 解决惊群效应  */
+        stream_context_set_option($context, 'socket', 'so_reuseport', 1);
+        /** 设置ip复用 */
+        stream_context_set_option($context, 'socket', 'so_reuseaddr', 1);
+        /** 设置服务端：监听地址+端口 */
+        $socket = stream_socket_server($listeningAddress, $errno, $errstr, STREAM_SERVER_BIND | STREAM_SERVER_LISTEN, $context);
+        /** 设置非阻塞，语法是关闭阻塞 */
+        stream_set_blocking($socket, 0);
+        /** 将服务端保存所有socket列表  */
+        self::$allSocket[(int)$socket] = $socket;
+        /** 单独保存服务端 */
+        $this->serverSocket[(int)$socket] = $socket;
+    }
+
+    public function startFlv()
+    {
+        /** @var string $listeningAddress 拼接监听地址 */
+        if ($this->listeningAddress) {
+            $listeningAddress = $this->listeningAddress;
+        } else {
+            $listeningAddress = $this->protocol . '://' . $this->host . ':' . $this->port;
+        }
         echo "开始监听{$listeningAddress}\r\n";
         /** 不验证https证书 */
         $contextOptions['ssl'] = ['verify_peer' => false, 'verify_peer_name' => false];

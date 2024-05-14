@@ -42,14 +42,16 @@ class Demo extends BaseCommand
                 new \MediaServer\Utils\WMBufferStream($connection)
             );
         };
-        /** 下面是提供flv播放资源的接口 */
-        $server->onWorkerStart = function ($worker) {
-            logger()->info("rtmp server " . $worker->getSocketName() . " start . ");
-            \MediaServer\Http\HttpWMServer::$publicPath = __DIR__.'/public';
-            $httpServer = new \MediaServer\Http\HttpWMServer("\\MediaServer\\Http\\ExtHttpProtocol://0.0.0.0:18080");
+        /**  这个的作用就是添加一个新的协议并监听 */
+        $server->onWorkerStart = function ($server) {
+
+//            logger()->info("rtmp server " . $worker->getSocketName() . " start . ");
+//            \MediaServer\Http\HttpWMServer::$publicPath = __DIR__.'/public';
+            $httpServer = new \MediaServer\Http\HttpWMServer("\\MediaServer\\Http\\ExtHttpProtocol://0.0.0.0:18080",$server);
             //$httpServer->listen();
-            logger()->info("http server " . $httpServer->getSocketName() . " start . ");
-            var_dump("http server start");
+//            logger()->info("http server " . $httpServer->getSocketName() . " start . ");
+//            var_dump("http server start");
+            //$server->flvServer();
         };
         /** 这个http好像要单独开一个进程 */
 

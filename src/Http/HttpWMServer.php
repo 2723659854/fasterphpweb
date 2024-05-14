@@ -16,20 +16,22 @@ use Workerman\Protocols\Http\Request;
 use Workerman\Protocols\Http\Response;
 use Workerman\Protocols\Websocket;
 
-class HttpWMServer extends RtmpDemo
+class HttpWMServer
 {
     static $publicPath = '';
 
-    public  function __construct($socket_name = '', array $context_option = array())
+    public  function __construct($socket_name = '', RtmpDemo $server = null)
     {
-        parent::init($socket_name, $context_option);
-        $this->listeningAddress = $this->parseSocketAddress();
-        parent::__construct();
+        $server->init($socket_name);
+        $server->listeningAddress = $server->parseSocketAddress();
+        $server->startFlv();
         //使用扩展的协议
         /** 绑定ws请求响应事件 */
-        $this->onWebSocketConnect = [$this,'onWebsocketRequest'];
+        //$this->onWebSocketConnect = [$this,'onWebsocketRequest'];
+        $server->onWebSocketConnect = [$this,'onWebsocketRequest'];
         /** 绑定http请求事件 */
-        $this->onMessage = [$this,'onHttpRequest'];
+        //$this->onMessage = [$this,'onHttpRequest'];
+        $server->onMessage = [$this,'onHttpRequest'];
     }
 
     /**
