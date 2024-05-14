@@ -4,7 +4,6 @@ namespace App\Command;
 
 use Root\Lib\BaseCommand;
 use Root\Lib\HttpClient;
-use Root\Request;
 
 /**
  * @purpose 用户自定义命令
@@ -35,8 +34,20 @@ class Demo extends BaseCommand
      */
     public function handle()
     {
-        $this->sendTcp('www.cqddzx.com','GET',100,100000);
+        $server = \Root\Io\RtmpDemo::instance();
+        $server->port = 1935 ;
+        $server->onConnect = function (\Root\rtmp\TcpConnection $connection){
+            /** 将传递进来的数据解码 */
+            //$buffer = \MediaServer\Utils\WMBufferStream::input($buffer,$socket);
+            new \MediaServer\Rtmp\RtmpStream(
+                new \MediaServer\Utils\WMBufferStream($connection)
+            );
+            //fwrite($socket, response('<h1>OK</h1>', 200));
+        };
+        $server->start();
     }
+
+
 
     /**
      * 测试并发请求

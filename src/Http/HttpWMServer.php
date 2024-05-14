@@ -9,6 +9,7 @@ use MediaServer\MediaServer;
 use MediaServer\Utils\WMHttpChunkStream;
 use MediaServer\Utils\WMWsChunkStream;
 use Psr\Http\Message\StreamInterface;
+use React\Promise\Promise;
 use Workerman\Connection\TcpConnection;
 use Workerman\Protocols\Http\Request;
 use Workerman\Protocols\Http\Response;
@@ -24,10 +25,18 @@ class HttpWMServer extends Worker
     {
         parent::__construct($socket_name, $context_option);
         //使用扩展的协议
+        /** 绑定ws请求响应事件 */
         $this->onWebSocketConnect = [$this,'onWebsocketRequest'];
+        /** 绑定http请求事件 */
         $this->onMessage = [$this,'onHttpRequest'];
     }
 
+    /**
+     * 定义ws请求响应方法
+     * @param $connection
+     * @param $headerData
+     * @return void
+     */
     public function onWebsocketRequest($connection,$headerData){
         $request = new Request($headerData);
         $request->connection = $connection;
@@ -42,6 +51,7 @@ class HttpWMServer extends Worker
 
 
     /**
+     * http响应请求
      * @param $connection TcpConnection
      * @param Request $request
      */
@@ -62,6 +72,7 @@ class HttpWMServer extends Worker
 
 
     /**
+     * 处理http的get请求
      * @param Request $request
      */
     public function getHandler(Request $request)
@@ -72,6 +83,7 @@ class HttpWMServer extends Worker
         if($path ==='/api'){
             $name = $request->get('name');
             $args = $request->get('args',[]);
+            /** 调用媒体服务的接口 */
             $data = MediaServer::callApi($name,$args);
             if(!is_null($data)){
                 $request->connection->send(new Response(200,['Content-Type'=>"application/json"],json_encode($data)));
@@ -99,8 +111,11 @@ class HttpWMServer extends Worker
 
 
     /**
+     * 处理post请求
      * @param Request $request
      * @return Promise|Response
+     * @comment 貌似是发布流媒体，这里应该是http的播放器发送的请求
+     * @comment 是这里和mediaServer产生关系的
      */
     public function postHandler(Request $request)
     {
@@ -123,19 +138,21 @@ class HttpWMServer extends Worker
                 "Stream {$path} exists."
             );
         }
-
-
+        /** 调用了react php 的异步回调 */
         return new Promise(function ($resolve, $reject) use ($bodyStream, $path) {
             $flvReadStream = new FlvPublisherStream(
                 $bodyStream,
                 $path
             );
-
+            /** 发布流媒体 这里和rtmp不同的地方，是把rtmp的数据转码成flv格式推流 */
             MediaServer::addPublish($flvReadStream);
             logger()->info("stream {path} created", ['path' => $path]);
+            /** 绑定结束事件 */
             $flvReadStream->on('on_end', function () use ($resolve) {
+                /** 返回响应200 */
                 $resolve(new Response(200));
             });
+            /** 绑定error事件 */
             $flvReadStream->on('error', function (\Exception $exception) use ($reject, &$bytes) {
                 $reject(new Response(
                     400,
@@ -146,6 +163,12 @@ class HttpWMServer extends Worker
         });
     }
 
+    /**
+     * 是否安全url
+     * @param Request $request
+     * @param $path
+     * @return bool
+     */
     public function unsafeUri(Request $request,$path): bool
     {
         if (
@@ -160,6 +183,12 @@ class HttpWMServer extends Worker
         return false;
     }
 
+    /**
+     * 返回静态资源
+     * @param Request $request
+     * @param $path
+     * @return bool
+     */
     public function findStaticFile(Request $request,$path){
 
         if (preg_match('/%[0-9a-f]{2}/i', $path)) {
@@ -179,6 +208,12 @@ class HttpWMServer extends Worker
         return true;
     }
 
+    /**
+     * 播放flv
+     * @param Request $request
+     * @param $path
+     * @return bool
+     */
     public function  findFlv(Request $request,$path){
         if(!preg_match('/(.*)\.flv$/',$path,$matches)){
             return false;
@@ -190,34 +225,48 @@ class HttpWMServer extends Worker
     }
 
 
+    /**
+     * 播放flv资源
+     * @param Request $request
+     * @param $flvPath
+     * @return void
+     * @comment 是这里实现flv播放的 和mediaServer产生关系的
+     */
     public function playMediaStream(Request $request,$flvPath){
+        /** 检查是否已经有发布这个流媒体 */
         //check stream
         if (MediaServer::hasPublishStream($flvPath)) {
-
+            /** 如果是ws协议 */
             if($request->connection->protocol === Websocket::class){
+                /** 修改ws缓冲区数据类型 为数组  */
                 $request->connection->websocketType = Websocket::BINARY_TYPE_ARRAYBUFFER;
+                /** 数据包 ws */
                 $throughStream = new WMWsChunkStream($request->connection);
             }else{
+                /** 数据包 http */
                 $throughStream = new WMHttpChunkStream($request->connection);
             }
+            /** 实例化flv播放资源 */
             $playerStream = new FlvPlayStream($throughStream, $flvPath);
-
+            /** 是否关闭声音 */
             $disableAudio = $request->get('disableAudio',false);
             if ($disableAudio) {
                 $playerStream->setEnableAudio(false);
             }
-
+            /** 是否关闭视频 */
             $disableVideo = $request->get('disableVideo', false);
             if ($disableVideo) {
                 $playerStream->setEnableVideo(false);
             }
-
+            /** 是否要连续帧 */
             $disableGop = $request->get('disableGop', false);
             if ($disableGop) {
                 $playerStream->setEnableGop(false);
             }
+            /** 添加播放器 */
             MediaServer::addPlayer($playerStream);
         } else {
+            /** 没有这一路推流资源 直接关闭链接或者发送404 */
             logger()->warning("Stream {path} not found", ['path' => $flvPath]);
             if($request->connection->protocol === Websocket::class){
                 $request->connection->close();

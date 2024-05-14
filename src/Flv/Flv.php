@@ -14,6 +14,9 @@ use SabreAMF_AMF0_Deserializer;
 use SabreAMF_InputStream;
 use function ord;
 
+/**
+ * @purpose flv数据包
+ */
 class Flv
 {
 
@@ -29,6 +32,11 @@ class Flv
         return $up[0];
     }
 
+    /**
+     * 读取tag数据
+     * @param $tagData
+     * @return array
+     */
     static function tagDataRead($tagData)
     {
         return [
@@ -42,6 +50,7 @@ class Flv
     }
 
     /**
+     * 读取脚本数据
      * @param $scriptData
      * @return null[]
      * @throws Exception
@@ -51,13 +60,18 @@ class Flv
         static $scriptMetaDataCode = [
             'onMetaData' => ['dataObj']
         ];
+        /** 初始化输入数据流 */
         $stream = new SabreAMF_InputStream($scriptData);
+        /** 数据解码 */
         $deserializer = new SabreAMF_AMF0_Deserializer($stream);
+        /** 初始化结果 */
         $result = [
             'cmd' => null,
         ];
+        /** 读取amf数据包命令 */
         if ($cmd = @$deserializer->readAMFData()) {
             $result['cmd'] = $cmd;
+            /** 解码命令相关参数 */
             if (isset($scriptMetaDataCode[$cmd])) {
                 foreach ($scriptMetaDataCode[$cmd] as $k) {
                     $result[$k] = $deserializer->readAMFData();
@@ -71,6 +85,11 @@ class Flv
         return $result;
     }
 
+    /**
+     * 视频数据
+     * @param $videoData
+     * @return array
+     */
     static function videoFrameDataRead($videoData)
     {
         $firstByte = ord($videoData[0]);
@@ -81,6 +100,11 @@ class Flv
         ];
     }
 
+    /**
+     * 视频数据
+     * @param $avcPacket
+     * @return array
+     */
     static function avcPacketRead($avcPacket)
     {
         return [
@@ -90,6 +114,11 @@ class Flv
         ];
     }
 
+    /**
+     * 音频数据
+     * @param $audioData
+     * @return array
+     */
     static function audioFrameDataRead($audioData)
     {
         $firstByte = ord($audioData[0]);
@@ -102,6 +131,11 @@ class Flv
         ];
     }
 
+    /**
+     * 音频数据
+     * @param $accData
+     * @return array
+     */
     static function accPacketDataRead($accData)
     {
         return [
@@ -112,6 +146,7 @@ class Flv
 
 
     /**
+     * 设置tag点
      *  $analysis = unpack("CtagType/a3tagSize/a3timestamp/CtimestampEx/a3streamId/a{$dataSize}data", $data);
      * $tag = [
      * 'type' => $analysis['tagType'],

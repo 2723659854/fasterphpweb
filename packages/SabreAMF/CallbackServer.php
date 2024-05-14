@@ -9,8 +9,9 @@
     require_once dirname(__FILE__) . '/DetailException.php';
 
     /**
+     * amf服务
      * AMF Server
-     *
+     * amf服务端的网关，为client提供服务
      * This is the AMF0/AMF3 Server class. Use this class to construct a gateway for clients to connect to
      *
      * The difference between this server class and the regular server, is that this server is aware of the
@@ -29,6 +30,7 @@
     class SabreAMF_CallbackServer extends SabreAMF_Server {
 
         /**
+         * 定义回调函数别名  用来处理方法调用
          * Assign this callback to handle method-calls
          *
          * @var callback
@@ -36,6 +38,7 @@
         public $onInvokeService;
 
         /**
+         * 定义鉴权请求别名
          * Assign this callback to handle authentication requests
          *
          * @var callback
@@ -43,6 +46,7 @@
         public $onAuthenticate;
 
         /**
+         * 处理消息命令
          * handleCommandMessage
          *
          * @param SabreAMF_AMF3_CommandMessage $request
@@ -52,20 +56,24 @@
 
             switch($request->operation) {
 
+                /** 返回心跳 */
                 case SabreAMF_AMF3_CommandMessage::CLIENT_PING_OPERATION :
                     $response = new SabreAMF_AMF3_AcknowledgeMessage($request);
                     break;
+                    /** 登录 */
                 case SabreAMF_AMF3_CommandMessage::LOGIN_OPERATION :
                     $authData = base64_decode($request->body);
                     if ($authData) {
                         $authData = explode(':',$authData,2);
                         if (count($authData)==2) {
+                            /** 鉴权 */
                             $this->authenticate($authData[0],$authData[1]);
                         }
                     }
                     $response = new SabreAMF_AMF3_AcknowledgeMessage($request);
                     $response->body = true;
                     break;
+                    /** 退出登录 */
                 case SabreAMF_AMF3_CommandMessage::DISCONNECT_OPERATION :
                     $response = new SabreAMF_AMF3_AcknowledgeMessage($request);
                     break;
@@ -78,6 +86,7 @@
         }
 
         /**
+         * 鉴权
          * authenticate
          *
          * @param string $username
@@ -93,6 +102,7 @@
         }
 
         /**
+         * 初始化函数
          * invokeService
          *
          * @param string $service
@@ -112,6 +122,7 @@
 
 
         /**
+         * 默认执行方法
          * exec
          *
          * @return void
@@ -119,7 +130,7 @@
         public function exec() {
 
             // First we'll be looping through the headers to see if there's anything we reconize
-
+            /** 首先检查是否需要鉴权 */
             foreach($this->getRequestHeaders() as $header) {
 
                 switch($header['name']) {
@@ -132,7 +143,7 @@
                 }
 
             }
-
+            /** 处理每一个请求 */
             foreach($this->getRequests() as $request) {
 
                 // Default AMFVersion
@@ -146,18 +157,19 @@
                         $request['data'] = $request['data'][0];
                     }
 
+                    /** 是amf3格式的数据 */
                     // See if we are dealing with the AMF3 messaging system
                     if (is_object($request['data']) && $request['data'] instanceof SabreAMF_AMF3_AbstractMessage) {
 
                         $AMFVersion = 3;
-
+                        /** 是发送的命令，处理这些命令 */
                         // See if we are dealing with a CommandMessage
                         if ($request['data'] instanceof SabreAMF_AMF3_CommandMessage) {
 
                             // Handle the command message
                             $response = $this->handleCommandMessage($request['data']);
                         }
-
+                        /** 远程调用服务 */
                         // Is this maybe a RemotingMessage ?
                         if ($request['data'] instanceof SabreAMF_AMF3_RemotingMessage) {
 
@@ -168,22 +180,22 @@
                         }
 
                     } else {
-
+                        /** 处理amf0格式数据 */
                         // We are dealing with AMF0
                         $service = substr($request['target'],0,strrpos($request['target'],'.'));
                         $method  = substr(strrchr($request['target'],'.'),1);
-
+                        /** 远程调用服务 */
                         $response = $this->invokeService($service,$method,$request['data']);
 
                     }
-
+                    /** 返回状态为正常 */
                     $status = SabreAMF_Const::R_RESULT;
 
                 } catch (Exception $e) {
 
                     // We got an exception somewhere, ignore anything that has happened and send back
                     // exception information
-
+                    /** 有异常，忽略异常 */
                     if ($e instanceof SabreAMF_DetailException) {
                         $detail = $e->getDetail();
                     } else {
@@ -207,12 +219,14 @@
                             break;
 
                     }
+                    /** 返回状态为错误 */
                     $status = SabreAMF_Const::R_STATUS;
                 }
-
+                /** 返回异常 */
                 $this->setResponse($request['response'],$status,$response);
 
             }
+            /** 返回处理结果 */
             $this->sendResponse();
 
         }

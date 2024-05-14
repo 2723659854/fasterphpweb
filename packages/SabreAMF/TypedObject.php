@@ -3,6 +3,7 @@
     require_once dirname(__FILE__) . '/ITypedObject.php';
 
     /**
+     * 这是php和rtmp的flash交互类
      * SabreAMF_TypedObject 
      * 
      * @package SabreAMF 
@@ -17,6 +18,7 @@
         private $amfClassName;
         private $amfData;
 
+        /** 初始化 类名 数据 */
         public function __construct($classname,$data) {
 
             $this->setAMFClassName($classname);
@@ -25,6 +27,7 @@
         }
 
         /**
+         * 获取amf类名
          * getAMFClassName 
          * 
          * @return string 
@@ -36,6 +39,7 @@
         }
 
         /**
+         * 获取amf数据
          * getAMFData 
          * 
          * @return mixed 
@@ -47,6 +51,7 @@
         }
 
         /**
+         * 设置amf类名
          * setAMFClassName 
          * 
          * @param string $classname 
@@ -59,6 +64,7 @@
         }
 
         /**
+         * 设置amf数据
          * setAMFData 
          * 
          * @param mixed $data 

@@ -15,6 +15,7 @@
     require_once dirname(__FILE__) . '/../AMF3/AbstractMessage.php';
 
     /**
+     * 远程调用服务上的消息
      * Invokes a message on a service
      */
     class SabreAMF_AMF3_RemotingMessage extends SabreAMF_AMF3_AbstractMessage {

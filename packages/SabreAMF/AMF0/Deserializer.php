@@ -8,6 +8,7 @@
     require_once dirname(__FILE__) . '/../TypedObject.php';
 
     /**
+     * 这个是读取amf数据的操作，反序列化
      * SabreAMF_AMF0_Deserializer
      *
      * @package SabreAMF
@@ -39,6 +40,7 @@
         private $amf3Deserializer = null;
 
         /**
+         * 读取数据
          * readAMFData
          *
          * @param int $settype
@@ -53,6 +55,7 @@
                 $settype = $this->stream->readByte();
            }
 
+           /** 根据流媒体类型确定读取方式 */
            switch ($settype) {
 
                 case SabreAMF_AMF0_Const::DT_NUMBER      : return $this->stream->readDouble();
@@ -77,6 +80,7 @@
         }
 
         /**
+         * 读取对象
          * readObject
          *
          * @return object
@@ -84,11 +88,16 @@
         public function readObject() {
 
             $object = array();
+            /** 这里使用了地址引用 */
             $this->refList[] =& $object;
             while (true) {
+                /** 读取字符串 */
                 $key = $this->readString();
+                /** 读取数据流的字节 */
                 $vartype = $this->stream->readByte();
+                /** 如果遇到结束标记则跳出循环 */
                 if ($vartype==SabreAMF_AMF0_Const::DT_OBJECTTERM) break;
+                /** 读取指定类型的数据 */
                 $object[$key] = $this->readAmfData($vartype);
             }
             if (defined('SABREAMF_OBJECT_AS_ARRAY')) {
@@ -99,6 +108,7 @@
         }
 
         /**
+         * 从地址中读取数据
          * readReference
          *
          * @return object
@@ -117,12 +127,13 @@
 
 
         /**
+         * 读取数组
          * readArray
          *
          * @return array
          */
         public function readArray() {
-
+            /** 读取长度 */
             $length = $this->stream->readLong();
             $arr = array();
             $this->refList[]&=$arr;
@@ -132,6 +143,7 @@
         }
 
         /**
+         * 读取混合类型数组
          * readMixedArray
          *
          * @return array
@@ -144,6 +156,7 @@
         }
 
        /**
+         * 读取指定长度缓冲池
          * readString
          *
          * @return string
@@ -156,6 +169,7 @@
         }
 
         /**
+         * 读取超长缓冲数据
          * readLongString
          *
          * @return string
@@ -168,7 +182,7 @@
         }
 
         /**
-         *
+         * 读取日期
          * readDate
          *
          * @return int
@@ -190,6 +204,7 @@
         }
 
         /**
+         * 读取对象
          * readTypedObject
          *
          * @return object
@@ -228,6 +243,7 @@
         }
 
         /**
+         * 读取amf3的数据
          * readAMF3Data
          *
          * @return SabreAMF_AMF3_Wrapper

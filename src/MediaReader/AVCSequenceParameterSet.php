@@ -5,6 +5,9 @@ namespace MediaServer\MediaReader;
 
 use MediaServer\Utils\BitReader;
 
+/**
+ * @purpose 音频数据包参数处理
+ */
 class AVCSequenceParameterSet extends BitReader
 {
     public $profile;
@@ -16,9 +19,11 @@ class AVCSequenceParameterSet extends BitReader
     public function __construct($data)
     {
         parent::__construct($data);
+        /** 读取数据 */
         $this->readData();
     }
 
+    /** 获取图像资源名称 */
     public function getAVCProfileName()
     {
         switch ($this->profile) {
@@ -87,14 +92,19 @@ class AVCSequenceParameterSet extends BitReader
         */
 
         //configurationVersion
+        /** 跳过8个字节 */
         $this->skipBits(8);
         //profile
+        /** 获取资源概要 */
         $this->profile = $profile = $this->getBits(8);                               // read profile
         //profile compat
+        /** 跳过8个字节 */
         $this->skipBits(8);
+        /** 获取画面等级信息 */
         $this->level = $level = $this->getBits(8);                         // level_idc
-
+        /** 视频画面的h264格式的编码信息 */
         $naluSize = ($this->getBits(8) & 0x03) + 1;
+        /** NAL 单元流参数 用户描述h264的视频编码信息 */
         $nb_sps = $this->getBits(8) & 0x1F;
 
 
@@ -103,6 +113,7 @@ class AVCSequenceParameterSet extends BitReader
             return;
         }
 
+        /** 指针移动16个字节 */
         //nalSize
         $this->getBits(16);
 
@@ -111,40 +122,49 @@ class AVCSequenceParameterSet extends BitReader
             return;
         }
 
+        /** 读取sps 编码信息 */
         /* SPS */
         $profile_idc = $this->getBits(8);
 
+        /** 获取视频标记 */
         /* flags */
         $this->getBits(8);
 
+        /** 获取等级信息 */
         /* level idc */
         $this->getBits(8);
 
-
+        /**  */
         $this->expGolombUe();                                   // seq_parameter_set_id // sps
 
         if ($profile_idc == 100 || $profile_idc == 110 ||
             $profile_idc == 122 || $profile_idc == 244 || $profile_idc == 44 ||
             $profile_idc == 83 || $profile_idc == 86 || $profile_idc == 118) {
             /* chroma format idc */
+            /** 色度格式idc */
             $cf_idc = $this->expGolombUe();
 
             if ($cf_idc == 3) {
 
                 /* separate color plane */
+                /** 单独的彩色平面 */
                 $this->getBits(1);
             }
 
+            /** 处理亮度 比特深度亮度 */
             /* bit depth luma - 8 */
             $this->expGolombUe();
 
             /* bit depth chroma - 8 */
+            /** 位深度色度 */
             $this->expGolombUe();
 
             /* qpprime y zero transform bypass */
+            /** 变换旁路 */
             $this->getBits(1);
 
             /* seq scaling matrix present */
+            /** 缩放比例矩阵 */
             if ($this->getBits(1)) {
 
                 for ($n = 0; $n < ($cf_idc != 3 ? 8 : 12); $n++) {
@@ -152,6 +172,7 @@ class AVCSequenceParameterSet extends BitReader
                     /* seq scaling list present */
                     if ($this->getBits(1)) {
 
+                        /** 比例列表 */
                         /* TODO: scaling_list()
                         if (n < 6) {
                         } else {
@@ -162,6 +183,7 @@ class AVCSequenceParameterSet extends BitReader
             }
         }
 
+        /** 获取最大帧数 */
         /* log2 max frame num */
         $this->expGolombUe();
 

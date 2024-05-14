@@ -2,25 +2,38 @@
 
 namespace MediaServer\Rtmp;
 
-
+/**
+ * @purpose rtmp 数据包
+ */
 class RtmpPacket
 {
+    /** 数据包开头 */
     const PACKET_STATE_BEGIN = 0;
+    /** 数据包头部 */
     const PACKET_STATE_MSG_HEADER = 1;
+    /** 数据包时间戳 */
     const PACKET_STATE_EXT_TIMESTAMP = 2;
+    /** 数据包内容 */
     const PACKET_STATE_PAYLOAD = 3;
 
     /* Protocol Control Messages */
+    /** 分包大小 */
     const TYPE_SET_CHUNK_SIZE = 1;
+    /** 终止 */
     const TYPE_ABORT = 2;
+    /** ack */
     const TYPE_ACKNOWLEDGEMENT = 3;
+    /** ack 大小 */
     const TYPE_WINDOW_ACKNOWLEDGEMENT_SIZE = 5;
+    /** 宽带 */
     const TYPE_SET_PEER_BANDWIDTH = 6;
 
     /* User Control Messages Event (4) */
+    /** 事件 */
     const TYPE_EVENT = 4;
-
+    /** 音频 */
     const TYPE_AUDIO = 8;
+    /** 视频 */
     const TYPE_VIDEO = 9;
 
     /* Data Message */
@@ -32,6 +45,7 @@ class RtmpPacket
     const TYPE_SHARED_OBJECT = 19; // AMF0
 
 
+    /** 发送操作消息 灵活消息类型为17 表示AMF3 */
     /* Command Message */
     const TYPE_FLEX_MESSAGE = 17; // AMF3
     const TYPE_INVOKE = 20; // AMF0
@@ -69,6 +83,7 @@ class RtmpPacket
 
     public $state = self::PACKET_STATE_BEGIN;
 
+    /** 释放 */
     public function reset()
     {
         $this->chunkType = 0;
@@ -84,12 +99,14 @@ class RtmpPacket
         $this->state = self::PACKET_STATE_BEGIN;
     }
 
+    /** 释放数据 */
     public function free()
     {
         $this->payload = "";
         $this->bytesRead = 0;
     }
 
+    /** 是否准备完成 */
     public function isReady()
     {
         return $this->bytesRead == $this->length;

@@ -1,6 +1,7 @@
 <?php
 
     /**
+     * AMF序列化工具
      * SabreAMF_Serializer
      *
      * @package SabreAMF
@@ -22,6 +23,7 @@
     abstract class SabreAMF_Serializer {
 
         /**
+         * 输出流
          * stream
          *
          * @var SabreAMF_OutputStream
@@ -29,6 +31,7 @@
         protected $stream;
 
         /**
+         * 初始化
          * __construct
          *
          * @param SabreAMF_OutputStream $stream

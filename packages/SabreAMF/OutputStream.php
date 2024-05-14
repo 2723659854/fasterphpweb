@@ -1,6 +1,7 @@
 <?php
 
     /**
+     * amf输出流 将数据转码成二进制
      * SabreAMF_OutputStream 
      *
      * This class provides methods to encode bytes, longs, strings, int's etc. to a binary format

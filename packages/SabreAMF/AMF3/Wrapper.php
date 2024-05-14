@@ -1,6 +1,7 @@
 <?php
 
     /**
+     * amf3数据打包
      * SabreAMF_AMF3_Wrapper 
      * 
      * @package SabreAMF
