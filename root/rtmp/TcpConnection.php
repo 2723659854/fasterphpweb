@@ -376,8 +376,7 @@ class TcpConnection extends ConnectionInterface
                 $this->_sendBuffer = $send_buffer;
             }
             //Worker::$globalEvent->add($this->_socket, EventInterface::EV_WRITE, array($this, 'baseWrite'));
-            var_dump($this->_socket,EventInterface::EV_WRITE);
-            RtmpDemo::add($this->_socket, EventInterface::EV_WRITE, array($this, 'baseWrite'));
+            RtmpDemo::instance()->add($this->_socket, EventInterface::EV_WRITE, array($this, 'baseWrite'));
             // Check if the send buffer will be full.
             $this->checkBufferWillFull();
             return;
@@ -589,7 +588,14 @@ class TcpConnection extends ConnectionInterface
 
         // If the application layer protocol has been set up.
         if ($this->protocol !== null) {
+            /** 這裡的協議出現了問題 */
             $parser = $this->protocol;
+            /** 如果是flv客戶端，手動切換協議 */
+            //todo 這裡不合理 不應該手動切換協議
+            if (in_array($socket,RtmpDemo::$flvClients)){
+                $parser = \MediaServer\Http\ExtHttpProtocol::class;
+            }
+
             while ($this->_recvBuffer !== '' && !$this->_isPaused) {
                 // The current packet length is known.
                 if ($this->_currentPackageLength) {

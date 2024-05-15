@@ -125,6 +125,7 @@ class RtmpDemo
         if (!isset(static::$_builtinTransports[$scheme])) {
             $scheme = \ucfirst($scheme);
             $this->protocol = \substr($scheme, 0, 1) === '\\' ? $scheme : 'Protocols\\' . $scheme;
+            var_dump($this->protocol);
             if (!isset(static::$_builtinTransports[$this->transport])) {
                 throw new \Exception('Bad worker->transport ' . \var_export($this->transport, true));
             }
@@ -299,6 +300,8 @@ class RtmpDemo
         self::$allSocket[(int)$socket] = $socket;
         /** 单独保存服务端 */
         $this->serverSocket[(int)$socket] = $socket;
+
+        self::$flvServerSocket = $socket;
     }
 
     /**
@@ -324,6 +327,10 @@ class RtmpDemo
     }
 
 
+    /** 所有的flv播放器客戶端 */
+    public static array $flvClients = [];
+    /** flv服務端 */
+    public static $flvServerSocket = null;
     /** 接收客户端消息 */
     private function accept()
     {
@@ -355,12 +362,20 @@ class RtmpDemo
                     if (in_array($fd,$this->serverSocket)) {
                         /** 读取服务端接收到的 消息，这个消息的内容是客户端连接 ，stream_socket_accept方法负责接收客户端连接 */
                         $clientSocket = stream_socket_accept($fd, 0, $remote_address); //阻塞监听 设置超时0，并获取客户端地址
+                        /** 把flv的客戶端單獨保存有用 */
+                        if (self::$flvServerSocket && $fd == self::$flvServerSocket){
+                            self::$flvClients[(int)$clientSocket] = $clientSocket;
+                        }
                         //触发事件的连接的回调
                         /** 如果这个客户端连接不为空，并且本服务的onConnect是回调函数 */
                         if (!empty($clientSocket) && is_callable($this->onConnect)) {
                             /** 把客户端连接传递到onConnect回调函数 */
                             try {
                                 $connection = new TcpConnection($clientSocket, $remote_address);
+                                $connection->protocol               = $this->protocol;
+                                //$connection->protocol               = "\MediaServer\Http\ExtHttpProtocol";
+                                $connection->transport              = $this->transport;
+                                $connection->onMessage              = $this->onMessage;
                                 call_user_func($this->onConnect, $connection);
                             } catch (\Exception|\RuntimeException $exception) {
                                 self::dumpError($exception);
