@@ -35,7 +35,6 @@ class ComposerStaticInitcbb973351035d2749c2ce7735e220087
         'W' => 
         array (
             'Ws\\' => 3,
-            'Workerman\\' => 10,
         ),
         'S' => 
         array (
@@ -136,10 +135,6 @@ class ComposerStaticInitcbb973351035d2749c2ce7735e220087
         'Ws\\' => 
         array (
             0 => __DIR__ . '/../..' . '/ws',
-        ),
-        'Workerman\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/workerman/workerman',
         ),
         'Symfony\\Polyfill\\Ctype\\' => 
         array (

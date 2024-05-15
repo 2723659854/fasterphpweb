@@ -3,7 +3,7 @@
         'name' => 'xiaosongshu/fasterphpweb',
         'pretty_version' => 'dev-master',
         'version' => 'dev-master',
-        'reference' => 'f60b8febd77aca93e77088b5c13b0ce85abd1030',
+        'reference' => '0a9ede6a0780b9d0e631f829406889026ec03f22',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -446,15 +446,6 @@
                 0 => 'v3.2.0',
             ),
         ),
-        'workerman/workerman' => array(
-            'pretty_version' => 'v4.1.9',
-            'version' => '4.1.9.0',
-            'reference' => '1f92d02c26106b5fbe6f61ea776198aad6e426f7',
-            'type' => 'library',
-            'install_path' => __DIR__ . '/../workerman/workerman',
-            'aliases' => array(),
-            'dev_requirement' => false,
-        ),
         'xiaosongshu/colorword' => array(
             'pretty_version' => 'dev-master',
             'version' => 'dev-master',
@@ -469,7 +460,7 @@
         'xiaosongshu/fasterphpweb' => array(
             'pretty_version' => 'dev-master',
             'version' => 'dev-master',
-            'reference' => 'f60b8febd77aca93e77088b5c13b0ce85abd1030',
+            'reference' => '0a9ede6a0780b9d0e631f829406889026ec03f22',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

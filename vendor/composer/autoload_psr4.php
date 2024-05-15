@@ -13,7 +13,6 @@ return array(
     'Xiaosongshu\\Mail\\' => array($vendorDir . '/xiaosongshu/mail/src'),
     'Xiaosongshu\\Colorword\\' => array($vendorDir . '/xiaosongshu/colorword/src'),
     'Ws\\' => array($baseDir . '/ws'),
-    'Workerman\\' => array($vendorDir . '/workerman/workerman'),
     'Symfony\\Polyfill\\Ctype\\' => array($vendorDir . '/symfony/polyfill-ctype'),
     'Symfony\\Contracts\\EventDispatcher\\' => array($vendorDir . '/symfony/event-dispatcher-contracts'),
     'Symfony\\Component\\Yaml\\' => array($vendorDir . '/symfony/yaml'),
