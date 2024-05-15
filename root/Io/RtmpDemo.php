@@ -375,7 +375,10 @@ class RtmpDemo
                                 $connection->protocol               = $this->protocol;
                                 //$connection->protocol               = "\MediaServer\Http\ExtHttpProtocol";
                                 $connection->transport              = $this->transport;
+                                /** 支持http的flv播放 */
                                 $connection->onMessage              = $this->onMessage;
+                                /** 支持ws的flv播放 */
+                                $connection->onWebSocketConnect = $this->onWebSocketConnect;
                                 call_user_func($this->onConnect, $connection);
                             } catch (\Exception|\RuntimeException $exception) {
                                 self::dumpError($exception);
