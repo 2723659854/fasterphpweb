@@ -24,10 +24,20 @@ class CheckAi extends BaseCommand
      */
     public string $doc = "https://docs.qq.com/sheet/DZWJQQk10a2xySGlh?tab=BB08J2";
 
-    /** 免费的api key pool */
+    /**
+     * 免费的api key pool
+     * @var array|string[]
+     * @note 因为apiKey不能上传，所以进行了特殊处理
+     */
     public array $apiKey = [
         's,k,-,t,m,J,K,U,I,I,F,C,s,1,m,v,T,I,m,F,s,4,v,T,3,B,l,b,k,F,J,V,3,W,o,a,6,E,E,g,Y,K,M,j,4,o,V,k,y,t,q',
-
+        's,k,-,o,4,C,0,o,K,X,2,a,C,C,f,Y,h,f,B,J,v,p,B,T,3,B,l,b,k,F,J,8,7,C,2,5,D,h,o,Q,B,a,S,P,F,h,2,j,H,g,L',
+        's,k,-,8,7,j,k,b,7,3,E,6,a,U,F,d,2,D,v,x,z,g,U,T,3,B,l,b,k,F,J,n,r,Q,p,i,g,B,O,s,y,w,y,c,G,Z,P,6,s,y,M',
+        's,k,-,G,v,C,0,V,x,g,p,N,b,l,J,J,t,k,K,a,M,z,J,T,3,B,l,b,k,F,J,x,U,R,G,d,R,K,w,0,J,j,8,d,x,c,A,f,9,u,F',
+        's,k,-,0,d,j,9,w,x,q,b,1,2,0,z,u,2,A,v,3,6,H,9,T,3,B,l,b,k,F,J,l,1,u,S,g,a,k,Z,3,U,i,y,y,t,S,B,e,L,o,9',
+        's,k,-,G,K,E,K,5,e,o,P,f,W,r,X,1,N,1,G,B,h,2,Y,T,3,B,l,b,k,F,J,D,v,c,H,N,g,q,7,X,A,t,G,Z,3,6,4,z,1,f,G',
+        's,k,-,c,B,T,z,H,E,2,0,i,S,P,f,S,4,X,9,9,h,7,h,T,3,B,l,b,k,F,J,2,2,z,M,g,V,8,j,C,w,z,T,1,y,0,T,J,H,N,L',
+        's,k,-,b,B,l,v,X,q,6,5,4,q,g,w,W,S,6,q,E,3,Z,v,T,3,B,l,b,k,F,J,A,9,S,G,R,C,t,h,u,i,S,1,S,B,3,S,w,h,s,q',
     ];
     /** 指针 切换客户端用 */
     public int $index = 3;
@@ -44,6 +54,7 @@ class CheckAi extends BaseCommand
     /** 客户端休眠时间 ，因为chatgpt限制了请求频率 ，过快的请求频率会报错 */
     public int $sleepTime = 1;
 
+    /** 支持的模型 */
     public array $models = [
         'gpt-3.5-turbo-0301',//聊天模型
         "gpt-3.5-turbo",//基本模型
@@ -62,6 +73,30 @@ class CheckAi extends BaseCommand
         //$this->addOption('option','这个是option参数的描述信息');
     }
 
+
+    /**
+     * 清在这里编写你的业务逻辑
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public function handle()
+    {
+        /** 初始化客户端 */
+        $this->getClient();
+        $this->client->addMessage('开始对话', 'system');
+        $this->info("机器人：开始对话，请输入你要资讯的问题\r\n");
+        if ($this->sleepTime < 1) {
+            /** 防止过快请求 导致接口限制 */
+            $this->sleepTime = 1;
+        }
+        /** 循环交流 */
+        while (true) {
+            /** 请求chatgpt */
+            $this->requestChatGpt();
+            /** 模拟自然人交流，不可访问频率过高 */
+            sleep($this->sleepTime);
+        }
+    }
+
     /**
      * 获取客户端
      */
@@ -70,32 +105,11 @@ class CheckAi extends BaseCommand
         $this->client = new ChatGPTV2($this->getKey());
     }
 
-
-    /**
-     * 清在这里编写你的业务逻辑
-     * @return void
-     */
-    public function handle()
-    {
-        /** 初始化客户端 */
-        $this->getClient();
-        $this->client->addMessage('开始对话', 'system');
-        $this->info("system:开始对话\r\n");
-        if ($this->sleepTime < 1) {
-            $this->sleepTime = 1;
-        }
-        /** 循环交流 */
-        while (true) {
-            $this->requestChatGpt();
-            /** 防止过快请求 导致接口限制 */
-            sleep($this->sleepTime);
-        }
-    }
-
     /**
      * 发送请求，并打印
-     * @param string $question 用户的问题
+     * @param string $question
      * @return mixed
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function requestChatGpt(string $question = '')
     {
@@ -107,7 +121,7 @@ class CheckAi extends BaseCommand
         try {
             /** 先问一遍 */
             $this->client->addMessage($question, 'user');
-            $this->info("user:" . $question . "\r\n");
+            $this->info("用户：" . $question . "\r\n");
             $answers = $this->client->ask($question);
         } catch (\Exception $exception) {
             /** 打印错误信息 */
@@ -131,7 +145,7 @@ class CheckAi extends BaseCommand
         }
         /** 输出回复内容 */
         foreach ($answers as $item) {
-            $this->info("system:" . $item['answer'] . "\r\n");
+            $this->info("机器人：" . $item['answer'] . "\r\n");
             $this->client->addMessage($this->encodeWord($item['answer']), 'system');
         }
         /** 问题被正常解答，清除错误计数器 */
@@ -147,11 +161,10 @@ class CheckAi extends BaseCommand
      */
     public function getQuestion()
     {
-        $this->info("请输入你要资讯的问题\r\n");
         /** php 在Windows环境下只有使用这个以readline方法才不会乱码 */
-        $question = readline("\r\n");
+        $question = readline("");
         if (!$question) {
-            $this->info("你输入的信息为空\r\n");
+            $this->info("你输入的信息为空，请重新输入\r\n");
             return $this->getQuestion();
         }
         if (in_array($question, ["exit", "退出"])) {
@@ -190,7 +203,7 @@ class CheckAi extends BaseCommand
         if ($this->index > (count($this->apiKey) - 1)) {
             $this->index = 0;
         }
-        /** 返回当前指针的key，并移动指针 */
-        return $this->apiKey[$this->index++];
+        /** 返回当前指针的key，并移动指针，逐个使用每一个客户端，不使用随机客户端 */
+        return implode('',explode(',',$this->apiKey[$this->index++]));
     }
 }
