@@ -7,6 +7,7 @@
     require_once dirname(__FILE__) . '/../ByteArray.php';
 
     /**
+     * amf3的数据编码
      * SabreAMF_AMF3_Serializer
      *
      * @package SabreAMF
@@ -24,6 +25,7 @@
     class SabreAMF_AMF3_Serializer extends SabreAMF_Serializer {
 
         /**
+         * 写入amf的数据
          * writeAMFData
          *
          * @param mixed $data
@@ -92,6 +94,7 @@
         }
 
         /**
+         * 写入对象
          * writeObject
          *
          * @param mixed $data
@@ -105,7 +108,7 @@
                 $classname = $data->getAMFClassName();
                 $data = $data->getAMFData();
 
-            } else if (!$classname = $this->getRemoteClassName(get_class($data))) {
+            } else if (!$classname = $this->getRemoteClassName(get_class($data))) {/** get_class 获取对象名称 */
 
 
                 $classname = '';
@@ -161,6 +164,7 @@
         }
 
         /**
+         * 写入整型
          * writeInt
          *
          * @param int $int
@@ -205,6 +209,11 @@
     			return;
         }
 
+        /**
+         * 写入二进制
+         * @param SabreAMF_ByteArray $data
+         * @return void
+         */
         public function writeByteArray(SabreAMF_ByteArray $data) {
 
             $this->writeString($data->getData());
@@ -212,6 +221,7 @@
         }
 
         /**
+         * 写入字符串
          * writeString
          *
          * @param string $str
@@ -226,6 +236,7 @@
         }
 
         /**
+         * 写入数组
          * writeArray
          *
          * @param array $arr
@@ -263,6 +274,7 @@
         }
 
         /**
+         * 写入对象
          * Writes a date object
          *
          * @param DateTime $data

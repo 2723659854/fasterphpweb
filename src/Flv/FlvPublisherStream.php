@@ -17,6 +17,9 @@ use MediaServer\Utils\BinaryStream;
 use React\Stream\ReadableStreamInterface;
 use Workerman\Timer;
 
+/**
+ * @purpose 推流数据流
+ */
 class FlvPublisherStream extends EventEmitter implements PublishStreamInterface
 {
     const FLV_STATE_FLV_HEADER = 0;
@@ -101,19 +104,25 @@ class FlvPublisherStream extends EventEmitter implements PublishStreamInterface
     }
 
     /**
+     * 初始化
      * FlvStream constructor.
      * @param $input EventEmitter|ReadableStreamInterface
      * @param $path  string
+     * @comment 这里好像是把数据转码成flv格式
      */
     public function __construct($input, $path)
     {
         //先随机生成个id
         $this->id = generateNewSessionID();
         $this->input = $input;
+        /** 保存流媒体路径 */
         $this->publishPath = $path;
         $this->startTimestamp = timestamp();
+        /** 绑定数据事件 */
         $input->on('data', [$this, 'onStreamData']);
+        /** 绑定error事件 */
         $input->on('error', [$this, 'onStreamError']);
+        /** 绑定close事件 */
         $input->on('close', [$this, 'onStreamClose']);
         $this->buffer = new BinaryStream();
     }
@@ -136,17 +145,22 @@ class FlvPublisherStream extends EventEmitter implements PublishStreamInterface
     public function onStreamData($data)
     {
         //若干秒后没有收到数据断开
+        /** 将接收的数据追加到缓存区 */
         $this->buffer->push($data);
+        /** 处理数据 */
         switch ($this->steamStatus) {
             case self::FLV_STATE_FLV_HEADER:
+                /** 这里是比较关键的，这里实现了rtmp数据的转码 */
                 if ($this->buffer->has(9)) {
+                    /** 处理头部信息 */
                     $this->flvHeader = new FlvHeader($this->buffer->readRaw(9));
                     $this->hasFlvHeader = true;
                     $this->hasAudio = $this->flvHeader->hasAudio;
                     $this->hasVideo = $this->flvHeader->hasVideo;
-
+                    /** 清空缓存区 */
                     $this->buffer->clear();
                     logger()->info("publisher {path} recv flv header.", ['path' => $this->publishPath]);
+                    /** 触发事件on_publish_ready */
                     $this->emit("on_publish_ready");
                     $this->steamStatus = self::FLV_STATE_TAG_HEADER;
                 } else {
@@ -161,6 +175,7 @@ class FlvPublisherStream extends EventEmitter implements PublishStreamInterface
     }
 
     /**
+     * 处理flv数据帧
      * @throws Exception
      */
     public function flvTagHandler()
@@ -168,6 +183,7 @@ class FlvPublisherStream extends EventEmitter implements PublishStreamInterface
         //若干秒后没有收到数据断开
         switch ($this->steamStatus) {
             case self::FLV_STATE_TAG_HEADER:
+                /** 解析header帧 */
                 if ($this->buffer->has(15)) {
                     //除去pre tag size 4byte
                     $this->buffer->skip(4);
@@ -182,14 +198,15 @@ class FlvPublisherStream extends EventEmitter implements PublishStreamInterface
                 } else {
                     break;
                 }
+                /** 解析数据 */
             case self::FLV_STATE_TAG_DATA:
                 $curTag = $this->currentTag;
                 if ($this->buffer->has($curTag->dataSize)) {
                     $curTag->data = $this->buffer->readRaw($curTag->dataSize);
-
+                    /** 处理数据帧 */
                     //处理tag
                     $this->onTagEvent();
-
+                    /** 清空缓冲区 */
                     $this->buffer->clear();
                     //进入等待header流程
                     $this->steamStatus = self::FLV_STATE_TAG_HEADER;
@@ -205,49 +222,61 @@ class FlvPublisherStream extends EventEmitter implements PublishStreamInterface
 
 
     /**
+     * 处理帧数据
      * @throws Exception
      */
     public function onTagEvent()
     {
         $tag = $this->currentTag;
         switch ($tag->type) {
+            /** 脚本数据 */
             case Flv::SCRIPT_TAG:
+                /** 解析脚本命令 */
                 $metaData = Flv::scriptFrameDataRead($tag->data);
                 logger()->info("publisher {path} metaData: " . json_encode($metaData));
+                /** 宽 */
                 $this->videoWidth = $metaData['dataObj']['width'] ?? 0;
+                /** 高 */
                 $this->videoHeight = $metaData['dataObj']['height'] ?? 0;
+                /** 比特率 */
                 $this->videoFps = $metaData['dataObj']['framerate'] ?? 0;
-
+                /** 音频采样率 每一秒钟采样和记录音频数据 */
                 $this->audioSamplerate = $metaData['dataObj']['audiosamplerate'] ?? 0;
+                /** 声道为立体声 */
                 $this->audioChannels = $metaData['dataObj']['stereo'] ?? 1;
-
+                /** 元数据帧 */
                 $this->metaDataFrame = new MetaDataFrame($tag->data);
                 $this->isMetaData = true;
+                /** 触发on_frame事件  获取到帧数据 */
                 $this->emit('on_frame', [$this->metaDataFrame, $this]);
                 break;
             case Flv::VIDEO_TAG:
                 //视频数据
+                /** 解码视频帧 */
                 $videoFrame = new VideoFrame($tag->data, $tag->timestamp);
                 if ($this->videoCodec == 0) {
                     $this->videoCodec = $videoFrame->codecId;
+                    /** 视频编码名称 */
                     $this->videoCodecName = $videoFrame->getVideoCodecName();
                 }
-
+                /** 如果帧率=0 */
                 if ($this->videoFps === 0) {
                     //当前帧为第0
                     if ($this->videoCount++ === 0) {
-                        $this->videoFpsCountTimer = Timer::add(5, function () {
-                            $this->videoFps = ceil($this->videoCount / 5);
-                            $this->videoFpsCountTimer = null;
-                        }, [], false);
+                        /** 计算帧率 */
+//                        $this->videoFpsCountTimer = Timer::add(5, function () {
+//                            $this->videoFps = ceil($this->videoCount / 5);
+//                            $this->videoFpsCountTimer = null;
+//                        }, [], false);
                     }
                 }
-
+                /** h264解码 */
                 if ($videoFrame->codecId === VideoFrame::VIDEO_CODEC_ID_AVC) {
                     //h264
                     $avcPack = $videoFrame->getAVCPacket();
 
                     //read avc
+                    /** 元数据 描述信息 */
                     if ($avcPack->avcPacketType === AVCPacket::AVC_PACKET_TYPE_SEQUENCE_HEADER) {
                         $this->isAVCSequence = true;
                         $this->avcSequenceHeaderFrame = $videoFrame;
@@ -260,12 +289,13 @@ class FlvPublisherStream extends EventEmitter implements PublishStreamInterface
                     }
 
                     if ($this->isAVCSequence) {
+                        /** 清空关键帧 */
                         if ($videoFrame->frameType === VideoFrame::VIDEO_FRAME_TYPE_KEY_FRAME
                             &&
                             $avcPack->avcPacketType === AVCPacket::AVC_PACKET_TYPE_NALU) {
                             $this->gopCacheQueue = [];
                         }
-
+                        /** 保存视频帧 */
                         if ($videoFrame->frameType === VideoFrame::VIDEO_FRAME_TYPE_KEY_FRAME
                             &&
                             $avcPack->avcPacketType === AVCPacket::AVC_PACKET_TYPE_SEQUENCE_HEADER) {
@@ -286,11 +316,14 @@ class FlvPublisherStream extends EventEmitter implements PublishStreamInterface
                 $audioFrame = new AudioFrame($tag->data, $tag->timestamp);
                 if ($this->audioCodec === 0) {
                     $this->audioCodec = $audioFrame->soundFormat;
+                    /** 编码格式 */
                     $this->audioCodecName = $audioFrame->getAudioCodecName();
+                    /** 采样率 */
                     $this->audioSamplerate = $audioFrame->getAudioSamplerate();
+                    /** 声道 */
                     $this->audioChannels = ++$audioFrame->soundType;
                 }
-
+                /** 解码AAC音频数据 */
                 if ($audioFrame->soundFormat === AudioFrame::SOUND_FORMAT_AAC) {
                     $aacPack = $audioFrame->getAACPacket();
                     if ($aacPack->aacPacketType === AACPacket::AAC_PACKET_TYPE_SEQUENCE_HEADER) {
@@ -314,7 +347,7 @@ class FlvPublisherStream extends EventEmitter implements PublishStreamInterface
 
 
                 }
-
+                /** 触发meda sever上的on_frame事件 */
                 $this->emit('on_frame', [$audioFrame, $this]);
                 //logger()->info("rtmpAudioHandler");
                 $audioFrame->destroy();
@@ -345,10 +378,10 @@ class FlvPublisherStream extends EventEmitter implements PublishStreamInterface
         $this->gopCacheQueue = [];
         $this->input->close();
 
-        if ($this->videoFpsCountTimer) {
-            Timer::del($this->videoFpsCountTimer);
-            $this->videoFpsCountTimer = null;
-        }
+//        if ($this->videoFpsCountTimer) {
+//            Timer::del($this->videoFpsCountTimer);
+//            $this->videoFpsCountTimer = null;
+//        }
 
 
         $this->emit('on_close');

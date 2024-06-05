@@ -3,6 +3,7 @@
     require_once dirname(__FILE__) . '/ITypedObject.php';
 
     /**
+     * amf 记录设置
      * SabreAMF_RecordSet
      *
      * @uses SabreAMF_ITypedObject

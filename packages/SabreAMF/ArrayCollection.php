@@ -3,6 +3,7 @@
     require_once dirname(__FILE__) . '/Externalized.php';
 
     /**
+     * 用于flex 命令
      * This is the default mapping for the flex.messaging.io.ArrayCollection class
      * It can be accessed using most of the normal array access methods
      *
@@ -31,7 +32,7 @@
          * @param array $data pass an array here to populate the array collection
          * @return void
          */
-        function __construct(array $data = array())  {
+        function __construct($data = array()) {
 
             if (!$data) $data = array();
             $this->data = new ArrayObject($data);
@@ -39,6 +40,7 @@
         }
 
         /**
+         * amf3 格式的数据反序列化用到
          * This is used by SabreAMF when this object is unserialized (from AMF3)
          *
          * @param array $data
@@ -51,11 +53,12 @@
         }
 
         /**
+         * amf格式序列化的时候用到
          * This is used by SabreAMF when this object is serialized
          *
          * @return array
          */
-        function writeExternal():array {
+        function writeExternal() {
 
             return iterator_to_array($this->data);
 
@@ -66,7 +69,7 @@
          *
          * @return ArrayObject
          */
-        function getIterator():ArrayObject {
+        function getIterator() {
 
             return $this->data;
 
@@ -78,7 +81,7 @@
          * @param mixed $offset
          * @return bool
          */
-        function offsetExists(mixed $offset):bool {
+        function offsetExists($offset) {
 
             return isset($this->data[$offset]);
 
@@ -90,7 +93,7 @@
          * @param mixed $offset
          * @return mixed
          */
-        function offsetGet(mixed $offset):mixed {
+        function offsetGet($offset) {
 
             return $this->data[$offset];
 
@@ -103,7 +106,7 @@
          * @param mixed $value
          * @return void
          */
-        function offsetSet(mixed $offset,mixed $value):void {
+        function offsetSet($offset,$value) {
 
             if (!is_null($offset)) {
                 $this->data[$offset] = $value;
@@ -119,7 +122,7 @@
          * @param mixed $offset
          * @return void
          */
-        function offsetUnset(mixed $offset):void {
+        function offsetUnset($offset) {
 
             unset($this->data[$offset]);
 
@@ -130,7 +133,7 @@
          *
          * @return int
          */
-        function count():int {
+        function count() {
 
             return count($this->data);
 

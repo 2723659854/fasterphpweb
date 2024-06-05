@@ -9,9 +9,10 @@ class ComposerStaticInitcbb973351035d2749c2ce7735e220087
     public static $files = array (
         '7b11c4dc42b3b3023073cb14e519683c' => __DIR__ . '/..' . '/ralouphie/getallheaders/src/getallheaders.php',
         '6e3fae29631ef280660b3cdad06f25a8' => __DIR__ . '/..' . '/symfony/deprecation-contracts/function.php',
-        'ad155f8f1cf0d418fe49e248db8c661b' => __DIR__ . '/..' . '/react/promise/src/functions_include.php',
         '37a3dc5111fe8f707ab4c132ef1dbc62' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/functions_include.php',
+        'ad155f8f1cf0d418fe49e248db8c661b' => __DIR__ . '/..' . '/react/promise/src/functions_include.php',
         'decc78cc4436b1292c6c0d151b19445c' => __DIR__ . '/..' . '/phpseclib/phpseclib/phpseclib/bootstrap.php',
+        'e39a8b23c42d4e1452234d762b03835a' => __DIR__ . '/..' . '/ramsey/uuid/src/functions.php',
         '320cde22f66dd4f5d3fd621d3e88b98f' => __DIR__ . '/..' . '/symfony/polyfill-ctype/bootstrap.php',
         '8592c7b0947d8a0965a9e8c3d16f9c24' => __DIR__ . '/..' . '/elasticsearch/elasticsearch/src/autoload.php',
         '253c157292f75eb38082b5acb06f3f01' => __DIR__ . '/..' . '/nikic/fast-route/src/functions.php',
@@ -35,7 +36,6 @@ class ComposerStaticInitcbb973351035d2749c2ce7735e220087
         'W' => 
         array (
             'Ws\\' => 3,
-            'Workerman\\' => 10,
         ),
         'S' => 
         array (
@@ -49,6 +49,8 @@ class ComposerStaticInitcbb973351035d2749c2ce7735e220087
         array (
             'Root\\' => 5,
             'React\\Promise\\' => 14,
+            'Ramsey\\Uuid\\' => 12,
+            'Ramsey\\Collection\\' => 18,
         ),
         'P' => 
         array (
@@ -77,6 +79,10 @@ class ComposerStaticInitcbb973351035d2749c2ce7735e220087
         array (
             'Invoker\\' => 8,
         ),
+        'H' => 
+        array (
+            'HaoZiTeam\\ChatGPT\\' => 18,
+        ),
         'G' => 
         array (
             'GuzzleHttp\\Stream\\' => 18,
@@ -100,6 +106,10 @@ class ComposerStaticInitcbb973351035d2749c2ce7735e220087
             'Doctrine\\Common\\Lexer\\' => 22,
             'Doctrine\\Common\\Annotations\\' => 28,
             'DI\\' => 3,
+        ),
+        'B' => 
+        array (
+            'Brick\\Math\\' => 11,
         ),
         'A' => 
         array (
@@ -137,10 +147,6 @@ class ComposerStaticInitcbb973351035d2749c2ce7735e220087
         array (
             0 => __DIR__ . '/../..' . '/ws',
         ),
-        'Workerman\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/workerman/workerman',
-        ),
         'Symfony\\Polyfill\\Ctype\\' => 
         array (
             0 => __DIR__ . '/..' . '/symfony/polyfill-ctype',
@@ -168,6 +174,14 @@ class ComposerStaticInitcbb973351035d2749c2ce7735e220087
         'React\\Promise\\' => 
         array (
             0 => __DIR__ . '/..' . '/react/promise/src',
+        ),
+        'Ramsey\\Uuid\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/ramsey/uuid/src',
+        ),
+        'Ramsey\\Collection\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/ramsey/collection/src',
         ),
         'Psr\\SimpleCache\\' => 
         array (
@@ -230,6 +244,10 @@ class ComposerStaticInitcbb973351035d2749c2ce7735e220087
         array (
             0 => __DIR__ . '/..' . '/php-di/invoker/src',
         ),
+        'HaoZiTeam\\ChatGPT\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/haozi-team/chatgpt-php/src',
+        ),
         'GuzzleHttp\\Stream\\' => 
         array (
             0 => __DIR__ . '/..' . '/ezimuel/guzzlestreams/src',
@@ -277,6 +295,10 @@ class ComposerStaticInitcbb973351035d2749c2ce7735e220087
         'DI\\' => 
         array (
             0 => __DIR__ . '/..' . '/php-di/php-di/src',
+        ),
+        'Brick\\Math\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/brick/math/src',
         ),
         'App\\' => 
         array (

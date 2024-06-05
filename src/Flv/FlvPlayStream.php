@@ -16,6 +16,9 @@ use MediaServer\Utils\WMHttpChunkStream;
 use function chr;
 use function ord;
 
+/**
+ * @purpose flv播放资源
+ */
 class FlvPlayStream extends EventEmitter implements PlayStreamInterface
 {
     protected $playPath = '';
@@ -40,8 +43,11 @@ class FlvPlayStream extends EventEmitter implements PlayStreamInterface
     public function __construct($input, $playPath)
     {
         $this->input = $input;
+        /** 给当前链接绑定 error事件 */
         $input->on('error', [$this, 'onStreamError']);
+        /** 绑定close事件 */
         $input->on('close', [$this, 'close']);
+        /** 绑定播放路径 */
         $this->playPath = $playPath;
     }
 
@@ -51,6 +57,7 @@ class FlvPlayStream extends EventEmitter implements PlayStreamInterface
     }
 
     /**
+     * 触发错误回调
      * @param \Exception $e
      * @internal
      */
@@ -59,6 +66,10 @@ class FlvPlayStream extends EventEmitter implements PlayStreamInterface
         $this->close();
     }
 
+    /**
+     * 关闭链接并移除所有监听事件
+     * @return void
+     */
     public function close()
     {
         if ($this->closed) {
@@ -72,26 +83,47 @@ class FlvPlayStream extends EventEmitter implements PlayStreamInterface
     }
 
 
+    /**
+     * 播放器是否空闲
+     * @return bool|mixed
+     */
     public function isPlayerIdling()
     {
         return $this->isPlayerIdling;
     }
 
+    /**
+     * 发送数据
+     * @param $data
+     * @return null
+     */
     public function write($data)
     {
         return $this->input->write($data);
     }
 
+    /**
+     * 开启声音
+     * @return true
+     */
     public function isEnableAudio()
     {
         return true;
     }
 
+    /**
+     * 开启视频
+     * @return true
+     */
     public function isEnableVideo()
     {
         return true;
     }
 
+    /**
+     * 是否重要关键帧
+     * @return true
+     */
     public function isEnableGop()
     {
         return true;
@@ -110,27 +142,38 @@ class FlvPlayStream extends EventEmitter implements PlayStreamInterface
     }
 
 
+    /**
+     * 开始播放
+     * @return void
+     */
     public function startPlay()
     {
         //各种发送数据包
         $path = $this->getPlayPath();
+        /** 获取推流的资源 */
         $publishStream = MediaServer::getPublishStream($path);
         logger()->info('flv play stream start play');
-
+        /** 还没有发送flv协议头 */
         if (!$this->isFlvHeader) {
+            /** 组装flv头部 */
             $flvHeader = "FLV\x01\x00" . pack('NN', 9, 0);
+            /** 组装音频参数编码 */
             if ($this->isEnableAudio() && $publishStream->hasAudio()) {
                 $flvHeader[4] = chr(ord($flvHeader[4]) | 4);
             }
+            /** 视频参数编码 */
             if ($this->isEnableVideo() && $publishStream->hasVideo()) {
                 $flvHeader[4] = chr(ord($flvHeader[4]) | 1);
             }
+            /** 发送flv协议头部 数据 */
             $this->write($flvHeader);
+            /** 标记已发送flv头部 */
             $this->isFlvHeader = true;
         }
 
 
         /**
+         * 发送meta元数据 就是基本参数
          * meta data send
          */
         if ($publishStream->isMetaData()) {
@@ -139,6 +182,7 @@ class FlvPlayStream extends EventEmitter implements PlayStreamInterface
         }
 
         /**
+         * 发送视频avc数据
          * avc sequence send
          */
         if ($publishStream->isAVCSequence()) {
@@ -148,6 +192,7 @@ class FlvPlayStream extends EventEmitter implements PlayStreamInterface
 
 
         /**
+         * 发送音频aac数据
          * aac sequence send
          */
         if ($publishStream->isAACSequence()) {
@@ -156,19 +201,25 @@ class FlvPlayStream extends EventEmitter implements PlayStreamInterface
         }
 
         //gop 发送
+        /**
+         * 发送关键帧
+         */
         if ($this->isEnableGop()) {
             foreach ($publishStream->getGopCacheQueue() as &$frame) {
                 $this->frameSend($frame);
             }
         }
-
+        /** 更新播放器状态为非空闲 */
         $this->isPlayerIdling = false;
+        /** 更新为正在播放 */
         $this->isPlaying = true;
     }
 
     /**
+     * 发送数据到客户端
      * @param $frame MediaFrame
      * @return mixed
+     * @comment 发送音频，视频，元数据
      */
     public function frameSend($frame)
     {
@@ -183,11 +234,19 @@ class FlvPlayStream extends EventEmitter implements PlayStreamInterface
         }
     }
 
+    /**
+     * 关闭拉流
+     * @return void
+     */
     public function playClose()
     {
         $this->input->close();
     }
 
+    /**
+     * 获取播放资源地址
+     * @return mixed|string
+     */
     public function getPlayPath()
     {
         return $this->playPath;
@@ -195,21 +254,26 @@ class FlvPlayStream extends EventEmitter implements PlayStreamInterface
 
 
     /**
+     * 发送元数据
      * @param $metaDataFrame MetaDataFrame|MediaFrame
      * @return mixed
      */
     public function sendMetaDataFrame($metaDataFrame)
     {
+        /** 组装数据 */
         $tag = new FlvTag();
         $tag->type = Flv::SCRIPT_TAG;
         $tag->timestamp = 0;
         $tag->data = (string)$metaDataFrame;
         $tag->dataSize = strlen($tag->data);
+        /** 将数据打包编码 */
         $chunks = Flv::createFlvTag($tag);
+        /** 发送 */
         $this->write($chunks);
     }
 
     /**
+     * 发送音频帧
      * @param $audioFrame AudioFrame|MediaFrame
      * @return mixed
      */
@@ -225,6 +289,7 @@ class FlvPlayStream extends EventEmitter implements PlayStreamInterface
     }
 
     /**
+     * 发送视频帧
      * @param $videoFrame VideoFrame|MediaFrame
      * @return mixed
      */

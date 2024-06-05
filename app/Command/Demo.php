@@ -4,7 +4,6 @@ namespace App\Command;
 
 use Root\Lib\BaseCommand;
 use Root\Lib\HttpClient;
-use Root\Request;
 
 /**
  * @purpose 用户自定义命令
@@ -35,8 +34,31 @@ class Demo extends BaseCommand
      */
     public function handle()
     {
-        $this->sendTcp('www.cqddzx.com','GET',100,100000);
+        $server = \Root\Io\RtmpDemo::instance();
+        $server->port = 1935 ;
+        $server->onConnect = function (\Root\rtmp\TcpConnection $connection){
+            /** 将传递进来的数据解码 */
+            new \MediaServer\Rtmp\RtmpStream(
+                new \MediaServer\Utils\WMBufferStream($connection)
+            );
+        };
+        /**  这个的作用就是添加一个新的协议并监听 */
+        $server->onWorkerStart = function ($server) {
+
+//            logger()->info("rtmp server " . $worker->getSocketName() . " start . ");
+//            \MediaServer\Http\HttpWMServer::$publicPath = __DIR__.'/public';
+            $httpServer = new \MediaServer\Http\HttpWMServer("\\MediaServer\\Http\\ExtHttpProtocol://0.0.0.0:18080",$server);
+            //$httpServer->listen();
+//            logger()->info("http server " . $httpServer->getSocketName() . " start . ");
+//            var_dump("http server start");
+            //$server->flvServer();
+        };
+        /** 这个http好像要单独开一个进程 */
+
+        $server->start();
     }
+
+
 
     /**
      * 测试并发请求

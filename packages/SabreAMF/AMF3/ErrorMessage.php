@@ -18,6 +18,7 @@
     require_once dirname(__FILE__) . '/../AMF3/AcknowledgeMessage.php';
 
     /**
+     * 写入对象
      * This is the receipt for Error Messages
      */
     class SabreAMF_AMF3_ErrorMessage extends SabreAMF_AMF3_AcknowledgeMessage {

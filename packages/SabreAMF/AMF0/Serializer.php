@@ -8,6 +8,7 @@
     require_once dirname(__FILE__) . '/../ITypedObject.php';
 
     /**
+     * 这个是php和flash的写数据交互
      * SabreAMF_AMF0_Serializer
      *
      * @package SabreAMF

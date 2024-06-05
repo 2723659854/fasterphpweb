@@ -5,6 +5,7 @@ use Apix\Log\Logger\Stream;
 
 if (!function_exists('logger')) {
     /**
+     * 打印日志
      * @return Stream
      */
     function logger()
@@ -17,6 +18,7 @@ if (!function_exists('logger')) {
 
 if (!function_exists('echo_now_init')) {
     /**
+     * 打印当前毫秒时间戳
      * @return mixed
      */
     function echo_now_init()
@@ -28,6 +30,7 @@ if (!function_exists('echo_now_init')) {
 
 if (!function_exists('echo_now')) {
     /**
+     * 打印当前时间
      * @return mixed
      */
     function echo_now()
@@ -38,6 +41,11 @@ if (!function_exists('echo_now')) {
 }
 
 if (!function_exists('make_random_str')) {
+    /**
+     * 生成随机字符串
+     * @param $length
+     * @return false|string
+     */
     function make_random_str($length = 32)
     {
         static $char = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -54,6 +62,11 @@ if (!function_exists('make_random_str')) {
 
 
 if (!function_exists('generateNewSessionID')) {
+    /**
+     * 生成sessionid
+     * @param $length
+     * @return false|string
+     */
     function generateNewSessionID($length = 8)
     {
         static $char = 'ABCDEFGHIJKLMNOPQRSTUVWKYZ0123456789';
@@ -70,6 +83,10 @@ if (!function_exists('generateNewSessionID')) {
 
 
 if (!function_exists('timestamp')) {
+    /**
+     * 毫秒时间戳
+     * @return false|float
+     */
     function timestamp()
     {
         return floor(microtime(true) * 1000);

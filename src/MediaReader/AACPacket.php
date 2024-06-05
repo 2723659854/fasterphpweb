@@ -7,6 +7,9 @@ namespace MediaServer\MediaReader;
 use MediaServer\Utils\BinaryStream;
 use MediaServer\Utils\BitReader;
 
+/**
+ * @purpose 音频数据包
+ */
 class AACPacket
 {
     const AAC_SAMPLE_RATE = [
@@ -34,11 +37,12 @@ class AACPacket
 
     /**
      * AACPacket constructor.
-     * @param $stream BinaryStream
+     * @param $stream BinaryStream 二进制媒体资源
      */
     public function __construct($stream)
     {
         $this->stream=$stream;
+        /** 包类型 读取一个字节 */
         $this->aacPacketType=$stream->readTinyInt();
 
     }
@@ -49,11 +53,13 @@ class AACPacket
     protected $aacSequenceParameterSet;
 
     /**
+     * 获取音频序列参数
      * @return AACSequenceParameterSet
      */
     public function getAACSequenceParameterSet(){
 
         if(!$this->aacSequenceParameterSet){
+            /** 如果没有设置参数 ，那么就解析参数 */
             $this->aacSequenceParameterSet=new AACSequenceParameterSet($this->stream->readRaw());
         }
         return $this->aacSequenceParameterSet;

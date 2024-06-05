@@ -10,6 +10,9 @@ use MediaServer\MediaReader\MediaFrame;
 use MediaServer\MediaReader\MetaDataFrame;
 use MediaServer\MediaReader\VideoFrame;
 
+/**
+ * @purpose 播放接口
+ */
 interface PlayStreamInterface extends EventEmitterInterface
 {
 

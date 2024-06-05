@@ -5,6 +5,9 @@ namespace MediaServer\MediaReader;
 
 use MediaServer\Utils\BitReader;
 
+/**
+ * @purpose 音频参数设置
+ */
 class AACSequenceParameterSet extends BitReader
 {
     public $objType;
@@ -15,12 +18,20 @@ class AACSequenceParameterSet extends BitReader
     public $ps;
     public $extObjectType;
 
+    /**
+     * 读取数据
+     * @param $data
+     */
     public function __construct($data)
     {
         parent::__construct($data);
         $this->readData();
     }
 
+    /**
+     * 获取音频资源文件
+     * @return string
+     */
     public function getAACProfileName()
     {
         switch ($this->objType) {
@@ -45,6 +56,10 @@ class AACSequenceParameterSet extends BitReader
         }
     }
 
+    /**
+     * 读取数据
+     * @return void
+     */
     public function readData()
     {
         $objectType = ($objectType = $this->getBits(5)) === 31 ? ($this->getBits(6) + 32) : $objectType;

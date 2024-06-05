@@ -4,6 +4,9 @@
 namespace MediaServer\Flv;
 
 
+/**
+ * @purpose flv 数据包头
+ */
 class FlvHeader
 {
     public $signature;
@@ -13,6 +16,10 @@ class FlvHeader
     public $hasAudio;
     public $hasVideo;
 
+    /**
+     * 数据包解码
+     * @param $data
+     */
     public function __construct($data)
     {
 

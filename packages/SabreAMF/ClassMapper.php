@@ -66,6 +66,7 @@
         }
 
         /**
+         * 获取本地已保存的远程对象
          * Get the local classname for a remote class
          *
          * This method will return FALSE when the class is not found
@@ -94,6 +95,7 @@
         }
 
         /**
+         * 获取远程调用对象
          * Get the remote classname for a local class
          *
          * This method will return FALSE when the class is not found

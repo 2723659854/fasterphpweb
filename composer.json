@@ -44,7 +44,6 @@
     "ext-mysqli": "*",
     "evenement/evenement": "^3.0",
     "apix/log": "^1.2",
-    "workerman/workerman": "v4.1.9",
     "react/promise": "^2.9",
     "xiaosongshu/nacos": "dev-master",
     "symfony/yaml": "5.4.*",
@@ -54,7 +53,9 @@
     "xiaosongshu/mail": "dev-master",
     "ext-gd": "*",
     "ext-memcache": "*",
-    "nikic/php-parser": "^4.19"
+    "nikic/php-parser": "^4.19",
+    "ext-zlib": "*",
+    "haozi-team/chatgpt-php": "^2.1"
   },
   "config": {
     "allow-plugins": {

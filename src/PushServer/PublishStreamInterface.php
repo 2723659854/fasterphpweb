@@ -11,6 +11,7 @@ use MediaServer\MediaReader\MetaDataFrame;
 use MediaServer\MediaReader\VideoFrame;
 
 /**
+ * @purpose 推流接口
  * Interface PublishStreamInterface
  * @package MediaServer\PushServer
  * @property $is_on_frame

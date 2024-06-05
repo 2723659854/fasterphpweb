@@ -9,9 +9,13 @@ require_once __DIR__ . '/../../packages/SabreAMF/InputStream.php';
 require_once __DIR__ . '/../../packages/SabreAMF/AMF0/Serializer.php';
 require_once __DIR__ . '/../../packages/SabreAMF/AMF0/Deserializer.php';
 
+/**
+ * @comment 这个是工具类
+ * @purpose amf流媒体格式
+ */
 class RtmpAMF
 {
-
+    /** 定义命令编码 */
     const RTMP_CMD_CODE = [
         '_result' => ['transId', 'cmdObj', 'info'],
         '_error' => ['transId', 'cmdObj', 'info', 'streamId'], // Info / Streamid are optional
@@ -38,6 +42,7 @@ class RtmpAMF
         'pause' => ['transId', 'cmdObj', 'pause', 'ms']
     ];
 
+    /** 定义数据编码 */
     const RTMP_DATA_CODE = [
         '@setDataFrame' => ['method', 'dataObj'],
         'onFI' => ['info'],
@@ -137,6 +142,8 @@ class RtmpAMF
     }
 
     /**
+     * 解析amf 命令
+     * 人都麻了，这么多代码
      * Encode AMF0 Command
      * @param $opt
      * @throws \Exception

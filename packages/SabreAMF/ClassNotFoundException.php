@@ -1,6 +1,7 @@
 <?php
 
     /**
+     * 这个是对象没有找到，用于处理rpc调用的
      * SabreAMF_ClassNotFoundException
      *
      * @package SabreAMF

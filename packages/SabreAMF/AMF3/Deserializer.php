@@ -8,6 +8,7 @@
     require_once dirname(__FILE__) . '/../Externalized.php';
 
     /**
+     * amf3的数据解码
      * SabreAMF_AMF3_Deserializer
      *
      * @package SabreAMF
@@ -53,7 +54,7 @@
         private $storedClasses = array();
 
         /**
-         * readAMFData
+         * readAMFData 读取amf数据
          *
          * @param mixed $settype
          * @return mixed
@@ -88,7 +89,7 @@
 
 
         /**
-         * readObject
+         * readObject 写入对象
          *
          * @return object
          */
@@ -227,6 +228,7 @@
         }
 
         /**
+         * 读取数组
          * readArray
          *
          * @return array
@@ -264,6 +266,7 @@
 
 
         /**
+         * 读取字符串
          * readString
          *
          * @return string
@@ -290,7 +293,7 @@
 
 
         /**
-         * readString
+         * readString 从xml读取字符串
          *
          * @return string
          */
@@ -305,6 +308,7 @@
         }
 
         /**
+         * 读取字符串 从从字节码读取
          * readString
          *
          * @return string
@@ -320,6 +324,7 @@
         }
 
         /**
+         * U29 类型通常用于存储小于等于 29 位的非负整数
          * readU29
          *
          * @return int
@@ -352,6 +357,7 @@
         }
 
         /**
+         * 读取整型
          * readInt
          *
          * @return int
@@ -373,6 +379,7 @@
         }
 
         /**
+         * 读取数据
          * readDate
          *
          * @return int

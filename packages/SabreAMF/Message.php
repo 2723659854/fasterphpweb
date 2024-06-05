@@ -6,6 +6,9 @@
     require_once dirname(__FILE__) . '/AMF3/Wrapper.php';
 
     /**
+     * 在实时音视频流传输的过程中，RTMP 通常用于传输视频和音频数据流，而 AMF 则用于传输控制信息和元数据。例如，在实时直播中，
+     * 视频和音频数据通过 RTMP 协议传输，而实时聊天消息、用户状态等控制信息则可以使用 AMF 格式传输。
+     * 设置amf数据，被用作request
      * SabreAMF_Message
      *
      * The Message class encapsulates either an entire request package or an entire result package; including an AMF enveloppe
@@ -47,6 +50,7 @@
         private $encoding = SabreAMF_Const::AMF0;
 
         /**
+         * 数据序列化
          * serialize
          *
          * This method serializes a request. It requires an SabreAMF_OutputStream as an argument to read
@@ -56,12 +60,13 @@
          * @return void
          */
         public function serialize(SabreAMF_OutputStream $stream) {
-
+            /** 设置输出流 */
             $this->outputStream = $stream;
+            /** 设置amf头 */
             $stream->writeByte(0x00);
             $stream->writeByte($this->encoding);
             $stream->writeInt(count($this->headers));
-
+            /** 写入header头部数据 */
             foreach($this->headers as $header) {
 
                 $serializer = new SabreAMF_AMF0_Serializer($stream);
@@ -70,7 +75,7 @@
                 $stream->writeLong(-1);
                 $serializer->writeAMFData($header['data']);
             }
-
+            /** 写入body */
             $stream->writeInt(count($this->bodies));
 
 
@@ -96,6 +101,7 @@
         }
 
         /**
+         * 数据反序列化
          * deserialize
          *
          * This method deserializes a request. It requires an SabreAMF_InputStream with valid AMF data. After

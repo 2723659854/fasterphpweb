@@ -15,6 +15,7 @@
 
 
     /**
+     * amf 数据解码
      * SabreAMF_Deserializer
      *
      * This is the abstract Deserializer. The AMF0 and AMF3 classes descent from this class
