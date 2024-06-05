@@ -26,6 +26,7 @@ class CheckAi extends BaseCommand
 
     /** 免费的api key pool */
     public array $apiKey = [
+        's,k,-,t,m,J,K,U,I,I,F,C,s,1,m,v,T,I,m,F,s,4,v,T,3,B,l,b,k,F,J,V,3,W,o,a,6,E,E,g,Y,K,M,j,4,o,V,k,y,t,q',
 
     ];
     /** 指针 切换客户端用 */
@@ -154,7 +155,7 @@ class CheckAi extends BaseCommand
             return $this->getQuestion();
         }
         if (in_array($question, ["exit", "退出"])) {
-            $this->info("系统退出\r\n");
+            $this->info("系统退出，拜拜\r\n");
             exit;
         }
         if (in_array($question, ["-help", "-h", "-帮助"])) {
