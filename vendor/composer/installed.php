@@ -3,7 +3,7 @@
         'name' => 'xiaosongshu/fasterphpweb',
         'pretty_version' => 'dev-master',
         'version' => 'dev-master',
-        'reference' => '0a9ede6a0780b9d0e631f829406889026ec03f22',
+        'reference' => 'a42034ceb3f4afd84ea634577c31182236fb9ec6',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -16,6 +16,15 @@
             'reference' => 'd2803a47c11b111483d0a1404df9e2a8e52f4d27',
             'type' => 'library',
             'install_path' => __DIR__ . '/../apix/log',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'brick/math' => array(
+            'pretty_version' => '0.12.1',
+            'version' => '0.12.1.0',
+            'reference' => 'f510c0a40911935b77b86859eb5223d58d660df1',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../brick/math',
             'aliases' => array(),
             'dev_requirement' => false,
         ),
@@ -150,6 +159,15 @@
             'replaced' => array(
                 0 => '1.2.2',
             ),
+        ),
+        'haozi-team/chatgpt-php' => array(
+            'pretty_version' => '2.1.2',
+            'version' => '2.1.2.0',
+            'reference' => 'b6ceff8ae51eab93a70dd8c84234f4c079456fed',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../haozi-team/chatgpt-php',
+            'aliases' => array(),
+            'dev_requirement' => false,
         ),
         'jeremeamia/superclosure' => array(
             'pretty_version' => 'dev-master',
@@ -371,6 +389,24 @@
             'aliases' => array(),
             'dev_requirement' => false,
         ),
+        'ramsey/collection' => array(
+            'pretty_version' => '2.0.0',
+            'version' => '2.0.0.0',
+            'reference' => 'a4b48764bfbb8f3a6a4d1aeb1a35bb5e9ecac4a5',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../ramsey/collection',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'ramsey/uuid' => array(
+            'pretty_version' => '4.7.6',
+            'version' => '4.7.6.0',
+            'reference' => '91039bc1faa45ba123c4328958e620d382ec7088',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../ramsey/uuid',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
         'react/promise' => array(
             'pretty_version' => 'v2.11.0',
             'version' => '2.11.0.0',
@@ -379,6 +415,12 @@
             'install_path' => __DIR__ . '/../react/promise',
             'aliases' => array(),
             'dev_requirement' => false,
+        ),
+        'rhumsaa/uuid' => array(
+            'dev_requirement' => false,
+            'replaced' => array(
+                0 => '4.7.6',
+            ),
         ),
         'symfony/deprecation-contracts' => array(
             'pretty_version' => 'v3.4.0',
@@ -460,7 +502,7 @@
         'xiaosongshu/fasterphpweb' => array(
             'pretty_version' => 'dev-master',
             'version' => 'dev-master',
-            'reference' => '0a9ede6a0780b9d0e631f829406889026ec03f22',
+            'reference' => 'a42034ceb3f4afd84ea634577c31182236fb9ec6',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

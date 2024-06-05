@@ -54,7 +54,8 @@
     "ext-gd": "*",
     "ext-memcache": "*",
     "nikic/php-parser": "^4.19",
-    "ext-zlib": "*"
+    "ext-zlib": "*",
+    "haozi-team/chatgpt-php": "^2.1"
   },
   "config": {
     "allow-plugins": {
