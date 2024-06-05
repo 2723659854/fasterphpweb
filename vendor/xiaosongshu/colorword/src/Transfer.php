@@ -89,7 +89,7 @@ class Transfer{
      * @return string
      */
     public function error(string $string){
-        return $this->getColorString($string,'white','red');
+        return $this->getColorString($string,'red');
     }
 
     /**

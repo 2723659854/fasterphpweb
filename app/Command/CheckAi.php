@@ -83,7 +83,7 @@ class CheckAi extends BaseCommand
         /** 初始化客户端 */
         $this->getClient();
         $this->client->addMessage('开始对话', 'system');
-        $this->info("机器人：开始对话，请输入你要资讯的问题\r\n");
+        $this->info("系统：对话开始，请输入你要资讯的问题\r\n");
         if ($this->sleepTime < 1) {
             /** 防止过快请求 导致接口限制 */
             $this->sleepTime = 1;
@@ -125,7 +125,7 @@ class CheckAi extends BaseCommand
             $answers = $this->client->ask($question);
         } catch (\Exception $exception) {
             /** 打印错误信息 */
-            $this->info($exception->getMessage() . "\r\n");
+            $this->error($exception->getMessage() . "\r\n");
             /** 切换客户端 */
             $this->getClient();
             /** 统计问题失败次数 */
@@ -136,7 +136,7 @@ class CheckAi extends BaseCommand
             }
             /** 判断问题提问次数 */
             if ($this->cache[$question] > $this->maxRequest) {
-                $this->info("因为chatgpt服务异常，相同问题已被问了" . $this->maxRequest . "次，不要再问了\r\n");
+                $this->error("系统：因为chatgpt服务异常，相同问题已被问了" . $this->maxRequest . "次，不要再问了\r\n");
                 return $this->requestChatGpt();
             } else {
                 /** 再问一遍 */
@@ -164,15 +164,15 @@ class CheckAi extends BaseCommand
         /** php 在Windows环境下只有使用这个以readline方法才不会乱码 */
         $question = readline("");
         if (!$question) {
-            $this->info("你输入的信息为空，请重新输入\r\n");
+            $this->info("系统：你输入的信息为空，请重新输入\r\n");
             return $this->getQuestion();
         }
         if (in_array($question, ["exit", "退出"])) {
-            $this->info("系统退出，拜拜\r\n");
+            $this->info("系统：拜拜\r\n");
             exit;
         }
         if (in_array($question, ["-help", "-h", "-帮助"])) {
-            $this->info("你可以输入 `-h` ,`-help`,`-帮助` 获取帮助，输入`exit`或者`退出`可以退出会话。 ");
+            $this->info("系统：你可以输入 `-h` ,`-help`,`-帮助` 获取帮助，输入`exit`或者`退出`可以退出会话。 ");
             return $this->getQuestion();
         }
         return $this->encodeWord($question);
