@@ -1,5 +1,5 @@
  php笔记 ：https://www.kancloud.cn/nickpang/phper/2400752
-
+https://www.kancloud.cn/nickpang/phper/2400752
  cgi是web服务器和php解释器之间的通信协议，用来保证数据正确传输。
 
  php-cgi只能解析请求，返回结果，不会管理进程。
@@ -42,6 +42,152 @@
 
  php性能的提升这一块，比如数组，以前的php数组使用的是hash，每次读取数据，是先从一级缓存读，没有就读二级缓存，还没有读取三级缓存，比较耗时。
  升级后，使用双向链表，我们知道链表是保存了上一个元素和下一个元素的地址的链条，可以直接到对应内存地址读取数据。就快多了。
+ =====================================================================================================
+ 这些事件机制（select、poll、epoll、kqueue、/dev/poll、port）都是用于在多路复用I/O操作中进行事件驱动的技术。它们在操作系统层面提供了不同的方式来监控多个文件描述符（sockets、文件等），以确定哪些描述符已经准备好进行读取或写入，从而避免使用阻塞I/O时的资源浪费和效率问题。
+
+ 1. select
+ 原理：select是最古老的多路复用技术之一，它允许程序同时监视多个文件描述符的状态变化。
+ 特点：通过调用select函数，将待监视的文件描述符集合传递给内核，内核会检查每个文件描述符的状态，并返回就绪的文件描述符集合。
+ 缺点：效率较低，最大文件描述符数量受限制。
+ 2. poll
+ 原理：poll与select类似，但没有文件描述符数量的限制。
+ 特点：使用poll系统调用来监视文件描述符的状态变化，返回就绪的文件描述符集合。
+ 缺点：当文件描述符数量较大时，性能下降明显，因为每次调用poll都需要将所有的文件描述符集合从用户态拷贝到内核态。
+ 3. epoll
+ 原理：epoll是Linux特有的高性能I/O事件通知机制。
+ 特点：
+ 使用三个系统调用：epoll_create创建一个epoll句柄，epoll_ctl注册要监听的事件，epoll_wait等待事件就绪。
+ 支持水平触发（LT）和边缘触发（ET）两种模式。
+ 使用事件就绪列表避免了传统select和poll中需要遍历整个文件描述符集合的性能问题。
+ 优点：适用于大量连接的高性能场景，尤其是非阻塞I/O。
+ 4. kqueue
+ 原理：kqueue是BSD（包括macOS）上的事件通知机制。
+ 特点：
+ 使用kqueue系统调用来注册关注的事件和等待事件就绪。
+ 支持多种类型的事件，如文件描述符、定时器、信号等。
+ 提供更好的性能和扩展性，可以处理大量并发连接。
+ 适用性：主要用于BSD和macOS系统。
+ 5. /dev/poll
+ 原理：/dev/poll是Solaris上的事件通知机制。
+ 特点：
+ 通过/dev/poll设备文件进行事件注册和等待就绪。
+ 提供了与kqueue类似的高性能和扩展性。
+ 适用性：主要用于Solaris系统。
+ 6. port（Solaris中的事件机制）
+ 原理：port是Solaris上用于事件通知的一种机制。
+ 特点：
+ 类似于kqueue和/dev/poll，提供高性能的事件通知。
+ 可以处理大量并发连接和其他类型的事件。
+ 适用性：主要用于Solaris系统。
+ 总结
+ 这些事件机制都是为了解决I/O多路复用中的效率问题而设计的，各自在不同的操作系统平台上有不同的实现和特性。选择合适的事件机制通常取决于应用程序的具体需求、目标平台以及所需的性能和可移植性。
+ ===============================================================================================================================
+为什么用Kqueue？
+Wiki上的解释：
+
+kqueue 是一种可扩展的事件通知接口。2000 年 7 月发布的 FreeBSD 4.1 中首次引入了 kqueue，随后也被 NetBSD、OpenBSD、macOS 等操作系统支持。
+kqueue 在内核与用户空间之间充当输入输出事件的管线。因此在事件循环的迭代中，进行一次 kevent(2) 系统调用不仅可以接收未决事件，还可以修改事件过滤器。
+
+简单解释，Kqueue是unix系统上高效的IO多路复用技术（常见的io复用有select、poll、epoll、kqueue等等，其中epoll为Linux系统独有，kqueue则在众多unix系统中存在）。
+
+为什么要有IO多路复用？
+阻塞I/O模式下，一个线程只能处理一个流的I/O事件（比如用户线程发起一个IO请求操作，内核会去查看要读取的数据是否就绪，如果数据没有就绪，则会一直在那等待，直到数据就绪，当数据就绪之后，便将数据拷贝到用户线程）。所以，如果想要同时处理多个流，要么多进程(fork)，要么多线程(pthread_create)，很不幸这两种方法效率都不高。
+所以，考虑非阻塞忙轮询的I/O方式，我们发现我们可以同时处理多个流了。使用select，我们有O(n)的无差别轮询复杂度，同时处理的流越多，每一次无差别轮询时间就越长。select/poll是通过轮询的方法来获得就绪的状态，调用select/poll后就阻塞住，直到有就绪的文件描述符，或者超时，或者被中断。返回值是就绪的文件描述符的个数，需要遍历作为参数传入的文件描述符的位域或数组获得文件描述符。
+
+Kqueue和Epoll的优势：通过callback避免忙轮询
+
+epoll可以理解为event poll，不同于忙轮询和无差别轮询，epoll之会把哪个流发生了怎样的I/O事件通知我们。此时我们对这些流的操作都是有意义的。
+kqueue与epoll非常相似，在注册一批文件描述符到 kqueue 以后，当其中的描述符状态发生变化时，kqueue将一次性通知应用程序哪些描述符可读、可写或出错了（即产生事件Event）。
+
+什么是Kqueue？
+kqueue是freebsd内核中的一个事件队列kernel queue。在kqueue实现中，比较关键的是一个knote结构体，该结构体在内核空间对应于应用层的kevent结构体。
+
+kqueue的实现由三个子结构体组成，每个结构体的基本元素是knote：
+
+一个队列，用来保存active的knotes节点。（有事件发生的节点，这个队列就是已完成事件队列）
+一个hashtable 用来存储和查找identity->descriptor的映射。
+线性的描述符list，用来存储和查找有对应描述符的knotes节点。（用于保证当事件kevent的fd文件描述符被关闭后，对应的knote被释放）
+在一个 kqueue 中，{ident, filter} 确定一个唯一的事件，这个事件被称为Kevent，它的结构体如下：
+
+type Kevent_t struct {
+   Ident  uint64
+   Filter int16
+   Flags  uint16
+   Fflags uint32
+   Data   int64
+   Udata  *byte
+}
+
+Ident：事件的 id，一般设置为文件描述符。在 socket 使用中，它是 socket 的 fd 句柄。
+Filter： filter 是事件的类型，有 15 种。内核检测 ident 上注册的 filter 的状态，状态发生了变化，就通知应用程序。
+kevent 定义了较多的 filter，比如与socket读写相关的filter：
+EVFILT_READ：TCP 监听 socket，如果在完成的连接队列 ( 已收三次握手最后一个 ACK) 中有数据，此事件将被通知。收到该通知的应用一般调用 accept()，且可通过 data 获得完成队列的节点个数。 流或数据报 socket，当协议栈的 socket 层接收缓冲区有数据时，该事件会被通知，并且 data 被设置成可读数据的字节数。
+EVFILT_WRIT：当 socket 层的写入缓冲区可写入时，该事件将被通知；data 指示目前缓冲区有多少字节空闲空间。
+EVFILT_USER 用户自定义的事件，由用户代码触发（而非内核触发）
+Flags：操作事件的方式，比如，EV_ADD 添加事件到Kqueue，EV_DELETE 删除，EV_ENABLE 激活，EV_DISABLE 不激活。
+FFlags：Filter-specific flags，特定 filter 的专有标志，可用于保存专有返回信息。
+Data：int 型的用户数据，特定 filter 存储专有信息，比如socket 里面它是可读写的数据长度。
+UData：指针类型的数据，你可以携带任何想携带的附加数据。比如对象、指针地址（Opaque User Data Identifier）。
+Kqueue怎么运行？
+Kqueue是这样初始化的：
+
+获取和分配Kqueue
+最初， 应用程序调用kqueue() 来分配一个新的kqueue, 涉及到了分配一个新的kqueue描述符、kqueue结构体、和一个指向已打开文件描述符table的指针, 这个时候并没有给这个给array和hashtable分配空间.
+链接Kevent和Knote
+应用调用kevent()传递一个changelist指针(Kevents的数组)，changelist中的kevents从用户空间copy到内核空间, 然后对每一个kevents调用register()：register()先在KQ中查找是否有匹配的knotes, 如果过没有，表明第一次添加，分配一个新的knotes(有EV_ADD标记).根据传递来的kevent信息对新建的knotes进行初始化，并调用attacth()将knote连接到事件源(如tcp收包)。
+添加Knote到队列
+之后将knote添加到kqueue的hashtable或array中
+Kqueue是这样运行的：
+
+事件源有事件发生时，即收到事件时，事件源会对attach到自己的knotes链表调用knote()函数：扫描所有link到该事件源的knotes，检测事件是否满足通知条件（KeventFilter）, 如果事件条件满足则将该knote放入到kqueue的active list队列里，最终会传递给应用层。
+事件是由 <file,filter> 两者唯一确定的。这说明，如果在创建event 时，相同的文件描述符，不同的filter 的组合，最终的创建的事件是不同的。在内核中，相同文件的不同事件由klist 进行管理。当该数据结构上发生某种变化时，就会遍历klist，确定是否有事件发生。
+
+一个示例
+使用Kqueue和KEvent非常简单：
+
+func initKqueue() {
+   kqueueFd, err := syscall.Kqueue()
+   fd := int(os.Stdin.Fd())
+
+   //build kEvent
+   //fileFd = 0
+   kEvent1 := syscall.Kevent_t{
+      Ident:  uint64(fd),
+      Filter: syscall.EVFILT_READ,
+      Flags:  syscall.EV_ADD,
+   }
+
+   //register kEvent to kernel
+   _, err = syscall.Kevent(kqueueFd, []syscall.Kevent_t{kEvent1}, nil, nil)
+   if err != nil {
+      logs.Fatal("register kEvent error, err:%v", err)
+   }
+   for {
+      kEventArr := make([]syscall.Kevent_t, 10)
+      keventNum, err := syscall.Kevent(kqueueFd, nil, kEventArr, nil)
+      if err != nil {
+         logs.Fatal("get kEvent error, err:%v", err)
+      }
+      logs.Info("kEvent Num:%v", keventNum)
+      for i := 0; i < keventNum; i++ {
+         logs.Info("kevent:%+v", kEventArr[i])
+      }
+      time.Sleep(2 * time.Second)
+      logs.Info("done.")
+   }
+}
+————————————————
+
+版权声明：本文为博主原创文章，遵循 CC 4.0 BY-SA 版权协议，转载请附上原文出处链接和本声明。
+
+原文链接：https://blog.csdn.net/No_Game_No_Life_/article/details/111454706
+
+==========================================================================================================================
+vpn
+https://xn--clouds-o43k.com/#/stage/buysubs
+https://hitun.io/
+https://sakuracat-1.com/
+
 
 
  
