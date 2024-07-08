@@ -189,5 +189,7 @@ https://hitun.io/
 https://sakuracat-1.com/
 
 
-
+====================================================================================================
+php多线程扩展
+https://blog.csdn.net/wwz_henu/article/details/129397237
  
