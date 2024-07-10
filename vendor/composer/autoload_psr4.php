@@ -20,6 +20,7 @@ return array(
     'SuperClosure\\' => array($vendorDir . '/jeremeamia/superclosure/src'),
     'Root\\' => array($baseDir . '/root'),
     'React\\Promise\\' => array($vendorDir . '/react/promise/src'),
+    'React\\EventLoop\\' => array($vendorDir . '/react/event-loop/src'),
     'Ramsey\\Uuid\\' => array($vendorDir . '/ramsey/uuid/src'),
     'Ramsey\\Collection\\' => array($vendorDir . '/ramsey/collection/src'),
     'Psr\\SimpleCache\\' => array($vendorDir . '/psr/simple-cache/src'),

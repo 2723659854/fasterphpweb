@@ -49,6 +49,7 @@ class ComposerStaticInitcbb973351035d2749c2ce7735e220087
         array (
             'Root\\' => 5,
             'React\\Promise\\' => 14,
+            'React\\EventLoop\\' => 16,
             'Ramsey\\Uuid\\' => 12,
             'Ramsey\\Collection\\' => 18,
         ),
@@ -174,6 +175,10 @@ class ComposerStaticInitcbb973351035d2749c2ce7735e220087
         'React\\Promise\\' => 
         array (
             0 => __DIR__ . '/..' . '/react/promise/src',
+        ),
+        'React\\EventLoop\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/react/event-loop/src',
         ),
         'Ramsey\\Uuid\\' => 
         array (

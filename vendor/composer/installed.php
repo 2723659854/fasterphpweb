@@ -1,9 +1,9 @@
 <?php return array(
     'root' => array(
         'name' => 'xiaosongshu/fasterphpweb',
-        'pretty_version' => 'dev-master',
-        'version' => 'dev-master',
-        'reference' => 'a42034ceb3f4afd84ea634577c31182236fb9ec6',
+        'pretty_version' => '1.0.0+no-version-set',
+        'version' => '1.0.0.0',
+        'reference' => null,
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -407,6 +407,15 @@
             'aliases' => array(),
             'dev_requirement' => false,
         ),
+        'react/event-loop' => array(
+            'pretty_version' => '3.x-dev',
+            'version' => '3.9999999.9999999.9999999-dev',
+            'reference' => 'f2fb5a22568c4d29737d69208d1394ac47d77a38',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../react/event-loop',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
         'react/promise' => array(
             'pretty_version' => 'v2.11.0',
             'version' => '2.11.0.0',
@@ -500,9 +509,9 @@
             'dev_requirement' => false,
         ),
         'xiaosongshu/fasterphpweb' => array(
-            'pretty_version' => 'dev-master',
-            'version' => 'dev-master',
-            'reference' => 'a42034ceb3f4afd84ea634577c31182236fb9ec6',
+            'pretty_version' => '1.0.0+no-version-set',
+            'version' => '1.0.0.0',
+            'reference' => null,
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

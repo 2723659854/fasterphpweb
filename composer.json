@@ -56,7 +56,8 @@
     "nikic/php-parser": "^4.19",
     "ext-zlib": "*",
     "haozi-team/chatgpt-php": "^2.1",
-    "ext-readline": "*"
+    "ext-readline": "*",
+    "react/event-loop": "^3@dev"
   },
   "config": {
     "allow-plugins": {
