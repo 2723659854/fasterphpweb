@@ -37,6 +37,7 @@ echo "\r\n";
 
 /** 案例2：动态规划，将商品放入到背包中，使得包中的商品价值最高 */
 
+/** 商品信息 */
 $goods = [
     ['id' => 1, 'weight' => 10, 'price' => 50],
     ['id' => 2, 'weight' => 20, 'price' => 120],
@@ -44,6 +45,7 @@ $goods = [
     ['id' => 4, 'weight' => 40, 'price' => 210],
     ['id' => 5, 'weight' => 50, 'price' => 240],
 ];
+/** 背包最大承重 */
 $maxWeight = 60;
 
 function knapsack($goods, $maxWeight) {
