@@ -189,7 +189,7 @@ $target = 1;
 $result = threeSumClosest($nums, $target);
 echo "Closest sum to target $target is: $result\n";
 
-/** 分治算法 之 归并排序 */
+/** 分治算法 之 归并排序 个人觉得这个方法复杂度也很高，每一次分组都会调用merge方法进行排序 */
 
 // 归并排序的实现函数
 function merge_sort($arr)
@@ -217,6 +217,8 @@ function merge($left, $right)
     $result = [];
     $i = $j = 0;
 
+    /** 我擦，这一步真的是写的比较牛逼了 ，这个世界真的是极少数的天才和绝大多数傻逼组成的 */
+    /** 将第一个数组剩下的元素逐个 和 第二个数组的元素对比，取出较小的那一个 */
     // 比较左右两部分的元素，依次放入结果数组
     while ($i < count($left) && $j < count($right)) {
         if ($left[$i] <= $right[$j]) {
@@ -242,3 +244,51 @@ $arr = [3, 1, 4, 1, 5, 9, 2, 6, 5, 3, 5];
 $sorted_arr = merge_sort($arr);
 echo "Original array: " . implode(", ", $arr) . "\n";
 echo "Sorted array: " . implode(", ", $sorted_arr) . "\n";
+
+
+/**
+ * 基于分治实现二分查找
+ * 二分查找算法
+ *
+ * @param array $arr 已排序的数组
+ * @param int $left 搜索范围的左边界
+ * @param int $right 搜索范围的右边界
+ * @param int $x 要查找的元素
+ * @return int 找到元素的位置，若未找到返回 -1
+ * @comment  这个依赖于有序数组
+ */
+function binarySearch($arr, $left, $right, $x)
+{
+    if ($right >= $left) {
+        $mid = $left + (int)(($right - $left) / 2);
+
+        // 检查中间元素是否为目标元素
+        if ($arr[$mid] == $x) {
+            return $mid;
+        }
+
+        // 如果目标元素小于中间元素，则在左子数组中查找
+        if ($arr[$mid] > $x) {
+            return binarySearch($arr, $left, $mid - 1, $x);
+        }
+
+        // 否则在右子数组中查找
+        return binarySearch($arr, $mid + 1, $right, $x);
+    }
+
+    // 如果元素不在数组中，返回 -1
+    return -1;
+}
+
+// 测试二分查找
+$arr = [2, 3, 4, 10, 40];
+$n = count($arr);
+$x = 10;
+
+$result = binarySearch($arr, 0, $n - 1, $x);
+if ($result != -1) {
+    echo "元素 $x 在数组中的索引为: $result";
+} else {
+    echo "数组中不存在元素 $x";
+}
+
