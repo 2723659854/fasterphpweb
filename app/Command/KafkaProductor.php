@@ -4,7 +4,6 @@ namespace App\Command;
 
 use Root\Lib\BaseCommand;
 use Monolog\Logger;
-use Monolog\Handler\StdoutHandler;
 use Monolog\Handler\StreamHandler;
 
 /**
@@ -119,11 +118,11 @@ class KafkaProductor extends BaseCommand
         $producer = new \Kafka\Producer();
         $producer->setLogger($logger);
 
-        for ($i = 0; $i < 5; $i++) {
+        for ($i = 0; $i < 10; $i++) {
             $producer->send(array(
                 array(
                     'topic' => 'test',
-                    'value' => date('Y-m-d H:i:s'),
+                    'value' => $i,
                     'key' => 'test',
                 ),
             ));
