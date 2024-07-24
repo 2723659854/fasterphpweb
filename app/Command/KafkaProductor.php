@@ -50,20 +50,21 @@ class KafkaProductor extends BaseCommand
                 return [
                     [
                         'topic' => 'test',
-                        'value' => 'test....message.',
-                        'key' => 'testkey',
+                        'value' => 'demo',
+                        'key' => 'test',
                     ],
                 ];
             }
         );
-        $producer->setLogger($logger);
+        //$producer->setLogger($logger);
         $producer->success(function($result) {
-            var_dump($result);
+            $this->info("投递成功");
+            //var_dump($result);
         });
         $producer->error(function($errorCode) {
             var_dump($errorCode);
         });
         $producer->send(true);
-        $this->info("请在这里编写你的业务逻辑");
+
     }
 }

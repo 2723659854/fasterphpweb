@@ -54,7 +54,8 @@ class Process
 
     // }}}
     // {{{ public function init()
-
+    /** 状态 */
+    private $state;
     /**
      * start consumer
      *

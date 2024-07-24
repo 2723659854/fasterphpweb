@@ -46,9 +46,10 @@ class KafkaConsume extends BaseCommand
         $config->setTopics(['test']);
         //$config->setOffsetReset('earliest');
         $consumer = new \Kafka\Consumer();
-        $consumer->setLogger($logger);
+        //$consumer->setLogger($logger);
         $consumer->start(function($topic, $part, $message) {
-            var_dump($message);
+            $this->info("接收到消息了".date('Y-m-d H:i:s'));
+            //var_dump($message);
         });
         $this->info("请在这里编写你的业务逻辑");
     }

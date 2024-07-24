@@ -234,11 +234,16 @@ abstract class Protocol
             } elseif ($data == -2) { // -2L
                 $data = self::Khex2bin('fffffffffffffffe');
             } else {
-                $left  = 0xffffffff00000000;
-                $right = 0x00000000ffffffff;
-
-                $l = ($data & $left) >> 32;
-                $r = $data & $right;
+//                $left  = 0xffffffff00000000;
+//                $right = 0x00000000ffffffff;
+//
+//                $l = ($data & $left) >> 32;
+//                $r = $data & $right;
+//                $data = pack($type, $l, $r);
+                /** 丢失精度 所以修改了源码 */
+                $hexData = sprintf('%016x', $data); // 将数据转换为16位16进制字符串
+                $l = hexdec(substr($hexData, 0, 8)); // 高32位
+                $r = hexdec(substr($hexData, 8, 8)); // 低32位
                 $data = pack($type, $l, $r);
             }
         } else {
