@@ -11,7 +11,8 @@ use Monolog\Handler\StreamHandler;
  * @author administrator
  * @time 2024-07-24 01:48:06
  * @command php start.php k:publish
- * @note 这个插件使用了框架 amphp/amp ，这是一个php版本的多线程异步io框架。
+ * @note 这个插件使用了框架 amphp/amp ，这是一个php版本的协程异步io框架。可是我对协程已经没有任何兴趣了，因为swoole已经搞出来多线程了。
+ * @note 为什么没有用swoole呢，因为swoole是用c语言写的扩展，里面的很多功能用C语言实现的，无法看到底层运行情况。
  * @link https://github.com/amphp/amp
  */
 class KafkaProductor extends BaseCommand
