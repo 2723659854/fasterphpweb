@@ -12,9 +12,7 @@ use Monolog\Logger;
  * @comment 通过测试发现，kafka延迟高，一般在15秒以上，并且会丢失数据，投递5条数据，会丢失一条数据。但是也可能是我的用法不对吧。
  * @note 分区操作，进入容器后执行：kafka-topics.sh --alter --topic test --partitions 6 --bootstrap-server localhost:9092
  * @note 验证分区结果：kafka-topics.sh --describe --topic test --bootstrap-server localhost:9092
- * @note 分区后，同一个分组的多个消费者才生效，否则始终只有一个消费者消费，高并发情况下，导致数据积压。
- * @note 当然了，这个也存在问题，如果只有一个消费者，消息按道理说应该分配给这个消费者，但是实际上只分配了一部分，其余的消息丢失了，目测是分配到
- * 了其他的分区，但是其他分区并没有消费者，又或者是数据丢失了（因为不创建多个分区，也会丢失数据）
+ * @note 分区后，订阅同一个主题的消费者数应该等于分区数，否则某一个分区如果没有消费者，会导致消息积压在这个分区不被消费
  */
 class KafkaConsume extends BaseCommand
 {
@@ -64,8 +62,10 @@ class KafkaConsume extends BaseCommand
         /** 设置消费者订阅的主题列表，这里是订阅名为 test 的主题。 */
         $config->setTopics(['test']);
         /** 解决心跳报错 Heartbeat error, errorCode:27 The group is rebalancing, so a rejoin is needed.*/
-        $config->set('session.timeout.ms', 10000);  // 10秒
-        $config->set('heartbeat.interval.ms', 3000);  // 3秒
+        // 调整配置参数
+        $config->set('session.timeout.ms', 30000);  // 30秒
+        $config->set('heartbeat.interval.ms', 10000);  // 10秒
+        $config->set('max.poll.interval.ms', 300000);  // 5分钟
 
         /** 设置消费者在找不到之前的偏移量或偏移量超出范围时，应该从主题的最早（earliest）位置开始消费。 默认为 latest，即从最新的位置开始消费 */
         //$config->setOffsetReset('earliest');

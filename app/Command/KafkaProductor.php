@@ -111,11 +111,13 @@ class KafkaProductor extends BaseCommand
         $config->setBrokerVersion('1.0.0');
         //$config->setRequiredAck(1);
         /** 所有消息都需要反馈ack确认 */
-        $config->setRequiredAck(-1);
+        $config->setRequiredAck(1);
         /** 经过测试发现，这里设置成异步，才不会丢失消息 */
         $config->setIsAsyn(true);
         $config->setProduceInterval(500);
+        /** 实例化生产者 */
         $producer = new \Kafka\Producer();
+        /** 添加日志处理器 */
         $producer->setLogger($logger);
 
         for ($i = 0; $i < 10; $i++) {
