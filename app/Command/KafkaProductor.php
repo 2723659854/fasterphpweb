@@ -10,6 +10,7 @@ use Monolog\Handler\StreamHandler;
  * @purpose 用户自定义命令
  * @author administrator
  * @time 2024-07-24 01:48:06
+ * @command php start.php k:publish
  */
 class KafkaProductor extends BaseCommand
 {

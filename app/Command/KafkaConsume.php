@@ -13,6 +13,10 @@ use Monolog\Logger;
  * @note 分区操作，进入容器后执行：kafka-topics.sh --alter --topic test --partitions 6 --bootstrap-server localhost:9092
  * @note 验证分区结果：kafka-topics.sh --describe --topic test --bootstrap-server localhost:9092
  * @note 分区后，订阅同一个主题的消费者数应该等于分区数，否则某一个分区如果没有消费者，会导致消息积压在这个分区不被消费
+ * 比如说，在本测试样例中，消费者订阅的主题是test，上面的命令设置了6个分区，那么同样的也要设置6个消费者。
+ * 若消费者数小于分区数，某些分区的消息不回被消费，导致消息积压，给人的感觉是丢失了消息。
+ * 若消费者数大于分区数，那么多出来消费者将会被限制。因为同一个分区，只能有一个消费者消费。
+ * @command php start.php k:consume
  */
 class KafkaConsume extends BaseCommand
 {
