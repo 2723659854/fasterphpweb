@@ -1,3 +1,5 @@
+# 本配置设置较多的服务，可能你实际上并不需要这些服务，可以根据实际需求删除不需要的服务。本服务没有添加MySQL等数据库服务，因为数据库一般都是单独部署
+# 特定的服务器上，而且数据库服务比较占内存，所以就剔除了数据库服务。同时剔除了占内存较高的elasticsearch服务。
 # 指定版本号
 version: '3'
 # 包含的服务
@@ -96,9 +98,9 @@ services:
     # 端口映射
     ports:
       - "11211:11211"
-  # zookeeper容器
+  # zookeeper容器 这个需要使用官方的镜像，否则无法使用kafka manager管理工具
   zookeeper:
-    image: wurstmeister/zookeeper
+    image: zookeeper:3.5
     ports:
       - "2181:2181"
   # kafka消息队列容器
@@ -111,6 +113,21 @@ services:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
 #    volumes:
 #      - /var/run/docker.sock:/var/run/docker.sock
+  # kafka可视化管理工具
+  kafka-manager:
+    image: hlebalbau/kafka-manager:latest
+    ports:
+      - "9000:9000"
+    environment:
+      ZK_HOSTS: zookeeper:2181
+      KM_CLUSTER_NAME: "MyKafkaCluster"
+      KM_KAFKA_VERSION: "2.8.1"  # 根据你的 Kafka 版本设置
+    depends_on:
+      - zookeeper
+      - kafka
+    links:
+      - zookeeper
+      - kafka
 
 # 创建桥接网络 ,可以让容器通过ip访问宿主机 ，一般用于访问宿主机上配置的网站，可以配合Apache使用，设置网站在localhost下。参考：https://blog.csdn.net/u012516524/article/details/131978081
 networks:
