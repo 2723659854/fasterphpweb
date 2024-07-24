@@ -11,6 +11,8 @@ use Monolog\Handler\StreamHandler;
  * @author administrator
  * @time 2024-07-24 01:48:06
  * @command php start.php k:publish
+ * @note 这个插件使用了框架 amphp/amp ，这是一个php版本的多线程异步io框架。
+ * @link https://github.com/amphp/amp
  */
 class KafkaProductor extends BaseCommand
 {
