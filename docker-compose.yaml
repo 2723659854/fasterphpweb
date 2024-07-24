@@ -96,6 +96,21 @@ services:
     # 端口映射
     ports:
       - "11211:11211"
+  # zookeeper容器
+  zookeeper:
+    image: wurstmeister/zookeeper
+    ports:
+      - "2181:2181"
+  # kafka消息队列容器
+  kafka:
+    image: wurstmeister/kafka
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_ADVERTISED_HOST_NAME: localhost
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+#    volumes:
+#      - /var/run/docker.sock:/var/run/docker.sock
 
 # 创建桥接网络 ,可以让容器通过ip访问宿主机 ，一般用于访问宿主机上配置的网站，可以配合Apache使用，设置网站在localhost下。参考：https://blog.csdn.net/u012516524/article/details/131978081
 networks:

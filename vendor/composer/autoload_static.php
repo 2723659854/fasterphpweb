@@ -11,6 +11,7 @@ class ComposerStaticInitcbb973351035d2749c2ce7735e220087
         '6e3fae29631ef280660b3cdad06f25a8' => __DIR__ . '/..' . '/symfony/deprecation-contracts/function.php',
         '37a3dc5111fe8f707ab4c132ef1dbc62' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/functions_include.php',
         'ad155f8f1cf0d418fe49e248db8c661b' => __DIR__ . '/..' . '/react/promise/src/functions_include.php',
+        'e8aa6e4b5a1db2f56ae794f1505391a8' => __DIR__ . '/..' . '/amphp/amp/lib/functions.php',
         'decc78cc4436b1292c6c0d151b19445c' => __DIR__ . '/..' . '/phpseclib/phpseclib/phpseclib/bootstrap.php',
         'e39a8b23c42d4e1452234d762b03835a' => __DIR__ . '/..' . '/ramsey/uuid/src/functions.php',
         '320cde22f66dd4f5d3fd621d3e88b98f' => __DIR__ . '/..' . '/symfony/polyfill-ctype/bootstrap.php',
@@ -70,6 +71,7 @@ class ComposerStaticInitcbb973351035d2749c2ce7735e220087
         ),
         'M' => 
         array (
+            'Monolog\\' => 8,
             'MediaServer\\' => 12,
         ),
         'L' => 
@@ -116,6 +118,7 @@ class ComposerStaticInitcbb973351035d2749c2ce7735e220087
         array (
             'App\\' => 4,
             'Apix\\Log\\' => 9,
+            'Amp\\' => 4,
         ),
     );
 
@@ -237,6 +240,10 @@ class ComposerStaticInitcbb973351035d2749c2ce7735e220087
         array (
             0 => __DIR__ . '/..' . '/paragonie/constant_time_encoding/src',
         ),
+        'Monolog\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/monolog/monolog/src/Monolog',
+        ),
         'MediaServer\\' => 
         array (
             0 => __DIR__ . '/../..' . '/src',
@@ -313,9 +320,20 @@ class ComposerStaticInitcbb973351035d2749c2ce7735e220087
         array (
             0 => __DIR__ . '/..' . '/apix/log/src',
         ),
+        'Amp\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/amphp/amp/lib',
+        ),
     );
 
     public static $prefixesPsr0 = array (
+        'K' => 
+        array (
+            'Kafka\\' => 
+            array (
+                0 => __DIR__ . '/..' . '/nmred/kafka-php/src',
+            ),
+        ),
         'G' => 
         array (
             'Guzzle\\Stream' => 

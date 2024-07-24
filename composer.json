@@ -57,7 +57,9 @@
     "ext-zlib": "*",
     "haozi-team/chatgpt-php": "^2.1",
     "ext-readline": "*",
-    "react/event-loop": "^3@dev"
+    "react/event-loop": "^3@dev",
+    "nmred/kafka-php": "0.2.*",
+    "monolog/monolog": "^2.9"
   },
   "config": {
     "allow-plugins": {

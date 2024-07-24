@@ -1,0 +1,4 @@
+安装
+pip install Django
+会报错 python安装Django报错WARNING: Failed to write executable - trying to use .deleteme logic
+正确的安装方法是：pip install --user django
