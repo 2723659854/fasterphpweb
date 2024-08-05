@@ -381,49 +381,29 @@ class Solution
      * @param Integer $numRows
      * @return String
      * @link https://leetcode.cn/problems/zigzag-conversion/description/?envType=study-plan-v2&envId=top-interview-150
+     * @note 复杂度为O(n) 关键点是正确计算每一个字符的坐标
      */
     function convert($s, $numRows)
     {
-
-        $array = [];
         $length = strlen($s);
-
-        if (in_array($length, [1, 2])) {
+        if ($length==1) {
             return $s;
         }
-        /** 字符串坐标 */
+        /** 一个单位需要的字符长度 */
+        $number = 2 * ($numRows - 1);
+        /** 字符串指针 */
         $i = 0;
-        /** 先按照Z排列 */
-        /** 一个单元占用字符数 */
-        $oneWords = ($numRows + $numRows - 2);
-        /** 会生成的单元数 */
-        $danyuanshu = ceil($length / $oneWords);
-        /** */
-        $newIndex = 0;
-        /** 按单元逐个处理 */
-        for ($index = 0; $index < $danyuanshu; $index++) {
-            /** 列数 = 行数 - 1 */
-            for ($n = 0; $n < $numRows - 1; $n++) {
-                /** 初始化这一列为空 */
-                $danyuan = array_fill(0, $numRows, "");
-                if ($n == 0) {
-                    /** 第一列 */
-                    for ($j = 0; $j < $numRows; $j++) {
-                        $danyuan[$j] = $s[$i++] ?? "";
-                    }
-                } else {
-                    /** 其余列 */
-                    $danyuan[$numRows - $n - 1] = $s[$i++] ?? "";
-                }
-                $array[] = $danyuan;
-            }
+        /** 初始化每一行都为空 */
+        $other = array_fill(0, $numRows, "");
+        /** 纵向排列字符，逐个移动字符指针 */
+        while ($i < $length) {
+            /** 字符在一个单位中的行坐标 */
+            $index = $i % $number;
+            /** 如果坐标大于等于行数 ，倒序排列 */
+            $other[($index < $numRows) ? $index : ($number - $index)] .= $s[$i++] ?? "";
         }
 
-        $string = "";
-        for ($tom = 0; $tom < $numRows; $tom++) {
-            $string .= implode("", array_column($array, $tom));
-        }
-        return $string;
+        return implode("", $other);
     }
 
 }
@@ -431,7 +411,7 @@ class Solution
 #输入：nums1 = [1,2,3,0,0,0], m = 3, nums2 = [2,5,6], n = 3
 
 $math = new Solution();
-var_dump($math->convert("PAYPALISHIRING", 3));
+var_dump($math->convert("PAYPALISHIRING", 2));
 var_dump("PAHNAPLSIIGYIR");
 
 var_dump($math->convert("PAYPALISHIRING", 4));
