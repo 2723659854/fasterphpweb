@@ -3,6 +3,8 @@
 /**
  * 力扣算法题解法
  * @link https://leetcode.cn/studyplan/top-interview-150/
+ * https://www.zhihu.com/question/26530631
+ * https://www.zhihu.com/question/578847091
  */
 class Solution
 {
@@ -386,7 +388,7 @@ class Solution
     function convert($s, $numRows)
     {
         $length = strlen($s);
-        if ($length==1) {
+        if ($length == 1) {
             return $s;
         }
         /** 一个单位需要的字符长度 */
@@ -406,16 +408,498 @@ class Solution
         return implode("", $other);
     }
 
+    /**
+     * @param String[] $words
+     * @param Integer $maxWidth
+     * @return String[]
+     * @link https://leetcode.cn/problems/text-justification/description/?envType=study-plan-v2&envId=top-interview-150
+     */
+    function fullJustify($words, $maxWidth)
+    {
+        $information = [];
+        /** 先计算每一个单词的长度 */
+        foreach ($words as $key => $word) {
+
+            $information[] = [
+                'length' => strlen($word),
+                'value' => $word
+            ];
+        }
+
+        $rows = [];
+        $index = 0;
+        /** 逐行填充单词 ，若长度大于宽度，则将单词填充到下一行，本行使用空格，并且空格平均分配，以单词结尾 */
+        $input = [];
+        $length = 0;
+        /** 逐个处理字符 */
+        while ($index < count($information)) {
+            /** 当前的长度 = 空格 + 单词的长度 两个单词之间最少一个空格 */
+            $length = count($input) + $information[$index]['length'] + $length;
+
+            /** 如果添加这个单词长度会超过，则新起一行 */
+            if ($length >= $maxWidth) {
+                $rows[] = $input;
+                /** 清空数据，并初始化长度 */
+                $input = [];
+                $length = 0;
+                /** 更新长度 */
+                $length += $information[$index]['length'];
+            }
+            /** 更新内容 */
+            $input[] = $information[$index];
+            /** 更新指针 */
+            $index++;
+            /** 已读取所有数据，需要把剩下的数据取出 */
+            if ($index == count($information)) {
+                $rows[] = $input;
+            }
+        }
+
+        /** 最终排版 */
+        $array = [];
+        /** 排版 计算每一行需要的空格数 */
+
+        foreach ($rows as $row) {
+            $count = (count($row) - 1);
+            $count = $count > 0 ? $count : 1;
+            $factLength = array_sum(array_column($row, 'length'));
+            $space = " ";
+            $emptyCount = $maxWidth - $factLength;
+            /** 单词之间的空格数 */
+            $perSpace = floor($emptyCount / $count);
+            /** 剩余的空格数 需要填充到最后一个单词之前 */
+            $overSpace = $emptyCount - $perSpace * $count;
+
+            $string = "";
+            foreach ($row as $i => $v) {
+                if ($i == ($count - 1)) {
+                    $perSpace = $overSpace + $perSpace;
+                }
+                $string .= $perSpace > 0 ? str_repeat($space, $perSpace) . $v['value'] : $v['value'];
+            }
+            /** 去除多余空格 */
+            $string = trim($string);
+            $str_length = strlen($string);
+            $need = ($maxWidth - $str_length);
+            /** 保证文字左对齐 */
+            $array[] = $need > 0 ? $string . str_repeat($space, $need) : $string;
+        }
+        return $array;
+    }
+
+    /**
+     * 是否回文
+     * @param String $s
+     * @return Boolean
+     * @link https://leetcode.cn/problems/valid-palindrome/description/?envType=study-plan-v2&envId=top-interview-150
+     */
+    function isPalindrome($s)
+    {
+        $s = strtolower(trim($s));
+        preg_match_all('/[a-zA-Z]/', $s, $matches);
+        $s = implode('', $matches[0]);
+        $length = strlen($s);
+        if ($length <= 1) {
+            return true;
+        }
+        $mid = floor($length / 2);
+        for ($i = 0; $i < $mid; $i++) {
+            if ($s[$i] != $s[$length - $i - 1]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * 是否子序列
+     * @param String $s
+     * @param String $t
+     * @return Boolean
+     * @link https://leetcode.cn/problems/is-subsequence/?envType=study-plan-v2&envId=top-interview-150
+     */
+    function isSubsequence($s, $t)
+    {
+        $length = strlen($s);
+        $fatherLength = strlen($t);
+        $step = 0;
+        /** 坐标 */
+        $array = [];
+        for ($i = 0; $i < $length; $i++) {
+            /** 更新起点*/
+            for ($j = $step; $j < $fatherLength; $j++) {
+                /** 在集合中找到了这个字符 */
+                if ($s[$i] == $t[$j]) {
+                    $array[] = $j;
+                    /** 保证字符串的顺序 */
+                    $step = $j;
+                    break;
+                }
+            }
+        }
+        if (count($array) == $length) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * @param Integer[] $numbers
+     * @param Integer $target
+     * @return Integer[]
+     * @link https://leetcode.cn/problems/two-sum-ii-input-array-is-sorted/description/?envType=study-plan-v2&envId=top-interview-150
+     */
+    function twoSum($numbers, $target)
+    {
+        foreach ($numbers as $key => $value) {
+            $cha = $target - $value;
+            $other = array_slice($numbers, $key + 1);
+            if (in_array($cha, $other)) {
+                $index = array_search($cha, $other) + $key + 2;
+                return [$key + 1, $index];
+            }
+        }
+        return [0, 0];
+    }
+
+    /**
+     * @param Integer[] $height
+     * @return Integer
+     * @link https://leetcode.cn/problems/container-with-most-water/?envType=study-plan-v2&envId=top-interview-150
+     */
+    function maxArea($height)
+    {
+        $count = count($height);
+        $maxArea = 0;
+        /** 就是求最大的面积 */
+        for ($j = 0; $j < $count; $j++) {
+            for ($i = $j + 1; $i < $count; $i++) {
+                $width = $i - $j;
+                $heights = min($height[$i], $height[$j]);
+                $area = $width * $heights;
+                $maxArea = max($maxArea, $area);
+            }
+        }
+        return $maxArea;
+    }
+
+    /**
+     * @param Integer[] $nums
+     * @return Integer[][]
+     * @link https://leetcode.cn/problems/3sum/?envType=study-plan-v2&envId=top-interview-150
+     */
+    function threeSum($nums)
+    {
+
+        $array = [];
+        /** 三个坐标不同的数的和 = 0 */
+        $length = count($nums);
+        for ($i = 0; $i < $length; $i++) {
+            for ($j = $i + 1; $j < $length; $j++) {
+                $sum = $nums[$i] + $nums[$j];
+                $target = -$sum;
+                if (in_array($target, $nums)) {
+                    $index = array_search($target, $nums);
+                    if (!in_array($index, [$i, $j])) {
+                        /** 去重 */
+                        $small = [$nums[$i], $nums[$j], $nums[$index]];
+                        sort($small);
+                        if (!in_array($small, $array)) {
+                            $array[] = $small;
+                        }
+                    }
+                }
+            }
+        }
+        return $array;
+    }
+
+    /**
+     * 本题对数据
+     * @param Integer $target
+     * @param Integer[] $nums
+     * @return Integer
+     * @link https://leetcode.cn/problems/minimum-size-subarray-sum/?envType=study-plan-v2&envId=top-interview-150
+     * @note 滑动窗口算法：获取到第一个满足条件长度的滑块，然后往右滑动一格，然后左侧减去一格，判断是否满足条件，循环执行。
+     */
+    function minSubArrayLen($target, $nums)
+    {
+
+        /** 双指针 */
+        $left = 0;
+        $sum = 0;
+        /** 初始化最小长度 */
+        $minLength = PHP_INT_MAX;
+        /** 滑块向右滑动 */
+        for ($right = 0; $right < count($nums); $right++) {
+            /** 往右滑动滑块 */
+            $sum += $nums[$right];
+            /** 如果满足条件 */
+            while ($sum >= $target) {
+                /** 更新最小长度 */
+                $minLength = min($minLength, $right - $left + 1);
+                /** 左侧缩短一格 */
+                $sum -= $nums[$left];
+                /** 更新滑块左侧指针 */
+                $left++;
+            }
+        }
+
+        return ($minLength == PHP_INT_MAX) ? 0 : $minLength;
+    }
+
+    /**
+     * @param int $target
+     * @param array $nums
+     * @return int|mixed
+     * @link https://leetcode.cn/problems/minimum-size-subarray-sum/description/?envType=study-plan-v2&envId=top-interview-150
+     */
+    public function minSubArrayLen2(int $target, array $nums)
+    {
+        $i = 0;
+        $j = 0;
+        $minLen = PHP_INT_MAX;
+        $tempSum = 0;
+        while ($i <= $j && $j < count($nums)) {
+            if ($tempSum < $target) {
+                $tempSum += $nums[$j];
+            } else {
+                $tempSum -= $nums[$i++];
+            }
+            if ($tempSum >= $target) {
+                $minLen = min($minLen, $j - $i + 1);
+            } else {
+                $j++;
+            }
+        }
+        return $minLen == PHP_INT_MAX ? 0 : $minLen;
+    }
+
+    /**
+     * @param String $s
+     * @return Integer
+     * @link https://leetcode.cn/problems/longest-substring-without-repeating-characters/?envType=study-plan-v2&envId=top-interview-150
+     */
+    function lengthOfLongestSubstring($s)
+    {
+        $m = 0;  // 初始化变量 $m 为 0，用于存储最长无重复子串的长度
+        $n = strlen($s);  // 获取输入字符串 $s 的长度，并将其存储在 $n 中
+        $p = 0;  // 初始化变量 $p 为 0，用于标记子串的起始位置
+
+        for ($i = 0; $i < $n; $i++) {  // 外层循环，从字符串的开头逐个遍历到结尾
+            for ($j = $p; $j < $i; $j++) {  // 内层循环，从子串的起始位置到当前外层循环的位置之前
+                if ($s[$j] == $s[$i]) {  // 如果发现当前位置 $i 的字符与之前位置 $j 的字符重复
+                    $p = $j + 1;  // 更新子串的起始位置为重复字符的下一个位置
+                    break;  // 跳出内层循环
+                }
+            }
+            $m = max($m, $i - $p + 1);  // 计算当前无重复子串的长度，并与之前记录的最大长度进行比较和更新
+        }
+        return $m;  // 返回最长无重复子串的长度
+    }
+
+    /**
+     * @param String $s
+     * @param String $t
+     * @return String
+     * @link https://leetcode.cn/problems/minimum-window-substring/description/?envType=study-plan-v2&envId=top-interview-150
+     */
+    function minWindow($s, $t)
+    {
+        if ($s == $t) {
+            return $s;
+        }
+        /** 初始化结果集 */
+        $back = [];
+        /** 将字符串切割为数组 */
+        $s_array = [];
+        for ($i = 0; $i < strlen($s); $i++) {
+            $s_array[$i] = $s[$i];
+        }
+        /** 字符串切割为数组 */
+        $t_array = [];
+        for ($i = 0; $i < strlen($t); $i++) {
+            $t_array[$i] = $t[$i];
+        }
+        /** 搜索字符串长度初始化为t的长度 */
+        $startLength = strlen($t);
+        while ($startLength <= strlen($s)) {
+            /** 滑块向右逐个字符移动 */
+            for ($i = 0; $i <= strlen($s) - $startLength; $i++) {
+                /** 获取搜索字符串 */
+                $findArray = array_slice($s_array, $i, $startLength);
+                /** 求两个集合的交集，如果并集等于t,则说明包含 */
+                $jiaoji = array_intersect($findArray, $t_array);
+                /** 如果交集元素个数等于 t数组个数 ，说明包含 */
+                if (count($jiaoji) == strlen($t)) {
+                    /** 如果结果集为空，则初始化 */
+                    if (empty($back)) {
+                        $back = $findArray;
+                    }
+                    /** 如果当前结果比结果集更小 ，则更新结果集 */
+                    if ((count($findArray) < count($back))) {
+                        $back = $findArray;
+                    }
+                }
+            }
+            /** 没有搜索到符合要求的字符串，那么变更搜索字符串长度 */
+            $startLength++;
+        }
+        return implode("", $back);
+
+    }
+
+    /**
+     * @param String[][] $board
+     * @return Boolean
+     * @link https://leetcode.cn/problems/valid-sudoku/?envType=study-plan-v2&envId=top-interview-150
+     */
+    function isValidSudoku($board)
+    {
+
+        /** 横向验证 */
+        foreach ($board as $value) {
+            $temp = [];
+            foreach ($value as $v) {
+                if (!isset($temp[$v])) {
+                    $temp[$v] = 1;
+                } else {
+                    if ($v != ".") {
+                        return false;
+                    }
+                }
+            }
+        }
+        /** 纵向验证 */
+        for ($i = 0; $i < count($board); $i++) {
+            $value = array_column($board, $i);
+            $temp = [];
+            foreach ($value as $v) {
+                if (!isset($temp[$v])) {
+                    $temp[$v] = 1;
+                } else {
+                    if ($v != ".") {
+                        return false;
+                    }
+                }
+            }
+        }
+        /** 3*3的表格中是否重复 */
+        for ($i = 0; $i < count($board); $i = $i + 3) {
+            $end = $i;
+            $temp = [];
+            for ($m = $i; $m < $end; $end++) {
+                for ($n = $i; $n < $end; $n++) {
+                    $v = $board[$m][$n];
+                    if (!isset($temp[$v])) {
+                        $temp[$v] = 1;
+                    } else {
+                        if ($v != ".") {
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+
+    /**
+     * @param $board
+     * @return bool
+     * @link https://leetcode.cn/problems/valid-sudoku/description/?envType=study-plan-v2&envId=top-interview-150
+     */
+    function isValidSudoku2($board)
+    {
+        // 记录某行，某位数字是否已经被摆放
+        $row = array_fill(0, 9, array_fill(0, 9, false));
+        // 使用 array_fill 函数初始化一个二维数组 $row，9 行 9 列，初始值都为 false，表示每行每个数字都未被摆放
+
+        // 记录某列，某位数字是否已经被摆放
+        $col = array_fill(0, 9, array_fill(0, 9, false));
+        // 同样初始化一个二维数组 $col，用于记录每列数字的摆放情况
+
+        // 记录某 3x3 宫格内，某位数字是否已经被摆放
+        $block = array_fill(0, 9, array_fill(0, 9, false));
+        // 初始化一个二维数组 $block，用于记录每个 3x3 宫格内数字的摆放情况
+
+        for ($i = 0; $i < 9; $i++) {  // 外层循环遍历 9 行
+            for ($j = 0; $j < 9; $j++) {  // 内层循环遍历 9 列
+                if ($board[$i][$j] != '.') {  // 如果当前位置不是'.'（表示有数字）
+                    /** - '1'表示计算ASCII值 */
+                    $num = $board[$i][$j] - '1';  // 将当前数字转换为 0 - 8 的索引
+                    $blockIndex = floor($i / 3) * 3 + floor($j / 3);  // 计算当前位置所属的 3x3 宫格的索引
+
+                    if ($row[$i][$num] || $col[$j][$num] || $block[$blockIndex][$num]) {  // 如果在对应的行、列或宫格中已经存在该数字
+                        return false;  // 则返回 false，表示数独不合法
+                    } else {  // 否则
+                        $row[$i][$num] = true;  // 将当前数字在当前行的对应位置标记为已存在
+                        $col[$j][$num] = true;  // 在当前列的对应位置标记为已存在
+                        $block[$blockIndex][$num] = true;  // 在当前宫格的对应位置标记为已存在
+                    }
+                }
+            }
+        }
+        return true;  // 如果遍历完都没有发现不合法的情况，返回 true，表示数独合法
+    }
+
+    /**
+     * @param Integer[][] $matrix
+     * @return Integer[]
+     * @link https://leetcode.cn/problems/spiral-matrix/?envType=study-plan-v2&envId=top-interview-150
+     */
+    public function spiralOrder($matrix) {
+        if (empty($matrix) || empty($matrix[0])) {  // 如果矩阵为空或者矩阵的第一行空，返回空数组
+            return [];
+        }
+        $res = [];  // 初始化结果数组
+        $m = count($matrix);  // 获取矩阵的行数
+        $n = count($matrix[0]);  // 获取矩阵的列数
+        // 确定上下左右四条边的位置
+        $up = 0;  // 上边初始位置为 0
+        $down = $m - 1;  // 下边初始位置为行数减 1
+        $left = 0;  // 左边初始位置为 0
+        $right = $n - 1;  // 右边初始位置为列数减 1
+        while (true) {  // 开始一个无限循环，直到内部条件满足退出
+            for ($i = $left; $i <= $right; $i++) {  // 从左到右遍历上边的一行，将元素添加到结果数组
+                $res[] = $matrix[$up][$i];
+            }
+            if (++$up > $down) {  // 上边向下移动一行，如果超过了下边，退出循环
+                break;
+            }
+            for ($i = $up; $i <= $down; $i++) {  // 从上到下遍历右边的一列，将元素添加到结果数组
+                $res[] = $matrix[$i][$right];
+            }
+            if (--$right < $left) {  // 右边向左移动一列，如果小于左边，退出循环
+                break;
+            }
+            for ($i = $right; $i >= $left; $i--) {  // 从右到左遍历下边的一行，将元素添加到结果数组
+                $res[] = $matrix[$down][$i];
+            }
+            if (--$down < $up) {  // 下边向上移动一行，如果小于上边，退出循环
+                break;
+            }
+            for ($i = $down; $i >= $up; $i--) {  // 从下到上遍历左边的一列，将元素添加到结果数组
+                $res[] = $matrix[$i][$left];
+            }
+            if (++$left > $right) {  // 左边向右移动一列，如果超过右边，退出循环
+                break;
+            }
+        }
+        return $res;  // 返回螺旋遍历的结果数组
+    }
+
 }
 
-#输入：nums1 = [1,2,3,0,0,0], m = 3, nums2 = [2,5,6], n = 3
 
 $math = new Solution();
-var_dump($math->convert("PAYPALISHIRING", 2));
-var_dump("PAHNAPLSIIGYIR");
+print_r($math->spiralOrder([[1,2,3],[4,5,6],[7,8,9]]));
 
-var_dump($math->convert("PAYPALISHIRING", 4));
-var_dump("PINALSIGYAHRPI");
 
-//var_dump($math->trap([4,2,0,3,2,5]));
+
+
+
+
 
