@@ -5,6 +5,7 @@
  * @link https://leetcode.cn/studyplan/top-interview-150/
  * https://www.zhihu.com/question/26530631
  * https://www.zhihu.com/question/578847091
+ * @note 算法的解题方法：将数据模型转换为几何图形，将几何图形的变化过程用代码表示出来
  */
 class Solution
 {
@@ -850,7 +851,8 @@ class Solution
      * @return Integer[]
      * @link https://leetcode.cn/problems/spiral-matrix/?envType=study-plan-v2&envId=top-interview-150
      */
-    public function spiralOrder($matrix) {
+    public function spiralOrder($matrix)
+    {
         if (empty($matrix) || empty($matrix[0])) {  // 如果矩阵为空或者矩阵的第一行空，返回空数组
             return [];
         }
@@ -862,25 +864,31 @@ class Solution
         $down = $m - 1;  // 下边初始位置为行数减 1
         $left = 0;  // 左边初始位置为 0
         $right = $n - 1;  // 右边初始位置为列数减 1
+        /** 这里是控制循环的圈数 */
         while (true) {  // 开始一个无限循环，直到内部条件满足退出
+            /** 这里面是一个顺时针转一圈的代码   */
+            /** 清理上边， 更新上边界 */
             for ($i = $left; $i <= $right; $i++) {  // 从左到右遍历上边的一行，将元素添加到结果数组
                 $res[] = $matrix[$up][$i];
             }
             if (++$up > $down) {  // 上边向下移动一行，如果超过了下边，退出循环
                 break;
             }
+            /** 清理右边，更新右边界 */
             for ($i = $up; $i <= $down; $i++) {  // 从上到下遍历右边的一列，将元素添加到结果数组
                 $res[] = $matrix[$i][$right];
             }
             if (--$right < $left) {  // 右边向左移动一列，如果小于左边，退出循环
                 break;
             }
+            /** 清理下边，更新下边界 */
             for ($i = $right; $i >= $left; $i--) {  // 从右到左遍历下边的一行，将元素添加到结果数组
                 $res[] = $matrix[$down][$i];
             }
             if (--$down < $up) {  // 下边向上移动一行，如果小于上边，退出循环
                 break;
             }
+            /** 清理左边，更新左边界 */
             for ($i = $down; $i >= $up; $i--) {  // 从下到上遍历左边的一列，将元素添加到结果数组
                 $res[] = $matrix[$i][$left];
             }
@@ -891,11 +899,74 @@ class Solution
         return $res;  // 返回螺旋遍历的结果数组
     }
 
+    /**
+     * 90旋转矩阵
+     * @param $matrix
+     * @return mixed
+     * @link https://leetcode.cn/problems/rotate-image/description/?envType=study-plan-v2&envId=top-interview-150
+     * @note 解题思路：原题是说逆时针旋转，在这里研究发现先上下翻转，在进行对角线翻转也可以达到效果
+     * @note 这些逼人怎么想出来的，这个需要几何思维。找到了方法就很简单，找不到方法就抓瞎
+     */
+    public function rotate2($matrix)
+    {
+        $n = count($matrix);
+        // 首先进行上下翻转
+        for ($i = 0; $i < $n / 2; $i++) {
+            list($matrix[$i], $matrix[$n - $i - 1]) = array($matrix[$n - $i - 1], $matrix[$i]);
+        }
+        // 然后进行对角线翻转
+        for ($i = 0; $i < $n; $i++) {
+            for ($j = $i; $j < $n; $j++) {
+                list($matrix[$i][$j], $matrix[$j][$i]) = array($matrix[$j][$i], $matrix[$i][$j]);
+            }
+        }
+        return $matrix;
+    }
+
+    /**
+     * @param Integer[][] $matrix
+     * @return NULL
+     * @link https://leetcode.cn/problems/set-matrix-zeroes/?envType=study-plan-v2&envId=top-interview-150
+     * @note 暴力求解
+     */
+    function setZeroes($matrix)
+    {
+
+        /** 搜索数组中的0所在的坐标 */
+        $search = [];
+        foreach ($matrix as $x => $value) {
+            foreach ($value as $y => $item) {
+                if ($item == 0) {
+                    $search[] = ['x' => $x, 'y' => $y];
+                }
+            }
+        }
+
+        foreach ($search as $value) {
+            /** 横向全部变为零 y不变，x递增 */
+            for ($i = 0; $i < count($matrix[0]); $i++) {
+                if (isset($matrix[$i][$value['y']])){
+                    $matrix[$i][$value['y']] = 0;
+                }
+
+            }
+            /** 纵向全部变为零，x不变，y递增 */
+            for ($i = 0; $i < count($matrix); $i++) {
+                if (isset($matrix[$value['x']][$i])){
+                    $matrix[$value['x']][$i] = 0;
+                }
+
+            }
+        }
+
+        return $matrix;
+    }
 }
 
 
 $math = new Solution();
-print_r($math->spiralOrder([[1,2,3],[4,5,6],[7,8,9]]));
+print_r($math->setZeroes([[1,1,1],[1,0,1],[1,1,1]]));
+print_r($math->setZeroes([[0,1,2,0],[3,4,5,2],[1,3,1,5]]));
 
 
 
