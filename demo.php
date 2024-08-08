@@ -945,14 +945,14 @@ class Solution
         foreach ($search as $value) {
             /** 横向全部变为零 y不变，x递增 */
             for ($i = 0; $i < count($matrix[0]); $i++) {
-                if (isset($matrix[$i][$value['y']])){
+                if (isset($matrix[$i][$value['y']])) {
                     $matrix[$i][$value['y']] = 0;
                 }
 
             }
             /** 纵向全部变为零，x不变，y递增 */
             for ($i = 0; $i < count($matrix); $i++) {
-                if (isset($matrix[$value['x']][$i])){
+                if (isset($matrix[$value['x']][$i])) {
                     $matrix[$value['x']][$i] = 0;
                 }
 
@@ -961,12 +961,88 @@ class Solution
 
         return $matrix;
     }
+
+    /**
+     * @param String $ransomNote
+     * @param String $magazine
+     * @return Boolean
+     * @link https://leetcode.cn/problems/ransom-note/description/?envType=study-plan-v2&envId=top-interview-150
+     */
+    function canConstruct($ransomNote, $magazine)
+    {
+        if (strpos($magazine, $ransomNote) !== false) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * @param String[] $strs
+     * @return String[][]
+     * @link https://leetcode.cn/problems/group-anagrams/?envType=study-plan-v2&envId=top-interview-150
+     */
+    function groupAnagrams($strs)
+    {
+
+        /** 初始化结果集 */
+        $array = [];
+        foreach ($strs as $value) {
+            $length = strlen($value);
+            if ($length == 0) {
+                $array[""][] = "";
+            } else {
+                /** 拆分单词 按新的key分组 */
+                $temp = [];
+                for ($i = 0; $i < $length; $i++) {
+                    $temp[] = $value[$i];
+                }
+                sort($temp);
+                $key = implode("", $temp);
+                $array[$key][] = $value;
+            }
+        }
+        return $array;
+    }
+
+    /**
+     * @param Integer[] $nums
+     * @return Integer
+     * @link https://leetcode.cn/problems/longest-consecutive-sequence/?envType=study-plan-v2&envId=top-interview-150
+     * @note 伸缩的滑块算法
+     */
+    function longestConsecutive($nums)
+    {
+        /** 首先对数组进行去重排序 */
+        $nums = array_unique($nums);
+        sort($nums);
+        $length = count($nums);
+        /** 初始化有序数组 滑块 */
+        $slice = [$nums[0]];
+        $max = 0;
+        for ($i = 1; $i < $length; $i++) {
+            /** 滑块 最后一个值 */
+            $huakuai = end($slice);
+            /** 满足递增，则滑块长度+1 */
+            if (($huakuai + 1) == $nums[$i]) {
+                $slice[] = $nums[$i];
+            } else {
+                /** 构建新的滑块 */
+                $slice = [$nums[$i]];
+            }
+            /** 滑块达到最大长度，投递到结果集中 */
+            $max = max($max, count($slice));
+        }
+        return $max;
+    }
 }
 
 
 $math = new Solution();
-print_r($math->setZeroes([[1,1,1],[1,0,1],[1,1,1]]));
-print_r($math->setZeroes([[0,1,2,0],[3,4,5,2],[1,3,1,5]]));
+var_dump($math->longestConsecutive([100,4,200,1,3,2]));
+var_dump($math->longestConsecutive([0,3,7,2,5,8,4,6,0,1]));
+
+
 
 
 
