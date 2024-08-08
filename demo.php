@@ -1,5 +1,17 @@
 <?php
 
+class ListNode
+{
+    public $val = 0;
+    public $next = null;
+
+    function __construct($val = 0, $next = null)
+    {
+        $this->val = $val;
+        $this->next = $next;
+    }
+}
+
 /**
  * 力扣算法题解法
  * @link https://leetcode.cn/studyplan/top-interview-150/
@@ -1035,12 +1047,321 @@ class Solution
         }
         return $max;
     }
+
+    /**
+     * @param Integer[][] $intervals
+     * @return Integer[][]
+     * @link https://leetcode.cn/problems/merge-intervals/description/?envType=study-plan-v2&envId=top-interview-150
+     */
+    function merge2($intervals)
+    {
+
+        $length = count($intervals);
+        $array = [];
+        /** 初始化临时区间 */
+        $temp = $intervals[0];
+        for ($i = 1; $i < $length; $i++) {
+            $tem1 = $intervals[$i];
+            /** 如果两个区间重合 */
+            if ($tem1[0] <= $temp[1]) {
+                $temp[1] = $tem1[1];
+            } else {
+                /** 两个区间不重合 */
+                $array[] = $temp;
+                $temp = $tem1;
+            }
+        }
+        /** 不能遗漏最后一个区间 */
+        $array[] = $temp;
+
+        return $array;
+    }
+
+
+    /**
+     * @param Integer[][] $intervals
+     * @param Integer[] $newInterval
+     * @return Integer[][]
+     * @link https://leetcode.cn/problems/insert-interval/?envType=study-plan-v2&envId=top-interview-150
+     */
+    function insert($intervals, $newInterval)
+    {
+
+        /** 需要不停的更新newInterval */
+        $array = [];
+        foreach ($intervals as $value) {
+            $start = $value[0];
+            $end = $value[1];
+            /** 与滑块左侧相交 */
+            if (($newInterval[0] >= $start) && ($newInterval[0] <= $end)) {
+                $newInterval[0] = $start;
+            }
+            /** 与滑块右侧相交 */
+            if (($newInterval[1] >= $start) && ($newInterval[1] <= $end)) {
+                $newInterval[1] = $end;
+            }
+            /** 在滑块左侧 */
+            if ($end < $newInterval[0]) {
+                $array[$start] = $value;
+            }
+            /** 在滑块右侧 */
+            if ($start > $newInterval[1]) {
+                $array[$start] = $value;
+            }
+        }
+        /** 被更新范围的滑块投递到结果集 */
+        $array[$newInterval[0]] = $newInterval;
+        /** 排序 */
+        ksort($array);
+        return $array;
+    }
+
+    /**
+     * @param Integer[][] $points
+     * @return Integer
+     * @link https://leetcode.cn/problems/minimum-number-of-arrows-to-burst-balloons/?envType=study-plan-v2&envId=top-interview-150
+     */
+    function findMinArrowShots($points)
+    {
+
+        /** 一支箭最多只能穿透两个相交的区间的气球。意思就是最多两个相交的区间合并，统计合并完成后的区间总数 */
+
+        $array = [];
+        /** 先对区间进行排序 */
+        foreach ($points as $point) {
+            $array[$point[0]] = $point;
+        }
+        ksort($array);
+        $array = array_values($array);
+        $length = count($array);
+        $result = [];
+        for ($i = 0; $i < $length; $i++) {
+            $now = $array[$i];
+            $next = $array[$i + 1] ?? [];
+            if (empty($next)) {
+                $result[] = $now;
+                break;
+            }
+            /** 说明两个区间相交了 */
+            if ($now[1] >= $next[0]) {
+                $result[] = [$now[0], $next[1]];
+                /** 指针+1 */
+                $i++;
+            } else {
+                /** 两个区间不相交 ，直接投递 */
+                $result[] = $now;
+            }
+        }
+        return count($result);
+    }
+
+
+    /**
+     * 逆波兰表示法
+     * @param $tokens
+     * @return float|int|mixed
+     * @link https://leetcode.cn/problems/evaluate-reverse-polish-notation/description/?envType=study-plan-v2&envId=top-interview-150
+     */
+    function evalRPN($tokens)
+    {
+        $stack = [];  // 初始化一个空栈，用于存储操作数
+        foreach ($tokens as $token) {  // 遍历输入的逆波兰表达式的每个元素
+            if (in_array($token, ['+', '-', '*', '/'])) {  // 如果元素是操作符
+                /** array_pop 从数组的后面弹出数据 */
+                /** 这里取数据的顺序需要注意一下 */
+                $num2 = array_pop($stack);  // 从栈中弹出一个操作数作为第二个操作数
+                $num1 = array_pop($stack);  // 再弹出一个操作数作为第一个操作数
+                switch ($token) {  // 根据操作符进行相应的计算
+                    case '+':
+                        $result = $num1 + $num2;  // 执行加法
+                        break;
+                    case '-':
+                        $result = $num1 - $num2;  // 执行减法
+                        break;
+                    case '*':
+                        $result = $num1 * $num2;  // 执行乘法
+                        break;
+                    case '/':
+                        $result = intval($num1 / $num2);  // 执行除法并取整
+                        break;
+                }
+                /** array_push 将数据从结尾压入数组 */
+                array_push($stack, $result);  // 将计算结果压入栈中
+            } else {
+                array_push($stack, intval($token));  // 如果元素是操作数，将其转换为整数并压入栈中
+            }
+        }
+        return $stack[0];  // 返回栈顶元素，即表达式的计算结果
+    }
+
+    /**
+     * 基本计算器
+     * @param $s
+     * @return float|int
+     * @link https://leetcode.cn/problems/basic-calculator/description/?envType=study-plan-v2&envId=top-interview-150
+     * @note 本算法的思路是，修改每一个数字的符号，然后累加数组。但是有点打脑壳
+     * @note 原理就是 负负得正，正正得正，正负得负，
+     */
+    public function calculate($s)
+    {
+        $val = [];  // 初始化一个用于存储计算中间结果的数组
+        $ops = [1];  // 初始化一个用于存储操作符相关信息的数组，初始值为 1
+        $num = 0;  // 用于累计数字
+        $sign = 1;  // 初始符号为正
+
+        for ($i = 0; $i < strlen($s); $i++) {  // 遍历输入的字符串
+            if (is_numeric($s[$i])) {  // 如果当前字符是数字
+                $num = $num * 10 + intval($s[$i]);  // 累计数字，将当前数字乘以 10 并加上新的数字
+            }
+            if ($s[$i] == '(') {  // 如果遇到左括号
+                array_push($ops, $ops[count($ops) - 1] * $sign);  // 将当前的操作符信息乘以符号后存入操作符数组
+                $sign = 1;  // 符号重置为正
+            }
+            if (in_array($s[$i], ["+", "-", ')']) || $i == strlen($s) - 1) {  // 如果遇到运算符或者到达字符串末尾
+                /** 就是前一个数字拼接上符号 */
+                array_push($val, $sign * $ops[count($ops) - 1] * $num);  // 将计算结果存入中间结果数组
+                if ($s[$i] == "+") {  // 根据不同的运算符设置符号
+                    $sign = 1;
+                } elseif ($s[$i] == '-') {
+                    $sign = -1;
+                } elseif ($s[$i] == ')') {  // 如果遇到右括号
+                    /** 本轮括号内的计算结束，去掉操作符 */
+                    array_pop($ops);  // 弹出操作符数组的最后一个元素
+                }
+                $num = 0;  // 重置数字累计器
+            }
+//            var_dump("val:",$val);
+//            var_dump("ops:",$ops);
+//            var_dump("sign:",$sign);
+//            var_dump("num:",$num);
+//            var_dump("==================================================");
+        }
+        return array_sum($val);  // 返回中间结果数组的总和，即最终计算结果
+    }
+
+    /**
+     * 链表两数相加
+     * @param array $l1
+     * @param array $l2
+     * @return array
+     * @link https://leetcode.cn/problems/add-two-numbers/description/?envType=study-plan-v2&envId=top-interview-150
+     * @note 这个链表有点打脑壳
+     */
+    public function addTwoNumbers($l1, $l2)
+    {
+        //todo 这里有点打脑壳，需要消化一下
+        /** 通过数组构建父子节点 */
+        $l1 = $this->getNode($l1);
+        $l2 = $this->getNode($l2);
+
+        $root = new ListNode(0);  // 创建一个初始节点
+        $cursor = $root;  // 用于遍历结果链表的指针
+        $carry = 0;  // 进位标志
+
+        while ($l1 != null || $l2 != null || $carry != 0) {  // 只要有未处理完的节点或还有进位
+            $l1Val = ($l1 != null) ? $l1->val : 0;  // 如果 $l1 不为空，获取其值，否则为 0
+            $l2Val = ($l2 != null) ? $l2->val : 0;  // 同理处理 $l2
+            $sumVal = $l1Val + $l2Val + $carry;  // 计算两节点值和进位的和
+            $carry = intval($sumVal / 10);  // 获取进位
+
+            $sumNode = new ListNode($sumVal % 10);  // 创建新节点存储和的个位数字
+            $cursor->next = $sumNode;  // 将新节点连接到结果链表 这里就修改了root的结构，因为是引用赋值
+            $cursor = $sumNode;  // 移动指针
+
+            if ($l1 != null) $l1 = $l1->next;  // 如果 $l1 不为空，指向下一个节点
+            if ($l2 != null) $l2 = $l2->next;  // 同理处理 $l2
+        }
+
+        /** 打印结果 */
+        $array = [];
+        $result = $root->next;
+        while ($result != null) {
+            $array[] = $result->val;
+            $result = $result->next;
+        }
+        return $array;
+
+    }
+
+    /**
+     * 创建节点
+     * @param $list
+     * @return ListNode|null
+     * @note 低位在父节点，高位在子节点
+     */
+    public function getNode($list)
+    {
+        /** 因为在前面的是父节点，后面的是子节点，所以需要翻转数组 */
+        $list = array_reverse($list);
+        $node = null;
+        /** 先使用每一个元素创建节点 */
+        foreach ($list as $value) {
+            $node = new ListNode($value, $node);
+        }
+        return $node;
+    }
+
+    /**
+     * 合并两个有序的链表
+     * @param ListNode|null $l1
+     * @param ListNode|null $l2
+     * @return ListNode|null
+     * @note 使用递归的方法处理，打印节点就好理解这个递归方法了
+     */
+    public function mergeTwoLists(?ListNode $l1, ?ListNode $l2)
+    {
+        if ($l1 === null) {
+            return $l2;
+        }
+        if ($l2 === null) {
+            return $l1;
+        }
+        /** 节点的值如果比较大，那么就会变成小节点的子节点 */
+        if ($l1->val < $l2->val) {
+            $l1->next = $this->mergeTwoLists($l1->next, $l2);
+            return $l1;
+        } else {
+            $l2->next = $this->mergeTwoLists($l1, $l2->next);
+            return $l2;
+        }
+    }
+
+    /**
+     * 合并节点
+     * @param $l1
+     * @param $l2
+     * @return array
+     * @link https://leetcode.cn/problems/merge-two-sorted-lists/?envType=study-plan-v2&envId=top-interview-150
+     */
+    public function mergeNode($l1, $l2)
+    {
+        $l1 = $this->getNode($l1);
+        // print_r($l1);
+        $l2 = $this->getNode($l2);
+        // print_r($l2);
+        /** 合并节点 */
+        $res = $this->mergeTwoLists($l1, $l2);
+
+        /** 打印结果 */
+        $array = [];
+        $result = $res->next;
+        while ($result != null) {
+            $array[] = $result->val;
+            $result = $result->next;
+        }
+        return $array;
+    }
+
 }
 
-
 $math = new Solution();
-var_dump($math->longestConsecutive([100,4,200,1,3,2]));
-var_dump($math->longestConsecutive([0,3,7,2,5,8,4,6,0,1]));
+
+var_dump($math->mergeNode([1, 2, 4], [1, 3, 4]));
+
+
+
+
+
 
 
 
