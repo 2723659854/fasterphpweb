@@ -1743,5 +1743,12 @@ composer dump-autoload -o 命令，让composer刷新文件和对象的映射关�
 这种，在name两边加上英文波浪线，就是中横线
 ~~name~~
 
+###  算法
+
+算法部分都放在`math.php`文件里面，可以在根目录执行`php math.php`命令运行算法。有兴趣的朋友可以看一下。
+
+###  动画
+
+php在cli模式下，使用纯php开发动画，动画名称为《雪飘人间》，你可以在项目根目录下执行命令`php snow.php`。你可以按`ctrl + c`关闭动画。
 
 
