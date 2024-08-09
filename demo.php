@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * @purpose 普通单向链表
+ */
 class ListNode
 {
     public $val = 0;
@@ -9,6 +12,64 @@ class ListNode
     {
         $this->val = $val;
         $this->next = $next;
+    }
+
+
+}
+
+/**
+ * @purpose 双向链表
+ */
+class Node {
+    public $val;
+    public $next;
+    public $random;
+
+    public function __construct($val=0, $next = null, $random = null) {
+        $this->val = $val;
+        $this->next = $next;
+        $this->random = $random;
+    }
+
+}
+
+/**
+ * @purpose 关于php实现双向链表以及链表的操作，还存在问题
+ */
+class NodePool{
+
+    /** 双向链表数据 */
+    public array $list = [];
+
+    /**
+     * 创建双向链表
+     * @param array $head
+     * @return array
+     */
+    public function makeList(array $head)
+    {
+         $length = 0 ;
+         for ($i=0;$i<$length;$i++){
+             if ($i==($length-1)){
+                 $next = null;
+             }else{
+                 $next = $i+1;
+             }
+             $val = $head[0];
+             $random = $head[1];
+             $this->list[$i] = new Node($val,$next,$random);
+         }
+         return $this->list;
+    }
+
+    /**
+     * 通过指针获取节点
+     * @param $index
+     * @return mixed|null
+     */
+    public function getNodeByIndex($index)
+    {
+        return $this->list[$index]??null;
     }
 }
 
@@ -1352,12 +1413,17 @@ class Solution
         return $array;
     }
 
+
+
+
+
+
+
 }
 
 $math = new Solution();
 
-var_dump($math->mergeNode([1, 2, 4], [1, 3, 4]));
-
+//var_dump($math->mergeNode([1, 2, 4], [1, 3, 4]));
 
 
 
