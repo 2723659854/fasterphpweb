@@ -63,7 +63,7 @@ for ($i = 0; $i < 60; $i++) {
 }
 /** 循环渲染图像 */
 while (true) {
-    /** 清屏 */
+    /** 清屏 linux用clear命令 */
     system('cls');
     /** 隐藏光标 */
     echo "\033[?25l";
