@@ -18,7 +18,7 @@ function getTerminalSize() {
 }
 
 $terminalSize = getTerminalSize();
-$termWidth = $terminalSize['width'];
+$termWidth = $terminalSize['width']+50;
 $termHeight = $terminalSize['height'];
 
 // 计算画布的起始位置以居中显示
@@ -62,6 +62,7 @@ function getFadedColor($baseColor, $fadeLevel) {
     $fadedColorIndex = min($baseIndex + $fadeLevel, count($colors) - 1);
     return $colors[$fadedColorIndex];
 }
+
 
 // 生成新的星星
 function generateStars($numStars) {
@@ -149,5 +150,5 @@ while (true) {
     }
 
     // 等待一段时间
-    usleep($delay * 1000000); // usleep的单位是微秒
+    usleep($delay * 100000); // usleep的单位是微秒
 }
