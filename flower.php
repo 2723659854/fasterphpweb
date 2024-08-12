@@ -9,7 +9,8 @@ $delay = 0.05; // 延迟（秒）
 $trailLength = 2; // 轨迹长度（星星的单位）
 
 // 获取终端宽度和高度
-function getTerminalSize() {
+function getTerminalSize()
+{
     $size = [];
     if (preg_match('/(\d+)x(\d+)/', shell_exec('stty size'), $size)) {
         return ['width' => $size[1], 'height' => $size[2]];
@@ -18,7 +19,8 @@ function getTerminalSize() {
 }
 
 $terminalSize = getTerminalSize();
-$termWidth = $terminalSize['width']+50;
+/** 修正顯示區域的寬度 */
+$termWidth = $terminalSize['width'] + 50;
 $termHeight = $terminalSize['height'];
 
 // 计算画布的起始位置以居中显示
@@ -31,7 +33,8 @@ $canvas = array_fill(0, $size, array_fill(0, $size, ' '));
 $trail = array_fill(0, $size, array_fill(0, $size, [])); // 轨迹画布，存储轨迹
 
 // 生成随机高亮颜色
-function getRandomColor() {
+function getRandomColor()
+{
     $colors = [
         '91', // 红色高亮
         '92', // 绿色高亮
@@ -45,7 +48,8 @@ function getRandomColor() {
 }
 
 // 生成渐变颜色
-function getFadedColor($baseColor, $fadeLevel) {
+function getFadedColor($baseColor, $fadeLevel)
+{
     $colors = [
         '91', // 红色高亮
         '92', // 绿色高亮
@@ -65,7 +69,8 @@ function getFadedColor($baseColor, $fadeLevel) {
 
 
 // 生成新的星星
-function generateStars($numStars) {
+function generateStars($numStars)
+{
     $stars = [];
     for ($i = 0; $i < $numStars; $i++) {
         $stars[] = [
@@ -80,7 +85,8 @@ function generateStars($numStars) {
 }
 
 // 清除画布中的内容
-function clearCanvas(&$canvas) {
+function clearCanvas(&$canvas)
+{
     foreach ($canvas as $y => &$line) {
         foreach ($line as $x => &$pixel) {
             $pixel = ' ';
@@ -104,7 +110,7 @@ while (true) {
     foreach ($stars as &$star) {
         $star['radius'] += $star['speed']; // 半径增加，模拟向外运动
         $star['angle'] += $star['angleSpeed']; // 角度增加，模拟旋转
-
+        /** 使用三角函數正弦和余弦函数计算坐标 */
         $x = $centerX + (int)($star['radius'] * cos($star['angle']));
         $y = $centerY + (int)($star['radius'] * sin($star['angle']));
 
