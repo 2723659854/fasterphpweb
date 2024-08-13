@@ -20,6 +20,15 @@ function displayColorGradient($baseColor, $label) {
         usleep(500000); // 0.5秒
     }
 }
+$color = <<<eof
+红色：从 196 到 160
+橙色：从 208 到 202
+黄色：从 226 到 220
+绿色：从 28 到 22
+青色：从 51 到 24
+蓝色：从 75 到 19
+紫色：从 129 到 53
+eof;
 
 // 渐变颜色显示
 echo "红色渐变:\n";
