@@ -1,6 +1,6 @@
 <?php
 namespace App\Command;
-
+use Xiaosongshu\Progress\ProgressBar;
 use Root\Lib\BaseCommand;
 /**
  * @purpose 用户自定义命令
@@ -30,10 +30,20 @@ class hello extends BaseCommand
      */
     public function handle()
     {
-        /** 获取必选参数 */
-        var_dump($this->getOption('argument'));
-        /** 获取可选参数 */
-        var_dump($this->getOption('option'));
-        $this->info("请在这里编写你的业务逻辑");
+
+        /** 创建进度条 */
+        $bar = new ProgressBar();
+        /** 总长度 */
+        $bar->createBar(200);
+        /** 设置颜色：紫色 （非必选 ，默认白色） */
+        $bar->setColor('purple');
+        /** 更新进度条 */
+        for ($i=1;$i<=10;$i++){
+            //your code ......
+            /** 模拟业务耗时 */
+            sleep(1);
+            /** 更新进度条 */
+            $bar->advance(2);
+        }
     }
 }

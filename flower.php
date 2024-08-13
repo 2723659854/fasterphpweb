@@ -1,8 +1,9 @@
 <?php
 // 画布的尺寸
-$size = 40; // 正方形区域的边长
-$centerX = $size / 2; // 几何中心X
-$centerY = $size / 2; // 几何中心Y
+$width = 40; // 画布宽度
+$height = 20; // 画布高度
+$centerX = $width / 2; // 几何中心X
+$centerY = $height / 2; // 几何中心Y
 $numStars = 5; // 每一帧生成的星星数量
 $maxStars = 100; // 最大星星数量
 $delay = 0.05; // 延迟（秒）
@@ -19,38 +20,30 @@ function getTerminalSize()
 }
 
 $terminalSize = getTerminalSize();
-/** 修正顯示區域的寬度 */
-$termWidth = $terminalSize['width'] + 50;
+$termWidth = $terminalSize['width'];
 $termHeight = $terminalSize['height'];
 
-// 计算画布的起始位置以居中显示
-$startX = ($termWidth - $size) / 2;
-$startY = ($termHeight - $size) / 2;
+// 计算固定区域的起始位置以居中显示
+$startX = ($termWidth - $width) / 2;
+$startY = ($termHeight - $height) / 2;
 
 // 存储星星的数组
 $stars = [];
-$canvas = array_fill(0, $size, array_fill(0, $size, ' '));
-$trail = array_fill(0, $size, array_fill(0, $size, [])); // 轨迹画布，存储轨迹
+$canvas = array_fill(0, $height, array_fill(0, $width, ' '));
+$trail = array_fill(0, $height, array_fill(0, $width, [])); // 轨迹画布，存储轨迹
 
 // 生成随机颜色（256色模式）
 function getRandomColor()
 {
-    return mt_rand(16, 231); // 256色模式的范围
+    return strval(mt_rand(0, 255)); // 生成0-255之间的随机色
 }
 
 // 生成渐变颜色
 function getFadedColor($baseColor, $fadeLevel)
 {
-    $totalSteps = 4; // 轨迹长度
-    $maxFadeLevel = $totalSteps - 1; // 最大渐变级别
-    $fadeAmount = 6; // 渐变量减少
-
-    $baseColor = max(16, min(231, $baseColor)); // 确保 baseColor 在有效范围内
-
-    // 计算新的颜色
-    $fadedColorCode = $baseColor - $fadeLevel * $fadeAmount;
-    $fadedColorCode = max(16, min(231, $fadedColorCode)); // 确保颜色在有效范围内
-    return $fadedColorCode;
+    $fadeAmount = min($fadeLevel * 10, 255); // 调整颜色渐变幅度
+    $fadedColor = max(0, intval($baseColor) - $fadeAmount);
+    return strval($fadedColor);
 }
 
 // 生成新的星星
@@ -79,11 +72,30 @@ function clearCanvas(&$canvas)
     }
 }
 
+// 保存光标位置
+function saveCursorPosition()
+{
+    echo "\033[s";
+}
+
+// 恢复光标位置
+function restoreCursorPosition()
+{
+    echo "\033[u";
+}
+
 while (true) {
-    /** 清屏并移除历史记录 */
-    echo "\033[2J\033[H";
-    /** 隐藏光标 */
+//    // 清屏并移除历史记录
+//    echo "\033[2J\033[H";
+//    // 隐藏光标
+//    echo "\033[?25l";
+
+    // 清屏并移除历史记录
+    echo "\033[H\033[J";
+    // 隐藏光标
     echo "\033[?25l";
+    // 保存光标位置
+    saveCursorPosition();
 
     // 每一帧生成新的星星（只在最大星星数量内）
     if (count($stars) < $maxStars) {
@@ -95,26 +107,20 @@ while (true) {
     foreach ($stars as &$star) {
         $star['radius'] += $star['speed']; // 半径增加，模拟向外运动
         $star['angle'] += $star['angleSpeed']; // 角度增加，模拟旋转
-
-        // 使用三角函数正弦和余弦函数计算坐标
         $x = $centerX + (int)($star['radius'] * cos($star['angle']));
         $y = $centerY + (int)($star['radius'] * sin($star['angle']));
 
         // 确保星星位置在画布内
-        if ($x >= 0 && $x < $size && $y >= 0 && $y < $size) {
+        if ($x >= 0 && $x < $width && $y >= 0 && $y < $height) {
             // 更新轨迹
-            $trailX = $x;
-            $trailY = $y;
-
             for ($i = 0; $i < $trailLength; $i++) {
-                $prevX = $centerX + (int)(($star['radius'] - $i * ($star['speed'] / $trailLength)) * cos($star['angle']));
-                $prevY = $centerY + (int)(($star['radius'] - $i * ($star['speed'] / $trailLength)) * sin($star['angle']));
-                if ($prevX >= 0 && $prevX < $size && $prevY >= 0 && $prevY < $size) {
-                    // 确保轨迹点紧密跟随主星星
-                    $trail[$prevY][$prevX][] = getFadedColor($star['color'], $i);
+                $trailX = $centerX + (int)(($star['radius'] - $i * $star['speed']) * cos($star['angle']));
+                $trailY = $centerY + (int)(($star['radius'] - $i * $star['speed']) * sin($star['angle']));
+                if ($trailX >= 0 && $trailX < $width && $trailY >= 0 && $trailY < $height) {
+                    // 添加颜色到轨迹，并保证第二个星星颜色较暗
+                    $trail[$trailY][$trailX][] = getFadedColor($star['color'], $i);
                 }
             }
-
             // 记录有效的星星
             $newStars[] = $star;
         }
@@ -127,8 +133,8 @@ while (true) {
     clearCanvas($canvas);
 
     // 绘制轨迹
-    for ($y = 0; $y < $size; $y++) {
-        for ($x = 0; $x < $size; $x++) {
+    for ($y = 0; $y < $height; $y++) {
+        for ($x = 0; $x < $width; $x++) {
             if (!empty($trail[$y][$x])) {
                 // 使用最后的颜色显示轨迹
                 $lastColor = end($trail[$y][$x]);
@@ -139,13 +145,15 @@ while (true) {
         }
     }
 
+    // 恢复光标位置
+    restoreCursorPosition();
+
     // 输出画布
-    for ($y = 0; $y < $size; $y++) {
+    for ($y = 0; $y < $height; $y++) {
         echo str_repeat(' ', $startX); // 打印前导空格以居中
         echo implode('', $canvas[$y]) . PHP_EOL;
     }
 
     // 等待一段时间
-    usleep($delay * 10000); // usleep的单位是微秒
+    usleep($delay * 200000); // usleep的单位是微秒
 }
-?>
