@@ -80,13 +80,6 @@ function generateStars($numStars,$isWaterLine)
             'angleSpeed' =>$isWaterLine?0.05:( 0.05 * mt_rand(1, 2)), // 调整角速度
             'color' => getRandomColor() // 随机颜色
         ];
-        $stars[] = [
-            'angle' => mt_rand(0, 360) * M_PI / 180, // 随机初始角度，转换为弧度
-            'radius' => 0, // 从中心开始
-            'speed' => 0.1 , // 调整星星速度
-            'angleSpeed' => 0.05 , // 调整角速度
-            'color' => getRandomColor() // 随机颜色
-        ];
     }
     return $stars;
 }
