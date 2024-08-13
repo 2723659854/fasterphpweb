@@ -1749,6 +1749,12 @@ composer dump-autoload -o 命令，让composer刷新文件和对象的映射关�
 
 ###  动画
 
-php在cli模式下，使用纯php开发动画，动画名称为《雪飘人间》，你可以在项目根目录下执行命令`php snow.php`。你可以按`ctrl + c`关闭动画。
+php在cli模式下，使用纯php开发动画，动画名称为《雪飘人间》，你可以在项目根目录下执行命令`php snow.php`。你可以按`ctrl + c`关闭动画。<br>
+本项目下的动画有：<br>
+```php
+
+php snow.php  # 雪飘人间 这个是模拟的飘雪的效果，有闪电、云朵和雪花
+php flower.php # 万花筒  别被名字唬住了，就是简单的螺旋形流星效果
+```
 
 
