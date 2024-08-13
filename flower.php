@@ -12,11 +12,30 @@ $trailLength = 4; // 轨迹长度（星星的单位）
 // 获取终端宽度和高度
 function getTerminalSize()
 {
-    $size = [];
-    if (preg_match('/(\d+)x(\d+)/', shell_exec('stty size'), $size)) {
-        return ['width' => $size[1], 'height' => $size[2]];
+    if (PHP_OS_FAMILY === 'Windows') {
+        // Windows 系统
+        $cmd = 'mode con'; // Windows 命令行获取控制台尺寸
+        $output = shell_exec($cmd);
+
+        // 解析控制台尺寸
+        preg_match('/Columns:\s*(\d+)/', $output, $widthMatch);
+        preg_match('/Lines:\s*(\d+)/', $output, $heightMatch);
+
+        $width = isset($widthMatch[1]) ? (int)$widthMatch[1] : 80; // 默认值
+        $height = isset($heightMatch[1]) ? (int)$heightMatch[1] : 24; // 默认值
+    } else {
+        // Linux 系统
+        $size = [];
+        if (preg_match('/(\d+)x(\d+)/', shell_exec('stty size'), $size)) {
+            $width = $size[1];
+            $height = $size[2];
+        } else {
+            $width = 80; // 默认值
+            $height = 24; // 默认值
+        }
     }
-    return ['width' => 80, 'height' => 24]; // 默认值
+
+    return ['width' => $width, 'height' => $height];
 }
 
 $terminalSize = getTerminalSize();
@@ -150,7 +169,7 @@ while (true) {
 
     // 输出画布
     for ($y = 0; $y < $height; $y++) {
-        echo str_repeat(' ', $startX); // 打印前导空格以居中
+        echo str_repeat(' ', (int)$startX); // 打印前导空格以居中
         echo implode('', $canvas[$y]) . PHP_EOL;
     }
 
