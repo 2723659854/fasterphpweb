@@ -127,19 +127,27 @@ while (true) {
     // 更新每个星星的位置
     $newStars = []; // 临时存储有效的星星
     foreach ($stars as &$star) {
+        /** 坐标使用了三角函数计算 */
         $star['radius'] += $star['speed']; // 半径增加，模拟向外运动
         $star['angle'] += $star['angleSpeed']; // 角度增加，模拟旋转
+        /** x 坐标 = 圆心x坐标 + 半径 x 角度的余弦 */
         $x = $centerX + (int)($star['radius'] * cos($star['angle']));
+        /** y 坐标 = 圆心y坐标 + 半径 x 角度的正弦 */
         $y = $centerY + (int)($star['radius'] * sin($star['angle']));
 
         // 确保星星位置在画布内
         if ($x >= 0 && $x < $width && $y >= 0 && $y < $height) {
             // 更新轨迹
             for ($i = 0; $i < $trailLength; $i++) {
+                /** 尾巴总是离圆心更近一些，越是后面的尾巴，离圆心越近 */
+                /** 尾巴的x坐标 = 圆心点x的坐标 + （头部的半径 - 尾巴的长度） x 圆角的余弦 */
                 $trailX = $centerX + (int)(($star['radius'] - $i * $star['speed']) * cos($star['angle']));
+                /** 尾巴的y坐标 = 圆心的y坐标 + （头部的半径 - 尾巴的长度） x 圆角的正弦 */
                 $trailY = $centerY + (int)(($star['radius'] - $i * $star['speed']) * sin($star['angle']));
+                /** 尾巴还在画布内 */
                 if ($trailX >= 0 && $trailX < $width && $trailY >= 0 && $trailY < $height) {
                     // 添加颜色到轨迹，并保证第二个星星颜色较暗
+                    /** 我尼玛难道一个坐标上还有几颗星星吗 */
                     $trail[$trailY][$trailX][] = getFadedColor($star['color'], $i);
                 }
             }
@@ -157,11 +165,13 @@ while (true) {
     // 绘制轨迹
     for ($y = 0; $y < $height; $y++) {
         for ($x = 0; $x < $width; $x++) {
+            /** 如果这个坐标有流星的尾巴 */
             if (!empty($trail[$y][$x])) {
-                // 使用最后的颜色显示轨迹
+                // 使用最后的颜色显示轨迹 尽管这个坐标有很多颗星星，但是只取最后一颗
                 $lastColor = end($trail[$y][$x]);
+                /** 渲染尾巴到画布中 */
                 $canvas[$y][$x] = "\033[38;5;{$lastColor}m*\033[0m";
-                // 清理过时的颜色
+                // 清理过时的颜色 为什么不是清空这个坐标的所有尾巴
                 $trail[$y][$x] = array_slice($trail[$y][$x], 1);
             }
         }
@@ -172,7 +182,9 @@ while (true) {
 
     // 输出画布
     for ($y = 0; $y < $height; $y++) {
+        /** 这里是逐行渲染动画内容 先移动光标到左边界 */
         echo str_repeat(' ', (int)$startX); // 打印前导空格以居中
+        /** 将这一行的数据全部串联起来打印，换行 */
         echo implode('', $canvas[$y]) . PHP_EOL;
     }
 
