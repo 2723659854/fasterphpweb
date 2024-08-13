@@ -4,10 +4,12 @@ $width = 40; // 画布宽度
 $height = 20; // 画布高度
 $centerX = $width / 2; // 几何中心X
 $centerY = $height / 2; // 几何中心Y
-$numStars = 5; // 每一帧生成的星星数量
-$maxStars = 100; // 最大星星数量
-$delay = 0.05; // 延迟（秒）
-$trailLength = 4; // 轨迹长度（星星的单位）
+$numStars = 1; // 每一帧生成的星星数量
+$maxStars = 10; // 最大星星数量
+$delay = 0.1; // 延迟（秒）
+$trailLength = 10; // 轨迹长度（星星的单位）
+
+$isWaterLine = true;//是否流线型运动
 
 // 获取终端宽度和高度
 function getTerminalSize()
@@ -38,6 +40,7 @@ function getTerminalSize()
     return ['width' => $width, 'height' => $height];
 }
 
+/** 控制台尺寸 */
 $terminalSize = getTerminalSize();
 $termWidth = $terminalSize['width'];
 $termHeight = $terminalSize['height'];
@@ -66,15 +69,22 @@ function getFadedColor($baseColor, $fadeLevel)
 }
 
 // 生成新的星星
-function generateStars($numStars)
+function generateStars($numStars,$isWaterLine)
 {
     $stars = [];
     for ($i = 0; $i < $numStars; $i++) {
         $stars[] = [
             'angle' => mt_rand(0, 360) * M_PI / 180, // 随机初始角度，转换为弧度
             'radius' => 0, // 从中心开始
-            'speed' => 0.1 + 0.1 * mt_rand(0, 5), // 调整星星速度
-            'angleSpeed' => 0.05 * mt_rand(1, 3), // 调整角速度
+            'speed' => $isWaterLine?0.1:(0.1 + 0.1 * mt_rand(0, 5)), // 调整星星速度
+            'angleSpeed' =>$isWaterLine?0.05:( 0.05 * mt_rand(1, 2)), // 调整角速度
+            'color' => getRandomColor() // 随机颜色
+        ];
+        $stars[] = [
+            'angle' => mt_rand(0, 360) * M_PI / 180, // 随机初始角度，转换为弧度
+            'radius' => 0, // 从中心开始
+            'speed' => 0.1 , // 调整星星速度
+            'angleSpeed' => 0.05 , // 调整角速度
             'color' => getRandomColor() // 随机颜色
         ];
     }
@@ -118,7 +128,7 @@ while (true) {
 
     // 每一帧生成新的星星（只在最大星星数量内）
     if (count($stars) < $maxStars) {
-        $stars = array_merge($stars, generateStars($numStars));
+        $stars = array_merge($stars, generateStars($numStars,$isWaterLine));
     }
 
     // 更新每个星星的位置
