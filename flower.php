@@ -6,7 +6,7 @@ $centerY = $size / 2; // 几何中心Y
 $numStars = 5; // 每一帧生成的星星数量
 $maxStars = 100; // 最大星星数量
 $delay = 0.05; // 延迟（秒）
-$trailLength = 2; // 轨迹长度（星星的单位）
+$trailLength = 4; // 轨迹长度（星星的单位）
 
 // 获取终端宽度和高度
 function getTerminalSize()
@@ -32,41 +32,26 @@ $stars = [];
 $canvas = array_fill(0, $size, array_fill(0, $size, ' '));
 $trail = array_fill(0, $size, array_fill(0, $size, [])); // 轨迹画布，存储轨迹
 
-// 生成随机高亮颜色
+// 生成随机颜色（256色模式）
 function getRandomColor()
 {
-    $colors = [
-        '91', // 红色高亮
-        '92', // 绿色高亮
-        '93', // 黄色高亮
-        '94', // 蓝色高亮
-        '95', // 紫色高亮
-        '96', // 青色高亮
-        '97'  // 白色高亮
-    ];
-    return $colors[array_rand($colors)];
+    return mt_rand(16, 231); // 256色模式的范围
 }
 
 // 生成渐变颜色
 function getFadedColor($baseColor, $fadeLevel)
 {
-    $colors = [
-        '91', // 红色高亮
-        '92', // 绿色高亮
-        '93', // 黄色高亮
-        '94', // 蓝色高亮
-        '95', // 紫色高亮
-        '96', // 青色高亮
-        '97'  // 白色高亮
-    ];
-    $baseIndex = array_search($baseColor, $colors);
-    if ($baseIndex === false) {
-        $baseIndex = 0; // 默认为红色高亮
-    }
-    $fadedColorIndex = min($baseIndex + $fadeLevel, count($colors) - 1);
-    return $colors[$fadedColorIndex];
-}
+    $totalSteps = 4; // 轨迹长度
+    $maxFadeLevel = $totalSteps - 1; // 最大渐变级别
+    $fadeAmount = 6; // 渐变量减少
 
+    $baseColor = max(16, min(231, $baseColor)); // 确保 baseColor 在有效范围内
+
+    // 计算新的颜色
+    $fadedColorCode = $baseColor - $fadeLevel * $fadeAmount;
+    $fadedColorCode = max(16, min(231, $fadedColorCode)); // 确保颜色在有效范围内
+    return $fadedColorCode;
+}
 
 // 生成新的星星
 function generateStars($numStars)
@@ -78,7 +63,7 @@ function generateStars($numStars)
             'radius' => 0, // 从中心开始
             'speed' => 0.1 + 0.1 * mt_rand(0, 5), // 调整星星速度
             'angleSpeed' => 0.05 * mt_rand(1, 3), // 调整角速度
-            'color' => getRandomColor() // 随机高亮颜色
+            'color' => getRandomColor() // 随机颜色
         ];
     }
     return $stars;
@@ -110,21 +95,26 @@ while (true) {
     foreach ($stars as &$star) {
         $star['radius'] += $star['speed']; // 半径增加，模拟向外运动
         $star['angle'] += $star['angleSpeed']; // 角度增加，模拟旋转
-        /** 使用三角函數正弦和余弦函数计算坐标 */
+
+        // 使用三角函数正弦和余弦函数计算坐标
         $x = $centerX + (int)($star['radius'] * cos($star['angle']));
         $y = $centerY + (int)($star['radius'] * sin($star['angle']));
 
         // 确保星星位置在画布内
         if ($x >= 0 && $x < $size && $y >= 0 && $y < $size) {
             // 更新轨迹
+            $trailX = $x;
+            $trailY = $y;
+
             for ($i = 0; $i < $trailLength; $i++) {
-                $trailX = $centerX + (int)(($star['radius'] - $i * $star['speed']) * cos($star['angle']));
-                $trailY = $centerY + (int)(($star['radius'] - $i * $star['speed']) * sin($star['angle']));
-                if ($trailX >= 0 && $trailX < $size && $trailY >= 0 && $trailY < $size) {
-                    // 添加颜色到轨迹，并保证第二个星星颜色较暗
-                    $trail[$trailY][$trailX][] = getFadedColor($star['color'], $i);
+                $prevX = $centerX + (int)(($star['radius'] - $i * ($star['speed'] / $trailLength)) * cos($star['angle']));
+                $prevY = $centerY + (int)(($star['radius'] - $i * ($star['speed'] / $trailLength)) * sin($star['angle']));
+                if ($prevX >= 0 && $prevX < $size && $prevY >= 0 && $prevY < $size) {
+                    // 确保轨迹点紧密跟随主星星
+                    $trail[$prevY][$prevX][] = getFadedColor($star['color'], $i);
                 }
             }
+
             // 记录有效的星星
             $newStars[] = $star;
         }
@@ -142,7 +132,7 @@ while (true) {
             if (!empty($trail[$y][$x])) {
                 // 使用最后的颜色显示轨迹
                 $lastColor = end($trail[$y][$x]);
-                $canvas[$y][$x] = "\033[{$lastColor}m*\033[0m";
+                $canvas[$y][$x] = "\033[38;5;{$lastColor}m*\033[0m";
                 // 清理过时的颜色
                 $trail[$y][$x] = array_slice($trail[$y][$x], 1);
             }
@@ -156,5 +146,6 @@ while (true) {
     }
 
     // 等待一段时间
-    usleep($delay * 100000); // usleep的单位是微秒
+    usleep($delay * 10000); // usleep的单位是微秒
 }
+?>
