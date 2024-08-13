@@ -1,59 +1,69 @@
 <?php
 
+// 画布尺寸
+$width = 80; // 画布宽度
+$height = 24; // 画布高度
+$delay = 100000; // 延迟（微秒）
 
-$width = 40; // 控制台宽度
-$height = 20; // 控制台高度
-$delay = 0.1; // 动画帧之间的延迟（秒）
-$radius = min($width, $height) / 3; // 地球仪半径
-
-function clearScreen()
-{
-    echo "\033[H\033[J";
+// 初始化雨滴
+function createRaindrop() {
+    return [
+        'x' => mt_rand(0, $GLOBALS['width'] - 1),
+        'y' => 0,
+        'length' => mt_rand(1, 5) // 雨滴长度
+    ];
 }
 
-function drawEarth($angle)
-{
-    global $width, $height, $radius;
+// 生成初始雨滴
+function generateRaindrops($count) {
+    $raindrops = [];
+    for ($i = 0; $i < $count; $i++) {
+        $raindrops[] = createRaindrop();
+    }
+    return $raindrops;
+}
 
-    $centerX = $width / 2;
-    $centerY = $height / 2;
-
+// 绘制画布
+function drawCanvas($raindrops) {
+    global $width, $height;
     $canvas = array_fill(0, $height, array_fill(0, $width, ' '));
 
-    for ($y = 0; $y < $height; $y++) {
-        for ($x = 0; $x < $width; $x++) {
-            $dx = $x - $centerX;
-            $dy = $y - $centerY;
-            $distance = sqrt($dx * $dx + $dy * $dy);
-
-            if ($distance < $radius) {
-                $angleOffset = atan2($dy, $dx) - $angle;
-                $dist = $radius * cos($angleOffset);
-                $projX = (int)($centerX + $dist * cos($angleOffset));
-                $projY = (int)($centerY + $dist * sin($angleOffset));
-
-                if ($projX >= 0 && $projX < $width && $projY >= 0 && $projY < $height) {
-                    $canvas[$projY][$projX] = '*';
-                }
+    // 绘制雨滴
+    foreach ($raindrops as $drop) {
+        $x = $drop['x'];
+        $y = $drop['y'];
+        $length = $drop['length'];
+        for ($i = 0; $i < $length; $i++) {
+            if ($y + $i < $height) {
+                $canvas[$y + $i][$x] = '|';
             }
         }
     }
 
-    return $canvas;
-}
-
-function printCanvas($canvas)
-{
+    // 输出画布
+    echo "\033[H"; // 将光标移动到屏幕左上角
     foreach ($canvas as $line) {
         echo implode('', $line) . PHP_EOL;
     }
 }
 
+// 主循环
+$raindrops = generateRaindrops(100); // 生成初始的雨滴
 while (true) {
-    for ($angle = 0; $angle < 360; $angle += 10) {
-        clearScreen();
-        $canvas = drawEarth(deg2rad($angle));
-        printCanvas($canvas);
-        usleep($delay * 1000000); // usleep 的单位是微秒
+    // 更新雨滴位置
+    foreach ($raindrops as &$drop) {
+        $drop['y'] += 1;
+        if ($drop['y'] >= $height) {
+            $drop = createRaindrop(); // 重置超出画布的雨滴
+        }
     }
+
+    // 清屏
+    echo "\033[H\033[J"; // 清屏
+
+    // 绘制画布
+    drawCanvas($raindrops);
+
+    // 等待一段时间
+    usleep($delay);
 }
