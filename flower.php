@@ -2,18 +2,24 @@
 // 画布的尺寸
 $width = 40; // 画布宽度
 $height = 20; // 画布高度
+/** 圆心 */
 $centerX = $width / 2; // 几何中心X
 $centerY = $height / 2; // 几何中心Y
+/** 每次刷新页面只生成一个星星 */
 $numStars = 1; // 每一帧生成的星星数量
+/** 最大页面同时存在10个星星 */
 $maxStars = 10; // 最大星星数量
+/** 刷新时间 */
 $delay = 0.1; // 延迟（秒）
+/** 流星尾巴长度 */
 $trailLength = 10; // 轨迹长度（星星的单位）
-
+/** 是否流线型，确定了尾巴是否紧紧的跟随流星 */
 $isWaterLine = true;//是否流线型运动
 
 // 获取终端宽度和高度
 function getTerminalSize()
 {
+
     if (PHP_OS_FAMILY === 'Windows') {
         // Windows 系统
         $cmd = 'mode con'; // Windows 命令行获取控制台尺寸
@@ -23,8 +29,8 @@ function getTerminalSize()
         preg_match('/Columns:\s*(\d+)/', $output, $widthMatch);
         preg_match('/Lines:\s*(\d+)/', $output, $heightMatch);
 
-        $width = isset($widthMatch[1]) ? (int)$widthMatch[1] : 80; // 默认值
-        $height = isset($heightMatch[1]) ? (int)$heightMatch[1] : 24; // 默认值
+        $width = isset($widthMatch[1]) ? (int)$widthMatch[1] : 60; // 默认值
+        $height = isset($heightMatch[1]) ? (int)$heightMatch[1] : 40; // 默认值
     } else {
         // Linux 系统
         $size = [];
@@ -32,8 +38,8 @@ function getTerminalSize()
             $width = $size[1];
             $height = $size[2];
         } else {
-            $width = 80; // 默认值
-            $height = 24; // 默认值
+            $width = 60; // 默认值
+            $height = 40; // 默认值
         }
     }
 
@@ -42,11 +48,12 @@ function getTerminalSize()
 
 /** 控制台尺寸 */
 $terminalSize = getTerminalSize();
+
 $termWidth = $terminalSize['width'];
 $termHeight = $terminalSize['height'];
 
 // 计算固定区域的起始位置以居中显示
-$startX = ($termWidth - $width) / 2;
+$startX = ($termWidth - $width) / 2 + 20;
 $startY = ($termHeight - $height) / 2;
 
 // 存储星星的数组
@@ -68,24 +75,39 @@ function getFadedColor($baseColor, $fadeLevel)
     return strval($fadedColor);
 }
 
-// 生成新的星星
-function generateStars($numStars,$isWaterLine)
+/**
+ * 生成新的星星
+ * @param int $numStars 流星总数
+ * @param bool $isWaterLine 是否流线型
+ * @return array
+ */
+function generateStars(int $numStars,bool $isWaterLine)
 {
     $stars = [];
     for ($i = 0; $i < $numStars; $i++) {
         $stars[] = [
-            'angle' => mt_rand(0, 360) * M_PI / 180, // 随机初始角度，转换为弧度
-            'radius' => 0, // 从中心开始
-            'speed' => $isWaterLine?0.1:(0.1 + 0.1 * mt_rand(0, 5)), // 调整星星速度
-            'angleSpeed' =>$isWaterLine?0.05:( 0.05 * mt_rand(1, 2)), // 调整角速度
-            'color' => getRandomColor() // 随机颜色
+            /** 随机初始角度，转换为弧度 决定流星在圆心中抛射出来的方向 */
+            'angle' => mt_rand(0, 360) * M_PI / 180, //
+            /** 从中心开始生成流星 若大于0则中间会留一个空腔 */
+            'radius' => 0, //
+            /** 调整星星速度,半径增加的速度 ，值越大，轨迹沿直径方向变化越大 */
+            'speed' => $isWaterLine?0.1:(0.1 + 0.1 * mt_rand(0, 5)), //
+            /** 调整角速度，角度增加的速度，值越大，星星旋转的越快，绕的圆周越多 */
+            'angleSpeed' =>$isWaterLine?0.03:( 0.03 * mt_rand(1, 2)), //
+            /** 随机颜色 */
+            'color' => getRandomColor() //
         ];
+
     }
     return $stars;
 }
 
-// 清除画布中的内容
-function clearCanvas(&$canvas)
+/**
+ * 清除画布中的内容
+ * @param array $canvas
+ * @return void
+ */
+function clearCanvas(array &$canvas)
 {
     foreach ($canvas as $y => &$line) {
         foreach ($line as $x => &$pixel) {
@@ -94,13 +116,19 @@ function clearCanvas(&$canvas)
     }
 }
 
-// 保存光标位置
+/**
+ * 保存光标位置
+ * @return void
+ */
 function saveCursorPosition()
 {
     echo "\033[s";
 }
 
-// 恢复光标位置
+/**
+ * 恢复光标位置
+ * @return void
+ */
 function restoreCursorPosition()
 {
     echo "\033[u";
@@ -108,19 +136,14 @@ function restoreCursorPosition()
 
 while (true) {
 //    // 清屏并移除历史记录
-//    echo "\033[2J\033[H";
+//    echo "\033[H\033[J";
 //    // 隐藏光标
 //    echo "\033[?25l";
-
-    // 清屏并移除历史记录
-    echo "\033[H\033[J";
-    // 隐藏光标
-    echo "\033[?25l";
     // 保存光标位置
-    saveCursorPosition();
+    //saveCursorPosition();
 
     // 每一帧生成新的星星（只在最大星星数量内）
-    if (count($stars) < $maxStars) {
+    if (count($stars) <= $maxStars) {
         $stars = array_merge($stars, generateStars($numStars,$isWaterLine));
     }
 
@@ -135,36 +158,36 @@ while (true) {
         /** y 坐标 = 圆心y坐标 + 半径 x 角度的正弦 */
         $y = $centerY + (int)($star['radius'] * sin($star['angle']));
 
-        // 确保星星位置在画布内
-        if ($x >= 0 && $x < $width && $y >= 0 && $y < $height) {
+        /** 确保星星位置在画布内 */
+        if ($x >= 0 && $x <= $width && $y >= 0 && $y <= $height) {
             // 更新轨迹
-            for ($i = 0; $i < $trailLength; $i++) {
+            for ($i = 0; $i <= $trailLength; $i++) {
                 /** 尾巴总是离圆心更近一些，越是后面的尾巴，离圆心越近 */
                 /** 尾巴的x坐标 = 圆心点x的坐标 + （头部的半径 - 尾巴的长度） x 圆角的余弦 */
                 $trailX = $centerX + (int)(($star['radius'] - $i * $star['speed']) * cos($star['angle']));
                 /** 尾巴的y坐标 = 圆心的y坐标 + （头部的半径 - 尾巴的长度） x 圆角的正弦 */
                 $trailY = $centerY + (int)(($star['radius'] - $i * $star['speed']) * sin($star['angle']));
                 /** 尾巴还在画布内 */
-                if ($trailX >= 0 && $trailX < $width && $trailY >= 0 && $trailY < $height) {
+                if ($trailX >= 0 && $trailX <= $width && $trailY >= 0 && $trailY <= $height) {
                     // 添加颜色到轨迹，并保证第二个星星颜色较暗
-                    /** 我尼玛难道一个坐标上还有几颗星星吗 */
+                    /** 因为流星的速度不一样，存在交叉的情况，所以会存在流星尾巴重合的情况，所以同一个坐标会有多个星星 */
                     $trail[$trailY][$trailX][] = getFadedColor($star['color'], $i);
                 }
+
             }
             // 记录有效的星星
             $newStars[] = $star;
         }
     }
-
     // 更新星星数组
     $stars = $newStars;
 
     // 清除画布并绘制新的内容
     clearCanvas($canvas);
 
-    // 绘制轨迹
-    for ($y = 0; $y < $height; $y++) {
-        for ($x = 0; $x < $width; $x++) {
+    /** 绘制轨迹：只绘制了轨迹，而并没有绘制流星本身 */
+    for ($y = 0; $y <= $height; $y++) {
+        for ($x = 0; $x <= $width; $x++) {
             /** 如果这个坐标有流星的尾巴 */
             if (!empty($trail[$y][$x])) {
                 // 使用最后的颜色显示轨迹 尽管这个坐标有很多颗星星，但是只取最后一颗

@@ -1,69 +1,44 @@
 <?php
 
-// 画布尺寸
-$width = 80; // 画布宽度
-$height = 24; // 画布高度
-$delay = 100000; // 延迟（微秒）
+// ANSI 转义码定义
+define('RESET', "\033[0m");
 
-// 初始化雨滴
-function createRaindrop() {
-    return [
-        'x' => mt_rand(0, $GLOBALS['width'] - 1),
-        'y' => 0,
-        'length' => mt_rand(1, 5) // 雨滴长度
-    ];
+// 函数：获取颜色渐变色
+function getColorGradient($baseColor, $level) {
+    $start = $baseColor; // 起始颜色代码
+    $end = $baseColor - 6; // 结束颜色代码
+    $range = $start - $end;
+    $step = $range / 10;
+    $colorCode = (int)($start - $step * $level);
+    return "\033[38;5;{$colorCode}m";
 }
 
-// 生成初始雨滴
-function generateRaindrops($count) {
-    $raindrops = [];
-    for ($i = 0; $i < $count; $i++) {
-        $raindrops[] = createRaindrop();
-    }
-    return $raindrops;
-}
-
-// 绘制画布
-function drawCanvas($raindrops) {
-    global $width, $height;
-    $canvas = array_fill(0, $height, array_fill(0, $width, ' '));
-
-    // 绘制雨滴
-    foreach ($raindrops as $drop) {
-        $x = $drop['x'];
-        $y = $drop['y'];
-        $length = $drop['length'];
-        for ($i = 0; $i < $length; $i++) {
-            if ($y + $i < $height) {
-                $canvas[$y + $i][$x] = '|';
-            }
-        }
-    }
-
-    // 输出画布
-    echo "\033[H"; // 将光标移动到屏幕左上角
-    foreach ($canvas as $line) {
-        echo implode('', $line) . PHP_EOL;
+// 渐变显示
+function displayColorGradient($baseColor, $label) {
+    for ($i = 0; $i <= 10; $i++) {
+        echo getColorGradient($baseColor, $i) . $label . ($i * 10) . RESET . PHP_EOL;
+        usleep(500000); // 0.5秒
     }
 }
 
-// 主循环
-$raindrops = generateRaindrops(100); // 生成初始的雨滴
-while (true) {
-    // 更新雨滴位置
-    foreach ($raindrops as &$drop) {
-        $drop['y'] += 1;
-        if ($drop['y'] >= $height) {
-            $drop = createRaindrop(); // 重置超出画布的雨滴
-        }
-    }
+// 渐变颜色显示
+echo "红色渐变:\n";
+displayColorGradient(196, "红色 ");
 
-    // 清屏
-    echo "\033[H\033[J"; // 清屏
+echo "橙色渐变:\n";
+displayColorGradient(208, "橙色 ");
 
-    // 绘制画布
-    drawCanvas($raindrops);
+echo "黄色渐变:\n";
+displayColorGradient(226, "黄色 ");
 
-    // 等待一段时间
-    usleep($delay);
-}
+echo "绿色渐变:\n";
+displayColorGradient(28, "绿色 ");
+
+echo "青色渐变:\n";
+displayColorGradient(51, "青色 ");
+
+echo "蓝色渐变:\n";
+displayColorGradient(75, "蓝色 ");
+
+echo "紫色渐变:\n";
+displayColorGradient(129, "紫色 ");
