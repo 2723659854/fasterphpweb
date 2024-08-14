@@ -1,5 +1,11 @@
 <?php
-// 画布的尺寸
+/**
+ * @purpose 万花筒
+ * @note php在cli模式下，是以字节的形式输出，所以分辨率很低。php也有做UI的gdk，比如PHP-GDK，但是已经很久没有更新了。因为php的初衷是做服务端
+ * 开发语言，是做web开发的语言。不是用来做客户端开发语言。
+ * @note php在cli模式下，也可以实现语音播放，需要特定的扩展。
+ */
+/** 画布的尺寸 */
 $width = 40; // 画布宽度
 $height = 20; // 画布高度
 /** 圆心 */
@@ -16,7 +22,10 @@ $trailLength = 10; // 轨迹长度（星星的单位）
 /** 是否流线型，确定了尾巴是否紧紧的跟随流星 */
 $isWaterLine = true;//是否流线型运动
 
-// 获取终端宽度和高度
+/**
+ * 获取终端宽度和高度
+ * @return array|int[]
+ */
 function getTerminalSize()
 {
 
@@ -52,25 +61,37 @@ $terminalSize = getTerminalSize();
 $termWidth = $terminalSize['width'];
 $termHeight = $terminalSize['height'];
 
-// 计算固定区域的起始位置以居中显示
-$startX = ($termWidth - $width) / 2 + 20;
+/** 计算固定区域的起始位置以居中显示 */
+$startX = ($termWidth - $width) / 2 ;
 $startY = ($termHeight - $height) / 2;
 
-// 存储星星的数组
+/** 存储星星的数组 */
 $stars = [];
+/** 画布 */
 $canvas = array_fill(0, $height, array_fill(0, $width, ' '));
-$trail = array_fill(0, $height, array_fill(0, $width, [])); // 轨迹画布，存储轨迹
+/** 轨迹画布，存储轨迹 */
+$trail = array_fill(0, $height, array_fill(0, $width, []));
 
-// 生成随机颜色（256色模式）
+/**
+ * 生成随机颜色（256色模式）
+ * @return string
+ */
 function getRandomColor()
 {
-    return strval(mt_rand(0, 255)); // 生成0-255之间的随机色
+    /** 生成0-255之间的随机色 */
+    return strval(mt_rand(0, 255));
 }
 
-// 生成渐变颜色
+/**
+ * 生成渐变颜色
+ * @param $baseColor
+ * @param $fadeLevel
+ * @return string
+ */
 function getFadedColor($baseColor, $fadeLevel)
 {
-    $fadeAmount = min($fadeLevel * 10, 255); // 调整颜色渐变幅度
+    /** 调整颜色渐变幅度 为1 */
+    $fadeAmount = min($fadeLevel * 1, 255);
     $fadedColor = max(0, intval($baseColor) - $fadeAmount);
     return strval($fadedColor);
 }
@@ -135,23 +156,23 @@ function restoreCursorPosition()
 }
 
 while (true) {
-//    // 清屏并移除历史记录
-//    echo "\033[H\033[J";
-//    // 隐藏光标
-//    echo "\033[?25l";
-    // 保存光标位置
-    //saveCursorPosition();
+    /** 清屏并移除历史记录 */
+    echo "\033[H\033[J";
+    /** 隐藏光标 */
+    echo "\033[?25l";
+    /** 保存光标位置 */
+    saveCursorPosition();
 
-    // 每一帧生成新的星星（只在最大星星数量内）
+    /** 每一帧生成新的星星（只在最大星星数量内）*/
     if (count($stars) <= $maxStars) {
         $stars = array_merge($stars, generateStars($numStars,$isWaterLine));
     }
 
-    // 更新每个星星的位置
-    $newStars = []; // 临时存储有效的星星
+    /** 更新每个星星的位置 临时存储有效的星星 */
+    $newStars = [];
     foreach ($stars as &$star) {
         /** 坐标使用了三角函数计算 */
-        $star['radius'] += $star['speed']; // 半径增加，模拟向外运动
+        $star['radius'] += $star['speed']; // 半径增加，模拟径向位移
         $star['angle'] += $star['angleSpeed']; // 角度增加，模拟旋转
         /** x 坐标 = 圆心x坐标 + 半径 x 角度的余弦 */
         $x = $centerX + (int)($star['radius'] * cos($star['angle']));
@@ -175,42 +196,40 @@ while (true) {
                 }
 
             }
-            // 记录有效的星星
+            /** 记录有效的星星 */
             $newStars[] = $star;
         }
     }
-    // 更新星星数组
+    /** 更新星星数组 */
     $stars = $newStars;
-
-    // 清除画布并绘制新的内容
+    /** 清除画布并绘制新的内容 */
     clearCanvas($canvas);
-
     /** 绘制轨迹：只绘制了轨迹，而并没有绘制流星本身 */
     for ($y = 0; $y <= $height; $y++) {
         for ($x = 0; $x <= $width; $x++) {
             /** 如果这个坐标有流星的尾巴 */
             if (!empty($trail[$y][$x])) {
-                // 使用最后的颜色显示轨迹 尽管这个坐标有很多颗星星，但是只取最后一颗
+                /** 使用最后的颜色显示轨迹 尽管这个坐标有很多颗星星，但是只取最后一颗 */
                 $lastColor = end($trail[$y][$x]);
                 /** 渲染尾巴到画布中 */
                 $canvas[$y][$x] = "\033[38;5;{$lastColor}m*\033[0m";
-                // 清理过时的颜色 为什么不是清空这个坐标的所有尾巴
+                /** 清理过时的颜色 为什么不是清空这个坐标的所有尾巴 */
                 $trail[$y][$x] = array_slice($trail[$y][$x], 1);
             }
         }
     }
 
-    // 恢复光标位置
+    /** 恢复光标位置 */
     restoreCursorPosition();
 
-    // 输出画布
+    /** 输出画布 */
     for ($y = 0; $y < $height; $y++) {
-        /** 这里是逐行渲染动画内容 先移动光标到左边界 */
-        echo str_repeat(' ', (int)$startX); // 打印前导空格以居中
+        /** 这里是逐行渲染动画内容 先移动光标到左边界 打印前导空格以居中 */
+        echo str_repeat(' ', (int)$startX);
         /** 将这一行的数据全部串联起来打印，换行 */
         echo implode('', $canvas[$y]) . PHP_EOL;
     }
 
-    // 等待一段时间
-    usleep($delay * 200000); // usleep的单位是微秒
+    /** usleep的单位是微秒 画面需要停留一定时间，以便在用户眼中停留形成影像 当刷新时间设置为200000 ，20000画面稳定一些，不会闪烁 */
+    usleep($delay * 200000);
 }
