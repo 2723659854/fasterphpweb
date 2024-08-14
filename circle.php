@@ -38,6 +38,8 @@ function clearScreen()
 // 绘制字符
 function drawFirework($x, $y, $char, $color)
 {
+    $color = getRandomColor();
+
     echo "\033[{$y};{$x}H\033[38;5;{$color}m{$char}\033[0m";
 }
 
@@ -46,7 +48,7 @@ function drawExplosion($x, $y, $width, $height, $char, $color, $maxExplosionRadi
 {
     $numSparks = 20;
     for ($i = 0; $i < $numSparks; $i++) {
-        $explosionX = $x + rand(-$maxExplosionRadius, $maxExplosionRadius);
+        $explosionX = ($x + rand(-$maxExplosionRadius, $maxExplosionRadius));
         $explosionY = $y + rand(-$maxExplosionRadius, $maxExplosionRadius);
         // 确保爆炸点在画布范围内
         if ($explosionX >= 1 && $explosionX <= $width && $explosionY >= 1 && $explosionY <= $height) {
