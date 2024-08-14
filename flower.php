@@ -14,11 +14,11 @@ $centerY = $height / 2; // 几何中心Y
 /** 每次刷新页面只生成一个星星 */
 $numStars = 1; // 每一帧生成的星星数量
 /** 最大页面同时存在10个星星 */
-$maxStars = 10; // 最大星星数量
+$maxStars = 20; // 最大星星数量
 /** 刷新时间 */
 $delay = 0.1; // 延迟（秒）
-/** 流星尾巴长度 */
-$trailLength = 10; // 轨迹长度（星星的单位）
+/** 流星尾巴长度 因为一个色系的长度是6所以最长设置为6 */
+$trailLength = 6; // 轨迹长度（星星的单位）
 /** 是否流线型，确定了尾巴是否紧紧的跟随流星 */
 $isWaterLine = true;//是否流线型运动
 
@@ -62,7 +62,7 @@ $termWidth = $terminalSize['width'];
 $termHeight = $terminalSize['height'];
 
 /** 计算固定区域的起始位置以居中显示 */
-$startX = ($termWidth - $width) / 2 ;
+$startX = ($termWidth - $width) / 2;
 $startY = ($termHeight - $height) / 2;
 
 /** 存储星星的数组 */
@@ -74,12 +74,14 @@ $trail = array_fill(0, $height, array_fill(0, $width, []));
 
 /**
  * 生成随机颜色（256色模式）
- * @return string
  */
 function getRandomColor()
 {
-    /** 生成0-255之间的随机色 */
-    return strval(mt_rand(0, 255));
+    /** 每6个数字一个渐变色段，先生成渐变色的最亮色 */
+    $colors = range(21, 231, 6);
+    $numbers = count($colors)-1;
+    /** 返回一个随机的亮色 */
+    return $colors[rand(0,$numbers)];
 }
 
 /**
@@ -87,13 +89,12 @@ function getRandomColor()
  * @param $baseColor
  * @param $fadeLevel
  * @return string
+ * @note 但是cli模式下这个颜色对比实在太小了吧，
  */
 function getFadedColor($baseColor, $fadeLevel)
 {
-    /** 调整颜色渐变幅度 为1 */
-    $fadeAmount = min($fadeLevel * 1, 255);
-    $fadedColor = max(0, intval($baseColor) - $fadeAmount);
-    return strval($fadedColor);
+    /** 颜色逐渐变暗 */
+    return intval($baseColor) - $fadeLevel;
 }
 
 /**
@@ -102,7 +103,7 @@ function getFadedColor($baseColor, $fadeLevel)
  * @param bool $isWaterLine 是否流线型
  * @return array
  */
-function generateStars(int $numStars,bool $isWaterLine)
+function generateStars(int $numStars, bool $isWaterLine)
 {
     $stars = [];
     for ($i = 0; $i < $numStars; $i++) {
@@ -112,9 +113,9 @@ function generateStars(int $numStars,bool $isWaterLine)
             /** 从中心开始生成流星 若大于0则中间会留一个空腔 */
             'radius' => 0, //
             /** 调整星星速度,半径增加的速度 ，值越大，轨迹沿直径方向变化越大 */
-            'speed' => $isWaterLine?0.1:(0.1 + 0.1 * mt_rand(0, 5)), //
+            'speed' => $isWaterLine ? 0.1 : (0.1 + 0.1 * mt_rand(0, 5)), //
             /** 调整角速度，角度增加的速度，值越大，星星旋转的越快，绕的圆周越多 */
-            'angleSpeed' =>$isWaterLine?0.03:( 0.03 * mt_rand(1, 2)), //
+            'angleSpeed' => $isWaterLine ? 0.03 : (0.03 * mt_rand(1, 2)), //
             /** 随机颜色 */
             'color' => getRandomColor() //
         ];
@@ -165,7 +166,7 @@ while (true) {
 
     /** 每一帧生成新的星星（只在最大星星数量内）*/
     if (count($stars) <= $maxStars) {
-        $stars = array_merge($stars, generateStars($numStars,$isWaterLine));
+        $stars = array_merge($stars, generateStars($numStars, $isWaterLine));
     }
 
     /** 更新每个星星的位置 临时存储有效的星星 */
@@ -180,7 +181,7 @@ while (true) {
         $y = $centerY + (int)($star['radius'] * sin($star['angle']));
 
         /** 确保星星位置在画布内 */
-        if ($x >= 0 && $x <= $width && $y >= 0 && $y <= $height) {
+        if ($x >= 0 && $x < $width && $y >= 0 && $y < $height) {
             // 更新轨迹
             for ($i = 0; $i <= $trailLength; $i++) {
                 /** 尾巴总是离圆心更近一些，越是后面的尾巴，离圆心越近 */
@@ -189,9 +190,9 @@ while (true) {
                 /** 尾巴的y坐标 = 圆心的y坐标 + （头部的半径 - 尾巴的长度） x 圆角的正弦 */
                 $trailY = $centerY + (int)(($star['radius'] - $i * $star['speed']) * sin($star['angle']));
                 /** 尾巴还在画布内 */
-                if ($trailX >= 0 && $trailX <= $width && $trailY >= 0 && $trailY <= $height) {
+                if ($trailX >= 0 && $trailX < $width && $trailY >= 0 && $trailY < $height) {
                     // 添加颜色到轨迹，并保证第二个星星颜色较暗
-                    /** 因为流星的速度不一样，存在交叉的情况，所以会存在流星尾巴重合的情况，所以同一个坐标会有多个星星 */
+                    /** 因为流星的速度不一样，存在交叉的情况，所以会存在流星尾巴重合的情况，所以同一个坐标会有多个星星，按顺序存储星星 */
                     $trail[$trailY][$trailX][] = getFadedColor($star['color'], $i);
                 }
 
@@ -205,16 +206,14 @@ while (true) {
     /** 清除画布并绘制新的内容 */
     clearCanvas($canvas);
     /** 绘制轨迹：只绘制了轨迹，而并没有绘制流星本身 */
-    for ($y = 0; $y <= $height; $y++) {
-        for ($x = 0; $x <= $width; $x++) {
+    for ($y = 0; $y < $height; $y++) {
+        for ($x = 0; $x < $width; $x++) {
             /** 如果这个坐标有流星的尾巴 */
             if (!empty($trail[$y][$x])) {
-                /** 使用最后的颜色显示轨迹 尽管这个坐标有很多颗星星，但是只取最后一颗 */
-                $lastColor = end($trail[$y][$x]);
-                /** 渲染尾巴到画布中 */
+                /** 这里必须按顺序获取星星的数据，否则流星颜色会混乱，这一步很关键 */
+                $lastColor = array_shift($trail[$y][$x]);
+                /** 渲染当前坐标的流星 */
                 $canvas[$y][$x] = "\033[38;5;{$lastColor}m*\033[0m";
-                /** 清理过时的颜色 为什么不是清空这个坐标的所有尾巴 */
-                $trail[$y][$x] = array_slice($trail[$y][$x], 1);
             }
         }
     }

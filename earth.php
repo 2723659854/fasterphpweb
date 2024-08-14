@@ -17,7 +17,7 @@ function getColorGradient($baseColor, $level) {
 function displayColorGradient($baseColor, $label) {
     for ($i = 0; $i <= 10; $i++) {
         echo getColorGradient($baseColor, $i) . $label . ($i * 10) . RESET . PHP_EOL;
-        usleep(500000); // 0.5秒
+        //usleep(500000); // 0.5秒
     }
 }
 $color = <<<eof
@@ -51,3 +51,9 @@ displayColorGradient(75, "蓝色 ");
 
 echo "紫色渐变:\n";
 displayColorGradient(129, "紫色 ");
+
+/** 颜色校验 */
+for ($i = 0; $i < 256; $i++) {
+    echo "\033[38;5;{$i}mColor {$i}\033[0m\n";
+}
+exit;
