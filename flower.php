@@ -6,7 +6,7 @@
  * @note php在cli模式下，也可以实现语音播放，需要特定的扩展。
  */
 /** 画布的尺寸 */
-$width = 40; // 画布宽度
+$width = 60; // 画布宽度
 $height = 20; // 画布高度
 /** 圆心 */
 $centerX = $width / 2; // 几何中心X
@@ -21,7 +21,8 @@ $delay = 0.1; // 延迟（秒）
 $trailLength = 6; // 轨迹长度（星星的单位）
 /** 是否流线型，确定了尾巴是否紧紧的跟随流星 */
 $isWaterLine = true;//是否流线型运动
-
+/** 横向和纵向的修正系数 就是cli模式下字符宽度和高度的比值 宽度：高度，若取值1 ，则为纵向的椭圆 */
+$rateForWithAndHeight = 2.1;
 /**
  * 获取终端宽度和高度
  * @return array|int[]
@@ -79,9 +80,9 @@ function getRandomColor()
 {
     /** 每6个数字一个渐变色段，先生成渐变色的最亮色 */
     $colors = range(21, 231, 6);
-    $numbers = count($colors)-1;
+    $numbers = count($colors) - 1;
     /** 返回一个随机的亮色 */
-    return $colors[rand(0,$numbers)];
+    return $colors[rand(0, $numbers)];
 }
 
 /**
@@ -175,8 +176,8 @@ while (true) {
         /** 坐标使用了三角函数计算 */
         $star['radius'] += $star['speed']; // 半径增加，模拟径向位移
         $star['angle'] += $star['angleSpeed']; // 角度增加，模拟旋转
-        /** x 坐标 = 圆心x坐标 + 半径 x 角度的余弦 */
-        $x = $centerX + (int)($star['radius'] * cos($star['angle']));
+        /** x 坐标 = 圆心x坐标 + 半径 x 角度的余弦 需要校正x方向坐标 */
+        $x = $centerX + (int)($star['radius'] * $rateForWithAndHeight * cos($star['angle']));
         /** y 坐标 = 圆心y坐标 + 半径 x 角度的正弦 */
         $y = $centerY + (int)($star['radius'] * sin($star['angle']));
 
@@ -185,8 +186,8 @@ while (true) {
             // 更新轨迹
             for ($i = 0; $i <= $trailLength; $i++) {
                 /** 尾巴总是离圆心更近一些，越是后面的尾巴，离圆心越近 */
-                /** 尾巴的x坐标 = 圆心点x的坐标 + （头部的半径 - 尾巴的长度） x 圆角的余弦 */
-                $trailX = $centerX + (int)(($star['radius'] - $i * $star['speed']) * cos($star['angle']));
+                /** 尾巴的x坐标 = 圆心点x的坐标 + （头部的半径 - 尾巴的长度） x 圆角的余弦 需要校正x方向坐标 */
+                $trailX = $centerX + (int)(($star['radius'] - $i * $star['speed']) * $rateForWithAndHeight * cos($star['angle']));
                 /** 尾巴的y坐标 = 圆心的y坐标 + （头部的半径 - 尾巴的长度） x 圆角的正弦 */
                 $trailY = $centerY + (int)(($star['radius'] - $i * $star['speed']) * sin($star['angle']));
                 /** 尾巴还在画布内 */
