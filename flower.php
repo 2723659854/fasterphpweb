@@ -5,24 +5,28 @@
  * 开发语言，是做web开发的语言。不是用来做客户端开发语言。
  * @note php在cli模式下，也可以实现语音播放，需要特定的扩展。
  */
-/** 画布的尺寸 */
-$width = 60; // 画布宽度
-$height = 20; // 画布高度
+
+/** 控制台尺寸 */
+$terminalSize = getTerminalSize();
+/** 画布大小和控制台大小一致 */
+$termWidth = $width = $terminalSize['width'];
+$termHeight = $height = $terminalSize['height'];
 /** 圆心 */
-$centerX = $width / 2; // 几何中心X
-$centerY = $height / 2; // 几何中心Y
+$centerX = round($width / 2); // 几何中心X
+$centerY = round($height / 2); // 几何中心Y
 /** 每次刷新页面只生成一个星星 */
 $numStars = 1; // 每一帧生成的星星数量
 /** 最大页面同时存在10个星星 */
-$maxStars = 20; // 最大星星数量
+$maxStars = 100; // 最大星星数量
 /** 刷新时间 */
 $delay = 0.1; // 延迟（秒）
 /** 流星尾巴长度 因为一个色系的长度是6所以最长设置为6 */
 $trailLength = 6; // 轨迹长度（星星的单位）
 /** 是否流线型，确定了尾巴是否紧紧的跟随流星 */
 $isWaterLine = true;//是否流线型运动
-/** 横向和纵向的修正系数 就是cli模式下字符宽度和高度的比值 宽度：高度，若取值1 ，则为纵向的椭圆 */
-$rateForWithAndHeight = 2.1;
+/** 横向和纵向的修正系数 就是cli模式下字符宽度和高度的比值 宽度：高度，若取值1 ，则为纵向的椭圆 ，经过测试2.1是最理想的状态 */
+$rateForWithAndHeight = 2.1; # 2.1
+
 /**
  * 获取终端宽度和高度
  * @return array|int[]
@@ -56,11 +60,6 @@ function getTerminalSize()
     return ['width' => $width, 'height' => $height];
 }
 
-/** 控制台尺寸 */
-$terminalSize = getTerminalSize();
-
-$termWidth = $terminalSize['width'];
-$termHeight = $terminalSize['height'];
 
 /** 计算固定区域的起始位置以居中显示 */
 $startX = ($termWidth - $width) / 2;
@@ -114,7 +113,7 @@ function generateStars(int $numStars, bool $isWaterLine)
             /** 从中心开始生成流星 若大于0则中间会留一个空腔 */
             'radius' => 0, //
             /** 调整星星速度,半径增加的速度 ，值越大，轨迹沿直径方向变化越大 */
-            'speed' => $isWaterLine ? 0.1 : (0.1 + 0.1 * mt_rand(0, 5)), //
+            'speed' => $isWaterLine ? 0.09 : (0.1 + 0.1 * mt_rand(0, 5)), //
             /** 调整角速度，角度增加的速度，值越大，星星旋转的越快，绕的圆周越多 */
             'angleSpeed' => $isWaterLine ? 0.03 : (0.03 * mt_rand(1, 2)), //
             /** 随机颜色 */
@@ -176,15 +175,19 @@ while (true) {
         /** 坐标使用了三角函数计算 */
         $star['radius'] += $star['speed']; // 半径增加，模拟径向位移
         $star['angle'] += $star['angleSpeed']; // 角度增加，模拟旋转
+        if ($star['angle'] >= 360) {
+            $star['angle'] = $star['angle'] % 360;
+        }
         /** x 坐标 = 圆心x坐标 + 半径 x 角度的余弦 需要校正x方向坐标 */
         $x = $centerX + (int)($star['radius'] * $rateForWithAndHeight * cos($star['angle']));
         /** y 坐标 = 圆心y坐标 + 半径 x 角度的正弦 */
         $y = $centerY + (int)($star['radius'] * sin($star['angle']));
 
+        /** 在坐标系中，分成四个象限 */
         /** 确保星星位置在画布内 */
         if ($x >= 0 && $x < $width && $y >= 0 && $y < $height) {
             // 更新轨迹
-            for ($i = 0; $i <= $trailLength; $i++) {
+            for ($i = 0; $i < $trailLength; $i++) {
                 /** 尾巴总是离圆心更近一些，越是后面的尾巴，离圆心越近 */
                 /** 尾巴的x坐标 = 圆心点x的坐标 + （头部的半径 - 尾巴的长度） x 圆角的余弦 需要校正x方向坐标 */
                 $trailX = $centerX + (int)(($star['radius'] - $i * $star['speed']) * $rateForWithAndHeight * cos($star['angle']));
@@ -196,7 +199,6 @@ while (true) {
                     /** 因为流星的速度不一样，存在交叉的情况，所以会存在流星尾巴重合的情况，所以同一个坐标会有多个星星，按顺序存储星星 */
                     $trail[$trailY][$trailX][] = getFadedColor($star['color'], $i);
                 }
-
             }
             /** 记录有效的星星 */
             $newStars[] = $star;
