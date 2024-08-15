@@ -51,7 +51,7 @@ function drawLine(&$canvas, $x0, $y0, $x1, $y1)
     }
 }
 
-function drawCube($width, $height, $angleX, $angleY)
+function drawCube($width, $height, $angleX, $angleY, $scale)
 {
     $canvas = array_fill(0, $height, array_fill(0, $width, ' '));
 
@@ -90,7 +90,12 @@ function drawCube($width, $height, $angleX, $angleY)
         $z = $x * $sinY + $z * $cosY;
         $x = $xz;
 
-        $rotatedVertices[] = [$x, $y, $z];
+        // 应用缩放因子
+        $x *= $scale;
+        $y *= $scale;
+
+        // 将坐标调整为画布坐标系
+        $rotatedVertices[] = [$x + $width / 2, $y + $height / 2];
     }
 
     // 定义立方体的边
@@ -101,10 +106,10 @@ function drawCube($width, $height, $angleX, $angleY)
     ];
 
     foreach ($edges as $edge) {
-        $x1 = (int)(($rotatedVertices[$edge[0]][0] + 1) * $width / 2);
-        $y1 = (int)(($rotatedVertices[$edge[0]][1] + 1) * $height / 2);
-        $x2 = (int)(($rotatedVertices[$edge[1]][0] + 1) * $width / 2);
-        $y2 = (int)(($rotatedVertices[$edge[1]][1] + 1) * $height / 2);
+        $x1 = (int)$rotatedVertices[$edge[0]][0];
+        $y1 = (int)$rotatedVertices[$edge[0]][1];
+        $x2 = (int)$rotatedVertices[$edge[1]][0];
+        $y2 = (int)$rotatedVertices[$edge[1]][1];
 
         drawLine($canvas, $x1, $y1, $x2, $y2);
     }
@@ -116,10 +121,11 @@ list($width, $height) = getTerminalSize();
 $angleX = 0;
 $angleY = 0;
 $angleStep = 0.1;
+$scale = min($width, $height) / 12; // 缩小比例，确保立方体适应终端
 
 while (true) {
     echo "\033[H\033[J";
-    $canvas = drawCube($width, $height, $angleX, $angleY);
+    $canvas = drawCube($width, $height, $angleX, $angleY, $scale);
     foreach ($canvas as $line) {
         echo implode('', $line) . PHP_EOL;
     }
