@@ -34,6 +34,87 @@ function getTerminalSize()
 }
 
 /**
+ * 绘制金字塔
+ * @param $width
+ * @param $height
+ * @param $angleX
+ * @param $angleY
+ * @param $angleZ
+ * @param $scale
+ * @return array
+ * @note 只要确定了三维图形的每一个顶点的坐标，以及这些顶点的连线路径，就可以绘制三维图形。
+ * @note 这里可以抽象成一个公共方法，传入终端的宽高，x,y,z方向的旋转角度，缩放比例，三维图像的顶点坐标，三维图像的边构成方式。
+ * 如果要实现在三维空间的位移，那么可以在转换过的坐标加上偏移量即可。
+ */
+function drawPyramid($width, $height, $angleX, $angleY, $angleZ, $scale)
+{
+    $canvas = array_fill(0, $height, array_fill(0, $width, ' '));
+
+    // 定义金字塔的顶点
+    $vertices = [
+        // 底面四个点
+        [-1, -1, -1], // 0
+        [1, -1, -1],  // 1
+        [1, 1, -1],   // 2
+        [-1, 1, -1],  // 3
+        // 顶点
+        [0, 0, 1]     // 4
+    ];
+
+    // 旋转矩阵和坐标转换（与立方体相同）
+    $cosX = cos($angleX);
+    $sinX = sin($angleX);
+    $cosY = cos($angleY);
+    $sinY = sin($angleY);
+    $cosZ = cos($angleZ);
+    $sinZ = sin($angleZ);
+
+    /** 这里是将三维图像的顶点投影到二维平面 */
+    $rotatedVertices = [];
+    foreach ($vertices as $vertex) {
+        $x = $vertex[0];
+        $y = $vertex[1];
+        $z = $vertex[2];
+
+        $xz = $x * $cosZ - $y * $sinZ;
+        $y = $x * $sinZ + $y * $cosZ;
+        $x = $xz;
+
+        $yz = $y * $cosX - $z * $sinX;
+        $z = $y * $sinX + $z * $cosX;
+        $y = $yz;
+
+        $xz = $x * $cosY - $z * $sinY;
+        $z = $x * $sinY + $z * $cosY;
+        $x = $xz;
+
+        $x *= $scale;
+        $y *= $scale;
+        /** 只取被位移后的x和y坐标 ，就完成了三维到二维的转换 */
+        $rotatedVertices[] = [$x + $width / 2, $y + $height / 2];
+    }
+
+    // 定义金字塔的边
+    $edges = [
+        [0, 1], [1, 2], [2, 3], [3, 0], // 底面四条边
+        [0, 4], [1, 4], [2, 4], [3, 4]  // 从顶点到底面四个点的边
+    ];
+
+    foreach ($edges as $edge) {
+        $x1 = (int)$rotatedVertices[$edge[0]][0];
+        $y1 = (int)$rotatedVertices[$edge[0]][1];
+        $x2 = (int)$rotatedVertices[$edge[1]][0];
+        $y2 = (int)$rotatedVertices[$edge[1]][1];
+        drawLine($canvas, $x1, $y1, $x2, $y2);
+    }
+
+    return $canvas;
+}
+
+// 使用上述相同的终端绘制和更新逻辑
+
+
+/**
  * 生成随机颜色（256色模式）
  */
 function getRandomColor()
@@ -219,7 +300,10 @@ while (true) {
     echo "\033[H\033[J";
     /** 隐藏光标 */
     echo "\033[?25l";
-    $canvas = drawCube($width, $height, $angleX, $angleY, $angleZ, $scale); // 绘制立方体
+    /** 绘制立方体 */
+    $canvas = drawCube($width, $height, $angleX, $angleY, $angleZ, $scale);
+    /** 绘制金字塔 */
+    //$canvas = drawPyramid($width, $height, $angleX, $angleY, $angleZ, $scale);
     foreach ($canvas as $line) {
         echo implode('', $line) . PHP_EOL; // 输出画布内容
     }
