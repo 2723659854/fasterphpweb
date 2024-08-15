@@ -24,6 +24,18 @@ function getTerminalSize()
 }
 
 /**
+ * 生成随机颜色（256色模式）
+ */
+function getRandomColor()
+{
+    /** 每6个数字一个渐变色段，先生成渐变色的最亮色 */
+    $colors = range(21, 231, 6);
+    $numbers = count($colors) - 1;
+    /** 返回一个随机的亮色 */
+    return $colors[rand(0, $numbers)];
+}
+
+/**
  * 使用Bresenham算法绘制直线
  */
 function drawLine(&$canvas, $x0, $y0, $x1, $y1)
@@ -36,7 +48,10 @@ function drawLine(&$canvas, $x0, $y0, $x1, $y1)
 
     while (true) {
         if ($x0 >= 0 && $x0 < count($canvas[0]) && $y0 >= 0 && $y0 < count($canvas)) {
-            $canvas[$y0][$x0] = '*';
+            $lastColor = getRandomColor();
+            $string = "\033[38;5;{$lastColor}m*\033[0m";
+            //$canvas[$y0][$x0] = '*';
+            $canvas[$y0][$x0] = $string;
         }
         if ($x0 == $x1 && $y0 == $y1) break;
         $e2 = $err * 2;
@@ -121,7 +136,7 @@ list($width, $height) = getTerminalSize();
 $angleX = 0;
 $angleY = 0;
 $angleStep = 0.1;
-$scale = min($width, $height) / 12; // 缩小比例，确保立方体适应终端
+$scale = min($width, $height) / 7; // 缩小比例，确保立方体适应终端
 
 while (true) {
     echo "\033[H\033[J";
