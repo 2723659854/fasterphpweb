@@ -4,6 +4,8 @@
  * 本程序旨在绘制三维动画，实现原理就是给定一组构成图像的基本点，以及连接这些基本点构成图像的的方法，然后给出不同时间这些点所在的位置。当程序运行的
  * 时候，没一个时间点都计算当前时刻基本点的位置，然后使用给定的路径连接这些基本点，构成了图像。
  * 本程序将三维图像投射到二维平面，然后获取二维平面各点的投影坐标。使得生成图像的透视效果。
+ * 可以增加x方向和y方向偏移量，实现对三维图像的位移控制，那么理论上是可以实现动漫的效果。需要控制角色的位移路线，也就是每一个时刻的x和y的便宜量，
+ * 用来做动漫的话，估计数据量很庞大，做普通的游戏应该没问题，遇到边界就返回。
  * 然后不停的擦除旧的图像，绘制新的图像，就形成了动画。
  */
 
@@ -46,7 +48,7 @@ function getTerminalSize()
  * @note 这里可以抽象成一个公共方法，传入终端的宽高，x,y,z方向的旋转角度，缩放比例，三维图像的顶点坐标，三维图像的边构成方式。
  * 如果要实现在三维空间的位移，那么可以在转换过的坐标加上偏移量即可。
  */
-function drawPyramid($width, $height, $angleX, $angleY, $angleZ, $scale)
+function drawPyramid($width, $height, $angleX, $angleY, $angleZ, $scale,$distancX=0,$distanceY=0)
 {
     $canvas = array_fill(0, $height, array_fill(0, $width, ' '));
 
@@ -91,7 +93,7 @@ function drawPyramid($width, $height, $angleX, $angleY, $angleZ, $scale)
         $x *= $scale;
         $y *= $scale;
         /** 只取被位移后的x和y坐标 ，就完成了三维到二维的转换 */
-        $rotatedVertices[] = [$x + $width / 2, $y + $height / 2];
+        $rotatedVertices[] = [$x + $distancX + $width / 2, $y + $distanceY +  $height / 2];
     }
 
     // 定义金字塔的边
@@ -184,6 +186,8 @@ function drawLine(&$canvas, $x0, $y0, $x1, $y1)
  * @param float $angleY 绕Y轴的旋转角度
  * @param float $angleZ 绕Z轴的旋转角度
  * @param float $scale 缩放因子
+ * @param int $distancX x轴方向偏移量，用于控制动画位移
+ * @param int $distanceY y轴方向偏移量，用于控制动画位移
  * @return array 画布数组
  * @note 使用将三维图形降维到二维的方式绘制图形
  */
@@ -310,10 +314,11 @@ while (true) {
     echo "\033[H\033[J";
     /** 隐藏光标 */
     echo "\033[?25l";
+
     /** 绘制立方体 实现立方体的位移 */
     $canvas = drawCube($width, $height, $angleX, $angleY, $angleZ, $scale,$distanceX,$distanceY);
     /** 绘制金字塔 */
-    //$canvas = drawPyramid($width, $height, $angleX, $angleY, $angleZ, $scale);
+    //$canvas = drawPyramid($width, $height, $angleX, $angleY, $angleZ, $scale,$distanceX,$distanceY);
     foreach ($canvas as $line) {
         echo implode('', $line) . PHP_EOL; // 输出画布内容
     }
@@ -361,7 +366,7 @@ while (true) {
     if ($angleX >= 2 * M_PI) $angleX -= 2 * M_PI; // 保持X轴角度在0到2π之间
     if ($angleY >= 2 * M_PI) $angleY -= 2 * M_PI; // 保持Y轴角度在0到2π之间
     if ($angleZ >= 2 * M_PI) $angleZ -= 2 * M_PI; // 保持Z轴角度在0到2π之间
-
+    /** 这个时间是看着最流畅的 */
     usleep(10000); // 100ms 延时
 }
 
