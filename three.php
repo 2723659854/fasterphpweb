@@ -187,7 +187,7 @@ function drawLine(&$canvas, $x0, $y0, $x1, $y1)
  * @return array 画布数组
  * @note 使用将三维图形降维到二维的方式绘制图形
  */
-function drawCube($width, $height, $angleX, $angleY, $angleZ, $scale,$distancX=0)
+function drawCube($width, $height, $angleX, $angleY, $angleZ, $scale,$distancX=0,$distanceY=0)
 {
     $canvas = array_fill(0, $height, array_fill(0, $width, ' ')); // 初始化画布
 
@@ -252,7 +252,7 @@ function drawCube($width, $height, $angleX, $angleY, $angleZ, $scale,$distancX=0
 
         /** 按顺序存入8个顶点的新坐标 */
         // 将坐标调整为画布坐标系
-        $rotatedVertices[] = [$x + $distancX+ $width / 2, $y + $height / 2];
+        $rotatedVertices[] = [$x + $distancX+ $width / 2, $y + $distanceY + $height / 2];
     }
 
     // 确保$rotatedVertices数组包含8个顶点
@@ -299,18 +299,25 @@ $distanceX = 0;
 
 /** x方向移动方向，默认向右 */
 $directionX = 1;
+
+/** 纵向实现上下快速跳动 */
+$distanceY = 0;
+/** 默认向上跳动 */
+$directionY = 1;
+
 while (true) {
     /** 清屏并移除历史记录 */
     echo "\033[H\033[J";
     /** 隐藏光标 */
     echo "\033[?25l";
     /** 绘制立方体 实现立方体的位移 */
-    $canvas = drawCube($width, $height, $angleX, $angleY, $angleZ, $scale,$distanceX);
+    $canvas = drawCube($width, $height, $angleX, $angleY, $angleZ, $scale,$distanceX,$distanceY);
     /** 绘制金字塔 */
     //$canvas = drawPyramid($width, $height, $angleX, $angleY, $angleZ, $scale);
     foreach ($canvas as $line) {
         echo implode('', $line) . PHP_EOL; // 输出画布内容
     }
+    /** 实现水平跳动 */
     /** 向右移动 */
     if ($directionX == 1){
         $distanceX++;
@@ -327,6 +334,27 @@ while (true) {
     if ($distanceX<=(-$width/2)){
         $directionX = 1;
     }
+
+    /** 实现纵向的跳动 */
+
+    /** 向右移动 */
+    if ($directionY == 1){
+        $distanceY +=1;
+    }
+    /** 向左移动 */
+    if ($directionY == -1){
+        $distanceY -=1;
+    }
+    /** 即将超过右边界，更换方向，向左移动 */
+    if ($distanceY>=($height/2)){
+        $directionY = -1;
+    }
+    /** 即将超过左边界，更换方向，向右移动 */
+    if ($distanceY<=(-$height/2)){
+        $directionY = 1;
+    }
+
+    /** 实现立方体的旋转 */
     $angleX += $angleStepX; // 更新X轴角度
     $angleY += $angleStepY; // 更新Y轴角度
     $angleZ += $angleStepZ; // 更新Z轴角度
