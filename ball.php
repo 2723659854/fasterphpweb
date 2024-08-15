@@ -158,7 +158,11 @@ $angleStep = 0.1; // 每次更新角度的步长
 $scale = min($width, $height) / 7; // 缩放因子，使立方体适应终端
 
 while (true) {
-    echo "\033[H\033[J"; // 清屏
+    /** 清屏并移除历史记录 */
+    echo "\033[H\033[J";
+    /** 隐藏光标 */
+    echo "\033[?25l";
+    //echo "\033[H\033[J"; // 清屏
     $canvas = drawCube($width, $height, $angleX, $angleY, $scale); // 绘制立方体
     foreach ($canvas as $line) {
         echo implode('', $line) . PHP_EOL; // 输出画布内容
