@@ -421,7 +421,7 @@ function computeCoordinateFor3d(array $config = [], array $canvas = [])
  * @param array $canvas
  * @return array
  */
-function computeCoordinateFor2dCircle(array &$stars,array $config =[],array $canvas = [])
+function computeCoordinateFor2dCircle(array &$stars,array &$trail,array $config =[],array $canvas = [])
 {
     $maxStars = $config['maxStars']??1;
     $numStars = $config['numStars']??1;
@@ -440,7 +440,8 @@ function computeCoordinateFor2dCircle(array &$stars,array $config =[],array $can
         /** 画布 */
         $canvas = array_fill(0, $height, array_fill(0, $width, ' '));
     }
-
+    /** 轨迹画布，存储轨迹 */
+    //$trail = array_fill(0, $height, array_fill(0, $width, []));
     /** 每一帧生成新的星星（只在最大星星数量内）*/
     if (count($stars) <= $maxStars) {
         $stars = array_merge($stars, generateStars($numStars, $isWaterLine));
@@ -498,6 +499,18 @@ function computeCoordinateFor2dCircle(array &$stars,array $config =[],array $can
     return $canvas;
 }
 
+/**
+ * 创建画布
+ * @param int $height
+ * @param int $width
+ * @return array
+ */
+function createCanvas(int $height,int $width)
+{
+    /** 画布 */
+    return array_fill(0, $height, array_fill(0, $width, ' '));
+}
+
 /**------------------------------------------3D-------------------------------------------------------------*/
 /** 获取终端的宽度和高度 */
 list($width, $height) = getTerminalSize(); //
@@ -537,7 +550,7 @@ $maxStars = 100; // 最大星星数量
 /** 流星尾巴长度 因为一个色系的长度是6所以最长设置为6 */
 $trailLength = 6; // 轨迹长度（星星的单位）
 /** 是否流线型，确定了尾巴是否紧紧的跟随流星 */
-$isWaterLine = true;//是否流线型运动
+$isWaterLine = true;
 /** 横向和纵向的修正系数 就是cli模式下字符宽度和高度的比值 宽度：高度，若取值1 ，则为纵向的椭圆 ，经过测试2.1是最理想的状态 */
 $rateForWithAndHeight = 2.1; # 2.1
 
@@ -556,6 +569,7 @@ while (true) {
     echo "\033[H\033[J";
     /** 隐藏光标 */
     echo "\033[?25l";
+    $canvas = createCanvas($height,$width);
     /** 金字塔配置 */
     $config = [
         'width' => $width,
@@ -578,7 +592,7 @@ while (true) {
         ],
     ];
     /** 渲染3D金字塔 */
-    $canvas = computeCoordinateFor3d($config);
+    $canvas = computeCoordinateFor3d($config,$canvas);
 
     /** 立方体 */
     $config2 = [
@@ -620,7 +634,7 @@ while (true) {
 
     ];
     /** 渲染2D流星 */
-    $canvas = computeCoordinateFor2dCircle($stars,$config3,$canvas);
+    $canvas = computeCoordinateFor2dCircle($stars,$trail,$config3,$canvas);
 
     /** 渲染页面 */
     foreach ($canvas as $line) {
