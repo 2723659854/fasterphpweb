@@ -364,7 +364,7 @@ function computeCoordinateFor3d(array $config = [], array $canvas = [])
     $vertices = $config['vertices'] ?? [];
     /** 三维图形绘图路径 */
     $edges = $config['edges'] ?? [];
-    /** 如果没有涂层，则需要创建新的图层 */
+    /** 如果没有图层，则需要创建新的图层 */
     if (empty($canvas)) {
         $canvas = array_fill(0, $height, array_fill(0, $width, ' '));
     }
@@ -416,32 +416,32 @@ function computeCoordinateFor3d(array $config = [], array $canvas = [])
 
 /**
  * 绘制二维动画流星
- * @param array $stars
- * @param array $config
- * @param array $canvas
+ * @param array $stars 流星坐标
+ * @param array $trail 流星轨迹坐标
+ * @param array $config 流星配置
+ * @param array $canvas 画布
  * @return array
  */
-function computeCoordinateFor2dCircle(array &$stars,array &$trail,array $config =[],array $canvas = [])
+function computeCoordinateFor2dCircle(array &$stars, array &$trail, array $config = [], array $canvas = [])
 {
-    $maxStars = $config['maxStars']??1;
-    $numStars = $config['numStars']??1;
-    $isWaterLine = $config['isWaterLine']??true;
-    $centerX = $config['centerX']??0;
-    $centerY = $config['centerY']??0;
-    $width = $config['width']??80;
-    $height = $config['height']??40;
-    $trailLength = $config['trailLength']??6;
+    $maxStars = $config['maxStars'] ?? 1;
+    $numStars = $config['numStars'] ?? 1;
+    $isWaterLine = $config['isWaterLine'] ?? true;
+    $centerX = $config['centerX'] ?? 0;
+    $centerY = $config['centerY'] ?? 0;
+    $width = $config['width'] ?? 80;
+    $height = $config['height'] ?? 40;
+    $trailLength = $config['trailLength'] ?? 6;
     /** 二维平面x轴方向偏移量 */
     $distanceX = $config['distanceX'] ?? 0;
     /** 二维平面y轴方向偏移量 */
     $distanceY = $config['distanceY'] ?? 0;
 
-    if(empty($canvas)){
+    if (empty($canvas)) {
         /** 画布 */
         $canvas = array_fill(0, $height, array_fill(0, $width, ' '));
     }
-    /** 轨迹画布，存储轨迹 */
-    //$trail = array_fill(0, $height, array_fill(0, $width, []));
+
     /** 每一帧生成新的星星（只在最大星星数量内）*/
     if (count($stars) <= $maxStars) {
         $stars = array_merge($stars, generateStars($numStars, $isWaterLine));
@@ -501,11 +501,11 @@ function computeCoordinateFor2dCircle(array &$stars,array &$trail,array $config 
 
 /**
  * 创建画布
- * @param int $height
- * @param int $width
+ * @param int $height 终端高度
+ * @param int $width 终端宽度
  * @return array
  */
-function createCanvas(int $height,int $width)
+function createCanvas(int $height, int $width)
 {
     /** 画布 */
     return array_fill(0, $height, array_fill(0, $width, ' '));
@@ -555,13 +555,12 @@ $isWaterLine = true;
 $rateForWithAndHeight = 2.1; # 2.1
 
 /** 计算固定区域的起始位置以居中显示 */
-$startX =  $width / 2;
-$startY =  $height / 2;
+$startX = $width / 2;
+$startY = $height / 2;
 /** 轨迹画布，存储轨迹 */
 $trail = array_fill(0, $height, array_fill(0, $width, []));
 /** 存储星星的数组 */
 $stars = [];
-
 
 
 while (true) {
@@ -569,7 +568,7 @@ while (true) {
     echo "\033[H\033[J";
     /** 隐藏光标 */
     echo "\033[?25l";
-    $canvas = createCanvas($height,$width);
+    $canvas = createCanvas($height, $width);
     /** 金字塔配置 */
     $config = [
         'width' => $width,
@@ -592,7 +591,7 @@ while (true) {
         ],
     ];
     /** 渲染3D金字塔 */
-    $canvas = computeCoordinateFor3d($config,$canvas);
+    $canvas = computeCoordinateFor3d($config, $canvas);
 
     /** 立方体 */
     $config2 = [
@@ -619,22 +618,22 @@ while (true) {
     /** 渲染3D立方体 */
     $canvas = computeCoordinateFor3d($config2, $canvas);
 
-   /** 渲染2D流星 */
+    /** 渲染2D流星 */
     $config3 = [
-        'maxStars'=>$maxStars,
-        'numStars'=>$numStars,
-        'isWaterLine'=>$isWaterLine,
-        'centerX'=>$centerX,
-        'centerY'=>$centerY,
-        'width'=>$width,
-        'height'=>$height,
-        'trailLength'=>$trailLength,
-        'distanceX'=>0,
-        'distanceY'=>0,
+        'maxStars' => $maxStars,
+        'numStars' => $numStars,
+        'isWaterLine' => $isWaterLine,
+        'centerX' => $centerX,
+        'centerY' => $centerY,
+        'width' => $width,
+        'height' => $height,
+        'trailLength' => $trailLength,
+        'distanceX' => $distanceX + 2,
+        'distanceY' => -$distanceY - 2,
 
     ];
     /** 渲染2D流星 */
-    $canvas = computeCoordinateFor2dCircle($stars,$trail,$config3,$canvas);
+    $canvas = computeCoordinateFor2dCircle($stars, $trail, $config3, $canvas);
 
     /** 渲染页面 */
     foreach ($canvas as $line) {
