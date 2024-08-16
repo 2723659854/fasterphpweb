@@ -342,7 +342,7 @@ function generateStars(int $numStars, bool $isWaterLine)
  * @return array
  * @note 将三维坐标透视到二维坐标
  */
-function computeCoordinateFor3D(array $config = [], array $canvas = [])
+function computeCoordinateFor3d(array $config = [], array $canvas = [])
 {
     /** 终端宽度  */
     $width = $config['width'] ?? 80;
@@ -414,6 +414,90 @@ function computeCoordinateFor3D(array $config = [], array $canvas = [])
     return $canvas;
 }
 
+/**
+ * 绘制二维动画流星
+ * @param array $stars
+ * @param array $config
+ * @param array $canvas
+ * @return array
+ */
+function computeCoordinateFor2dCircle(array &$stars,array $config =[],array $canvas = [])
+{
+    $maxStars = $config['maxStars']??1;
+    $numStars = $config['numStars']??1;
+    $isWaterLine = $config['isWaterLine']??true;
+    $centerX = $config['centerX']??0;
+    $centerY = $config['centerY']??0;
+    $width = $config['width']??80;
+    $height = $config['height']??40;
+    $trailLength = $config['trailLength']??6;
+    /** 二维平面x轴方向偏移量 */
+    $distanceX = $config['distanceX'] ?? 0;
+    /** 二维平面y轴方向偏移量 */
+    $distanceY = $config['distanceY'] ?? 0;
+
+    if(empty($canvas)){
+        /** 画布 */
+        $canvas = array_fill(0, $height, array_fill(0, $width, ' '));
+    }
+
+    /** 每一帧生成新的星星（只在最大星星数量内）*/
+    if (count($stars) <= $maxStars) {
+        $stars = array_merge($stars, generateStars($numStars, $isWaterLine));
+    }
+    /** 更新每个星星的位置 临时存储有效的星星 */
+    $newStars = [];
+    foreach ($stars as &$star) {
+        /** 坐标使用了三角函数计算 */
+        $star['radius'] += $star['speed']; // 半径增加，模拟径向位移
+        $star['angle'] += $star['angleSpeed']; // 角度增加，模拟旋转
+        if ($star['angle'] >= 360) {
+            $star['angle'] = $star['angle'] % 360;
+        }
+        /** x 坐标 = 圆心x坐标 + 半径 x 角度的余弦 需要校正x方向坐标 */
+        $x = $centerX + (int)($star['radius'] * 2 * cos($star['angle']));
+        /** y 坐标 = 圆心y坐标 + 半径 x 角度的正弦 */
+        $y = $centerY + (int)($star['radius'] * sin($star['angle']));
+
+        /** 在坐标系中，分成四个象限 */
+        /** 确保星星位置在画布内 */
+        if ($x >= 0 && $x < $width && $y >= 0 && $y < $height) {
+            // 更新轨迹
+            for ($i = 0; $i < $trailLength; $i++) {
+                /** 尾巴总是离圆心更近一些，越是后面的尾巴，离圆心越近 */
+                /** 尾巴的x坐标 = 圆心点x的坐标 + （头部的半径 - 尾巴的长度） x 圆角的余弦 需要校正x方向坐标 */
+                $trailX = $centerX + (int)(($star['radius'] - $i * $star['speed']) * 2 * cos($star['angle'])) + $distanceX;
+                /** 尾巴的y坐标 = 圆心的y坐标 + （头部的半径 - 尾巴的长度） x 圆角的正弦 */
+                $trailY = $centerY + (int)(($star['radius'] - $i * $star['speed']) * sin($star['angle'])) + $distanceY;
+                /** 尾巴还在画布内 */
+                if ($trailX >= 0 && $trailX < $width && $trailY >= 0 && $trailY < $height) {
+                    // 添加颜色到轨迹，并保证第二个星星颜色较暗
+                    /** 因为流星的速度不一样，存在交叉的情况，所以会存在流星尾巴重合的情况，所以同一个坐标会有多个星星，按顺序存储星星 */
+                    $trail[$trailY][$trailX][] = getFadedColor($star['color'], $i);
+                }
+            }
+            /** 记录有效的星星 */
+            $newStars[] = $star;
+        }
+    }
+    /** 更新星星数组 */
+    $stars = $newStars;
+    /** 绘制轨迹：只绘制了轨迹，而并没有绘制流星本身 */
+    for ($y = 0; $y < $height; $y++) {
+        for ($x = 0; $x < $width; $x++) {
+            /** 如果这个坐标有流星的尾巴 */
+            if (!empty($trail[$y][$x])) {
+                /** 这里必须按顺序获取星星的数据，否则流星颜色会混乱，这一步很关键 */
+                $lastColor = array_shift($trail[$y][$x]);
+                /** 渲染当前坐标的流星 */
+                $canvas[$y][$x] = "\033[38;5;{$lastColor}m*\033[0m";
+            }
+        }
+    }
+
+    return $canvas;
+}
+
 /**------------------------------------------3D-------------------------------------------------------------*/
 /** 获取终端的宽度和高度 */
 list($width, $height) = getTerminalSize(); //
@@ -472,7 +556,6 @@ while (true) {
     echo "\033[H\033[J";
     /** 隐藏光标 */
     echo "\033[?25l";
-    /**----------------------------------渲染3D图像开始---------------------------------------------------------------*/
     /** 金字塔配置 */
     $config = [
         'width' => $width,
@@ -494,8 +577,8 @@ while (true) {
             [0, 1], [1, 2], [2, 3], [3, 0], [0, 4], [1, 4], [2, 4], [3, 4]
         ],
     ];
-    /** 绘制金字塔 */
-    $canvas = computeCoordinateFor3D($config);
+    /** 渲染3D金字塔 */
+    $canvas = computeCoordinateFor3d($config);
 
     /** 立方体 */
     $config2 = [
@@ -519,67 +602,25 @@ while (true) {
         ],
         'edges' => [[0, 1], [1, 2], [2, 3], [3, 0], [4, 5], [5, 6], [6, 7], [7, 4], [0, 4], [1, 5], [2, 6], [3, 7]],
     ];
-    /** 将立方体动画叠加到金字塔图层上 */
-    $canvas = computeCoordinateFor3D($config2, $canvas);
+    /** 渲染3D立方体 */
+    $canvas = computeCoordinateFor3d($config2, $canvas);
 
-    /**-------------------渲染3D动画结束------------------------------------------------------------------------------*/
+   /** 渲染2D流星 */
+    $config3 = [
+        'maxStars'=>$maxStars,
+        'numStars'=>$numStars,
+        'isWaterLine'=>$isWaterLine,
+        'centerX'=>$centerX,
+        'centerY'=>$centerY,
+        'width'=>$width,
+        'height'=>$height,
+        'trailLength'=>$trailLength,
+        'distanceX'=>0,
+        'distanceY'=>0,
 
-    /**-------------------渲染2D图像开始------------------------------------------------------------------------------*/
-    /** 每一帧生成新的星星（只在最大星星数量内）*/
-    if (count($stars) <= $maxStars) {
-        $stars = array_merge($stars, generateStars($numStars, $isWaterLine));
-    }
-    /** 更新每个星星的位置 临时存储有效的星星 */
-    $newStars = [];
-    foreach ($stars as &$star) {
-        /** 坐标使用了三角函数计算 */
-        $star['radius'] += $star['speed']; // 半径增加，模拟径向位移
-        $star['angle'] += $star['angleSpeed']; // 角度增加，模拟旋转
-        if ($star['angle'] >= 360) {
-            $star['angle'] = $star['angle'] % 360;
-        }
-        /** x 坐标 = 圆心x坐标 + 半径 x 角度的余弦 需要校正x方向坐标 */
-        $x = $centerX + (int)($star['radius'] * $rateForWithAndHeight * cos($star['angle']));
-        /** y 坐标 = 圆心y坐标 + 半径 x 角度的正弦 */
-        $y = $centerY + (int)($star['radius'] * sin($star['angle']));
-
-        /** 在坐标系中，分成四个象限 */
-        /** 确保星星位置在画布内 */
-        if ($x >= 0 && $x < $width && $y >= 0 && $y < $height) {
-            // 更新轨迹
-            for ($i = 0; $i < $trailLength; $i++) {
-                /** 尾巴总是离圆心更近一些，越是后面的尾巴，离圆心越近 */
-                /** 尾巴的x坐标 = 圆心点x的坐标 + （头部的半径 - 尾巴的长度） x 圆角的余弦 需要校正x方向坐标 */
-                $trailX = $centerX + (int)(($star['radius'] - $i * $star['speed']) * $rateForWithAndHeight * cos($star['angle']));
-                /** 尾巴的y坐标 = 圆心的y坐标 + （头部的半径 - 尾巴的长度） x 圆角的正弦 */
-                $trailY = $centerY + (int)(($star['radius'] - $i * $star['speed']) * sin($star['angle']));
-                /** 尾巴还在画布内 */
-                if ($trailX >= 0 && $trailX < $width && $trailY >= 0 && $trailY < $height) {
-                    // 添加颜色到轨迹，并保证第二个星星颜色较暗
-                    /** 因为流星的速度不一样，存在交叉的情况，所以会存在流星尾巴重合的情况，所以同一个坐标会有多个星星，按顺序存储星星 */
-                    $trail[$trailY][$trailX][] = getFadedColor($star['color'], $i);
-                }
-            }
-            /** 记录有效的星星 */
-            $newStars[] = $star;
-        }
-    }
-    /** 更新星星数组 */
-    $stars = $newStars;
-    /** 绘制轨迹：只绘制了轨迹，而并没有绘制流星本身 */
-    for ($y = 0; $y < $height; $y++) {
-        for ($x = 0; $x < $width; $x++) {
-            /** 如果这个坐标有流星的尾巴 */
-            if (!empty($trail[$y][$x])) {
-                /** 这里必须按顺序获取星星的数据，否则流星颜色会混乱，这一步很关键 */
-                $lastColor = array_shift($trail[$y][$x]);
-                /** 渲染当前坐标的流星 */
-                $canvas[$y][$x] = "\033[38;5;{$lastColor}m*\033[0m";
-            }
-        }
-    }
-    /**-------------------------------------------渲染2D动画结束----------------------------------------------------------*/
-
+    ];
+    /** 渲染2D流星 */
+    $canvas = computeCoordinateFor2dCircle($stars,$config3,$canvas);
 
     /** 渲染页面 */
     foreach ($canvas as $line) {
