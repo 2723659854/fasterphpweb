@@ -48,11 +48,11 @@ function getTerminalSize()
  * @note 这里可以抽象成一个公共方法，传入终端的宽高，x,y,z方向的旋转角度，缩放比例，三维图像的顶点坐标，三维图像的边构成方式。
  * 如果要实现在三维空间的位移，那么可以在转换过的坐标加上偏移量即可。
  */
-function drawPyramid($width, $height, $angleX, $angleY, $angleZ, $scale,$distancX=0,$distanceY=0,$canvas = [] )
+function drawPyramid($width, $height, $angleX, $angleY, $angleZ, $scale, $distancX = 0, $distanceY = 0, $canvas = [])
 {
     //$canvas = array_fill(0, $height, array_fill(0, $width, ' '));
 
-    if (empty($canvas)){
+    if (empty($canvas)) {
         $canvas = array_fill(0, $height, array_fill(0, $width, ' '));
     }
     // 定义金字塔的顶点
@@ -96,7 +96,7 @@ function drawPyramid($width, $height, $angleX, $angleY, $angleZ, $scale,$distanc
         $x *= $scale;
         $y *= $scale;
         /** 只取被位移后的x和y坐标 ，就完成了三维到二维的转换 */
-        $rotatedVertices[] = [$x + $distancX + $width / 2, $y + $distanceY +  $height / 2];
+        $rotatedVertices[] = [$x + $distancX + $width / 2, $y + $distanceY + $height / 2];
     }
 
     // 定义金字塔的边
@@ -115,8 +115,6 @@ function drawPyramid($width, $height, $angleX, $angleY, $angleZ, $scale,$distanc
 
     return $canvas;
 }
-
-
 
 
 // 使用上述相同的终端绘制和更新逻辑
@@ -197,10 +195,10 @@ function drawLine(&$canvas, $x0, $y0, $x1, $y1)
  * @return array 画布数组
  * @note 使用将三维图形降维到二维的方式绘制图形
  */
-function drawCube($width, $height, $angleX, $angleY, $angleZ, $scale,$distancX=0,$distanceY=0,$canvas =[])
+function drawCube($width, $height, $angleX, $angleY, $angleZ, $scale, $distancX = 0, $distanceY = 0, $canvas = [])
 {
     //$canvas = array_fill(0, $height, array_fill(0, $width, ' ')); // 初始化画布
-    if (empty($canvas)){
+    if (empty($canvas)) {
         $canvas = array_fill(0, $height, array_fill(0, $width, ' '));
     }
     /** 一个立方体有8个顶点 ，通过点确定线，由线构成面 */
@@ -264,7 +262,7 @@ function drawCube($width, $height, $angleX, $angleY, $angleZ, $scale,$distancX=0
 
         /** 按顺序存入8个顶点的新坐标 */
         // 将坐标调整为画布坐标系
-        $rotatedVertices[] = [$x + $distancX+ $width / 2, $y + $distanceY + $height / 2];
+        $rotatedVertices[] = [$x + $distancX + $width / 2, $y + $distanceY + $height / 2];
     }
 
     // 确保$rotatedVertices数组包含8个顶点
@@ -304,30 +302,30 @@ function drawCube($width, $height, $angleX, $angleY, $angleZ, $scale,$distancX=0
  * @return array
  * @note 将三维坐标透视到二维坐标
  */
-function computeCoordinateFor3D(array $config = [],array $canvas = [] )
+function computeCoordinateFor3D(array $config = [], array $canvas = [])
 {
     /** 终端宽度  */
-    $width = $config['width']??80;
+    $width = $config['width'] ?? 80;
     /** 终端高度 */
-    $height = $config['height']??40;
+    $height = $config['height'] ?? 40;
     /** 绕x旋转角度 */
-    $angleX = $config['angleX']??0;
+    $angleX = $config['angleX'] ?? 0;
     /** 绕y轴旋转角度 */
-    $angleY = $config['angleY']??0;
+    $angleY = $config['angleY'] ?? 0;
     /** 绕z轴旋转角度 */
-    $angleZ = $config['angleZ']??0;
+    $angleZ = $config['angleZ'] ?? 0;
     /** 图形相对于终端尺寸缩放比例 */
-    $scale = $config['scale']??(min($width, $height) / 8);
+    $scale = $config['scale'] ?? (min($width, $height) / 8);
     /** 二维平面x轴方向偏移量 */
-    $distanceX = $config['distanceX']??1;
+    $distanceX = $config['distanceX'] ?? 1;
     /** 二维平面y轴方向偏移量 */
-    $distanceY = $config['distanceY']??1;
+    $distanceY = $config['distanceY'] ?? 1;
     /** 三维图像构图关键点 */
-    $vertices = $config['vertices']??[];
+    $vertices = $config['vertices'] ?? [];
     /** 三维图形绘图路径 */
-    $edges = $config['edges']??[];
+    $edges = $config['edges'] ?? [];
     /** 如果没有涂层，则需要创建新的图层 */
-    if (empty($canvas)){
+    if (empty($canvas)) {
         $canvas = array_fill(0, $height, array_fill(0, $width, ' '));
     }
 
@@ -361,7 +359,7 @@ function computeCoordinateFor3D(array $config = [],array $canvas = [] )
         $x *= $scale;
         $y *= $scale;
         /** 只取被位移后的x和y坐标 ，就完成了三维到二维的转换 */
-        $rotatedVertices[] = [$x + $distanceX + $width / 2, $y + $distanceY +  $height / 2];
+        $rotatedVertices[] = [$x * 2 + $distanceX + $width / 2, $y + $distanceY + $height / 2];
     }
 
     /** 根据配置使用两个端点绘制三维图像的边 */
@@ -404,23 +402,23 @@ while (true) {
 
     /** 金字塔配置 */
     $config = [
-        'width'=>$width,
-        'height'=>$height,
-        'angleX'=>$angleX,
-        'angleY'=>$angleY,
-        'angleZ'=>$angleZ,
-        'scale'=>$scale,
-        'distanceX'=>$distanceX,
-        'distanceY'=>$distanceY,
-        'vertices'=>[
+        'width' => $width,
+        'height' => $height,
+        'angleX' => $angleX,
+        'angleY' => $angleY,
+        'angleZ' => $angleZ,
+        'scale' => $scale,
+        'distanceX' => $distanceX,
+        'distanceY' => $distanceY,
+        'vertices' => [
             [-1, -1, -1],
             [1, -1, -1],
             [1, 1, -1],
             [-1, 1, -1],
             [0, 0, 1]
         ],
-        'edges'=>[
-            [0, 1], [1, 2], [2, 3], [3, 0],[0, 4], [1, 4], [2, 4], [3, 4]
+        'edges' => [
+            [0, 1], [1, 2], [2, 3], [3, 0], [0, 4], [1, 4], [2, 4], [3, 4]
         ],
     ];
     /** 绘制金字塔 */
@@ -428,15 +426,15 @@ while (true) {
 
     /** 立方体 */
     $config2 = [
-        'width'=>$width,
-        'height'=>$height,
-        'angleX'=>$angleX,
-        'angleY'=>$angleY,
-        'angleZ'=>$angleZ,
-        'scale'=>$scale,
-        'distanceX'=>-$distanceX-1,
-        'distanceY'=>-$distanceY-1,
-        'vertices'=>[
+        'width' => $width,
+        'height' => $height,
+        'angleX' => $angleX,
+        'angleY' => $angleY,
+        'angleZ' => $angleZ,
+        'scale' => $scale,
+        'distanceX' => -$distanceX - 1,
+        'distanceY' => -$distanceY - 1,
+        'vertices' => [
             [-1, -1, -1],
             [1, -1, -1],
             [1, 1, -1],
@@ -446,48 +444,48 @@ while (true) {
             [1, 1, 1],
             [-1, 1, 1]
         ],
-        'edges'=>[[0, 1], [1, 2], [2, 3], [3, 0], [4, 5], [5, 6], [6, 7], [7, 4], [0, 4], [1, 5], [2, 6], [3, 7]],
+        'edges' => [[0, 1], [1, 2], [2, 3], [3, 0], [4, 5], [5, 6], [6, 7], [7, 4], [0, 4], [1, 5], [2, 6], [3, 7]],
     ];
     /** 将立方体动画叠加到金字塔图层上 */
-    $canvas = computeCoordinateFor3D($config2,$canvas);
+    $canvas = computeCoordinateFor3D($config2, $canvas);
     /** 渲染页面 */
     foreach ($canvas as $line) {
         echo implode('', $line) . PHP_EOL; // 输出画布内容
     }
     /** 实现水平跳动 */
     /** 向右移动 */
-    if ($directionX == 1){
+    if ($directionX == 1) {
         $distanceX++;
     }
     /** 向左移动 */
-    if ($directionX == -1){
+    if ($directionX == -1) {
         $distanceX--;
     }
     /** 即将超过右边界，更换方向，向左移动 */
-    if ($distanceX>=($width/2)){
+    if ($distanceX >= ($width / 2)) {
         $directionX = -1;
     }
     /** 即将超过左边界，更换方向，向右移动 */
-    if ($distanceX<=(-$width/2)){
+    if ($distanceX <= (-$width / 2)) {
         $directionX = 1;
     }
 
     /** 实现纵向的跳动 */
 
     /** 向右移动 */
-    if ($directionY == 1){
-        $distanceY +=1;
+    if ($directionY == 1) {
+        $distanceY += 1;
     }
     /** 向左移动 */
-    if ($directionY == -1){
-        $distanceY -=1;
+    if ($directionY == -1) {
+        $distanceY -= 1;
     }
     /** 即将超过右边界，更换方向，向左移动 */
-    if ($distanceY>=($height/2)){
+    if ($distanceY >= ($height / 2)) {
         $directionY = -1;
     }
     /** 即将超过左边界，更换方向，向右移动 */
-    if ($distanceY<=(-$height/2)){
+    if ($distanceY <= (-$height / 2)) {
         $directionY = 1;
     }
 
