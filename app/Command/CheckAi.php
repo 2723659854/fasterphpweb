@@ -81,7 +81,12 @@ class CheckAi extends BaseCommand
     public function handle()
     {
         /** 初始化客户端 */
-        $this->getClient();
+        try {
+            $this->getClient();
+        }catch (\Exception $exception){
+            var_dump($exception->getMessage());
+        }
+
         $this->client->addMessage('开始对话', 'system');
         $this->info("系统：对话开始，请输入你要资讯的问题\r\n");
         if ($this->sleepTime < 1) {
@@ -91,7 +96,13 @@ class CheckAi extends BaseCommand
         /** 循环交流 */
         while (true) {
             /** 请求chatgpt */
-            $this->requestChatGpt();
+            try {
+                $this->requestChatGpt();
+            }catch (\Exception $exception){
+                /** 发生了错误，可能key不可用了，切换客户端 */
+                $this->getClient();
+            }
+
             /** 模拟自然人交流，不可访问频率过高 */
             sleep($this->sleepTime);
         }
@@ -199,11 +210,13 @@ class CheckAi extends BaseCommand
      */
     public function getKey()
     {
+        //return "sk-6pmw6yav430eL5l1sF30fGsadjVksjPWrTtLBFiDBHgeLHrB";
         /** 防止指针溢出 */
         if ($this->index > (count($this->apiKey) - 1)) {
             $this->index = 0;
         }
         /** 返回当前指针的key，并移动指针，逐个使用每一个客户端，不使用随机客户端 */
-        return implode('',explode(',',$this->apiKey[$this->index++]));
+        $key = implode('',explode(',',$this->apiKey[$this->index++]));
+        return $key;
     }
 }
