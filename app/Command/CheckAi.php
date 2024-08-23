@@ -100,6 +100,7 @@ class CheckAi extends BaseCommand
                 $this->requestChatGpt();
             }catch (\Exception $exception){
                 /** 发生了错误，可能key不可用了，切换客户端 */
+                $this->info("客户端崩溃，已自动切换客户端，请重新提问");
                 $this->getClient();
             }
 
