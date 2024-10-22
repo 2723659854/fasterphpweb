@@ -1,4 +1,7 @@
-框架简介
+## FASTERPHPWEB
+一个使用socket编写的PHP常驻内存框架，本项目是想到哪里写到哪里，里面有记录了笔记。
+
+### 框架简介
 <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;本框架旨在让用户了解和学习PHP实现web运行原理，涉及到了相对较多的底层基础知识。</p>
 <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fasterphpweb是一款常驻内存的轻量级的php框架，遵循常用的mvc架构。</p>
 <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;本框架对timer,redis,mysql,rabbitmq,kafka,websocket,elasticsearch,nacos,sqlite 进行了简单封装，并且保留了部分代码实例。</p>
