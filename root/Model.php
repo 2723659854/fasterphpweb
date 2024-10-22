@@ -1,6 +1,8 @@
 <?php
 namespace Root;
 use Root\Lib\BaseModel;
+use Root\Lib\Transaction;
+
 /**
  * 模型层
  */
@@ -22,5 +24,20 @@ class Model
             $class->table = $model->table;
         }
         return ($class)->{$name}(...$arguments);
+    }
+
+    /**
+     * 开启事务
+     * @param string $level 事无级别
+     * @return Transaction
+     */
+    final public static function startTransaction(string $level = Transaction::READ_COMMITTED){
+
+        $class = (new BaseModel());
+        $model = new (get_called_class());
+        if ($model->table){
+            $class->table = $model->table;
+        }
+        return ($class)->startTransaction($level);
     }
 }

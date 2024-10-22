@@ -350,6 +350,32 @@ class Book extends Model
         return ['status' => 1, 'data' => $messages, 'msg' => 'success','book'=>$book];
     }
 ```
+####  数据库事务的使用
+
+```php
+use App\Model\Admin;
+
+/** 开启事务 */
+$transAction = Admin::startTransaction();
+try {
+    /** 如果查询报错，那么写入就会失败 */
+    $query = Admin::where('id','=',1398)->first();
+    var_dump($query);
+    Admin::insert([
+        'phone'=>'125896325',
+        'nickname'=>'tom',
+        'password'=>md5(time())
+    ]);
+    /** 提交事务 */
+    $transAction->commit();
+}catch (\Exception $exception){
+    /** 发生了异常，事务回滚 */
+    $transAction->rollback();
+    /** 打印报错信息 */
+    var_dump($exception->getMessage());
+}
+
+```
 
 ### 缓存的使用
 

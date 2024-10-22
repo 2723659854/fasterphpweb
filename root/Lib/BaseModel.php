@@ -17,7 +17,7 @@ use \mysqli_sql_exception as MysqlException;
     private string $type = 'mysql';
 
     /** mysql连接公用的关键就是把mysql静态化存储，防止每一次类被实例化的时候重复的创建连接，减少tcp握手开销 */
-    private static  $mysql;
+    private static \mysqli $mysql;
 
     protected string $sql='';
     public string $table = '';
@@ -28,7 +28,7 @@ use \mysqli_sql_exception as MysqlException;
     /** 初始化 */
     public function __construct()
     {
-        if (!self::$mysql){
+        if (empty(self::$mysql)){
             $this->connect();
         }
     }
@@ -99,8 +99,9 @@ use \mysqli_sql_exception as MysqlException;
                 $this->sql=$sqlCopy;
                 /** 重新执行 */
                 return $this->first();
+            }else{
+                throw new \RuntimeException($e->getMessage());
             }
-            return [];
         }
     }
 
@@ -149,8 +150,9 @@ use \mysqli_sql_exception as MysqlException;
                 $this->sql=$sqlCopy;
                 /** 重新执行 */
                 return $this->get();
+            }else{
+                throw new \RuntimeException($e->getMessage());
             }
-            return [];
         }
 
     }
@@ -163,7 +165,7 @@ use \mysqli_sql_exception as MysqlException;
      * @param string|array $value 值
      * @return $this
      */
-    public function where(string $name, string $logic,  $value)
+    public function where(string $name, string $logic, string|array $value)
     {
         if ($this->sql){
             $this->sql=$this->sql.' and ';
@@ -239,8 +241,9 @@ use \mysqli_sql_exception as MysqlException;
                 $this->connect();
                 /** 重新执行 */
                 return $this->insert($param);
+            }else{
+                throw new \RuntimeException($e->getMessage());
             }
-            return false;
         }
     }
 
@@ -276,8 +279,9 @@ use \mysqli_sql_exception as MysqlException;
                 $this->sql=$sqlCopy;
                 /** 重新执行 */
                 return $this->update($param);
+            }else{
+                throw new \RuntimeException($e->getMessage());
             }
-            return false;
         }
     }
 
@@ -304,8 +308,9 @@ use \mysqli_sql_exception as MysqlException;
                 $this->sql=$sqlCopy;
                 /** 重新执行 */
                 return $this->delete();
+            }else{
+                throw new \RuntimeException($e->getMessage());
             }
-            return false;
         }
     }
 
@@ -393,8 +398,9 @@ use \mysqli_sql_exception as MysqlException;
                 $this->connect();
                 /** 重新执行 */
                 return $this->query($sql);
+            }else{
+                throw new \RuntimeException($e->getMessage());
             }
-            return false;
         }
     }
 
@@ -440,8 +446,20 @@ use \mysqli_sql_exception as MysqlException;
                 $this->connect();
                 /** 重新执行 */
                 return $this->insertAll($array);
+            }else{
+                throw new \RuntimeException($e->getMessage());
             }
-            return false;
         }
     }
+
+     /**
+      * 开启事务
+      * @param string $level 事无级别
+      * @return Transaction
+      */
+    public  function startTransaction(string $level = Transaction::READ_COMMITTED){
+        return (new Transaction(self::$mysql,$level));
+    }
+
+
  }

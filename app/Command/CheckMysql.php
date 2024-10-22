@@ -1,7 +1,7 @@
 <?php
 namespace App\Command;
 
-use App\Model\User;
+use App\Model\Admin;
 use Root\Lib\BaseCommand;
 /**
  * @purpose 用户自定义命令
@@ -31,18 +31,26 @@ class CheckMysql extends BaseCommand
      */
     public function handle()
     {
-        $this->info("请在这里编写你的业务逻辑");
-
-        $time = time();
-        $count = 100000;
-
-        $this->info("开始查询数据库");
-        for($i=0;$i<=$count;$i++){
-            //User::where('id','=',1)->first();
-            User::query('select * from users where id = 1');
+        $this->info("测试mysql事务");
+        /** 开启事务 */
+        $transAction = Admin::startTransaction();
+        try {
+            /** 如果查询报错，那么写入就会失败 */
+            $query = Admin::where('id','=',1398)->first();
+            var_dump($query);
+            Admin::insert([
+                'phone'=>'125896325',
+                'nickname'=>'tom',
+                'password'=>md5(time())
+            ]);
+            /** 提交事务 */
+            $transAction->commit();
+        }catch (\Exception $exception){
+            /** 发生了异常，事务回滚 */
+            $transAction->rollback();
+            /** 打印报错信息 */
+            var_dump($exception->getMessage());
         }
-        $time2 = time();
-        $spend = $time2 - $time;
-        $this->info("查询数据库{$count}次，耗时{$spend}s");
+
     }
 }
