@@ -37,7 +37,7 @@ services:
     # 目录挂载 这里是把宿主机的目录/e/yanglong/webman  挂载到容器的 /var/www 目录
     # 这里使用了目录挂载，可以实现代码实时更新
     volumes:
-      - /d/project:/usr/src/myapp
+      - /d/php:/usr/src/myapp
     # 需要连接的容器名称，这里指定要连接redis容器
     links:
        - redis
