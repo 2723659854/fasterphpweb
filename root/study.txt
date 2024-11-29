@@ -467,9 +467,29 @@ getDataWithError().catch((error) => {
 
 =========================================================================
 
+这一段JavaScript使用next生成器，目的是实现异步操作的作用。PHP中也有yeild关键字，称为迭代器
+remainTimer = setTimeout(() => {
+        Cookies.set('overTimer', 1)
 
+        if(Cookies.get('overTimer') >= 1) {
+          alert('您已登录超时')
 
+          clearTimeout(remainTimer)
+          Cookies.remove('overTimer')
+          Cookies.set('loginType', false)
 
+          window.localStorage.clear()
+          axios.get('/LoginApi/loginOut')
+
+          next({
+            path: '/',
+            query: {
+              redirect: to.fullPath
+            } // 将跳转的路由path作为参数，登录成功后跳转到该路由
+          })
+        }
+      }, 7200000)
+=======================
 
 
 
