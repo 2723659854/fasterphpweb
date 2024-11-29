@@ -403,6 +403,70 @@ dropZone.addEventListener('drop', (e) => {
 然后对于每个文件，使用 FileReader 读取文件内容。当文件内容读取完成后（reader.onload 事件触发），创建一个 XMLHttpRequest 对象，设置请求方式为 POST，并将文件内容以二进制流的形式（application/octet - stream）发送到指定的上传 URL（your - upload - url 需要替换为实际的上传地址）。
 通过以上的 HTML5 Drag and Drop API 以及相关的事件处理和数据传输机制，就可以实现网页上的拖拽上传功能。
 
+=======================================================================================================
+异步函数的基本概念
+在 JavaScript 中，async关键字用于定义一个异步函数。异步函数是一种特殊的函数，它返回一个Promise对象。这意味着函数的执行不会阻塞后续代码的运行，程序可以在异步函数执行的同时继续执行其他任务。
+示例对比同步函数和异步函数
+同步函数
+考虑以下同步函数：
+javascript
+复制
+function addNumbers(a, b) {
+    return a + b;
+}
+let result = addNumbers(3, 5);
+console.log(result);
+console.log("其他操作");
+在这个例子中，addNumbers函数是同步函数。当调用addNumbers函数时，程序会等待函数执行完毕并返回结果后，才会继续执行下一行代码。所以console.log(result)会先打印出8，然后console.log("其他操作")才会执行。
+异步函数
+现在看一个异步函数的例子：
+javascript
+复制
+async function getData() {
+    // 模拟一个异步操作，比如从网络获取数据
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            resolve("模拟获取的数据");
+        }, 2000);
+    });
+}
+getData().then((result) => {
+    console.log(result);
+});
+console.log("其他操作");
+在这里，getData函数是异步函数，因为它前面有async关键字。函数内部返回一个Promise，这个Promise在2秒后通过resolve返回一个模拟获取的数据。当调用getData函数时，它会立即返回一个Promise对象，程序不会等待Promise的状态变为resolved（已解决）就会继续执行下一行代码，所以console.log("其他操作")会先执行，大约2秒后，Promise的then方法中的回调函数才会被调用，打印出模拟获取的数据。
+async函数内部的await关键字配合使用
+async函数内部通常会和await关键字一起使用。await只能在async函数内部使用，它会暂停async函数的执行，直到等待的Promise被解决（resolved）或被拒绝（rejected）。
+例如：
+javascript
+复制
+async function getDataAndProcess() {
+    const data = await getData();
+    console.log("获取到数据后进行处理");
+    return data.toUpperCase();
+}
+getDataAndProcess().then((result) => {
+    console.log(result);
+});
+在getDataAndProcess函数中，await getData()会暂停函数的执行，直到getData函数返回的Promise被解决，获取到数据后，函数才会继续执行后面的代码，打印获取到数据后进行处理，然后对数据进行处理并返回。这种方式让异步代码在一定程度上可以像同步代码一样按照顺序编写，使代码逻辑更清晰，尤其是在处理多个依赖的异步操作时非常有用。
+错误处理
+因为async函数返回一个Promise，所以可以使用Promise的catch方法来处理异步函数中的错误。例如：
+javascript
+复制
+async function getDataWithError() {
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            reject("出现错误");
+        }, 2000);
+    });
+}
+getDataWithError().catch((error) => {
+    console.error(error);
+});
+在这个例子中，getDataWithError函数返回的Promise在2秒后被拒绝，通过catch方法可以捕获这个错误并进行处理，在控制台打印出出现错误。
+
+=========================================================================
+
 
 
 
