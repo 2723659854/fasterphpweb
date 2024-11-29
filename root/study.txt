@@ -339,6 +339,71 @@ https://www.hello-algo.com/chapter_array_and_linkedlist/ram_and_cache/#441
 
 
 
+HTML5 Drag and Drop API（拖放 API）基础原理
+事件驱动机制
+HTML5 提供了一系列的拖放事件来实现拖拽上传功能。主要的事件包括 dragstart、drag、dragenter、dragover、drop 和 dragend。
+当用户开始拖拽一个元素（例如文件）时，会在被拖拽元素上触发 dragstart 事件。这个事件可以用于设置被拖拽数据的相关信息，如文件内容等。在整个拖拽过程中，会不断触发 drag 事件，它可以用于更新一些视觉提示或者状态。
+当被拖拽元素进入一个有效的放置目标区域时，会触发该区域的 dragenter 事件。接着，dragover 事件会在放置目标区域上持续触发，这个事件很关键，因为默认情况下，浏览器是不允许在大多数元素上进行放置操作的，所以需要在放置目标区域的 dragover 事件处理函数中阻止浏览器的默认行为，以允许放置操作。
+当用户在目标区域释放鼠标，完成拖拽操作时，会触发 drop 事件，这个事件用于处理接收到的数据，例如读取上传文件的内容等。最后，dragend 事件会在被拖拽元素上触发，表示拖拽操作结束。
+数据传输（DataTransfer）对象
+在 dragstart 事件处理函数中，会使用到 DataTransfer 对象。这个对象用于在拖拽源和放置目标之间传递数据。例如，当拖拽一个文件时，可以通过 DataTransfer 对象获取文件相关信息，如文件名、文件类型和文件内容（通过 FileReader 读取）。
+它有一些重要的方法和属性，比如 setData() 方法用于设置要传递的数据，getData() 方法用于在放置目标处获取数据。在文件拖拽上传的场景中，DataTransfer 对象的 files 属性用于获取被拖拽的文件列表，这些文件可以在 drop 事件处理函数中进行进一步处理，如上传到服务器。
+实现步骤示例
+HTML 结构部分
+首先，需要在网页上定义一个放置目标区域，通常是一个 div 或者其他合适的 HTML 元素。例如：
+html
+复制
+<div id="drop - zone">将文件拖放到此处</div>
+CSS 样式部分
+为放置目标区域添加一些样式，以提供视觉提示，让用户知道这是一个可以放置文件的区域。例如：
+css
+复制
+#drop - zone {
+    border: 2px dashed gray;
+    width: 300px;
+    height: 200px;
+    text - align: center;
+    padding - top: 80px;
+    color: gray;
+}
+JavaScript 事件处理部分
+dragenter 和 dragover 事件处理：
+为放置目标区域添加 dragenter 和 dragover 事件处理函数，在这些函数中阻止浏览器的默认行为，使得可以在这个区域进行文件放置。例如：
+javascript
+复制
+const dropZone = document.getElementById('drop - zone');
+dropZone.addEventListener('dragenter', (e) => {
+    e.preventDefault();
+});
+dropZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+});
+drop 事件处理：
+在 drop 事件处理函数中，获取被拖拽的文件列表，并可以进行后续的上传操作。假设使用 XMLHttpRequest 来上传文件，示例代码如下：
+javascript
+复制
+dropZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    const files = e.dataTransfer.files;
+    for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const reader = new FileReader();
+        reader.onload = function (event) {
+            // 创建XMLHttpRequest对象用于上传文件
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', 'your - upload - url', true);
+            xhr.setRequestHeader('Content - Type', 'application/octet - stream');
+            xhr.send(event.target.result);
+        };
+        reader.readAsArrayBuffer(file);
+    }
+});
+在上述 drop 事件处理函数中：
+首先通过 e.dataTransfer.files 获取被拖拽的文件列表。
+然后对于每个文件，使用 FileReader 读取文件内容。当文件内容读取完成后（reader.onload 事件触发），创建一个 XMLHttpRequest 对象，设置请求方式为 POST，并将文件内容以二进制流的形式（application/octet - stream）发送到指定的上传 URL（your - upload - url 需要替换为实际的上传地址）。
+通过以上的 HTML5 Drag and Drop API 以及相关的事件处理和数据传输机制，就可以实现网页上的拖拽上传功能。
+
+
 
 
 
