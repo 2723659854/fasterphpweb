@@ -490,6 +490,56 @@ remainTimer = setTimeout(() => {
         }
       }, 7200000)
 =======================
+javascript 中的时间
+获取当前时间戳
+var timestamp = new Date()
+根据一个日期创建时间戳
+var timestamp1 = new Date('2024-11-05')
+将时间戳转化为制定格式
+s_time = new Date().Format("yyyy-MM-dd")
+
+================================================================================================================
+使用Javascript操作日期
+
+// 获取当前时间
+const now = new Date();
+
+// 设置为昨天的日期
+const yesterday = new Date(now);
+yesterday.setDate(yesterday.getDate() - 1);
+
+// 获取昨天00:00:00的时间并格式化为指定格式
+const startOfYesterday = new Date(yesterday);
+startOfYesterday.setHours(0);
+startOfYesterday.setMinutes(0);
+startOfYesterday.setSeconds(0);
+startOfYesterday.setMilliseconds(0);
+const startFormatted = formatDate(startOfYesterday);
+
+// 获取昨天23:59:59的时间并格式化为指定格式
+const endOfYesterday = new Date(yesterday);
+endOfYesterday.setHours(23);
+endOfYesterday.setMinutes(59);
+endOfYesterday.setSeconds(59);
+endOfYesterday.setMilliseconds(0);
+const endFormatted = formatDate(endOfYesterday);
+
+console.log("昨天00:00:00的时间（格式：Y-m-d H:i:s）：", startFormatted);
+console.log("昨天23:59:59的时间（格式：Y-m-d H:i:s）：", endFormatted);
+
+// 定义格式化日期的函数
+function formatDate(date) {
+    const year = date.getFullYear();
+    const month = ('0' + (date.getMonth() + 1)).slice(-2);
+    const day = ('0' + date.getDate()).slice(-2);
+    const hours = ('0' + date.getHours()).slice(-2);
+    const minutes = ('0' + date.getMinutes()).slice(-2);
+    const seconds = ('0' + date.getSeconds()).slice(-2);
+
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+}
+======================================================================================================================
+
 
 
 
