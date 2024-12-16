@@ -34,7 +34,7 @@
     "xiaosongshu/colorword": "dev-master",
     "xiaosongshu/progress": "dev-master",
     "xiaosongshu/table": "dev-master",
-    "phpseclib/phpseclib": "*",
+    "phpseclib/phpseclib": "^3.0",
     "jeremeamia/superclosure": "^2.4@dev",
     "nikic/fast-route": "^2.0@dev",
     "ext-pcntl": "*",
