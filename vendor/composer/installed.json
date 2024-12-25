@@ -3627,8 +3627,8 @@
         },
         {
             "name": "xiaosongshu/table",
-            "version": "dev-master",
-            "version_normalized": "dev-master",
+            "version": "v1.0.0",
+            "version_normalized": "1.0.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/2723659854/table.git",
@@ -3644,7 +3644,6 @@
                 "php": ">=7.0"
             },
             "time": "2023-09-06T05:12:02+00:00",
-            "default-branch": true,
             "type": "library",
             "installation-source": "dist",
             "autoload": {

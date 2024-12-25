@@ -51,7 +51,7 @@ class Table
          /** 计算每个单元格的宽度 */
         array_walk_recursive($data,function (&$v){
             /** 因为中英文混杂，长度不一致，那么取中间值作为元素的宽度 */
-            $l1= strlen($v);
+            $l1= mb_strlen($v);
             $l2= strlen($v);
             $v=ceil($l1+($l2-$l1)/2);
         });
