@@ -3584,24 +3584,23 @@
         },
         {
             "name": "xiaosongshu/progress",
-            "version": "dev-master",
-            "version_normalized": "dev-master",
+            "version": "v1.0.6",
+            "version_normalized": "1.0.6.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/2723659854/progress.git",
-                "reference": "3267b11c5c81587252ef67795c7c6c1a19c4ae3f"
+                "reference": "116b44f53384628492cbda0f8ecea0d9e1d07595"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/2723659854/progress/zipball/3267b11c5c81587252ef67795c7c6c1a19c4ae3f",
-                "reference": "3267b11c5c81587252ef67795c7c6c1a19c4ae3f",
+                "url": "https://api.github.com/repos/2723659854/progress/zipball/116b44f53384628492cbda0f8ecea0d9e1d07595",
+                "reference": "116b44f53384628492cbda0f8ecea0d9e1d07595",
                 "shasum": ""
             },
             "require": {
                 "php": ">=7.0"
             },
-            "time": "2023-09-05T10:17:38+00:00",
-            "default-branch": true,
+            "time": "2024-12-25T07:57:16+00:00",
             "type": "library",
             "installation-source": "dist",
             "autoload": {
@@ -3622,7 +3621,7 @@
             "description": "php的进度条，在cli模式下使用。（A progress bar plugin used in PHP's cli mode.）",
             "support": {
                 "issues": "https://github.com/2723659854/progress/issues",
-                "source": "https://github.com/2723659854/progress/tree/v1.0.5"
+                "source": "https://github.com/2723659854/progress/tree/v1.0.6"
             },
             "install-path": "../xiaosongshu/progress"
         },

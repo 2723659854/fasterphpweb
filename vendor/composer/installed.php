@@ -3,7 +3,7 @@
         'name' => 'xiaosongshu/fasterphpweb',
         'pretty_version' => 'dev-master',
         'version' => 'dev-master',
-        'reference' => '50afbb1940445a3510a2e9a867270d0d87b7961f',
+        'reference' => '5a38229f2cce87e2b22491b0737cb8828175963f',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -539,7 +539,7 @@
         'xiaosongshu/fasterphpweb' => array(
             'pretty_version' => 'dev-master',
             'version' => 'dev-master',
-            'reference' => '50afbb1940445a3510a2e9a867270d0d87b7961f',
+            'reference' => '5a38229f2cce87e2b22491b0737cb8828175963f',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
@@ -568,14 +568,12 @@
             'dev_requirement' => false,
         ),
         'xiaosongshu/progress' => array(
-            'pretty_version' => 'dev-master',
-            'version' => 'dev-master',
-            'reference' => '3267b11c5c81587252ef67795c7c6c1a19c4ae3f',
+            'pretty_version' => 'v1.0.6',
+            'version' => '1.0.6.0',
+            'reference' => '116b44f53384628492cbda0f8ecea0d9e1d07595',
             'type' => 'library',
             'install_path' => __DIR__ . '/../xiaosongshu/progress',
-            'aliases' => array(
-                0 => '9999999-dev',
-            ),
+            'aliases' => array(),
             'dev_requirement' => false,
         ),
         'xiaosongshu/table' => array(

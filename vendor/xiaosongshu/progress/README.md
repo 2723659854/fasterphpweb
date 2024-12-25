@@ -23,6 +23,8 @@ for ($i=1;$i<=10;$i++){
     /** 更新进度条 */
     $bar->advance(2);
 }
+/** 进度条完成 */
+$bar->finished();
 
 ```
 执行php index.php ,就可以看到类似进度条如下：<br>

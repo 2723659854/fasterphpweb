@@ -32,7 +32,6 @@
     "php-amqplib/php-amqplib": "3.2.*",
     "elasticsearch/elasticsearch": "7.17.*",
     "xiaosongshu/colorword": "dev-master",
-    "xiaosongshu/progress": "dev-master",
     "xiaosongshu/table": "dev-master",
     "phpseclib/phpseclib": "^3.0",
     "jeremeamia/superclosure": "^2.4@dev",
@@ -59,7 +58,8 @@
     "ext-readline": "*",
     "react/event-loop": "^3@dev",
     "nmred/kafka-php": "0.2.*",
-    "monolog/monolog": "^2.9"
+    "monolog/monolog": "^2.9",
+    "xiaosongshu/progress": "^1.0"
   },
   "config": {
     "allow-plugins": {
