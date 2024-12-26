@@ -262,8 +262,7 @@ if (!class_exists('Xiaosongshu')) {
                     }
                     file_put_contents($masterIdFile, null);
                 }
-                /** 关闭rtmp推流服务 */
-                self::closeRtmp();
+
                 /** 释放文件锁 */
                 if ($_start_server_file_lock) {
                     flock($_start_server_file_lock, LOCK_UN);
@@ -345,22 +344,7 @@ if (!class_exists('Xiaosongshu')) {
             return $matches[1] ?? [];
         }
 
-        /**
-         * 关闭rtmp服务
-         * @return void
-         */
-        public static function closeRtmp()
-        {
-            /** 关闭rtmp服务 */
-            $rtmp_enable = config('rtmp')['enable'] ?? false;
-            if ($rtmp_enable) {
-                /** workman是单独的一个框架，需要单独开启一个进程处理业务 */
-                $rtmp_pid = pcntl_fork();
-                if ($rtmp_pid > 0) {
-                    G(RtmpConsumer::class)->consume(['stop']);
-                }
-            }
-        }
+
 
         /** 运行环境监测 */
         public function check_env()

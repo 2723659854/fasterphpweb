@@ -229,8 +229,7 @@ class HttpClient
         $request .= "x-client-ip: $refererIp\r\n";
         $request .= "via: $refererIp\r\n";
         $request .= "Proxy_Add_X_Forwarded_For: $refererIp\r\n";
-        //todo 这里只是调试，正常情况应该追加这个结束符
-        //$request .= "$end";
+        $request .= "$end";
 
         return $request;
     }
