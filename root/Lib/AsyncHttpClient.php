@@ -26,12 +26,12 @@ class AsyncHttpClient
         stream_set_blocking($socket,false);
         $request = HttpClient::makeRequest($host,$port);
 
-        Selector::addFunction($socket,$request,function($buffer){
+        /*Selector::addFunction($socket,$request,function($buffer){
             var_dump('我是异步客户端回调');
 
         },function ( \RuntimeException $exception){
             var_dump($exception->getMessage());
-        });
+        });*/
 
     }
 }

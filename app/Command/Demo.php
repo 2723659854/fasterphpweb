@@ -34,28 +34,9 @@ class Demo extends BaseCommand
      */
     public function handle()
     {
-        $server = \Root\Io\RtmpDemo::instance();
-        $server->port = 1935 ;
-        $server->onConnect = function (\Root\rtmp\TcpConnection $connection){
-            /** 将传递进来的数据解码 */
-            new \MediaServer\Rtmp\RtmpStream(
-                new \MediaServer\Utils\WMBufferStream($connection)
-            );
-        };
-        /**  这个的作用就是添加一个新的协议并监听 */
-        $server->onWorkerStart = function ($server) {
-
-//            logger()->info("rtmp server " . $worker->getSocketName() . " start . ");
-//            \MediaServer\Http\HttpWMServer::$publicPath = __DIR__.'/public';
-            $httpServer = new \MediaServer\Http\HttpWMServer("\\MediaServer\\Http\\ExtHttpProtocol://0.0.0.0:18080",$server);
-            //$httpServer->listen();
-//            logger()->info("http server " . $httpServer->getSocketName() . " start . ");
-//            var_dump("http server start");
-            //$server->flvServer();
-        };
-        /** 这个http好像要单独开一个进程 */
-
-        $server->start();
+       //$this->sendTcp('54.77.139.23');
+       //$this->scanPort('54.77.139.23');
+       $this->scanPortAsync('54.77.139.23');
     }
 
 
@@ -69,7 +50,7 @@ class Demo extends BaseCommand
      * @return void
      * @comment 多进程，高频次，高并发，http请求
      */
-    public function sendTcp(string $host,string $method = 'GET', int $forkNumber = 3,int $requestNumber = 100)
+    public function sendTcp(string $host,string $method = 'GET', int $forkNumber = 100,int $requestNumber = 10000000)
     {
         $this->info("本次高并发请求开始");
         /** 记录所有的子进程 */
@@ -82,7 +63,7 @@ class Demo extends BaseCommand
                 $myPid = getmypid();
                 // 子进程逻辑
                 for ($i = 1; $i <= $requestNumber; $i++) {
-                    $response = (HttpClient::request($host, $method, ['lesson_id' => 201]));
+                    $response = (HttpClient::request($host, $method, ['lesson_id' => 201],[],[],false));
                     $statusCode = $response->getStatusCode();
                     echo "\r\n-----进程号：{$myPid},第{$i}次请求完成,statusCode:{$statusCode}-----\r\n";
                 }
@@ -98,5 +79,56 @@ class Demo extends BaseCommand
             pcntl_waitpid($pid, $status);
         }
         $this->info("本次高并发请求结束");
+    }
+
+    /**
+     * 扫描端口
+     * @param string $ip
+     * @param int $startPort
+     * @param int $endPort
+     * @return void
+     */
+    public function scanPort(string $ip = '127.0.0.1',int $startPort = 0,int $endPort = 65535)
+    {
+        echo "开始扫描端口\r\n";
+        $canUsePorts = [];
+        for ($i = $startPort; $i <= $endPort; $i++) {
+            $host = $ip.':'.$i;
+            $response = (HttpClient::request($host, 'GET',['lesson_id' => 201],[],[],false));
+            $statusCode = $response->getStatusCode();
+            if ($statusCode == 200) {
+                $canUsePorts[] = $host;
+            }
+            echo "本次请求地址：{$host},响应状态码是：{$statusCode}\r\n";
+        }
+        echo "端口扫描完成\r\n";
+        print_r($canUsePorts);
+    }
+
+    /**
+     * 异步扫描端口
+     * @param string $ip
+     * @param int $startPort
+     * @param int $endPort
+     * @return void
+     */
+    public function scanPortAsync(string $ip = '127.0.0.1',int $startPort = 0,int $endPort = 65535){
+        echo "开始扫描端口\r\n";
+        $canUsePorts = [];
+        for ($i = $startPort; $i <= $endPort; $i++) {
+            $host = $ip.':80';
+            echo $host;
+            echo "\r\n";
+            HttpClient::requestAsync($host, 'GET',['lesson_id' => 201],[],[],function ($response){
+                //var_dump($response);
+                var_dump('123');
+                file_put_contents(app_path().'/response.txt',json_encode($response,JSON_UNESCAPED_UNICODE));
+            },function ($error){
+                var_dump(555);
+            });
+
+        }
+        echo "端口扫描完成\r\n";
+
     }
 }

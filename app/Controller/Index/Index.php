@@ -9,6 +9,7 @@ use Root\Annotation\Mapping\Middlewares;
 use Root\Annotation\Mapping\RequestMapping;
 use Root\ESClient;
 use App\Middleware\MiddlewareA;
+use Root\Lib\HttpClient;
 use Root\Request;
 use Root\Cache;
 use App\Queue\Test;
@@ -120,7 +121,7 @@ class Index
         $queue = new Demo();
         $queue->publish(['name' => '张三', 'age' => 23]);
         (new Demo2())->publish(['school' => 'no school']);
-        (new DemoConsume())->publish(['status'=>1,'msg'=>'ok']);
+        (new DemoConsume())->publish(['status' => 1, 'msg' => 'ok']);
         return \response(['msg' => 'ok', 'status' => 200]);
     }
 
@@ -192,9 +193,34 @@ class Index
     {
         return view('/index/ws');
     }
+
     #[RequestMapping(methods: 'get', path: '/restart')]
-    public function restart(){
+    public function restart()
+    {
         Xiaosongshu::restart();
         return 'ok';
+    }
+
+    /**
+     * 扫描端口
+     * @return Response
+     * @note 经过检测，对方开启了端口25,587,80，465,443
+     */
+    #[RequestMapping(methods: 'get', path: '/scan')]
+    public function scan()
+    {
+        echo "开始扫描端口\r\n";
+        for ($i = 0; $i <= 6553; $i++) {
+            $host = "http://54.77.139.23:80";
+            HttpClient::requestAsync($host, 'GET', ['lesson_id' => 201], [], [], function ($response) use ($host) {
+                var_dump("请求地址：" . $host);
+                var_dump($response->getStatusCode());
+            }, function ($error) {
+                var_dump($error->getMessage());
+
+            });
+        }
+        echo "端口扫描完成\r\n";
+        return \response('异步端口扫描完成');
     }
 }

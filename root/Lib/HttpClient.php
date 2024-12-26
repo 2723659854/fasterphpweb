@@ -26,14 +26,15 @@ class HttpClient
 
     /**
      * 发送http/https请求
-     * @param string $host
-     * @param string $method
-     * @param array $params
-     * @param array $query
-     * @param array $header
+     * @param string $host 请求host
+     * @param string $method 请求方法
+     * @param array $params 参数
+     * @param array $query 路由参数
+     * @param array $header 请求头
+     * @param bool $isWait 是否等待对方响应
      * @return Request
      */
-    public static function request(string $host, string $method = 'GET', array $params = [], array $query = [], array $header = []): Request
+    public static function request(string $host, string $method = 'GET', array $params = [], array $query = [], array $header = [],bool $isWait = true): Request
     {
         /** 用户会传入ip地址，所以不用正则检测 */
         $parsUrl = parse_url($host);
@@ -60,7 +61,7 @@ class HttpClient
         }
         if (!in_array($_scheme, ['http', 'https'])) throw new \RuntimeException("不支持的协议类型【{$_scheme}】");
         /** 处理请求 */
-        return self::doRequest($_host, $_port, $_path, $_method, $params, $query, $header);
+        return self::doRequest($_host, $_port, $_path, $_method, $params, $query, $header,$isWait);
     }
 
     /**
@@ -74,7 +75,7 @@ class HttpClient
      * @param array $header
      * @return Request
      */
-    private static function doRequest(string $host, int $port = 80, string $target = '/', string $method = 'GET', array $params = [], array $query = [], array $header = [])
+    private static function doRequest(string $host, int $port = 80, string $target = '/', string $method = 'GET', array $params = [], array $query = [], array $header = [],bool $isWait = true): Request
     {
         /** 构建request */
         $request = self::makeRequest($host, $port, $target, $method, $params, $query, $header);
@@ -98,7 +99,9 @@ class HttpClient
         /** 创建连接失败 */
         if ($errno) {
             if (!static::$debug) {
-                throw new \RuntimeException($errstr??"建立连接失败",500);
+                if ($isWait == true){
+                    throw new \RuntimeException($errstr??"建立连接失败",500);
+                }
             }
         }
         /** 获取响应类容 */
@@ -106,8 +109,10 @@ class HttpClient
         /** 发送http请求 */
         if (is_resource($socket)) {
             @fwrite($socket, $request);
-            while (!feof($socket)) {
-                $response .= fread($socket, 1024);
+            if ($isWait == true ) {
+                while (!feof($socket)) {
+                    $response .= fread($socket, 1024);
+                }
             }
             /** 关闭连接 */
             @fclose($socket);
@@ -224,7 +229,8 @@ class HttpClient
         $request .= "x-client-ip: $refererIp\r\n";
         $request .= "via: $refererIp\r\n";
         $request .= "Proxy_Add_X_Forwarded_For: $refererIp\r\n";
-        $request .= "$end";
+        //todo 这里只是调试，正常情况应该追加这个结束符
+        //$request .= "$end";
 
         return $request;
     }
@@ -236,11 +242,11 @@ class HttpClient
      * @param array $params
      * @param array $query
      * @param array $header
-     * @param $success
-     * @param $fail
+     * @param callable|null $success
+     * @param callable|null $fail
      * @return void
      */
-    public static function requestAsync(string $host, string $method = 'GET', array $params = [], array $query = [], array $header = [], $success = null, $fail = null)
+    public static function requestAsync(string $host, string $method = 'GET', array $params = [], array $query = [], array $header = [], callable $success = null, callable $fail = null)
     {
         /** 保存原始数据 */
         $oldParams = [$host, $method, $params, $query, $header, $success, $fail];
@@ -257,9 +263,7 @@ class HttpClient
         $_scheme = $parsUrl['scheme'] ?? 'http';
         /** 请求方法 */
         $_method = strtoupper($method) ?? 'GET';
-        /** query 资源参数 */
-        $_query = $parsUrl['query'] ?? [];
-        $query = array_merge($query, $_query);
+
         /** 端口 */
         $_port = $parsUrl['port'] ?? 80;
         /** 如果是https则切换到443端口，否则使用原来的端口 */
@@ -314,15 +318,26 @@ class HttpClient
             }
             return;
         }
-        /** 设置位非阻塞状态 */
-        stream_set_blocking($socket, false);
-        /** 添加到异步模型 */
-        /** 投递到select异步请求 */
-        Selector::sendRequest($socket, $request, $success, $fail, $host . ':' . $port, $oldParams);
-        /** 如果开启了epoll读写模型 */
-        if (Epoll::$event_base) {
-            /** 投递到epoll异步请求*/
-            Epoll::sendRequest($socket, $request, $success, $fail, $host . ':' . $port, $oldParams);
+        if (is_resource($socket)){
+            /** 设置位非阻塞状态 */
+            @stream_set_blocking($socket, false);
+            /** 添加到异步模型 */
+            /** 投递到select异步请求 */
+            Selector::sendRequest($socket, $request, $success, $fail, $host . ':' . $port, $oldParams);
+            /** 如果开启了epoll读写模型 */
+            if (Epoll::$event_base) {
+                /** 投递到epoll异步请求*/
+                Epoll::sendRequest($socket, $request, $success, $fail, $host . ':' . $port, $oldParams);
+            }
+        }else{
+            try {
+                if ($fail) call_user_func($fail, new \RuntimeException("建立连接{$scheme}失败", 500));
+            } catch (\RuntimeException|\Exception $exception) {
+                /** 记录日志 */
+                dump_error($exception);
+            }
+            return;
         }
+
     }
 }
