@@ -1,7 +1,9 @@
 <?php
-require_once __DIR__.'/vendor/autoload.php';
 
-$data = include __DIR__.'/bug.jpg';
+require_once __DIR__.'/consume.php';
 
-print_r($data);
 
+
+var_dump('开始消费');
+
+(new Consume())->consume();
