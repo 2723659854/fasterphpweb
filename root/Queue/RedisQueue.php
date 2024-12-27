@@ -1,10 +1,18 @@
 <?php
 
+namespace Root\Queue;
 
+/**
+ * @purpose redis实现的队列
+ * @author yanglong
+ * @time 2024年12月27日18:18:03
+ */
 class RedisQueue
 {
+    /** redis服务 */
     private $queue;
 
+    /** 默认的队列分组 */
     const QUEUE_TOPIC = 'A_SIMPLE_QUEUE_TOPIC_';
 
     /**

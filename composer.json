@@ -59,7 +59,8 @@
     "nmred/kafka-php": "0.2.*",
     "monolog/monolog": "^2.9",
     "xiaosongshu/progress": "^1.0",
-    "xiaosongshu/table": "^1.0"
+    "xiaosongshu/table": "^1.0",
+    "ext-redis": "*"
   },
   "config": {
     "allow-plugins": {
