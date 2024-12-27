@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/Queue.php';
 
-class Consume extends Queue
+class Consume extends RedisQueue
 {
     public function execute(array $params): int
     {
