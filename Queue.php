@@ -20,6 +20,12 @@ class RedisQueue
     /** 分组名称 */
     public string $groupName = self::QUEUE_TOPIC;
 
+    /** 消费成功 */
+    const ACK = 1;
+
+    /** 消费失败 */
+    const NACK = 0;
+
     /**
      * 初始化
      */
