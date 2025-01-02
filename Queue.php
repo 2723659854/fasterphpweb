@@ -16,9 +16,12 @@ class RedisQueue
     const QUEUE_TOPIC = 'A_SIMPLE_QUEUE_TOPIC_';
 
     /** 队列名称 */
-    public string $queueName = self::QUEUE_TOPIC;
+    public  $queueName = self::QUEUE_TOPIC;
     /** 分组名称 */
-    public string $groupName = self::QUEUE_TOPIC;
+    public  $groupName = self::QUEUE_TOPIC;
+
+    /** 最大失败次数 */
+    public $maxFailNum = 5;
 
     /** 消费成功 */
     const ACK = 1;
@@ -33,7 +36,7 @@ class RedisQueue
     {
         try {
             $redis = new \Redis();
-            $redis->connect('192.168.110.72', 6379);
+            $redis->connect('127.0.0.1', 6379);
             $redis->auth('xT9=123456');
             $redis->select(5);
             $this->queue = $redis;
@@ -75,6 +78,19 @@ class RedisQueue
                         try {
                             if ($this->execute($message)) {
                                 $ackMessages[] = $messageId;
+                            }else{
+                                if (!isset($message['_fail'])){
+                                    $message['_fail'] = 1;
+                                }else{
+                                    $message['_fail'] ++;
+                                }
+                                if ($message['_fail'] >= $this->maxFailNum) {
+                                    unset($message['_fail']);
+                                    /** 超过最大执行次数，抛出异常 */
+                                    $this->error(new \Exception("队列：".$this->queueName." 执行失败超过最大次数：".$this->maxFailNum." 消息内容：".json_encode($message,JSON_UNESCAPED_UNICODE)));
+                                }else{
+                                    $this->publish($message);
+                                }
                             }
                         } catch (\Exception $e) {
                             /** 理论上业务的异常应该由开发者自己处理，本程序只负责值守任务 */

@@ -10,7 +10,7 @@ class Consume extends RedisQueue
             throw new Exception("测试抛出异常");
         }
 
-        return 1;
+        return self::NACK;
     }
 }
 
