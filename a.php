@@ -4,7 +4,7 @@ require_once __DIR__.'/consume.php';
 
 
 try {
-    for ($i = 0; $i <= 100; $i++) {
+    for ($i = 0; $i <= 50; $i++) {
         (new Consume())->publish(['time' => date('Y-m-d H:i:s'), 'num' => $i]);
         echo "投递{$i}\n";
         sleep(1);
