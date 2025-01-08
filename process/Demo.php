@@ -18,7 +18,7 @@ class Demo
                 $statusCode = $response->getStatusCode();
                 echo "请求地址：{$host},状态码：{$statusCode}\r\n";
             }, function ($error) {
-                var_dump( $error->getMessage());
+                //var_dump( $error->getMessage());
                 //file_put_contents(app_path().'/response.txt', $error->getMessage()."\r\n", FILE_APPEND);
             });
         }

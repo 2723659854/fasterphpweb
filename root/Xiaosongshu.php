@@ -565,22 +565,13 @@ if (!class_exists('Xiaosongshu')) {
          */
         public function makeConsumeProcess($master_pid)
         {
-            $redis_enable = config('redis')['enable'] ?? false;
+
             $rabbitmq_enable = in_array(true, array_column(config('rabbitmqProcess') ?? [], 'enable'));
             $ws_enable = in_array(true, array_column(config('ws') ?? [], 'enable'));
-            $rtmp_enable = config('rtmp')['enable'] ?? false;
             $process_enable = in_array(true, array_column(config('process') ?? [], 'enable'));
             /** 创建子进程负责处理 其他常驻内存的进程 */
             if (getmypid() == $master_pid) {
                 pcntl_fork();
-            }
-            /** rtmp进程 */
-            if ($rtmp_enable && (getmypid() != $master_pid)) {
-                G(RtmpConsumer::class)->consume(['start', '-d']);
-            }
-            /** 开启redis队列 */
-            if ($redis_enable && (getmypid() != $master_pid)) {
-                G(RedisQueueConsumer::class)->consume();
             }
             /** 开启rabbitmq队列 */
             if ($rabbitmq_enable && (getmypid() != $master_pid)) {

@@ -288,7 +288,6 @@ class HttpClient
      */
     private static function doAsyncRequest(string $host, int $port = 80, string $target = '/', string $method = 'GET', array $params = [], array $query = [], array $header = [], callable $success = null, callable $fail = null, array $oldParams = [])
     {
-
         /** 构建request */
         $request = self::makeRequest($host, $port, $target, $method, $params, $query, $header);
         /** 协议类型 */

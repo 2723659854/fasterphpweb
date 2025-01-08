@@ -61,6 +61,16 @@ if (!function_exists('command_path')){
     }
 }
 
+if (!function_exists('runtime_path')){
+    /**
+     * 运行目录
+     * @return string
+     */
+    function runtime_path(){
+        return dirname(__DIR__) . '/runtime';
+    }
+}
+
 
 if (!function_exists('scan_dir')){
     /**

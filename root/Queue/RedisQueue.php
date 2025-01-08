@@ -36,9 +36,10 @@ class RedisQueue
     final public function __construct()
     {
         try {
+            $config = config('redis');
             $redis = new \Redis();
-            $redis->connect('127.0.0.1', 6379);
-            $redis->auth('X3WzfcTI3LEXPhyW');
+            $redis->connect($config['host'], $config['port']);
+            $redis->auth($config['password']);
             $redis->select(5);
             $this->queue = $redis;
         } catch (\RedisException $e) {
@@ -144,7 +145,11 @@ class RedisQueue
      */
     final public function getLogPath()
     {
-        return dirname(dirname(dirname(dirname(__DIR__)))) . '/Application/Runtime/Logs/Command/';
+        $path = runtime_path() . '/Command/';
+        if (!is_dir($path)) {
+            mkdir($path, 0777, true);
+        }
+        return $path;
     }
 
     /**
