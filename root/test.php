@@ -85,4 +85,38 @@ if ($_SERVER['SCRIPT_NAME'] == "/index.php") {
     $file_path = __DIR__. $request_uri.'/index.html';
     readfile($file_path);
 }
+/** 在实际网络通信中，需要考虑网络协议（如 TCP、UDP）的特点，如 TCP 的粘包和拆包问题 */
+
+/**
+ * 发送数据的时候打包
+ * @param string $data
+ * @param int $type
+ * @return string
+ */
+function myPack(string $data, int $type = 0)
+{
+    return pack('NN', strlen($data), $type) . $data;
+}
+
+/**
+ * 接受数据的时候解包
+ * @param string $data
+ * @return string
+ */
+function myUnpack(string $data)
+{
+    $header = unpack('Nlength/Ntype', substr($data, 0, 8));
+    if ($header['type'] == 0){
+        return substr($data, 8, $header['length']);
+    }else{
+        return '';
+    }
+}
+/** 测试 */
+$string = "hello world";
+$encode = myPack($string, 0);
+var_dump($encode);
+$decode = myUnpack($encode);
+var_dump($decode);
+
 ?>
