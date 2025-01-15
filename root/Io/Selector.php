@@ -49,6 +49,12 @@ class Selector
     /** 客户端上传数据最大请求时间 ，如果超过这个时间就断开这个连接 默认6分钟 */
     private static $maxRequestTime = 360;
 
+    /** 消息队列 */
+    private static $queue = [];
+
+    /** 定时任务 */
+    private static $timer = [];
+
     /** 初始化 */
     public function __construct()
     {
@@ -128,6 +134,9 @@ class Selector
     {
         /** 创建多个子进程阻塞接收服务端socket 这个while死循环 会导致for循环被阻塞，不往下执行，创建了子进程也没有用，直接在第一个子进程哪里阻塞了 */
         while (true) {
+            /** 处理队列和定时任务 */
+            $this->dealQueue();
+            $this->dealTimer();
             /** 初始化需要监测的可写入的客户端，需要排除的客户端都为空 */
             $except = [];
             /** 需要监听socket */
@@ -140,6 +149,26 @@ class Selector
             /** 处理可写的连接 */
             $this->dealWriteEvent($write);
         }
+    }
+
+    /**
+     * 处理队列逻辑
+     * @return void
+     * @note 理论上应该在当前进程处理队列，但是考虑对io的阻塞，失去了削峰的作用，所以单独开启进程处理。
+     */
+    private function dealQueue()
+    {
+
+    }
+
+    /**
+     * 处理定时任务逻辑
+     * @return void
+     * @note 理论上是应该在当前进程处理定时任务，但是考虑到对io的阻塞，失去了削峰的作用，所以单独开启进程处理。
+     */
+    private function dealTimer()
+    {
+
     }
 
     /**
