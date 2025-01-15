@@ -5,6 +5,7 @@ namespace Root\Io;
 use Root\Lib\Container;
 use Root\Lib\HttpClient;
 use Root\Request;
+use Root\Xiaosongshu;
 
 /**
  * @purpose epoll的IO多路复用模型
@@ -76,8 +77,7 @@ class Epoll
                 stream_set_blocking($cli, 0);
                 /** 创建read处理事件 */
                 Epoll::dealReadEvent($cli, $this->onMessage, $remote_address);
-                //todo 这里应该添加可写是事件，负责发送暂存区的数据
-                Epoll::dealWriteBufferEvent($cli);
+                //Epoll::dealWriteBufferEvent($cli);
             }
         }, Epoll::$serv);
         /** 添加事件 */
@@ -86,26 +86,27 @@ class Epoll
         Epoll::$serveEvent = $event;
     }
 
-    /** 每一个客户端的写暂存区 */
-    public static array $writeBuffers = [];
 
     /**
      * 服务器处理客户端可写事件
      * @param mixed $cli
      * @return void
+     * @note 当添加可写事件之后，服务无法运行，也无法打印
      */
     public static function dealWriteBufferEvent(mixed $cli)
     {
         /** 语法 ：EventBase cli flag(write,read,persist) 回调，param */
         $client_event_write = new \Event(Epoll::$event_base, $cli, \Event::WRITE | \Event::PERSIST, function ($cli) {
             /** 如果暂存区有数据 */
-            $buffer = Epoll::$writeBuffers[(int)$cli]??"";
+            $buffer = Xiaosongshu::$writeBuffers[(int)$cli]??"";
             if ($buffer) {
                 /** 发送给客户端 */
                 $length = fwrite($cli, $buffer, strlen($buffer));
                 /** 更新暂存区 */
                 if ($length) {
-                    Epoll::$writeBuffers[(int)$cli] = substr($buffer,  $length);
+                    Xiaosongshu::$writeBuffers[(int)$cli] = substr($buffer,  $length);
+                }else{
+                    self::unsetResource($cli);
                 }
             }
         }, $cli);
@@ -374,15 +375,9 @@ class Epoll
             Epoll::$events[-(int)$cli]->free();
         }
 
-        /** 清理读事件 */
-        if (!empty(Epoll::$events[(int)$cli])) {
-            /** 暂停事件 */
-            //Epoll::$events[(int)$cli]->del();
-            /** 释放资源 */
-            Epoll::$events[(int)$cli]->free();
-        }
         /** 释放写事件 */
         unset(Epoll::$events[(int)$cli]);
+        unset(Epoll::$writeEvents[(int)$cli]);
         /** 释放读事件 */
         unset(Epoll::$events[(-1) * ((int)$cli)]);
         /** 释放读标记 */
