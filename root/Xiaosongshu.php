@@ -386,6 +386,7 @@ if (!class_exists('Xiaosongshu')) {
          * @param $message
          * @param $httpServer
          * @return mixed
+         * @note 貌似有点问题，应该放入到可写链接中而不是直接返回
          */
         public function onMessage($socketAccept, $message, &$httpServer, $remote_address)
         {
@@ -393,16 +394,10 @@ if (!class_exists('Xiaosongshu')) {
             $request = Container::set(Request::class, [$message, $remote_address]);
             $method = $request->method();
             $uri = $request->path();
-            /** 允许跨域 */
-            $withHeader = [
-                'Access-Control-Allow-Credentials' => 'true',
-                'Access-Control-Allow-Origin' => $request->header('origin'),
-                'Access-Control-Allow-Methods' => '*',
-                'Access-Control-Allow-Headers' => '*'
-            ];
             /** 谷歌浏览器会直接发送option请求，用于探测服务是否正常 ，这个需要直接返回200响应，并告知允许跨域。当使用本框架编写后端接口的时候，前端使用vue，前端会提示跨域问题，这里就要设置允许跨域 */
             if ($method == 'OPTIONS') {
-                fwrite($socketAccept, response('<h1>OK</h1>', 200, $withHeader));
+                $content = new Response(200,[],'<h1>OK</h1>');
+                fwrite($socketAccept, $content);
                 fclose($socketAccept);
             } else {
                 $info = explode('.', $request->path());
@@ -418,11 +413,22 @@ if (!class_exists('Xiaosongshu')) {
                     /** 如果有这个文件 */
                     if (is_file($fileName)) {
                         /** 存在某个版本的浏览器无法正常显示尺寸比较大的图片的问题，报错提示是，资源的大小不匹配 */
-                        fwrite($socketAccept, $response = response(file_get_contents($fileName), 200, array_merge(['Content-Type' => $this->backContenType[$file_extension]], $withHeader)), strlen($response));
+                        $content = (new Response());
+                        $content->withFile($fileName);
+                        $content->withHeader('Access-Control-Allow-Credentials', 'true');
+                        $content->withHeader('Access-Control-Allow-Origin', $request->header('origin'));
+                        $content->withHeader('Access-Control-Allow-Methods', '*');
+                        $content->withHeader('Access-Control-Allow-Headers', '*');
+                        fwrite($socketAccept, $content);
                         fclose($socketAccept);
                     } else {
                         /** 如果没有这个文件 */
-                        fwrite($socketAccept, response('<h1>Not Found</h1>', 404, $withHeader));
+                        $content = (new Response(404));
+                        $content->withHeader('Access-Control-Allow-Credentials', 'true');
+                        $content->withHeader('Access-Control-Allow-Origin', $request->header('origin'));
+                        $content->withHeader('Access-Control-Allow-Methods', '*');
+                        $content->withHeader('Access-Control-Allow-Headers', '*');
+                        fwrite($socketAccept, $content);
                         fclose($socketAccept);
                     }
                 } else {
@@ -446,7 +452,12 @@ if (!class_exists('Xiaosongshu')) {
                         fclose($socketAccept);
                     } catch (\Exception|\RuntimeException $exception) {
                         /** 如果出现了异常 */
-                        fwrite($socketAccept, response($exception->getMessage(), 400, $withHeader));
+                        $content = new Response(400,[],$exception->getMessage());
+                        $content->withHeader('Access-Control-Allow-Credentials', 'true');
+                        $content->withHeader('Access-Control-Allow-Origin', $request->header('origin'));
+                        $content->withHeader('Access-Control-Allow-Methods', '*');
+                        $content->withHeader('Access-Control-Allow-Headers', '*');
+                        fwrite($socketAccept, $content);
                         fclose($socketAccept);
                     }
                 }
