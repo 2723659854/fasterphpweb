@@ -397,8 +397,6 @@ if (!class_exists('Xiaosongshu')) {
             /** 谷歌浏览器会直接发送option请求，用于探测服务是否正常 ，这个需要直接返回200响应，并告知允许跨域。当使用本框架编写后端接口的时候，前端使用vue，前端会提示跨域问题，这里就要设置允许跨域 */
             if ($method == 'OPTIONS') {
                 $content = new Response(200,[],'<h1>OK</h1>');
-                fwrite($socketAccept, $content);
-                fclose($socketAccept);
             } else {
                 $info = explode('.', $request->path());
                 $file_extension = end($info);
@@ -419,8 +417,6 @@ if (!class_exists('Xiaosongshu')) {
                         $content->withHeader('Access-Control-Allow-Origin', $request->header('origin'));
                         $content->withHeader('Access-Control-Allow-Methods', '*');
                         $content->withHeader('Access-Control-Allow-Headers', '*');
-                        fwrite($socketAccept, $content);
-                        fclose($socketAccept);
                     } else {
                         /** 如果没有这个文件 */
                         $content = (new Response(404));
@@ -428,8 +424,6 @@ if (!class_exists('Xiaosongshu')) {
                         $content->withHeader('Access-Control-Allow-Origin', $request->header('origin'));
                         $content->withHeader('Access-Control-Allow-Methods', '*');
                         $content->withHeader('Access-Control-Allow-Headers', '*');
-                        fwrite($socketAccept, $content);
-                        fclose($socketAccept);
                     }
                 } else {
                     /** 动态路由 */
@@ -448,8 +442,6 @@ if (!class_exists('Xiaosongshu')) {
                         $content->withHeader('Access-Control-Allow-Origin', $request->header('origin'));
                         $content->withHeader('Access-Control-Allow-Methods', '*');
                         $content->withHeader('Access-Control-Allow-Headers', '*');
-                        fwrite($socketAccept, $content);
-                        fclose($socketAccept);
                     } catch (\Exception|\RuntimeException $exception) {
                         /** 如果出现了异常 */
                         $content = new Response(400,[],$exception->getMessage());
@@ -457,12 +449,12 @@ if (!class_exists('Xiaosongshu')) {
                         $content->withHeader('Access-Control-Allow-Origin', $request->header('origin'));
                         $content->withHeader('Access-Control-Allow-Methods', '*');
                         $content->withHeader('Access-Control-Allow-Headers', '*');
-                        fwrite($socketAccept, $content);
-                        fclose($socketAccept);
                     }
                 }
             }
-
+            /** 有数据的时候需要投递调需要发送的缓存中 ，而不是直接发送 */
+            fwrite($socketAccept, $content);
+            fclose($socketAccept);
             /** 清理select连接 */
             unset(Selector::$allSocket[(int)$socketAccept]);
             /** 清理epoll连接 */
