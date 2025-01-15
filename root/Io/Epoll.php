@@ -17,6 +17,9 @@ class Epoll
     /** 存所有的客户端事件 */
     public static $events = [];
 
+    /** 客户端可写事件 */
+    public static $writeEvents = [];
+
     /** @var \Event $serveEvent 整个服务的事件,必须单独保存在进程内，不保存进程直接退出，不单独保存，系统直接摆烂不工作 */
     private static $serveEvent;
 
@@ -73,12 +76,43 @@ class Epoll
                 stream_set_blocking($cli, 0);
                 /** 创建read处理事件 */
                 Epoll::dealReadEvent($cli, $this->onMessage, $remote_address);
+                //todo 这里应该添加可写是事件，负责发送暂存区的数据
+                Epoll::dealWriteBufferEvent($cli);
             }
         }, Epoll::$serv);
         /** 添加事件 */
         $event->add();
         /** 这个事件必须保存，不然会退出进程 */
         Epoll::$serveEvent = $event;
+    }
+
+    /** 每一个客户端的写暂存区 */
+    public static array $writeBuffers = [];
+
+    /**
+     * 服务器处理客户端可写事件
+     * @param mixed $cli
+     * @return void
+     */
+    public static function dealWriteBufferEvent(mixed $cli)
+    {
+        /** 语法 ：EventBase cli flag(write,read,persist) 回调，param */
+        $client_event_write = new \Event(Epoll::$event_base, $cli, \Event::WRITE | \Event::PERSIST, function ($cli) {
+            /** 如果暂存区有数据 */
+            $buffer = Epoll::$writeBuffers[(int)$cli]??"";
+            if ($buffer) {
+                /** 发送给客户端 */
+                $length = fwrite($cli, $buffer, strlen($buffer));
+                /** 更新暂存区 */
+                if ($length) {
+                    Epoll::$writeBuffers[(int)$cli] = substr($buffer,  $length);
+                }
+            }
+        }, $cli);
+        /** 将构建的客户端事件添加到Event当中 */
+        $client_event_write->add();
+        /** 所有的事件都必须保存到进程中，否则无效 ，导致服务无法运行或者直接卡死 */
+        Epoll::$writeEvents[(int)$cli] = $client_event_write;
     }
 
     /**
@@ -328,14 +362,14 @@ class Epoll
         /** 清理写事件 */
         if (!empty(Epoll::$events[(int)$cli])) {
             /** 暂停事件，仅仅只是暂停，但是依然保存在内存中 */
-            Epoll::$events[(int)$cli]->del();
+            //Epoll::$events[(int)$cli]->del();
             /** 释放资源，从内存中清除 */
             Epoll::$events[(int)$cli]->free();
         }
         /** 清理写事件 */
         if (!empty(Epoll::$events[-(int)$cli])) {
             /** 暂停事件 */
-            Epoll::$events[-(int)$cli]->del();
+            //Epoll::$events[-(int)$cli]->del();
             /** 释放资源 */
             Epoll::$events[-(int)$cli]->free();
         }
@@ -343,7 +377,7 @@ class Epoll
         /** 清理读事件 */
         if (!empty(Epoll::$events[(int)$cli])) {
             /** 暂停事件 */
-            Epoll::$events[(int)$cli]->del();
+            //Epoll::$events[(int)$cli]->del();
             /** 释放资源 */
             Epoll::$events[(int)$cli]->free();
         }

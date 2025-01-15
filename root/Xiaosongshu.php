@@ -453,14 +453,24 @@ if (!class_exists('Xiaosongshu')) {
                 }
             }
             /** 有数据的时候需要投递调需要发送的缓存中 ，而不是直接发送 */
-            fwrite($socketAccept, $content);
-            fclose($socketAccept);
+            //fwrite($socketAccept, $content);
+            //fclose($socketAccept);
+            $content = (string) $content;
+            /** 更新客户端的暂存区 */
+            if (!isset(Epoll::$writeBuffers[(int)$socketAccept])){
+                Epoll::$writeBuffers[(int)$socketAccept] =  $content;
+            }else{
+                Epoll::$writeBuffers[(int)$socketAccept] .= $content;
+            }
+
+
+            //todo 清理链接可能需要其他方式处理
             /** 清理select连接 */
-            unset(Selector::$allSocket[(int)$socketAccept]);
+            //unset(Selector::$allSocket[(int)$socketAccept]);
             /** 清理epoll连接 */
-            unset(Epoll::$events[(int)$socketAccept]);
+            //unset(Epoll::$events[(int)$socketAccept]);
             /** 释放客户端连接 */
-            unset($socketAccept);
+            //unset($socketAccept);
         }
 
 
