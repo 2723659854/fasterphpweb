@@ -5,6 +5,7 @@ namespace Root\Io;
 use Root\Lib\Container;
 use Root\Lib\HttpClient;
 use Root\Request;
+use Root\Response;
 use Root\Xiaosongshu;
 
 /**
@@ -222,21 +223,8 @@ class Epoll
                         $small_request = explode("\r\n\r\n",$_content);
                         $headerRaw = $small_request[0];
                         $headerLength = strlen($headerRaw);
-
-                        /** 以下这一段代码是查询boundary的，不过这里不需要了 */
-//                        $array = explode("\r\n",$small_request[0]);
-//                        foreach ($array as  $header_content){
-//                            $pattern = '/Content-Type: (.*)$/';
-//                            preg_match($pattern, $header_content, $matches);
-//                            if (isset($matches[1])){
-//                                $contentTypeArray = explode('boundary=',$matches[1]);
-//                                $boundary = end($contentTypeArray);
-//                            }
-//                        }
                     }
-
                     $buffer = $buffer . $_content;
-
                     /** 如果是传输文件过来 */
                     if ($post){
                         /** 这里是验证body的长度 */
@@ -246,7 +234,14 @@ class Epoll
                         }else{
                             if ((time()-$startTime)>self::$maxRequestTime){
                                 /** 如果超过最大等待时间，还没有发送完数据，那么直接通知客户端请求超时，并清空已接收到的数据 */
-                                fwrite($cli, response('<h1>Time Out</h1>', 408));
+                                //fwrite($cli, response('<h1>Time Out</h1>', 408));
+                                $content = new Response(408,[],'<h1>Time Out</h1>');
+                                $content->withHeader('Access-Control-Allow-Credentials', 'true');
+                                $content->withHeader('Access-Control-Allow-Origin', '*');
+                                $content->withHeader('Access-Control-Allow-Methods', '*');
+                                $content->withHeader('Access-Control-Allow-Headers', '*');
+                                $content = (string)$content;
+                                fwrite($cli, $content,strlen($content));
                                 $flag = false;
                                 $buffer = '';
                             }
