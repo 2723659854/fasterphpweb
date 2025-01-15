@@ -326,11 +326,27 @@ class Epoll
     private static function unsetResource($cli)
     {
         /** 清理写事件 */
-        if (!empty(Epoll::$events[(int)$cli])) Epoll::$events[(int)$cli]->del();
+        if (!empty(Epoll::$events[(int)$cli])) {
+            /** 暂停事件，仅仅只是暂停，但是依然保存在内存中 */
+            Epoll::$events[(int)$cli]->del();
+            /** 释放资源，从内存中清除 */
+            Epoll::$events[(int)$cli]->free();
+        }
         /** 清理写事件 */
-        if (!empty(Epoll::$events[-(int)$cli])) Epoll::$events[-(int)$cli]->del();
+        if (!empty(Epoll::$events[-(int)$cli])) {
+            /** 暂停事件 */
+            Epoll::$events[-(int)$cli]->del();
+            /** 释放资源 */
+            Epoll::$events[-(int)$cli]->free();
+        }
+
         /** 清理读事件 */
-        if (!empty(Epoll::$events[(int)$cli])) Epoll::$events[(int)$cli]->del();
+        if (!empty(Epoll::$events[(int)$cli])) {
+            /** 暂停事件 */
+            Epoll::$events[(int)$cli]->del();
+            /** 释放资源 */
+            Epoll::$events[(int)$cli]->free();
+        }
         /** 释放写事件 */
         unset(Epoll::$events[(int)$cli]);
         /** 释放读事件 */

@@ -133,8 +133,8 @@ class Selector
             /** 需要监听socket */
             $write = $read = Selector::$allSocket;
             /** 使用stream_select函数监测可读，可写的连接，如果某一个连接接收到数据，那么数据就会改变，select使用的foreach遍历所有的连接，查看是否可读，就是有消息的时候标记为可读 */
-            /** 这里设置了阻塞60秒 */
-            stream_select($read, $write, $except, 60);
+            /** 这里设置了阻塞1 微秒，只等待1微妙，提升并发性能 */
+            stream_select($read, $write, $except, 0,1);
             /** 处理可读的连接 */
             $this->dealReadEvent($read);
             /** 处理可写的连接 */
