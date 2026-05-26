@@ -1574,7 +1574,7 @@ get()方法负责读取一条消息，可以在任意地方调用。<br>
  WsClient::start();
 ```
 ###  流媒体服务rtmp
-流媒体服务已经独立成为一个单独的项目了，地址是 https://github.com/2723659854/rtmp_server 。
+流媒体服务已经独立成为一个单独的项目了，地址是 https://github.com/2723659854/rtmp-server 。
 你可以单独安装流媒体服务，命令如下：
 ```bash
 composer create-project xiaosongshu/rtmp_server
